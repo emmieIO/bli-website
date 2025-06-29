@@ -13,6 +13,8 @@ return new class extends Migration
     {
         Schema::create('programmes', function (Blueprint $table) {
             $table->id();
+            $table->uuid()->unique();
+            $table->string("slug")->unique();
             $table->string('theme');
             $table->string('description');
             $table->string('program_cover')->nullable();

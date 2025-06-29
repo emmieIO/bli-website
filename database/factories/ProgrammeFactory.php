@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Str;
 
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Programme>
@@ -17,7 +18,9 @@ class ProgrammeFactory extends Factory
     public function definition(): array
     {
         return [
-            'theme' => $this->faker->sentence(3),
+            'uuid'=> Str::uuid(),
+            'theme' => $theme = $this->faker->sentence(3),
+            'slug' => Str::slug($theme),
             'description' => $this->faker->paragraph,
             'program_cover' => $this->faker->imageUrl(640, 480, 'church', true, 'cover'), // optional
             'mode' => $this->faker->randomElement(['online', 'onsite', 'hybrid']),

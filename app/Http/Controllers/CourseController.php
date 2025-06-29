@@ -2,29 +2,16 @@
 
 namespace App\Http\Controllers;
 
-use App\Contracts\ProgramRepositoryInterface;
-use App\Models\Programme;
-use Cache;
 use Illuminate\Http\Request;
 
-class ProgrammeController extends Controller
+class CourseController extends Controller
 {
-    public function __construct(
-        protected ProgramRepositoryInterface $programRepository
-    ){}
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        $page = request()->getQueryString();
-        $cache_key = "events_$page";
-
-        $programmes = Cache::remember($cache_key, now()->addMinutes(10),function(){
-            return Programme::paginate(10)->withQueryString();
-        });
-
-        return view("upcoming_events.index", compact("programmes"));
+        return view("courses.index");
     }
 
     /**
@@ -46,14 +33,9 @@ class ProgrammeController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $slug)
+    public function show(string $id)
     {
-        try {
-            $programme = $this->programRepository->findProgramsBySlug($slug);
-            return view('upcoming_events.show-event',compact("programme"));
-        } catch (\Exception $e) {
-            abort(404,"Event does not exist");
-        }
+        //
     }
 
     /**
