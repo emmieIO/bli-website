@@ -1,55 +1,18 @@
 <x-auth-layout :title="'Create Account'" :description="'Start your leadership journey with us'">
-    <form method="POST" action="{{ route('register') }}" class="space-y-6">
+    <form method="POST" action="{{ route('register.store') }}" class="space-y-6">
         @csrf
 
         <!-- Name -->
-        <div>
-            <label for="name" class="block text-sm font-medium text-gray-700">Full Name</label>
-            <div class="mt-1 relative">
-                <input id="name" type="text" name="name" required autofocus
-                    class="block w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-teal-500 focus:border-teal-500" />
-                <i data-lucide="user" class="w-4 h-4 absolute left-3 top-2.5 text-gray-400"></i>
-            </div>
-            @error('name')
-                <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
-            @enderror
-        </div>
+        <x-input name="name" label="Full Name" icon="user" autofocus  />
 
         <!-- Email -->
-        <div>
-            <label for="email" class="block text-sm font-medium text-gray-700">Email address</label>
-            <div class="mt-1 relative">
-                <input id="email" type="email" name="email" required
-                    class="block w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-teal-500 focus:border-teal-500" />
-                <i data-lucide="mail" class="w-4 h-4 absolute left-3 top-2.5 text-gray-400"></i>
-            </div>
-            @error('email')
-                <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
-            @enderror
-        </div>
+        <x-input name="email" type="email" label="Email address" icon="mail" />
 
         <!-- Password -->
-        <div>
-            <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
-            <div class="mt-1 relative">
-                <input id="password" type="password" name="password" required
-                    class="block w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-teal-500 focus:border-teal-500" />
-                <i data-lucide="lock" class="w-4 h-4 absolute left-3 top-2.5 text-gray-400"></i>
-            </div>
-            @error('password')
-                <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
-            @enderror
-        </div>
+        <x-input name="password" type="password" label="Password" icon="lock" />
 
         <!-- Confirm Password -->
-        <div>
-            <label for="password_confirmation" class="block text-sm font-medium text-gray-700">Confirm Password</label>
-            <div class="mt-1 relative">
-                <input id="password_confirmation" type="password" name="password_confirmation" required
-                    class="block w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-teal-500 focus:border-teal-500" />
-                <i data-lucide="lock" class="w-4 h-4 absolute left-3 top-2.5 text-gray-400"></i>
-            </div>
-        </div>
+        <x-input name="password_confirmation" type="password" label="Confirm Password" icon="lock" />
 
         <!-- Submit -->
         <div>
@@ -80,5 +43,8 @@
             Already have an account?
             <a href="{{ route('login') }}" class="text-teal-700 hover:underline font-medium">Sign in</a>
         </p>
+
+
     </form>
+
 </x-auth-layout>

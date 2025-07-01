@@ -10,7 +10,7 @@
         </div>
     @endif
 
-    <form method="POST" action="" class="space-y-6">
+    <form method="POST" action="{{ route('verification.send') }}" class="space-y-6">
         @csrf
 
         <!-- Resend Button -->

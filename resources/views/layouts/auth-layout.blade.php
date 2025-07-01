@@ -40,7 +40,7 @@
             </div>
         </div>
     </div>
-
+    <x-toast/>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script>
         lucide.createIcons();
