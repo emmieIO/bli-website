@@ -3,14 +3,10 @@
         <!-- Profile Header -->
         <div class="relative bg-gradient-to-r from-teal-800 to-teal-600 rounded-xl shadow-md p-6 text-white mb-10">
             <div class="flex items-center gap-6">
-                <div class="relative -mt-16">
-                    <img src="https://ui-avatars.com/api/?name=John+Doe" alt="Profile"
-                        class="w-24 h-24 rounded-full ring-4 ring-white shadow-lg">
-                </div>
                 <div>
-                    <h2 class="text-2xl font-bold">John Doe</h2>
-                    <p class="text-sm opacity-90">john.doe@example.com</p>
-                    <p class="text-xs text-white/70 mt-1">Member since Jan 2024</p>
+                    <h2 class="text-2xl font-bold">{{ __(auth()->user()->name) }}</h2>
+                    <p class="text-sm opacity-90">{{ __(auth()->user()->email) }}</p>
+                    <p class="text-xs text-white/70 mt-1">Member since {{\Carbon\Carbon::parse(auth()->user()->created_at)->format("M d Y") }}</p>
                 </div>
             </div>
         </div>
@@ -72,7 +68,4 @@
         </div>
     </section>
 
-    <script>
-        lucide.createIcons();
-    </script>
 </x-app-layout>

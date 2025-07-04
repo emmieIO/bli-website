@@ -20,7 +20,7 @@
                     <div>
                         <h3 class="text-teal-700 font-semibold">Start Date</h3>
                         <p class="text-gray-800">
-                            {{ \Carbon\Carbon::parse($programme->start_date)->format('D, d M Y · g:i A') }}</p>
+                            {{ sweet_date($programme->start_date) }}</p>
                     </div>
                 </div>
                 <div class="flex items-start gap-3">
@@ -28,7 +28,7 @@
                     <div>
                         <h3 class="text-teal-700 font-semibold">End Date</h3>
                         <p class="text-gray-800">
-                            {{ \Carbon\Carbon::parse($programme->end_date)->format('D, d M Y · g:i A') }}</p>
+                            {{ sweet_date($programme->end_date) }}</p>
                     </div>
                 </div>
                 <div class="flex items-start gap-3">
@@ -78,21 +78,41 @@
                 </h4>
                 <p class="text-gray-700">Let us know you’re coming. Stay updated and receive reminders.</p>
             </div>
-
-            <form method="POST" action="#">
+            <x-modal event='{{ __("$programme->slug") }}' description="Please confirm that you'll be attending this event." title="Confirm RSVP">
+            <form method="POST" action="{{ route('events.join', $programme->slug) }}">
                 @csrf
+
                 <button type="submit"
-                    class="w-full bg-teal-700 text-white py-2 px-4 rounded-lg hover:bg-teal-800 transition-all flex items-center justify-center gap-2">
+                    @if(auth()->user() && $programme->attendees->contains(auth()->user()->id))
+                        disabled
+                    @endif
+                    class="w-full bg-teal-700 text-white py-2 cursor-pointer px-4 rounded-lg hover:bg-teal-800 transition-all flex items-center justify-center gap-2">
+                    <i data-lucide="handshake"></i>
+                    Proceed
+                </button>
+
+            </form>
+            </x-modal>
+                <button
+                    onclick="window.dispatchEvent(new Event('{{ __("$programme->slug") }}'))"
+                    @if(auth()->user() && $programme->attendees->contains(auth()->user()->id))
+                        disabled
+                    @endif
+                    class="w-full bg-teal-700 text-white py-2 cursor-pointer px-4 rounded-lg hover:bg-teal-800 transition-all flex items-center justify-center gap-2">
                     <i data-lucide="handshake"></i>
                     I’ll be attending
                 </button>
-            </form>
+                @if(auth()->user() && $programme->attendees->contains(auth()->user()->id))
+                    <p class="text-teal-700 text-center font-medium text-sm">You are already attending this event.</p>
+                @endif
 
-            <a href="{{ route('events.join', $programme->slug) }}"
+            @auth()
+            <a href="{{ route('user.events') }}"
                 class="text-center text-teal-700 font-medium hover:underline flex items-center justify-center gap-2">
                 <i data-lucide="external-link"></i>
-                Go to Event Page
+                View My Events
             </a>
+            @endauth()
         </div>
 
     </div>

@@ -4,8 +4,8 @@
     <section class="text-white bg-teal-800">
         <div class="md:flex md:justify-between lg:items-center py-16 w-[90%] mx-auto gap-6">
             <div class="max-w-xl space-y-5">
-                <h4 class="text-lg font-semibold tracking-wide uppercase">Beacon Leadership Institute</h4>
-                <h1 class="text-4xl md:text-5xl font-extrabold leading-tight">
+                <h4 class="text-md font-semibold tracking-wide uppercase">Beacon Leadership Institute</h4>
+                <h1 class="text-3xl md:text-3xl lg:text-5xl  font-extrabold leading-tight">
                     Empowering Leaders for Influence & Impact
                 </h1>
                 <p class="text-white/90 text-lg leading-relaxed">
@@ -17,7 +17,7 @@
                     Browse Courses
                 </a>
             </div>
-            <div class="md:w-[450px] mt-10 md:mt-0 hidden lg:block">
+            <div class="md:w-[450px] mt-10 md:mt-0 hidden md:block">
                 <img src="{{ asset('images/family.png') }}" alt="family" class="w-full h-auto object-contain" />
             </div>
         </div>
@@ -27,7 +27,7 @@
     <section class="py-16 bg-white">
         <div class="max-w-6xl mx-auto px-5 text-center space-y-10">
             <h2 class="text-3xl font-bold text-teal-800">Why Choose Beacon LMS?</h2>
-            <div class="grid md:grid-cols-3 gap-6 text-left">
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6 text-left">
                 <div class="p-6 border rounded-lg bg-gray-50 shadow">
                     <i data-lucide="brain" class="w-6 h-6 text-teal-600 mb-2"></i>
                     <h4 class="text-lg font-semibold">Spirit-Led Learning</h4>
@@ -51,9 +51,9 @@
     <section id="courses" class="py-16 bg-gray-100">
         <div class="max-w-6xl mx-auto px-5">
             <h2 class="text-3xl font-bold text-center text-teal-800 mb-8">Featured Courses</h2>
-            <div class="grid md:grid-cols-3 gap-6">
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                 <div class="bg-white border rounded-lg shadow-sm overflow-hidden">
-                    <img src="{{ asset('images/course1.jpg') }}" alt="Course 1" class="w-full h-40 object-cover" />
+                    <img src="{{ asset('images/logo.jpg') }}" alt="Course 1" class="w-full h-40 object-cover" />
                     <div class="p-4">
                         <h3 class="font-semibold text-lg text-gray-800">Foundations of Leadership</h3>
                         <p class="text-gray-600 text-sm mt-2">Learn the core principles of faith-driven leadership.</p>
@@ -61,7 +61,7 @@
                     </div>
                 </div>
                 <div class="bg-white border rounded-lg shadow-sm overflow-hidden">
-                    <img src="{{ asset('images/course2.jpg') }}" alt="Course 2" class="w-full h-40 object-cover" />
+                    <img src="{{ asset('images/logo.jpg') }}" alt="Course 2" class="w-full h-40 object-cover" />
                     <div class="p-4">
                         <h3 class="font-semibold text-lg text-gray-800">Spiritual Leadership in the Marketplace</h3>
                         <p class="text-gray-600 text-sm mt-2">Equip yourself to lead with integrity in business.</p>
@@ -69,7 +69,7 @@
                     </div>
                 </div>
                 <div class="bg-white border rounded-lg shadow-sm overflow-hidden">
-                    <img src="{{ asset('images/course3.jpg') }}" alt="Course 3" class="w-full h-40 object-cover" />
+                    <img src="{{ asset('images/logo.jpg') }}" alt="Course 3" class="w-full h-40 object-cover" />
                     <div class="p-4">
                         <h3 class="font-semibold text-lg text-gray-800">Vision Clarity Bootcamp</h3>
                         <p class="text-gray-600 text-sm mt-2">Gain clarity, confidence, and spiritual focus as a leader.
@@ -124,5 +124,5 @@
             </div>
         </div>
     </section>
-
+<!-- <x-toast message="Hello world" type="success" /> -->
 </x-guest-layout>

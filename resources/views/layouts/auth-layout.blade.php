@@ -13,7 +13,7 @@
 </head>
 
 <body class="font-[Outfit] bg-gray-50 text-gray-800">
-    <div class="min-h-screen grid md:grid-cols-2">
+    <div class="min-h-screen grid  lg:grid-cols-2">
         <!-- Left: Form -->
         <div class="flex flex-col justify-center px-8 py-12 sm:px-12 lg:px-20 bg-white">
             <div class="max-w-md w-full mx-auto">
@@ -25,25 +25,27 @@
                 <!-- Slot for dynamic form content -->
                 {{ $slot }}
 
+                <a href="{{ route("homepage") }}" class="text-xs block text-teal-800 text-center mt-8 underline">go
+                    back home</a>
                 <p class="text-xs text-gray-500 text-center mt-8">&copy; 2025 Beacon Leadership Institute. All rights
                     reserved.</p>
             </div>
         </div>
 
         <!-- Right: Image / Branding -->
-        <div class="hidden md:flex items-center justify-center bg-teal-800 text-white relative">
+        <div class="hidden md:hidden lg:flex items-center justify-center bg-teal-800 text-white relative">
             <div class="p-12 text-center">
-                <h2 class="text-4xl font-bold leading-tight">Beacon Leadership Institute</h2>
+                <h2 class="md:text-2xl lg:text-3xl font-bold leading-tight">Beacon Leadership Institute</h2>
                 <p class="text-white/80 mt-4">Raising visionary and value-driven leaders for global impact.</p>
                 <img src="{{ asset('images/logo.jpg') }}" alt="Leadership"
                     class="mt-10 w-full max-w-sm mx-auto object-contain">
             </div>
         </div>
     </div>
-    <x-toast/>
+    <x-toast />
     <script src="https://unpkg.com/lucide@latest"></script>
     <script>
-        lucide.createIcons();
+        // lucide.createIcons();
     </script>
 </body>
 

@@ -1,32 +1,12 @@
 <x-auth-layout :title="'Welcome Back'" :description="'Sign in to your account'">
-    <form method="POST" action="{{ route('login') }}" class="space-y-6">
+    <form method="POST" action="{{ route('login.store') }}" class="space-y-6">
         @csrf
 
         <!-- Email -->
-        <div>
-            <label for="email" class="block text-sm font-medium text-gray-700">Email address</label>
-            <div class="mt-1 relative">
-                <input id="email" type="email" name="email" required autofocus
-                    class="block w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-teal-500 focus:border-teal-500" />
-                <i data-lucide="mail" class="w-4 h-4 absolute left-3 top-2.5 text-gray-400"></i>
-            </div>
-            @error('email')
-                <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
-            @enderror
-        </div>
+         <x-input label="Email Address" type="email" name="email" autofocus icon="mail"/>
 
-        <!-- Password -->
-        <div>
-            <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
-            <div class="mt-1 relative">
-                <input id="password" type="password" name="password" required
-                    class="block w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-teal-500 focus:border-teal-500" />
-                <i data-lucide="lock" class="w-4 h-4 absolute left-3 top-2.5 text-gray-400"></i>
-            </div>
-            @error('password')
-                <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
-            @enderror
-        </div>
+         <!-- Password -->
+         <x-input label="Password" type="password" name="password" autofocus icon="lock"/>
 
         <!-- Remember Me & Forgot -->
         <div class="flex items-center justify-between">

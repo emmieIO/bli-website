@@ -14,10 +14,6 @@
     <!-- Events Section -->
     <section class="py-14 bg-gray-50 min-h-screen">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <h2 class="text-3xl font-bold text-teal-800 mb-10 text-center flex justify-center items-center gap-2">
-                <i data-lucide="calendar-heart" class="w-6 h-6 text-teal-700"></i>
-                Upcoming Events
-            </h2>
 
             @if(count($programmes))
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">

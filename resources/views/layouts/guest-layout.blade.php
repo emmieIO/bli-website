@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" x-data="{mainNavOpen:false}" x-cloak>
 
 <head>
     <meta charset="UTF-8" />
@@ -27,47 +27,50 @@
     </header>
 
     <!-- Navigation -->
-    <nav class="bg-teal-900 text-white">
-        <div class="flex justify-between items-center max-w-7xl mx-auto px-4 py-5">
+    <nav class="navigation__container">
+        <div class="navigation__parent">
             <!-- Logo -->
-            <div class="flex items-center gap-2">
+            <div class="logo__container">
                 <img src="{{ asset("images/logo.jpg") }}" class="w-30 h-10 object-cover" alt="app-logo">
-                <!-- <div class="text-2xl font-extrabold tracking-wide">BL<span class="text-teal-300">I</span></div> -->
-                <button class="lg:hidden" aria-label="Menu"><i data-lucide="menu" class="w-6 h-6"></i></button>
+                <button class="mobile__toggle-btn" @click="mainNavOpen = !mainNavOpen" aria-label="Menu"><i data-lucide="menu"
+                        class="w-6 h-6"></i></button>
             </div>
+            <div class="nav-link__containter" :class="{'hide':!mainNavOpen}">
+                <!-- Nav Links -->
+                <ul class="nav-link__parent">
+                    <li class="flex items-center gap-1">
+                        <i data-lucide="home" class="w-4 h-4"></i>
+                        <a href="{{ route('homepage') }}" class="hover:text-teal-300">Home</a>
+                    </li>
+                    <li class="flex items-center gap-1">
+                        <i data-lucide="calendar" class="w-4 h-4"></i>
+                        <a href="{{ route('events.index') }}" class="hover:text-teal-300">Events</a>
+                    </li>
+                    <li class="flex items-center gap-1">
+                        <i data-lucide="book-open" class="w-4 h-4"></i>
+                        <a href="{{ route('courses.index') }}">Courses</a>
+                    </li>
+                    <li class="flex items-center gap-1">
+                        <i data-lucide="users" class="w-4 h-4"></i>
+                        <a href="#">The Team</a>
+                    </li>
+                    <li class="flex items-center gap-1">
+                        <i data-lucide="pen-line" class="w-4 h-4"></i>
+                        <a href="#">Blog</a>
+                    </li>
+                    <li class="flex items-center gap-1">
+                        <i data-lucide="mail" class="w-4 h-4"></i>
+                        <a href="{{ route("contact-us") }}">Contact</a>
+                    </li>
 
-            <!-- Nav Links -->
-            <ul class="hidden lg:flex gap-6 items-center text-sm font-medium">
-                <li class="flex items-center gap-1">
-                    <i data-lucide="home" class="w-4 h-4"></i>
-                    <a href="{{ route('homepage') }}" class="hover:text-teal-300">Home</a>
-                </li>
-                <li class="flex items-center gap-1">
-                    <i data-lucide="calendar" class="w-4 h-4"></i>
-                    <a href="{{ route('events.index') }}" class="hover:text-teal-300">Events</a>
-                </li>
-                <li class="flex items-center gap-1">
-                    <i data-lucide="book-open" class="w-4 h-4"></i>
-                    <a href="{{ route('courses.index') }}">Courses</a>
-                </li>
-                <li class="flex items-center gap-1">
-                    <i data-lucide="users" class="w-4 h-4"></i>
-                    <a href="#">The Team</a>
-                </li>
-                <li class="flex items-center gap-1">
-                    <i data-lucide="pen-line" class="w-4 h-4"></i>
-                    <a href="#">Blog</a>
-                </li>
-                <li class="flex items-center gap-1">
-                    <i data-lucide="mail" class="w-4 h-4"></i>
-                    <a href="{{ route("contact-us") }}">Contact</a>
-                </li>
-            </ul>
+                </ul>
 
-            <!-- Call to Action -->
-            <div class="hidden lg:block">
-                <a href="{{ route("login") }}" class="bg-teal-400 hover:bg-teal-300 text-white px-4 py-2 rounded-lg transition">Get
-                    Started</a>
+                <!-- Call to Action -->
+                <div class="py-5 action__container">
+                    <a href="{{ route("login") }}"
+                        class="bg-teal-400 hover:bg-teal-300 text-white px-4 py-2 rounded-lg transition">Get
+                        Started</a>
+                </div>
             </div>
         </div>
     </nav>
@@ -83,11 +86,11 @@
             <p>&copy; {{ now()->year }} Beacon Leadership Institute. All rights reserved.</p>
         </div>
     </footer>
-
+    <x-toast />
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
     <script>
-        lucide.createIcons();
+        // lucide.createIcons();
     </script>
 </body>
 

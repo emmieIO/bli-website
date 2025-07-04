@@ -7,23 +7,11 @@
         </div>
     @endif
 
-    <form method="POST" action="" class="space-y-6">
+    <form method="POST" action="{{ route('password.email') }}" class="space-y-6">
         @csrf
 
         <!-- Email Input -->
-        <div>
-            <label for="email" class="block text-sm font-medium text-gray-700">Email address</label>
-            <div class="mt-1 relative rounded-md shadow-sm">
-                <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <i data-lucide="mail" class="w-4 h-4 text-gray-400"></i>
-                </span>
-                <input id="email" name="email" type="email" autocomplete="email" required autofocus
-                    class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-teal-500 focus:border-teal-500 sm:text-sm">
-            </div>
-            @error('email')
-                <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
-            @enderror
-        </div>
+         <x-input label="Email" type="email" name="email" icon="mail" autofocus />
 
         <!-- Submit Button -->
         <div>

@@ -1,0 +1,47 @@
+
+/* @media screen and (min-width: 1024px) { */
+    .dashboard_layout {
+        display: grid;
+        grid-template-columns: 300px 1fr;
+        grid-template-areas:
+            "sidebar content content"
+            "sidebar content content";
+    }
+
+    .content__container{
+        grid-area: content;
+        position: absolute;
+        width: 100%;
+        z-index: -1;
+
+    }
+
+    .sidebar__container{
+        color:white;
+        display: flex;
+        flex-direction: column;
+        justify-content:space-between;
+        @apply px-5;
+        overflow-x: hidden;
+        height: 100vh;
+        width: 300px;
+        position: fixed;
+        top:0;
+        grid-area: sidebar;
+        transition: all 500ms;
+
+    }
+
+    .top-nav__container{
+        @apply py-3 px-10 text-white flex items-center justify-between
+    }
+
+    .toggle-sidebar{
+        width: 0;
+        @apply px-0;
+    }
+
+    .content__parent {
+        @apply px-10 py-10;
+    }
+/* } */

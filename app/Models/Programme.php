@@ -10,4 +10,13 @@ class Programme extends Model
 {
     use HasFactory, HasUUID;
     protected $guarded = [];
+
+    public function attendees(){
+        return $this->belongsToMany(User::class, "event_user", "event_id", "user_id")->withTimestamps();
+    }
+
+    public function scopeFindBySlug($query, $slug)
+    {
+        return $query->where('slug', $slug);
+    }
 }

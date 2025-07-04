@@ -14,6 +14,6 @@ class ProgramRepository implements ProgramRepositoryInterface
      */
 
     public function findProgramsBySlug(string $slug): ?Programme{
-        return Programme::where('slug', $slug)->first();
+        return Programme::with("attendees")->where('slug', $slug)->first();
     }
 }

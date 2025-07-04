@@ -1,7 +1,10 @@
 <?php
 
+use App\Actions\JoinEventAction;
 use App\Http\Controllers\CourseController;
 use App\Http\Controllers\ProgrammeController;
+use App\Http\Controllers\UserDashboard\RevokeRsvpAction;
+use App\Http\Controllers\UserDashBoard\ShowMyEventsController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -15,7 +18,10 @@ Route::get("/contact-us", function(){
 
 Route::get("/events", [ProgrammeController::class, 'index'])->name("events.index");
 Route::get('/events/{slug}', [ProgrammeController::class, "show"])->name("events.show");
-Route::get('/events/{slug}/join', [ProgrammeController::class, "join"])->name("events.join");
+Route::post('/events/{slug}/join', JoinEventAction::class)->name("events.join");
+Route::get("/user/events",ShowMyEventsController::class)->name('user.events')
+->middleware("auth");
+Route::delete("events/user/{slug}/revoke-rsvp", RevokeRsvpAction::class)->name("user.revoke.event");
 
 
 // Courses

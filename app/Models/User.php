@@ -46,4 +46,8 @@ class User extends Authenticatable implements MustVerifyEmail
             'password' => 'hashed',
         ];
     }
+
+    public function events(){
+        return $this->belongsToMany(Programme::class, "event_user", 'user_id', "event_id")->withTimestamps();
+    }
 }

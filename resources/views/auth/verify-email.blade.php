@@ -23,7 +23,7 @@
         </div>
     </form>
 
-    <form method="POST" action="" class="mt-4 text-center">
+    <form method="POST" action="{{ route("logout") }}" class="mt-4 text-center">
         @csrf
         <button type="submit" class="text-sm text-gray-500 hover:text-gray-700 underline transition">
             <i data-lucide="log-out" class="inline-block w-4 h-4 mr-1 -mt-1"></i>
