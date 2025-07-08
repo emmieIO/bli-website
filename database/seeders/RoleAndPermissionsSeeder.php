@@ -14,13 +14,32 @@ class RoleAndPermissionsSeeder extends Seeder
     public function run(): void
     {
         $roles = [
-            "student","instructor","admin"
+            "student",
+            "instructor",
+            "admin"
         ];
 
-        foreach ($roles as $role) {
-            Role::firstOrCreate([
+        $rolesPermissions = [
+            'admin' => ['manage events'],
+            "instructor" => [],
+            'student' => []
+        ];
+
+        // Create permissions
+        $allPermissions = collect($rolesPermissions)->flatten()->unique();
+        foreach ($allPermissions as $permission) {
+            \Spatie\Permission\Models\Permission::firstOrCreate(['name' => $permission]);
+        }
+
+
+
+        foreach ($rolesPermissions as $role => $permissions) {
+            $roleModel = Role::firstOrCreate([
                 "name" => $role
-            ],["name"=>$role]);
+            ]);
+            if (!empty($permissions)) {
+                $roleModel->syncPermissions($permissions);
+            }
         }
     }
 }

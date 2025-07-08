@@ -157,3 +157,49 @@ body, html {
     }
   }
 }
+.hero{
+    @apply bg-teal-800 text-white;
+    background-image: url(../images/bg-pattern.png);
+    background-blend-mode: multiply;
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: center;
+}
+
+.preload{
+    position: fixed;
+    @apply bg-teal-500;
+    top:0;
+    bottom:0;
+    left:0;
+    right: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    place-content: center;
+    z-index: 9999;
+    transition: opacity 0.6s ease;
+
+}
+
+.hide-preload{
+    opacity: 0;
+    pointer-events: none;
+}
+
+.animate-scale{
+    animation: scale 1s infinite;
+}
+
+@keyframes scale {
+        0% {
+            transform: scale(1);
+
+        }
+        50% {
+            transform: scale(1.1);
+        }
+        100% {
+            transform: scale(1);
+        }
+    }

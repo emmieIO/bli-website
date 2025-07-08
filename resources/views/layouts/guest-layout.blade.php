@@ -14,8 +14,12 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 
-<body class="font-[Outfit] text-gray-800 bg-white">
-
+<body class="font-[Outfit] text-gray-800 bg-white min-h-screen">
+<div class="preload">
+   <div>
+    <img src="{{ asset("images/logo.jpg") }}" class="w-[100px] h-[100px] rounded-full animate-scale border-2 border-black" alt=""/>
+   </div>
+</div>
     <!-- Top Contact Bar -->
     <header class="bg-gray-100 text-sm text-gray-700">
         <div class="flex flex-col md:flex-row md:justify-between items-center gap-2 px-4 py-2 max-w-7xl mx-auto">
@@ -31,7 +35,9 @@
         <div class="navigation__parent">
             <!-- Logo -->
             <div class="logo__container">
-                <img src="{{ asset("images/logo.jpg") }}" class="w-30 h-10 object-cover" alt="app-logo">
+                <a href="{{ route("homepage") }}">
+                    <img src="{{ asset("images/logo.jpg") }}" class="w-30 h-10 object-cover" alt="app-logo">
+                </a>
                 <button class="mobile__toggle-btn" @click="mainNavOpen = !mainNavOpen" aria-label="Menu"><i data-lucide="menu"
                         class="w-6 h-6"></i></button>
             </div>

@@ -1,7 +1,7 @@
 <x-guest-layout>
 
     <!-- HERO Section -->
-    <section class="text-white bg-teal-800">
+    <section class="text-white bg-teal-800 hero">
         <div class="md:flex md:justify-between lg:items-center py-16 w-[90%] mx-auto gap-6">
             <div class="max-w-xl space-y-5">
                 <h4 class="text-md font-semibold tracking-wide uppercase">Beacon Leadership Institute</h4>

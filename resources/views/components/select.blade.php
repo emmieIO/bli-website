@@ -1,7 +1,7 @@
 @props([
     'label' => '',
-    'type' => 'text',
     'name',
+    'options' => [],
     'value' => '',
     'required' => false,
     'icon' => '',
@@ -29,18 +29,28 @@
             </div>
         @endif
 
-        <input
+        <select
             id="{{ $name }}"
-            type="{{ $type }}"
             name="{{ $name }}"
-            value="{{ old($name, $value) }}"
             {{ $required ? 'required' : '' }}
             {{ $autofocus ? 'autofocus' : '' }}
             {{ $disabled ? 'disabled' : '' }}
             {{ $attributes->merge([
-                'class' => 'block w-full pl-'.($icon ? '10' : '3').' pr-3 py-2.5 text-gray-900 rounded-md border-none focus:ring-0 sm:text-sm placeholder-gray-400'
+                'class' => 'block w-full pl-'.($icon ? '10' : '3').' pr-10 py-2.5 text-gray-900 rounded-md border-none focus:ring-0 sm:text-sm'
             ]) }}
-        />
+        >
+            @foreach($options as $optionValue => $optionLabel)
+                <option value="{{ $optionValue }}" @selected(old($name, $value) == $optionValue)>
+                    {{ $optionLabel }}
+                </option>
+            @endforeach
+        </select>
+
+        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
+            <svg class="h-4 w-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+            </svg>
+        </div>
     </div>
 
     <x-input-error :messages="$errors->get($name)" class="mt-1" />

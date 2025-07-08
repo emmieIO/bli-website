@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" x-data="{ mobileOpen: false, profilePopup:false }" x-cloak>
+<html lang="en" x-data="{ mobileOpen: false }" x-cloak>
 
 <head>
     <meta charset="UTF-8" />
@@ -14,16 +14,17 @@
     <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </head>
 
-<body class="font-[Outfit] bg-gray-50 text-gray-800" :class="{ 'overflow-hidden md:overflow-auto': mobileOpen }">
-    <div class="dashboard_layout ">
+<body class="font-[Outfit] bg-gray-50 text-gray-800" >
+
+    <div class="dashboard_layout">
         <div class="content__container">
             <!-- header -->
             <div class="top-nav__container bg-teal-800">
-                <button x-on:click="mobileOpen = !mobileOpen" class="toggle-btn">
-                    <i data-lucide="menu"></i>
+                <button  x-on:click="mobileOpen = !mobileOpen" class="toggle-btn lg:hidden ">
+                    <i data-lucide="menu" class="cursor-pointer"></i>
                 </button>
                 <div class="relative w-[30px] h-[30px] border-2 rounded-full cursor-pointer"
-                    x-data
+                    x-data="{ profilePopup: false }"
                     @click.outside="profilePopup = false"
                     @keydown.escape.window="profilePopup = false">
                     <!-- Profile Image -->
@@ -54,7 +55,7 @@
                     </div>
                 </div>
             </div>
-            <div class="content__parent">
+            <div class="content__parent overflow-x-scroll">
                 {{ $slot }}
             </div>
         </div>

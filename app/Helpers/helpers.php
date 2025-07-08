@@ -11,3 +11,13 @@ if (!function_exists('sweet_date')) {
         }
     }
 }
+
+if(!function_exists('limit_str')){
+    function limit_str(string $string, int $limit){
+        try{
+            return Str::limit($string, $limit,'...');
+        }catch(\Exception $e){
+            return null;
+        }
+    }
+}

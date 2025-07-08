@@ -21,10 +21,20 @@ class LoginRequest extends FormRequest
      */
     public function rules(): array
     {
+        $rules =  [
+            "email" =>    ["required", "email"],
+            "password" => ["required"],
+            "remember" => ['sometimes'],
+        ];
+        return $rules;
+    }
+
+    public function messages()
+    {
         return [
-            "email"=>["required", "email"],
-            "password"=>["required"],
-            "remember" => ['sometimes']
+            'email.required' => 'Email address is required',
+            'password.required' => 'Password is required',
+            'password.min' => 'Password must be at least 8 characters',
         ];
     }
 }

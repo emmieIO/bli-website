@@ -18,22 +18,16 @@ class AuthService
         //
     }
 
-    public function loginUser(LoginRequest $request)
+    public function loginUser(LoginRequest $request, string $guard='web')
     {
-        $credentials = $request->validated();
+        $validated = $request->validated();
+        $credentials = [
+            'email'=>$validated['email'],
+            'password'=>$validated['password']
+        ];
         $remember = $request->has('remember');
 
-        // Use Auth::attempt for now, but structure for easy switch to attemptWhen
-        $attempted = Auth::attempt([
-            "email" => $credentials['email'],
-            "password"=> $credentials['password']
-        ], $remember);
-
-        // In the future, you can replace the above with attemptWhen as needed:
-        // $attempted = Auth::attemptWhen($credentials, $remember, function ($user) {
-        //     // Add custom logic here
-        //     return true;
-        // });
+        $attempted = Auth::guard($guard)->attempt($credentials, $remember);
 
         if ($attempted) {
             $request->session()->regenerate();

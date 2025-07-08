@@ -2,7 +2,7 @@
 
 namespace Database\Seeders;
 
-use App\Models\Programme;
+
 use App\Models\User;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -23,7 +23,8 @@ class DatabaseSeeder extends Seeder
 
         // Programme::factory(20)->create();
         $this->call([
-            RoleAndPermissionsSeeder::class
+            RoleAndPermissionsSeeder::class,
+            AdminSeeder::class
         ]);
     }
 }

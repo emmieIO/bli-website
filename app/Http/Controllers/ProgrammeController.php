@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Contracts\ProgramRepositoryInterface;
-use App\Models\Programme;
+use App\Models\Event;
 use Cache;
 use Illuminate\Http\Request;
 
@@ -20,11 +20,11 @@ class ProgrammeController extends Controller
         $page = request()->getQueryString();
         $cache_key = "events_$page";
 
-        $programmes = Cache::remember($cache_key, now()->addMinutes(10),function(){
-            return Programme::paginate(10)->withQueryString();
+        $events = Cache::remember($cache_key, now()->addMinutes(10),function(){
+            return Event::latest()->simplePaginate(10)->withQueryString();
         });
 
-        return view("upcoming_events.index", compact("programmes"));
+        return view("upcoming_events.index", compact("events"));
     }
 
     /**
@@ -56,7 +56,7 @@ class ProgrammeController extends Controller
         }
     }
 
-    
+
 
     /**
      * Show the form for editing the specified resource.

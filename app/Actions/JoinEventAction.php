@@ -2,7 +2,7 @@
 
 namespace App\Actions;
 
-use App\Models\Programme;
+use App\Models\Event;
 use App\Services\Event\EventService;
 use Illuminate\Http\Request;
 
@@ -24,7 +24,7 @@ class JoinEventAction
     public function __invoke(Request $request, $slug)
     {
 
-        $event = Programme::findBySlug($slug)->firstOrFail();
+        $event = Event::findBySlug($slug)->firstOrFail();
         $this->eventService->registerForEvent($event->id);
 
         // Log the event registration for auditing purposes
