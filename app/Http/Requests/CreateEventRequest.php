@@ -27,7 +27,7 @@ class CreateEventRequest extends FormRequest
             "location"=> "required|string",
             "program_cover" => "nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048",
             "mode" => "required|string|in:" . implode(',', array_column(\App\Enums\EventModeEnum::cases(), 'value')),
-            "start_date" => "required|date|after_or_equal:today",
+            "start_date" => "required|date|after_or_equal:now",
             "end_date" => "required|date|after_or_equal:start_date",
             "metadata" => "sometimes"
         ];

@@ -9,7 +9,7 @@
                             {{ $event->status}}
                         </span>
                         <div class="flex items-center justify-between">
-                            <h3 class="text-lg font-semibold text-gray-800">{{ $event->theme }}</h3>
+                            <h3 class="text-lg font-semibold text-gray-800">{{ $event->title }}</h3>
                         </div>
                         <!-- <p class="text-sm text-gray-600 mt-2">
                                             {{ $event->description ?? 'No description available.' }}

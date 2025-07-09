@@ -28,9 +28,9 @@ class AdminSeeder extends Seeder
             $user->assignRole('admin');
 
             // You can use a factory to create related events for the admin user
-            $user->eventsCreated()->createMany(
-                \App\Models\Event::factory()->count(20)->make()->toArray()
-            );
+            // $user->eventsCreated()->createMany(
+            //     \App\Models\Event::factory()->count(20)->make()->toArray()
+            // );
         }
 
 

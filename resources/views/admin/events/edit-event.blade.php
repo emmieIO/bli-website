@@ -3,7 +3,7 @@
         <div class="flex items-center justify-between mb-8">
             <h1 class="text-2xl font-bold text-teal-800 flex items-center gap-2">
                 <i data-lucide="calendar-plus" class="w-6 h-6"></i>
-                Create New Event
+                Update Event
             </h1>
             <a href="{{ route('admin.events.index') }}"
                 class="text-sm text-gray-600 hover:text-teal-600 flex items-center gap-1">
@@ -13,9 +13,9 @@
         </div>
 
         <div class="bg-white shadow rounded-lg overflow-hidden">
-            <form action="{{ route('admin.events.store') }}" method="POST" enctype="multipart/form-data">
+            <form action="{{ route('admin.events.update', $event) }}" method="POST" enctype="multipart/form-data">
                 @csrf
-
+                @method("PUT")
                 <!-- Basic Information Section -->
                 <div class="p-6 border-b border-gray-200">
                     <h2 class="text-lg font-medium text-gray-900 mb-4">Basic Information</h2>
@@ -25,8 +25,8 @@
                         <div>
                             <label for="title" class="inline-block text-sm font-medium text-gray-700">Event Title
                                 *</label>
-                            <x-input icon="pen" title="Event Title" type="text" name="title" id="title"
-                                class="mt-1 inline-block focus:outline-none focus:ring-0 sm:text-sm" />
+                            <x-input icon="pen" :value="$event->title" title="Event Title" type="text" name="title"
+                                id="title" class="mt-1 inline-block focus:outline-none focus:ring-0 sm:text-sm" />
                         </div>
 
                         <!-- Description -->
@@ -34,7 +34,7 @@
                             <label for="description" class="block text-sm font-medium text-gray-700">Description
                                 *</label>
                             <textarea name="description" id="description" rows="5"
-                                class="mt-1 block w-full border border-gray-300 resize-none rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-teal-500 focus:border-teal-500 sm:text-sm">{{old('description')}}</textarea>
+                                class="mt-1 block w-full border border-gray-300 resize-none rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-teal-500 focus:border-teal-500 sm:text-sm">{{ old('description', $event->description) }}</textarea>
                         </div>
 
                         <!-- Program Cover -->
@@ -42,6 +42,18 @@
                             <label for="program_cover" class="inline-block text-sm font-medium text-gray-700">Event
                                 Cover
                                 Image</label>
+                            @if (isset($event) && $event->program_cover)
+                                <div class="flex items-center mb-2">
+                                    <a href="{{ asset('storage/' . $event->program_cover) }}" target="_blank"
+                                        class="text-blue-600 hover:underline">
+                                        View current file
+                                    </a>
+                                    <span
+                                        class="ml-2 text-gray-500 text-xs">({{ basename($event->program_cover) }})</span>
+                                </div>
+                            @else
+                                <p class="text-gray-500">No file uploaded</p>
+                            @endif
                             <div class="mt-1 flex items-center w-1/3 ">
                                 <x-input icon="image" type="file" name="program_cover" id="program_cover"
                                     accept="image/*"
@@ -59,19 +71,20 @@
                         <!-- Mode -->
                         <div>
                             <x-select label="Select Event Mode" name="mode" :options="[
-        '' => 'Select Mode',
-        'online' => 'Online',
-        'offline' => 'In-Person',
-        'hybrid' => 'Hybrid'
-    ]"
-                 value="{{ old('example_select') }}" required icon="chevron-down" autofocus />
+                                '' => 'Select Mode',
+                                'online' => 'Online',
+                                'offline' => 'In-Person',
+                                'hybrid' => 'Hybrid',
+                            ]"
+                            value="{{ old('mode', $event->mode) }}"
+                            required
+                            icon="chevron-down" autofocus />
                         </div>
-
                         <!-- Location/URL -->
                         <div id="location-field">
                             <label for="location" class="block text-sm font-medium text-gray-700">Location/Meeting
                                 URL</label>
-                            <x-input icon="map-pin" type="text" name="location" id="location"
+                            <x-input icon="map-pin" type="text" name="location" id="location" :value="$event->location"
                                 class="inline-block focus:outline-none focus:ring-0 sm:text-sm" />
                         </div>
 
@@ -79,7 +92,8 @@
                         <div>
 
                             <x-input label="Start Date & Time*" icon="clock" type="datetime-local"
-                                min="{{ now()->format('Y-m-d\TH:i') }}" name="start_date" id="start_date"
+                                min="{{ now()->format('Y-m-d\TH:i') }}"
+                                value="{{ old('start_date', \Carbon\Carbon::parse($event->start_date)->format('Y-m-d\TH:i')) }}" name="start_date" id="start_date"
                                 class=" inline-block focus:outline-none focus:ring-0 sm:text-sm" />
                         </div>
 
@@ -87,7 +101,9 @@
                         <div>
 
                             <x-input label="End Date & Time*" icon="clock" type="datetime-local"
-                                min="{{ now()->format('Y-m-d\TH:i') }}" name="end_date" id="start_date"
+                                min="{{ now()->format('Y-m-d\TH:i') }}"
+                                :value="old('end_date', \Carbon\Carbon::parse($event->end_date)->format('Y-m-d\TH:i'))"
+                                name="end_date" id="end_date"
                                 class="inline-block focus:outline-none focus:ring-0 sm:text-sm" />
                         </div>
 
@@ -99,11 +115,8 @@
                     <h2 class="text-lg font-medium text-gray-900 mb-4">Additional Options</h2>
 
                     <!-- Active Status -->
-                    <div class="flex items-center">
-                        <input type="checkbox" name="is_active" id="is_active" checked
-                            class="h-4 w-4 text-teal-600 focus:ring-teal-500 border-gray-300 rounded">
-                        <label for="is_active" class="ml-2 block text-sm text-gray-700">Make this event active</label>
-                    </div>
+                    <x-checkbox name="is_active" label="Make this event active" :checked="$event->is_active" />
+
                 </div>
 
                 <!-- Form Actions -->
@@ -111,7 +124,7 @@
                     <button type="submit"
                         class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-teal-600 hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500">
                         <i data-lucide="save" class="w-4 h-4 mr-2"></i>
-                        Create Event
+                        Update Event
                     </button>
                 </div>
             </form>
@@ -120,7 +133,7 @@
 
     <script>
         // Toggle location label based on mode
-        document.getElementById('mode').addEventListener('change', function () {
+        document.getElementById('mode').addEventListener('change', function() {
             const locationField = document.getElementById('location-field');
             const label = locationField.querySelector('label');
             const input = locationField.querySelector('input');
@@ -140,7 +153,5 @@
                 input. = false;
             }
         });
-
-
     </script>
 </x-app-layout>

@@ -4,6 +4,7 @@ namespace App\Services\Event;
 
 use App\Events\Events\EventCreated;
 use App\Http\Requests\CreateEventRequest;
+use App\Http\Requests\UpdateEventRequest;
 use App\Models\Event;
 use DB;
 use Illuminate\Support\Facades\Auth;
@@ -89,4 +90,86 @@ class EventService {
         $count = Event::where( 'slug', 'LIKE', "{$slug}%" )->count();
         return $count ? "{$slug}-{$count}" : $slug;
     }
+
+    public function updateEvent( UpdateEventRequest $request, Event $event ) {
+        DB::beginTransaction();
+        try {
+            $user = Auth::user();
+            if (
+                $event->creator_id !== $user->id &&
+                !$user->hasAnyRole( [ 'admin', 'super-admin' ] )
+            ) {
+                abort( 403 );
+            }
+            $file_path = $event->program_cover;
+            $validated = $request->validated();
+            $validated[ 'program_cover' ] = $file_path;
+
+            if ( $request->hasFile( 'program_cover' ) ) {
+                if ( !empty( $file_path ) && Storage::disk( 'public' )->exists( $file_path ) ) {
+                    Storage::disk( 'public' )->delete( $file_path );
+                }
+                $file = $request->file( 'program_cover' );
+                $file_path = $file->store( 'program_covers/' . now()->format( 'Y/m' ), 'public' );
+                $validated[ 'program_cover' ] = $file_path;
+            }
+            $event = $event->update( $validated );
+            DB::commit();
+            return $event;
+
+        } catch( \Exception $e ) {
+            DB::rollBack();
+            if ( !empty( $file_path ) && Storage::disk( 'public' )->exists( $file_path ) ) {
+                Storage::disk( 'public' )->delete( $file_path );
+            }
+            Log::error( 'Event update failed: ' . $e->getMessage() );
+            return null;
+        }
+    }
+
+    protected function removeFile(string $file_path, string $type='public') {
+        if ( !empty( $file_path ) && Storage::disk( $type )->exists( $file_path ) ) {
+            Storage::disk( $type )->delete( $file_path );
+        }
+    }
+
+    public function deleteEvent( Event $event ) {
+        try{
+            $file_path = $event->program_cover;
+            $result = DB::transaction(function() use ($event) {
+                return $event->delete();
+            });
+            $this->removeFile($file_path);
+            return $result;
+
+        }catch(\Exception $e){
+            Log::error('Event deletion failed: ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    public function deleteMany(array $eventIds)
+{
+    try {
+        // Get all events with their program_cover paths before deletion
+        $events = Event::whereIn('id', $eventIds)->get(['id', 'program_cover']);
+        
+        $filePaths = $events->pluck('program_cover')->filter()->toArray();
+        
+        $result = DB::transaction(function() use ($eventIds) {
+            return Event::whereIn('id', $eventIds)->delete();
+        });
+        
+        // Delete all associated files after successful database deletion
+        foreach ($filePaths as $filePath) {
+            $this->removeFile($filePath);
+        }
+        
+        return $result;
+
+    } catch (\Exception $e) {
+        Log::error('Mass event deletion failed: ' . $e->getMessage());
+        return false;
+    }
+}
 }

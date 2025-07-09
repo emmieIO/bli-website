@@ -73,9 +73,19 @@
 
                 <!-- Call to Action -->
                 <div class="py-5 action__container">
-                    <a href="{{ route("login") }}"
-                        class="bg-teal-400 hover:bg-teal-300 text-white px-4 py-2 rounded-lg transition">Get
-                        Started</a>
+                    @auth
+                        <a href="{{ route("user_dashboard") }}"
+                            class="flex items-center gap-2">
+                            <i data-lucide="grid" class="h-4 w-4"></i>
+                            <span>Dashboard</span>
+                        </a>
+                    @else
+                        <a href="{{ route("login") }}"
+                            class="flex items-center gap-2">
+                            <i data-lucide="log-in" class="h-4 w-4"></i>
+                            <span>Login</span>
+                        </a>
+                    @endauth
                 </div>
             </div>
         </div>

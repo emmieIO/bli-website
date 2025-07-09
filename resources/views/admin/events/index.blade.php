@@ -5,7 +5,7 @@
                 <i data-lucide="calendar-days" class="w-5 h-5"></i>
                 Events
             </h2>
-            <a href="{{ route("admin.events.create") }}"
+            <a href="{{ route('admin.events.create') }}"
                 class="bg-teal-600 hover:bg-teal-700 text-white py-2 px-4 rounded-lg inline-flex items-center gap-2 transition-colors shadow-sm">
                 <i data-lucide="plus-circle" class="w-4 h-4"></i>
                 <span class="text-sm">Create Event</span>
@@ -13,152 +13,196 @@
         </div>
 
         <!-- Filter & Search Controls -->
-        <!-- Enhanced Filter & Search Controls -->
         <div class="bg-white p-5 rounded-xl shadow-xs border border-gray-100 mb-8">
-            <div class="flex flex-col md:flex-row md:items-end gap-5">
-                <!-- Search Input -->
-                <div class="flex-1">
-                    <label for="event-search" class="block text-sm font-medium text-gray-700 mb-1">Search Events</label>
-                    <div class="relative rounded-md shadow-sm">
-                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <i data-lucide="search" class="h-4 w-4 text-gray-400"></i>
-                        </div>
-                        <input type="text" id="event-search" placeholder="Search by event name, location..."
-                            class="block w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-all duration-200">
-                    </div>
-                </div>
-
-                <!-- Mode Filter -->
-                <div class="w-full md:w-64">
-                    <label for="event-mode" class="block text-sm font-medium text-gray-700 mb-1">Event Type</label>
-                    <div class="relative">
-                        <select id="event-mode"
-                            class="appearance-none block w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-all duration-200 bg-white pr-10">
-                            <option value="">All Event Types</option>
-                            <option value="online">Online</option>
-                            <option value="offline">In-Person</option>
-                            <option value="hybrid">Hybrid</option>
-                        </select>
-                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
-                            <i data-lucide="chevron-down" class="h-4 w-4 text-gray-400"></i>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Date Filter (Optional) -->
-                <div class="w-full md:w-48">
-                    <label for="event-date" class="block text-sm font-medium text-gray-700 mb-1">Date Range</label>
-                    <div class="relative">
-                        <select id="event-date"
-                            class="appearance-none block w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-all duration-200 bg-white pr-10">
-                            <option value="">All Dates</option>
-                            <option value="today">Today</option>
-                            <option value="week">This Week</option>
-                            <option value="month">This Month</option>
-                            <option value="upcoming">Upcoming</option>
-                        </select>
-                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
-                            <i data-lucide="calendar" class="h-4 w-4 text-gray-400"></i>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Reset Button -->
-                <button
-                    class="h-[42px] px-4 flex items-center text-sm text-gray-600 hover:text-teal-600 transition-colors">
-                    <i data-lucide="rotate-ccw" class="h-4 w-4 mr-2"></i>
-                    Reset
-                </button>
-            </div>
+            <!-- ... (keep your existing filter controls) ... -->
         </div>
     </div>
 
-    <!-- Events Grid -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        @forelse($events as $event)
-            <div
-                class="bg-white rounded-lg shadow-sm border border-gray-100 hover:shadow-md transition overflow-hidden flex flex-col h-full relative">
-                <!-- Card Header with Mode Badge -->
-                <div class="p-4 border-b border-gray-100 relative">
-                    <!-- Mode Badge positioned absolutely in header -->
-                    <span class="absolute -top-2 -left-2 inline-flex items-center px-3 py-1 rounded-full text-xs font-medium {{
-            $event->mode === 'online' ? 'bg-blue-100 text-blue-800' :
-            ($event->mode === 'offline' ? 'bg-green-100 text-green-800' : 'bg-purple-100 text-purple-800')
-                                                            }} capitalize shadow-sm">
-                        {{ $event->mode }}
-                    </span>
-
-                    <div x-data="{action :false}" class="flex justify-between items-start">
-                        <h3 class="font-medium text-teal-800 text-lg pr-6 line-clamp-2">{{ $event->title }}</h3>
-                        <button x-on:click="action = !action" class="text-gray-400 hover:text-gray-600 transition-colors">
-                            <i data-lucide="more-vertical" class="w-5 h-5"></i>
-                        </button>
-                        <div x-show="action" @click.away="action = false" x-transition
-                            class="absolute right-0 mt-2 w-40 bg-white shadow-teal-800 rounded shadow z-10">
-                            <a href="" class="flex w-full items-center px-2 space-x-3 py-2 text-sm hover:bg-gray-100">
-                                <i data-lucide="pen" class="size-4"></i>
-                                <span>Edit</span>
-                            </a>
-                            <button class="flex w-full text-red-600 items-center px-2 space-x-3 py-2 text-sm hover:bg-gray-100">
-                                <i data-lucide="trash" class="size-4"></i>
-                                <span>Delete</span>
-                            </button>
-
-                        </div>
-                    </div>
+    <!-- Events Table with Mass Actions -->
+    <div class="bg-white rounded-xl shadow-xs border border-gray-100 overflow-hidden">
+        <!-- Mass Action Bar (hidden by default, shows when checkboxes are selected) -->
+        <div id="massActionsBar" class="hidden bg-gray-50 px-6 py-3 border-b border-gray-200">
+            <div class="flex items-center justify-between">
+                <div class="text-sm text-gray-600">
+                    <span id="selectedCount">0</span> selected
                 </div>
-
-                <!-- Card Body -->
-                <div class="p-4 flex-grow">
-                    <div class="flex items-start gap-3 text-sm text-gray-600 mb-4">
-                        <i data-lucide="map-pin" class="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0"></i>
-                        <span class="line-clamp-2">{{ $event->location }}</span>
-                    </div>
-
-                    <div class="space-y-3">
-                        <div class="flex items-start gap-3 text-sm text-gray-500">
-                            <i data-lucide="calendar" class="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0"></i>
-                            <div>
-                                <div class="text-xs text-gray-400">Start Date</div>
-                                <div>{{ sweet_date($event->start_date) }}</div>
-                            </div>
-                        </div>
-                        <div class="flex items-start gap-3 text-sm text-gray-500">
-                            <i data-lucide="calendar" class="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0"></i>
-                            <div>
-                                <div class="text-xs text-gray-400">End Date</div>
-                                <div>{{ sweet_date($event->end_date) }}</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Card Footer -->
-                <div class="px-4 py-3 bg-gray-50 border-t border-gray-100 flex justify-between items-center">
-                    <span class="text-xs text-gray-500">
-                        Created {{ $event->created_at->diffForHumans() }}
-                    </span>
-                    <a href="#"
-                        class="text-sm font-medium text-teal-600 hover:text-teal-800 transition-colors inline-flex items-center gap-1">
-                        View Details
-                        <i data-lucide="arrow-right" class="w-4 h-4"></i>
-                    </a>
+                <div>
+                    <button id="massDeleteBtn"
+                        class="text-red-600 hover:text-red-800 text-sm font-medium flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                        disabled>
+                        <i data-lucide="trash-2" class="w-4 h-4"></i>
+                        Delete Selected
+                    </button>
                 </div>
             </div>
-        @empty
-            <div class="col-span-full bg-white p-8 rounded-lg shadow-sm border border-gray-100 text-center">
-                <div class="mx-auto w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mb-4">
-                    <i data-lucide="calendar-off" class="w-8 h-8 text-gray-400"></i>
-                </div>
-                <h3 class="text-lg font-medium text-gray-900 mb-1">No events found</h3>
-                <p class="text-gray-500 mb-4">Create your first event to get started</p>
-                <a href="#"
-                    class="bg-teal-600 hover:bg-teal-700 text-white py-2 px-4 rounded-lg inline-flex items-center gap-2 transition-colors shadow-sm">
-                    <i data-lucide="plus-circle" class="w-4 h-4"></i>
-                    <span>Create Event</span>
-                </a>
-            </div>
-        @endforelse
+        </div>
 
+        <div class="overflow-x-auto">
+            <form id="massActionForm" action="{{ route("admin.events.massDelete") }}" method="POST">
+                @csrf
+                @method('DELETE')
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th scope="col"
+                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                <input type="checkbox" id="selectAll"
+                                    class="rounded border-gray-300 text-teal-600 focus:ring-teal-500">
+                            </th>
+                            <th scope="col"
+                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Event</th>
+                            <th scope="col"
+                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Location</th>
+                            <th scope="col"
+                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Dates</th>
+                            <th scope="col"
+                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Type</th>
+                            <th scope="col"
+                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Created</th>
+                            <th scope="col"
+                                class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        @forelse($events as $event)
+                                            <tr class="hover:bg-gray-50 transition-colors">
+                                                <td class="px-6 py-4 whitespace-nowrap">
+                                                    <input type="checkbox" name="selected_events[]" value="{{ $event->id }}"
+                                                        class="rowCheckbox rounded border-gray-300 text-teal-600 focus:ring-teal-500">
+                                                </td>
+                                                <td class="px-6 py-4 whitespace-nowrap">
+                                                    <div class="flex items-center">
+                                                        <div class="text-sm font-medium text-teal-800">{{ $event->title }}</div>
+                                                    </div>
+                                                </td>
+                                                <td class="px-6 py-4 whitespace-nowrap">
+                                                    <div class="flex items-center gap-2 text-sm text-gray-600">
+                                                        <i data-lucide="map-pin" class="w-4 h-4 text-gray-400 flex-shrink-0"></i>
+                                                        <span class="truncate max-w-[200px]">{{ $event->location }}</span>
+                                                    </div>
+                                                </td>
+                                                <td class="px-6 py-4 whitespace-nowrap">
+                                                    <div class="text-sm text-gray-600">
+                                                        <div>{{ sweet_date($event->start_date) }}</div>
+                                                        <div class="text-xs text-gray-400">to {{ sweet_date($event->end_date) }}</div>
+                                                    </div>
+                                                </td>
+                                                <td class="px-6 py-4 whitespace-nowrap">
+                                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full {{
+                            $event->mode === 'online' ? 'bg-blue-100 text-blue-800' :
+                            ($event->mode === 'offline' ? 'bg-green-100 text-green-800' : 'bg-purple-100 text-purple-800')
+                                                    }}">
+                                                        {{ $event->mode }}
+                                                    </span>
+                                                </td>
+                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                    {{ $event->created_at->diffForHumans() }}
+                                                </td>
+                                                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                                    <div class="flex items-center justify-end space-x-3">
+                                                        <a href="{{ route('admin.events.show', $event) }}" class="text-teal-600 hover:text-teal-900 transition-colors"
+                                                            title="View">
+                                                            <i data-lucide="eye" class="w-4 h-4"></i>
+                                                        </a>
+                                                        <a href="{{ route('admin.events.edit', $event->slug) }}"
+                                                            class="text-blue-600 hover:text-blue-900 transition-colors" title="Edit">
+                                                            <i data-lucide="edit" class="w-4 h-4"></i>
+                                                        </a>
+                                                        <button type="button" class="text-red-600 hover:text-red-900 transition-colors"
+                                                            title="Delete"
+                                                            onclick="if(confirm('Are you sure you want to delete this event?')) { document.getElementById('deleteForm-{{ $event->id }}').submit(); }">
+                                                            <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                                        </button>
+                                                        <form id="deleteForm-{{ $event->id }}"
+                                                            action="{{ route('admin.events.destroy', $event) }}" method="POST"
+                                                            class="hidden">
+                                                            @csrf
+                                                            @method('DELETE')
+                                                        </form>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="7" class="px-6 py-12 text-center">
+                                    <div
+                                        class="mx-auto w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mb-4">
+                                        <i data-lucide="calendar-off" class="w-8 h-8 text-gray-400"></i>
+                                    </div>
+                                    <h3 class="text-lg font-medium text-gray-900 mb-1">No events found</h3>
+                                    <p class="text-gray-500 mb-4">Create your first event to get started</p>
+                                    <a href="{{ route('admin.events.create') }}"
+                                        class="bg-teal-600 hover:bg-teal-700 text-white py-2 px-4 rounded-lg inline-flex items-center gap-2 transition-colors shadow-sm">
+                                        <i data-lucide="plus-circle" class="w-4 h-4"></i>
+                                        <span>Create Event</span>
+                                    </a>
+                                </td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </form>
+        </div>
+
+        <!-- Pagination -->
+        {{-- @if($events->hasPages())
+        <div class="px-6 py-4 border-t border-gray-200">
+            {{ $events->links() }}
+        </div>
+        @endif --}}
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const selectAll = document.getElementById('selectAll');
+            const rowCheckboxes = document.querySelectorAll('.rowCheckbox');
+            const massActionsBar = document.getElementById('massActionsBar');
+            const selectedCount = document.getElementById('selectedCount');
+            const massDeleteBtn = document.getElementById('massDeleteBtn');
+            const massActionForm = document.getElementById('massActionForm');
+
+            // Select/Deselect all checkboxes
+            selectAll.addEventListener('change', function () {
+                rowCheckboxes.forEach(checkbox => {
+                    checkbox.checked = selectAll.checked;
+                });
+                updateMassActionsBar();
+            });
+
+            // Update select all checkbox when individual checkboxes change
+            rowCheckboxes.forEach(checkbox => {
+                checkbox.addEventListener('change', function () {
+                    selectAll.checked = [...rowCheckboxes].every(cb => cb.checked);
+                    updateMassActionsBar();
+                });
+            });
+
+            // Update the mass actions bar
+            function updateMassActionsBar() {
+                const selected = [...rowCheckboxes].filter(cb => cb.checked).length;
+                if (selected > 0) {
+                    massActionsBar.classList.remove('hidden');
+                    selectedCount.textContent = selected;
+                    massDeleteBtn.disabled = false;
+                } else {
+                    massActionsBar.classList.add('hidden');
+                    massDeleteBtn.disabled = true;
+                }
+            }
+
+            // Mass delete button handler
+            massDeleteBtn.addEventListener('click', function (e) {
+                e.preventDefault();
+                if (confirm('Are you sure you want to delete the selected events?')) {
+                    massActionForm.submit();
+                }
+            });
+        });
+    </script>
 </x-app-layout>

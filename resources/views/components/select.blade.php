@@ -32,17 +32,18 @@
         <select
             id="{{ $name }}"
             name="{{ $name }}"
+            value={{ $value }}
             {{ $required ? 'required' : '' }}
             {{ $autofocus ? 'autofocus' : '' }}
             {{ $disabled ? 'disabled' : '' }}
             {{ $attributes->merge([
-                'class' => 'block w-full pl-'.($icon ? '10' : '3').' pr-10 py-2.5 text-gray-900 rounded-md border-none focus:ring-0 sm:text-sm'
-            ]) }}
+    'class' => 'block w-full pl-' . ($icon ? '10' : '3') . ' pr-10 py-2.5 text-gray-900 rounded-md border-none focus:ring-0 sm:text-sm'
+]) }}
         >
             @foreach($options as $optionValue => $optionLabel)
-                <option value="{{ $optionValue }}" @selected(old($name, $value) == $optionValue)>
-                    {{ $optionLabel }}
-                </option>
+                   <option value="{{ $optionValue }}" @selected((string) old($name, $value) === (string) $optionValue)>
+                        {{ $optionLabel }}
+                    </option>
             @endforeach
         </select>
 
