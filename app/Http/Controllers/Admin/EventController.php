@@ -7,11 +7,13 @@ use App\Http\Requests\CreateEventRequest;
 use App\Http\Requests\UpdateEventRequest;
 use App\Models\Event;
 use App\Services\Event\EventService;
+use App\Services\Event\SpeakerService;
 use Illuminate\Http\Request;
 
 class EventController extends Controller {
     public function __construct(
-        protected EventService $eventService
+        protected EventService $eventService,
+        protected SpeakerService $speakerService
     ) {
 
     }
@@ -27,6 +29,8 @@ class EventController extends Controller {
     }
 
     public function show(Event $event){
+        $event->load('speakers',"resources");
+
         return view("admin.events.view-event", compact('event'));
     }
     public function store( CreateEventRequest $request ) {
@@ -52,7 +56,7 @@ class EventController extends Controller {
         $event = $this->eventService->updateEvent( $request, $event );
 
         if ( $event ) {
-            return redirect()->route( 'admin.events.index' )->with( [
+            return redirect()->route( 'admin.events.index')->with( [
                 'type' => 'success',
                 'message' => 'Event updated successfully.'
             ] );

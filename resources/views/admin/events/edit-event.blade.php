@@ -1,157 +1,90 @@
 <x-app-layout>
-    <div class="py-6">
-        <div class="flex items-center justify-between mb-8">
-            <h1 class="text-2xl font-bold text-teal-800 flex items-center gap-2">
-                <i data-lucide="calendar-plus" class="w-6 h-6"></i>
-                Update Event
-            </h1>
-            <a href="{{ route('admin.events.index') }}"
-                class="text-sm text-gray-600 hover:text-teal-600 flex items-center gap-1">
-                <i data-lucide="arrow-left" class="w-4 h-4"></i>
-                Back to Events
-            </a>
+    @if ($errors->any())
+        <div class="mb-4 p-4 bg-red-100 text-red-700 rounded">
+            <strong>Whoops!</strong> Please fix the following issues:
+            <ul class="mt-2 list-disc list-inside text-sm">
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
         </div>
+    @endif
 
-        <div class="bg-white shadow rounded-lg overflow-hidden">
-            <form action="{{ route('admin.events.update', $event) }}" method="POST" enctype="multipart/form-data">
-                @csrf
-                @method("PUT")
-                <!-- Basic Information Section -->
-                <div class="p-6 border-b border-gray-200">
-                    <h2 class="text-lg font-medium text-gray-900 mb-4">Basic Information</h2>
+    <div class="py-8 px-4 sm:px-6 lg:px-8 max-w-5xl mx-auto">
+        <h2 class="text-2xl font-bold text-teal-800 flex items-center gap-2 mb-6">
+            <i data-lucide="calendar-check" class="w-6 h-6"></i>
+            Update Event
+        </h2>
 
-                    <div class="grid grid-cols-1 gap-6">
-                        <!-- Title -->
-                        <div>
-                            <label for="title" class="inline-block text-sm font-medium text-gray-700">Event Title
-                                *</label>
-                            <x-input icon="pen" :value="$event->title" title="Event Title" type="text" name="title"
-                                id="title" class="mt-1 inline-block focus:outline-none focus:ring-0 sm:text-sm" />
-                        </div>
+        <form action="{{ route('admin.events.update', $event) }}" method="POST" enctype="multipart/form-data"
+              class="bg-white border border-gray-100 rounded-xl shadow p-6 space-y-6">
+            @csrf
+            @method('PUT')
 
-                        <!-- Description -->
-                        <div>
-                            <label for="description" class="block text-sm font-medium text-gray-700">Description
-                                *</label>
-                            <textarea name="description" id="description" rows="5"
-                                class="mt-1 block w-full border border-gray-300 resize-none rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-teal-500 focus:border-teal-500 sm:text-sm">{{ old('description', $event->description) }}</textarea>
-                        </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <x-input name="title" label="Event Title" required icon="type" :value="old('title', $event->title)" />
 
-                        <!-- Program Cover -->
-                        <div>
-                            <label for="program_cover" class="inline-block text-sm font-medium text-gray-700">Event
-                                Cover
-                                Image</label>
-                            @if (isset($event) && $event->program_cover)
-                                <div class="flex items-center mb-2">
-                                    <a href="{{ asset('storage/' . $event->program_cover) }}" target="_blank"
-                                        class="text-blue-600 hover:underline">
-                                        View current file
-                                    </a>
-                                    <span
-                                        class="ml-2 text-gray-500 text-xs">({{ basename($event->program_cover) }})</span>
-                                </div>
-                            @else
-                                <p class="text-gray-500">No file uploaded</p>
-                            @endif
-                            <div class="mt-1 flex items-center w-1/3 ">
-                                <x-input icon="image" type="file" name="program_cover" id="program_cover"
-                                    accept="image/*"
-                                    class="inline-block text-sm text-gray-500 file:mr-4 file:py-2 file:px-5 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-teal-50 file:text-teal-700 hover:file:bg-teal-100" />
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                <x-select name="mode" label="Event Mode" required :options="[
+                    'online' => 'Online',
+                    'offline' => 'Offline',
+                    'hybrid' => 'Hybrid'
+                ]" :selected="old('mode', $event->mode)" icon="activity" />
 
-                <!-- Event Details Section -->
-                <div class="p-6 border-b border-gray-200">
-                    <h2 class="text-lg font-medium text-gray-900 mb-4">Event Details</h2>
+                <x-input name="start_date" label="Start Date" type="datetime-local" required icon="calendar"
+                         :value="old('start_date', \Carbon\Carbon::parse($event->start_date)->format('Y-m-d\TH:i'))" />
 
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <!-- Mode -->
-                        <div>
-                            <x-select label="Select Event Mode" name="mode" :options="[
-                                '' => 'Select Mode',
-                                'online' => 'Online',
-                                'offline' => 'In-Person',
-                                'hybrid' => 'Hybrid',
-                            ]"
-                            value="{{ old('mode', $event->mode) }}"
-                            required
-                            icon="chevron-down" autofocus />
-                        </div>
-                        <!-- Location/URL -->
-                        <div id="location-field">
-                            <label for="location" class="block text-sm font-medium text-gray-700">Location/Meeting
-                                URL</label>
-                            <x-input icon="map-pin" type="text" name="location" id="location" :value="$event->location"
-                                class="inline-block focus:outline-none focus:ring-0 sm:text-sm" />
-                        </div>
+                <x-input name="end_date" label="End Date" type="datetime-local" required icon="calendar-check"
+                         :value="old('end_date', \Carbon\Carbon::parse($event->end_date)->format('Y-m-d\TH:i'))" />
 
-                        <!-- Start Date -->
-                        <div>
+                <x-input name="location" label="Location (URL or Venue)" required icon="map-pin" :value="old('location', $event->location)" />
+                <x-input name="physical_address" label="Physical Address" icon="map" :value="old('physical_address', $event->physical_address)" />
+                <x-input name="contact_email" label="Contact Email" type="email" icon="mail" :value="old('contact_email', $event->contact_email)" />
+                <x-input name="entry_fee" label="Entry Fee (₦)" type="number" min="0" step="0.01" icon="credit-card"
+                         :value="old('entry_fee', $event->entry_fee)" />
 
-                            <x-input label="Start Date & Time*" icon="clock" type="datetime-local"
-                                min="{{ now()->format('Y-m-d\TH:i') }}"
-                                value="{{ old('start_date', \Carbon\Carbon::parse($event->start_date)->format('Y-m-d\TH:i')) }}" name="start_date" id="start_date"
-                                class=" inline-block focus:outline-none focus:ring-0 sm:text-sm" />
-                        </div>
+                <x-input name="program_cover" label="Cover Image" type="file" icon="image" />
+                @if ($event->program_cover)
+                    <p class="text-sm text-gray-500">
+                        Current file:
+                        <a href="{{ asset('storage/' . $event->program_cover) }}" class="underline text-teal-600" target="_blank">
+                            View cover image
+                        </a>
+                    </p>
+                @endif
+            </div>
 
-                        <!-- End Date -->
-                        <div>
+            <div>
+                <label for="description" class="block text-sm font-medium text-gray-700">Description</label>
+                <textarea name="description" id="description" rows="6"
+                          class="mt-1 block border p-3 w-full border-gray-300 rounded-md shadow-sm focus:ring-teal-500 focus:border-teal-500 sm:text-sm"
+                          placeholder="Write about the event...">{{ old('description', $event->description) }}</textarea>
+                <x-input-error :messages="$errors->get('description')" class="mt-1" />
+            </div>
 
-                            <x-input label="End Date & Time*" icon="clock" type="datetime-local"
-                                min="{{ now()->format('Y-m-d\TH:i') }}"
-                                :value="old('end_date', \Carbon\Carbon::parse($event->end_date)->format('Y-m-d\TH:i'))"
-                                name="end_date" id="end_date"
-                                class="inline-block focus:outline-none focus:ring-0 sm:text-sm" />
-                        </div>
+            <div class="flex items-center gap-4">
+                <label class="inline-flex items-center">
+                    <input type="checkbox" name="is_active" class="rounded text-teal-600"
+                           {{ old('is_active', $event->is_active) ? 'checked' : '' }}>
+                    <span class="ml-2 text-sm text-gray-700">Active</span>
+                </label>
 
-                    </div>
-                </div>
+                <label class="inline-flex items-center">
+                    <input type="checkbox" name="is_published" class="rounded text-teal-600"
+                           {{ old('is_published', $event->is_published) ? 'checked' : '' }}>
+                    <span class="ml-2 text-sm text-gray-700">Published</span>
+                </label>
+            </div>
 
-                <!-- Additional Options -->
-                <div class="p-6">
-                    <h2 class="text-lg font-medium text-gray-900 mb-4">Additional Options</h2>
+            <!-- creator_id is optional here; could be locked/hidden -->
+            <input type="hidden" name="creator_id" value="{{ $event->creator_id }}">
 
-                    <!-- Active Status -->
-                    <x-checkbox name="is_active" label="Make this event active" :checked="$event->is_active" />
-
-                </div>
-
-                <!-- Form Actions -->
-                <div class="px-6 py-3 bg-gray-50 text-right">
-                    <button type="submit"
-                        class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-teal-600 hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500">
-                        <i data-lucide="save" class="w-4 h-4 mr-2"></i>
-                        Update Event
-                    </button>
-                </div>
-            </form>
-        </div>
+            <div class="pt-4 flex items-center justify-between">
+                <a href="{{ route('admin.events.index') }}" class="text-sm text-gray-500 hover:underline">← Back to Events</a>
+                <button type="submit"
+                        class="inline-flex items-center px-4 py-2 bg-teal-600 text-white text-sm font-medium rounded hover:bg-teal-700 transition shadow-sm">
+                    <i data-lucide="save" class="w-4 h-4 mr-2"></i> Update Event
+                </button>
+            </div>
+        </form>
     </div>
-
-    <script>
-        // Toggle location label based on mode
-        document.getElementById('mode').addEventListener('change', function() {
-            const locationField = document.getElementById('location-field');
-            const label = locationField.querySelector('label');
-            const input = locationField.querySelector('input');
-            const mode = this.value;
-
-            if (mode === 'online') {
-                label.textContent = 'Meeting URL *';
-                input. = true;
-            } else if (mode === 'offline') {
-                label.textContent = 'Physical Location *';
-                input. = true;
-            } else if (mode === 'hybrid') {
-                label.textContent = 'Location/Meeting URL *';
-                input. = true;
-            } else {
-                label.textContent = 'Location/Meeting URL';
-                input. = false;
-            }
-        });
-    </script>
 </x-app-layout>

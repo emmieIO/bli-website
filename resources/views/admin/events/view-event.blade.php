@@ -19,7 +19,7 @@
 
                     <form action="{{ route('admin.events.destroy', $event) }}" method="POST">
                         @csrf
-                        @method("DELETE")
+                        @method('DELETE')
 
                         <button type="submit"
                             class="inline-flex items-center px-4 py-2 bg-red-600 border border-transparent rounded-md shadow-sm text-sm font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
@@ -39,8 +39,8 @@
                     <div class="bg-white shadow rounded-lg overflow-hidden">
                         <!-- Event cover image -->
                         <div class="h-48 bg-gray-100 overflow-hidden">
-                            <img src="{{ asset('storage/'.$event->program_cover) }}"
-                                alt="Leadership Conference" class="w-full h-full object-cover">
+                            <img src="{{ asset('storage/' . $event->program_cover) }}" alt="Leadership Conference"
+                                class="w-full h-full object-cover">
                         </div>
 
                         <div class="p-6">
@@ -48,7 +48,7 @@
                             <div class="flex justify-between items-start mb-4">
                                 <span
                                     class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
-                                    {{ $event->is_active ? 'Published' : "Not published" }}
+                                    {{ $event->is_active ? 'Published' : 'Not published' }}
                                 </span>
 
                                 <span
@@ -59,7 +59,7 @@
 
                             <!-- Event description -->
                             <div class="prose max-w-none text-gray-600 mb-6">
-                                <p>{{$event->description}}</p>
+                                <p>{{ $event->description }}</p>
                             </div>
 
                             <!-- Details grid -->
@@ -75,30 +75,30 @@
                                         </p>
                                     </div>
                                 </div>
-                                
-                                @if($event->mode == 'hybrid' || $event->mode == 'offline')
-                                <div class="flex items-start gap-3">
-                                    <i data-lucide="map-pin" class="w-5 h-5 text-gray-400 mt-0.5 flex-shrink-0"></i>
-                                    <div>
-                                        <h3 class="text-sm font-medium text-gray-700">Location/Meeting Link</h3>
-                                        <p class="text-sm text-gray-900">
-                                            {{ $event->venue }}<br>
-                                            <span class="text-gray-500">{{ $event->physical_address }}</span>
-                                        </p>
+
+                                @if ($event->mode == 'hybrid' || $event->mode == 'offline')
+                                    <div class="flex items-start gap-3">
+                                        <i data-lucide="map-pin" class="w-5 h-5 text-gray-400 mt-0.5 flex-shrink-0"></i>
+                                        <div>
+                                            <h3 class="text-sm font-medium text-gray-700">Location/Meeting Link</h3>
+                                            <p class="text-sm text-gray-900">
+                                                {{ $event->venue }}<br>
+                                                <span class="text-gray-500">{{ $event->physical_address }}</span>
+                                            </p>
+                                        </div>
                                     </div>
-                                </div>
                                 @endif
-                                @if($event->mode =='online' || $event->mode == 'hybrid')
-                                <div class="flex items-start gap-3">
-                                    <i data-lucide="link" class="w-5 h-5 text-gray-400 mt-0.5 flex-shrink-0"></i>
-                                    <div>
-                                        <h3 class="text-sm font-medium text-gray-700">Conference Meeting Link</h3>
-                                        <a href="https://eventbrite.com/leadership-conf-2023" target="_blank"
-                                            class="text-sm text-teal-600 hover:text-teal-800">
-                                            Event Link
-                                        </a>
+                                @if ($event->mode == 'online' || $event->mode == 'hybrid')
+                                    <div class="flex items-start gap-3">
+                                        <i data-lucide="link" class="w-5 h-5 text-gray-400 mt-0.5 flex-shrink-0"></i>
+                                        <div>
+                                            <h3 class="text-sm font-medium text-gray-700">Conference Meeting Link</h3>
+                                            <a href="https://eventbrite.com/leadership-conf-2023" target="_blank"
+                                                class="text-sm text-teal-600 hover:text-teal-800">
+                                                Event Link
+                                            </a>
+                                        </div>
                                     </div>
-                                </div>
                                 @endif
 
                                 <div class="flex items-start gap-3">
@@ -111,52 +111,99 @@
                                         </a>
                                     </div>
                                 </div>
+                                <!-- Entry Fee -->
+                                <div class="flex items-start gap-3">
+                                    <i data-lucide="credit-card" class="w-5 h-5 text-gray-400 mt-0.5 flex-shrink-0"></i>
+                                    <div>
+                                        <h3 class="text-sm font-medium text-gray-700">Entry Fee</h3>
+                                        <p class="text-sm text-gray-900">
+                                            {{ $event->entry_fee > 0 ? '₦' . number_format($event->entry_fee, 2) : 'Free' }}
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <!-- Creator -->
+                                <div class="flex items-start gap-3">
+                                    <i data-lucide="user-circle" class="w-5 h-5 text-gray-400 mt-0.5 flex-shrink-0"></i>
+                                    <div>
+                                        <h3 class="text-sm font-medium text-gray-700">Created By</h3>
+                                        <p class="text-sm text-gray-900">
+                                            {{ $event->creator?->name ?? 'Unknown' }}
+                                            <span
+                                                class="block text-xs text-gray-500">{{ $event->creator?->email }}</span>
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <!-- Created / Updated -->
+                                <div class="flex items-start gap-3">
+                                    <i data-lucide="clock" class="w-5 h-5 text-gray-400 mt-0.5 flex-shrink-0"></i>
+                                    <div>
+                                        <h3 class="text-sm font-medium text-gray-700">Timestamps</h3>
+                                        <p class="text-sm text-gray-900">
+                                            Created: {{ $event->created_at->diffForHumans() }} <br>
+                                            Updated: {{ $event->updated_at->diffForHumans() }}
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <!-- UUID (admin only?) -->
+                                {{-- <div class="flex items-start gap-3">
+                                    <i data-lucide="hash" class="w-5 h-5 text-gray-400 mt-0.5 flex-shrink-0"></i>
+                                    <div>
+                                        <h3 class="text-sm font-medium text-gray-700">UUID</h3>
+                                        <p class="text-sm text-gray-900">{{ $event->uuid }}</p>
+                                    </div>
+                                </div> --}}
                             </div>
                         </div>
                     </div>
 
                     <!-- Speakers section -->
                     <div class="bg-white shadow rounded-lg overflow-hidden">
-                        <div class="px-6 py-4 border-b border-gray-200">
-                            <h2 class="text-lg font-medium text-gray-900">Speakers</h2>
+                        <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+                            <h2 class="text-lg font-medium text-gray-900 flex items-center gap-2">
+                                <i data-lucide="mic" class="w-5 h-5 text-teal-600"></i> Speakers
+                            </h2>
+                            <a href="{{ route('admin.events.assign-speakers', $event) }}"
+                                class="text-sm text-teal-600 hover:text-teal-800 inline-flex items-center gap-1 font-medium">
+                                <i data-lucide="user-plus" class="w-4 h-4"></i>
+                                Assign Speakers
+                            </a>
                         </div>
+
                         <div class="divide-y divide-gray-200">
-                            <div class="p-6 flex items-start gap-4">
-                                <img src="https://randomuser.me/api/portraits/women/44.jpg" alt="Sarah Johnson"
-                                    class="w-16 h-16 rounded-full object-cover">
-                                <div>
-                                    <h3 class="font-medium text-gray-900">Sarah Johnson</h3>
-                                    <p class="text-sm text-gray-500">CEO, FutureVision Inc.</p>
-                                    <p class="mt-2 text-sm text-gray-600">Sarah has transformed three startups into
-                                        billion-dollar companies and will share her insights on disruptive leadership in
-                                        changing markets.</p>
+                            @if ($event->speakers->count())
+                                @foreach ($event->speakers as $speaker)
+                                    <div class="p-6 flex items-start  gap-4">
+                                        <div class="h-20 w-20 rounded-full border-2 overflow-hidden flex-shrink-0">
+                                            @if (!empty($speaker->photo) && file_exists(public_path('storage/' . $speaker->photo)))
+                                                <img src="{{ asset('storage/' . $speaker->photo) }}"
+                                                    alt="{{ $speaker->name }}"
+                                                    class="w-full h-full rounded-full object-cover">
+                                            @else
+                                                <img src="https://ui-avatars.com/api/?name={{ urlencode($speaker->name) }}"
+                                                    alt="{{ $speaker->name }}"
+                                                    class="w-full h-full rounded-full object-cover">
+                                            @endif
+                                        </div>
+                                        <div>
+                                            <h3 class="font-medium text-gray-900">{{ $speaker->name }}</h3>
+                                            <p class="text-sm text-gray-500">{{ $speaker->title }}</p>
+                                            <p class="mt-2 text-sm text-gray-600">{{ $speaker->bio }}</p>
+                                        </div>
+                                    </div>
+                                @endforeach
+                            @else
+                                <div class="p-6 text-center text-gray-500 text-sm">
+                                    No speakers found for this event.
                                 </div>
-                            </div>
-                            <div class="p-6 flex items-start gap-4">
-                                <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="Michael Chen"
-                                    class="w-16 h-16 rounded-full object-cover">
-                                <div>
-                                    <h3 class="font-medium text-gray-900">Michael Chen</h3>
-                                    <p class="text-sm text-gray-500">Head of Product, TechGlobal</p>
-                                    <p class="mt-2 text-sm text-gray-600">Michael leads product innovation for one of
-                                        the fastest growing tech companies and will discuss building high-performance
-                                        teams.</p>
-                                </div>
-                            </div>
-                            <div class="p-6 flex items-start gap-4">
-                                <div
-                                    class="w-16 h-16 rounded-full bg-gray-200 flex items-center justify-center text-gray-400">
-                                    <i data-lucide="user" class="w-8 h-8"></i>
-                                </div>
-                                <div>
-                                    <h3 class="font-medium text-gray-900">Alexis Rodriguez</h3>
-                                    <p class="text-sm text-gray-500">Organizational Psychologist</p>
-                                    <p class="mt-2 text-sm text-gray-600">Specializing in workplace dynamics and
-                                        leadership development with 15 years of consulting experience.</p>
-                                </div>
-                            </div>
+                            @endif
+
                         </div>
                     </div>
+
+
                 </div>
 
                 <!-- Right column - Stats and attendees -->
@@ -169,12 +216,12 @@
                         <div class="p-6 space-y-4">
                             <div class="flex items-center justify-between">
                                 <div class="text-sm font-medium text-gray-500">Total Registrations</div>
-                                <div class="text-lg font-semibold text-gray-900">1,248</div>
+                                <div class="text-lg font-semibold text-gray-900">{{ $event->attendeesCount() }}</div>
                             </div>
-                            <div class="flex items-center justify-between">
+                            {{-- <div class="flex items-center justify-between">
                                 <div class="text-sm font-medium text-gray-500">Attended</div>
                                 <div class="text-lg font-semibold text-gray-900">987</div>
-                            </div>
+                            </div> --}}
                             {{-- <div class="flex items-center justify-between">
                                 <div class="text-sm font-medium text-gray-500">Check-in Rate</div>
                                 <div class="text-lg font-semibold text-gray-900">79%</div>
@@ -190,111 +237,100 @@
                                 class="text-sm text-teal-600 hover:text-teal-800">View All</a>
                         </div>
                         <div class="divide-y divide-gray-200">
-                            <div class="p-4 flex items-center gap-3">
-                                <div class="flex-shrink-0">
-                                    <img class="h-10 w-10 rounded-full"
-                                        src="https://randomuser.me/api/portraits/women/12.jpg" alt="">
-                                </div>
-                                <div class="min-w-0 flex-1">
-                                    <p class="text-sm font-medium text-gray-900 truncate">Emily Parker</p>
-                                    <p class="text-sm text-gray-500 truncate">emily.parker@example.com</p>
-                                </div>
-                                <div class="text-xs text-gray-500">
-                                    2 hours ago
-                                </div>
-                            </div>
-                            <div class="p-4 flex items-center gap-3">
-                                <div class="flex-shrink-0">
-                                    <img class="h-10 w-10 rounded-full"
-                                        src="https://randomuser.me/api/portraits/men/45.jpg" alt="">
-                                </div>
-                                <div class="min-w-0 flex-1">
-                                    <p class="text-sm font-medium text-gray-900 truncate">David Wilson</p>
-                                    <p class="text-sm text-gray-500 truncate">d.wilson@business.com</p>
-                                </div>
-                                <div class="text-xs text-gray-500">
-                                    5 hours ago
-                                </div>
-                            </div>
-                            <div class="p-4 flex items-center gap-3">
-                                <div class="flex-shrink-0">
-                                    <div
-                                        class="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-400">
-                                        <i data-lucide="user" class="w-5 h-5"></i>
+                            @if ($event->recentRegistrations()->count() > 0)
+                                @foreach ($event->recentRegistrations() as $recent)
+                                    <div class="p-4 flex items-center gap-3">
+                                        <div class="flex-shrink-0">
+                                            <img class="h-10 w-10 rounded-full"
+                                                src="https://ui-avatars.com/api/?name={{ urlencode($recent->name) }}"
+                                                alt="">
+                                        </div>
+                                        <div class="min-w-0 flex-1">
+                                            {{-- {{ $recent }} --}}
+                                            <p class="text-sm font-medium text-gray-900 truncate">{{ $recent->name }}
+                                            </p>
+                                            <p class="text-sm text-gray-500 truncate">{{ $recent->email }}</p>
+                                        </div>
+                                        <div class="text-xs text-gray-500">
+                                            {{ \Carbon\Carbon::parse($recent->created_at)->diffForHumans() }}
+                                        </div>
                                     </div>
+                                @endforeach
+                            @else
+                                <div class="p-4 text-center text-gray-500 text-sm">
+                                    No recent registrations found.
                                 </div>
-                                <div class="min-w-0 flex-1">
-                                    <p class="text-sm font-medium text-gray-900 truncate">Robert Chen</p>
-                                    <p class="text-sm text-gray-500 truncate">robert.chen@tech.org</p>
-                                </div>
-                                <div class="text-xs text-gray-500">
-                                    1 day ago
-                                </div>
-                            </div>
-                            <div class="p-4 flex items-center gap-3">
-                                <div class="flex-shrink-0">
-                                    <img class="h-10 w-10 rounded-full"
-                                        src="https://randomuser.me/api/portraits/women/28.jpg" alt="">
-                                </div>
-                                <div class="min-w-0 flex-1">
-                                    <p class="text-sm font-medium text-gray-900 truncate">Sophia Martinez</p>
-                                    <p class="text-sm text-gray-500 truncate">s.martinez@company.net</p>
-                                </div>
-                                <div class="text-xs text-gray-500">
-                                    1 day ago
-                                </div>
-                            </div>
+                            @endif
                         </div>
                     </div>
 
                     <!-- Event resources -->
                     <div class="bg-white shadow rounded-lg overflow-hidden">
-                        <div class="px-6 py-4 border-b border-gray-200">
+                        <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
                             <h2 class="text-lg font-medium text-gray-900">Event Resources</h2>
+                            <a href="{{ route('admin.events.resources.create', $event) }}"
+                                class="inline-flex items-center px-2 py-1 bg-teal-600 text-white text-xs font-medium rounded-md shadow hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500">
+                                <i data-lucide="plus" class="w-4 h-4 mr-1"></i>
+                                Add Resource
+                            </a>
                         </div>
                         <div class="divide-y divide-gray-200">
-                            <div class="p-4">
-                                <div class="flex items-center gap-3">
-                                    <div class="flex-shrink-0">
-                                        <i data-lucide="file-text" class="w-5 h-5 text-red-500"></i>
+                            @foreach ($event->resources as $resource)
+                                <div class="p-4">
+                                    <div class="flex items-center gap-3">
+                                        <div class="flex-shrink-0">
+                                            @php
+                                                $extension = pathinfo($resource->file_path, PATHINFO_EXTENSION);
+                                            @endphp
+                                            @if (Str::endsWith($extension, 'pdf'))
+                                                <i data-lucide="file-text" class="w-5 h-5 text-red-500"></i>
+                                            @elseif(Str::endsWith($extension, 'zip'))
+                                                <i data-lucide="archive" class="w-5 h-5 text-blue-500"></i>
+                                            @elseif(Str::endsWith($extension, ['doc', 'docx']))
+                                                <i data-lucide="file" class="w-5 h-5 text-gray-500"></i>
+                                            @else
+                                                <i data-lucide="file" class="w-5 h-5 text-gray-400"></i>
+                                            @endif
+                                        </div>
+
+                                        <div class="min-w-0 flex-1">
+                                            <p class="text-sm font-medium text-gray-900 truncate">
+                                                {{ $resource->title }}</p>
+                                                @if($resource->type == "link")
+                                                <a href="{{ $resource->external_link }}" target="_blank" class="text-xs text-teal-600 hover:text-teal-800 break-all">
+                                                    view link resource
+                                                </a>
+                                                @endif
+                                            <p class="text-xs text-gray-500 uppercase">{{ $extension }}</p>
+                                        </div>
+
+                                        <div class="flex items-center gap-2 ml-auto">
+                                            @if ($resource->file_path && file_exists(public_path('storage/' . $resource->file_path)))
+                                                <a href="{{ asset('storage/' . $resource->file_path) }}" download
+                                                    class="text-teal-600 hover:text-teal-800 flex items-center">
+                                                    <i data-lucide="download" class="w-5 h-5"></i>
+                                                </a>
+                                            @else
+                                                <span class="text-xs text-gray-400 italic">No file</span>
+                                            @endif
+
+                                            <form
+                                                action="{{ route('admin.events.resources.destroy', [$event, $resource]) }}"
+                                                method="POST"
+                                                onsubmit="return confirm('Are you sure you want to delete this resource?')"
+                                                class="inline">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit"
+                                                    class="text-red-600 hover:text-red-800 flex items-center">
+                                                    <i data-lucide="trash-2" class="w-5 h-5"></i>
+                                                </button>
+                                            </form>
+                                        </div>
                                     </div>
-                                    <div class="min-w-0 flex-1">
-                                        <p class="text-sm font-medium text-gray-900 truncate">Conference Program</p>
-                                        <p class="text-xs text-gray-500">PDF • 2.4 MB</p>
-                                    </div>
-                                    <a href="#" download class="text-teal-600 hover:text-teal-800">
-                                        <i data-lucide="download" class="w-5 h-5"></i>
-                                    </a>
                                 </div>
-                            </div>
-                            <div class="p-4">
-                                <div class="flex items-center gap-3">
-                                    <div class="flex-shrink-0">
-                                        <i data-lucide="image" class="w-5 h-5 text-blue-500"></i>
-                                    </div>
-                                    <div class="min-w-0 flex-1">
-                                        <p class="text-sm font-medium text-gray-900 truncate">Speaker Headshots</p>
-                                        <p class="text-xs text-gray-500">ZIP • 8.7 MB</p>
-                                    </div>
-                                    <a href="#" download class="text-teal-600 hover:text-teal-800">
-                                        <i data-lucide="download" class="w-5 h-5"></i>
-                                    </a>
-                                </div>
-                            </div>
-                            <div class="p-4">
-                                <div class="flex items-center gap-3">
-                                    <div class="flex-shrink-0">
-                                        <i data-lucide="file" class="w-5 h-5 text-gray-500"></i>
-                                    </div>
-                                    <div class="min-w-0 flex-1">
-                                        <p class="text-sm font-medium text-gray-900 truncate">Workshop Materials</p>
-                                        <p class="text-xs text-gray-500">DOCX • 1.2 MB</p>
-                                    </div>
-                                    <a href="#" download class="text-teal-600 hover:text-teal-800">
-                                        <i data-lucide="download" class="w-5 h-5"></i>
-                                    </a>
-                                </div>
-                            </div>
+                            @endforeach
+
                         </div>
                     </div>
                 </div>

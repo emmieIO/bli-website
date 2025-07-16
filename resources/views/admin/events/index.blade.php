@@ -1,127 +1,96 @@
 <x-app-layout>
-    <div class="mb-8">
+    <div class="py-8 px-4 sm:px-6 lg:px-8">
+        <!-- Page Header -->
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-            <h2 class="text-2xl font-semibold text-teal-800 flex items-center gap-2">
-                <i data-lucide="calendar-days" class="w-5 h-5"></i>
+            <h2 class="text-2xl font-bold text-teal-800 flex items-center gap-2">
+                <i data-lucide="calendar-days" class="w-6 h-6"></i>
                 Events
             </h2>
             <a href="{{ route('admin.events.create') }}"
-                class="bg-teal-600 hover:bg-teal-700 text-white py-2 px-4 rounded-lg inline-flex items-center gap-2 transition-colors shadow-sm">
-                <i data-lucide="plus-circle" class="w-4 h-4"></i>
-                <span class="text-sm">Create Event</span>
+                class="inline-flex items-center px-4 py-2 bg-teal-600 text-white text-sm font-medium rounded hover:bg-teal-700 transition shadow-sm">
+                <i data-lucide="plus-circle" class="w-4 h-4 mr-2"></i> Create Event
             </a>
         </div>
 
-        <!-- Filter & Search Controls -->
-        <div class="bg-white p-5 rounded-xl shadow-xs border border-gray-100 mb-8">
-            <!-- ... (keep your existing filter controls) ... -->
+        <!-- Filter Placeholder -->
+        <div class="bg-white border border-gray-100 rounded-xl shadow p-5 mb-8">
+            <!-- Add filters here if needed -->
+            <p class="text-sm text-gray-500">Filter controls coming soon...</p>
         </div>
-    </div>
 
-    <!-- Events Table with Mass Actions -->
-    <div class="bg-white rounded-xl shadow-xs border border-gray-100 overflow-hidden">
-        <!-- Mass Action Bar (hidden by default, shows when checkboxes are selected) -->
-        <div id="massActionsBar" class="hidden bg-gray-50 px-6 py-3 border-b border-gray-200">
+        <!-- Mass Actions Bar -->
+        <div id="massActionsBar" class="hidden bg-gray-50 px-6 py-3 border border-b border-gray-200 rounded-t-xl">
             <div class="flex items-center justify-between">
-                <div class="text-sm text-gray-600">
-                    <span id="selectedCount">0</span> selected
-                </div>
-                <div>
-                    <button id="massDeleteBtn"
-                        class="text-red-600 hover:text-red-800 text-sm font-medium flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                        disabled>
-                        <i data-lucide="trash-2" class="w-4 h-4"></i>
-                        Delete Selected
-                    </button>
-                </div>
+                <p class="text-sm text-gray-600"><span id="selectedCount">0</span> selected</p>
+                <button id="massDeleteBtn"
+                    class="text-red-600 hover:text-red-800 text-sm font-medium inline-flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                    disabled>
+                    <i data-lucide="trash-2" class="w-4 h-4"></i> Delete Selected
+                </button>
             </div>
         </div>
 
-        <div class="overflow-x-auto">
-            <form id="massActionForm" action="{{ route("admin.events.massDelete") }}" method="POST">
+        <!-- Events Table -->
+        <!-- Events Table -->
+        <div class="bg-white rounded-xl shadow border border-gray-100 overflow-x-auto">
+            <form id="massActionForm" action="{{ route('admin.events.massDelete') }}" method="POST">
                 @csrf
                 @method('DELETE')
-                <table class="min-w-full divide-y divide-gray-200">
-                    <thead class="bg-gray-50">
+                <table class="min-w-full text-sm text-gray-700 divide-y divide-gray-200">
+                    <thead class="bg-gray-50 text-xs font-semibold text-gray-500 uppercase">
                         <tr>
-                            <th scope="col"
-                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <th class="px-4 py-3 text-left w-4">
                                 <input type="checkbox" id="selectAll"
                                     class="rounded border-gray-300 text-teal-600 focus:ring-teal-500">
                             </th>
-                            <th scope="col"
-                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Event</th>
-                            <th scope="col"
-                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Location</th>
-                            <th scope="col"
-                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Dates</th>
-                            <th scope="col"
-                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Type</th>
-                            <th scope="col"
-                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Created</th>
-                            <th scope="col"
-                                class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Actions</th>
+                            <th class="px-4 py-3 text-left">Event</th>
+                            <th class="px-4 py-3 text-left">Date</th>
+                            <th class="px-4 py-3 text-left">Type</th>
+                            <th class="px-4 py-3 text-right">Actions</th>
                         </tr>
                     </thead>
-                    <tbody class="bg-white divide-y divide-gray-200">
+                    <tbody class="divide-y divide-gray-100">
                         @forelse($events as $event)
-                                            <tr class="hover:bg-gray-50 transition-colors">
-                                                <td class="px-6 py-4 whitespace-nowrap">
+                                            <tr class="hover:bg-gray-50 transition duration-150">
+                                                <td class="px-4 py-4">
                                                     <input type="checkbox" name="selected_events[]" value="{{ $event->id }}"
                                                         class="rowCheckbox rounded border-gray-300 text-teal-600 focus:ring-teal-500">
                                                 </td>
-                                                <td class="px-6 py-4 whitespace-nowrap">
-                                                    <div class="flex items-center">
-                                                        <div class="text-sm font-medium text-teal-800">{{ $event->title }}</div>
-                                                    </div>
+                                                <td class="px-4 py-4 font-medium text-teal-800 whitespace-nowrap max-w-[180px] truncate">
+                                                    {{ $event->title }}
                                                 </td>
-                                                <td class="px-6 py-4 whitespace-nowrap">
-                                                    <div class="flex items-center gap-2 text-sm text-gray-600">
-                                                        <i data-lucide="map-pin" class="w-4 h-4 text-gray-400 flex-shrink-0"></i>
-                                                        <span class="truncate max-w-[200px]">{{ $event->location }}</span>
-                                                    </div>
+                                                <td class="px-4 py-4 whitespace-nowrap">
+                                                    <span class="block">{{ sweet_date($event->start_date) }}</span>
+                                                    <span class="text-xs text-gray-400">to {{ sweet_date($event->end_date) }}</span>
                                                 </td>
-                                                <td class="px-6 py-4 whitespace-nowrap">
-                                                    <div class="text-sm text-gray-600">
-                                                        <div>{{ sweet_date($event->start_date) }}</div>
-                                                        <div class="text-xs text-gray-400">to {{ sweet_date($event->end_date) }}</div>
-                                                    </div>
-                                                </td>
-                                                <td class="px-6 py-4 whitespace-nowrap">
-                                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full {{
+                                                <td class="px-4 py-4">
+                                                    <span class="px-2 py-1 inline-flex text-xs font-semibold rounded-full {{
                             $event->mode === 'online' ? 'bg-blue-100 text-blue-800' :
                             ($event->mode === 'offline' ? 'bg-green-100 text-green-800' : 'bg-purple-100 text-purple-800')
-                                                    }}">
-                                                        {{ $event->mode }}
+                                                }}">
+                                                        {{ ucfirst($event->mode) }}
                                                     </span>
                                                 </td>
-                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                    {{ $event->created_at->diffForHumans() }}
-                                                </td>
-                                                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                                    <div class="flex items-center justify-end space-x-3">
-                                                        <a href="{{ route('admin.events.show', $event) }}" class="text-teal-600 hover:text-teal-900 transition-colors"
-                                                            title="View">
+                                                <td class="px-4 py-4 text-right">
+                                                    <div class="flex items-center justify-end gap-3">
+                                                        <a href="{{ route('admin.events.assign-speakers', $event) }}"
+                                                            class="text-purple-600 hover:text-purple-800" title="Assign Speaker">
+                                                            <i data-lucide="user-plus" class="w-4 h-4"></i>
+                                                        </a>
+                                                        <a href="{{ route('admin.events.show', $event) }}" class="text-teal-600 hover:text-teal-800"
+                                                            title="View Event">
                                                             <i data-lucide="eye" class="w-4 h-4"></i>
                                                         </a>
                                                         <a href="{{ route('admin.events.edit', $event->slug) }}"
-                                                            class="text-blue-600 hover:text-blue-900 transition-colors" title="Edit">
+                                                            class="text-blue-600 hover:text-blue-800" title="Edit Event">
                                                             <i data-lucide="edit" class="w-4 h-4"></i>
                                                         </a>
-                                                        <button type="button" class="text-red-600 hover:text-red-900 transition-colors"
-                                                            title="Delete"
-                                                            onclick="if(confirm('Are you sure you want to delete this event?')) { document.getElementById('deleteForm-{{ $event->id }}').submit(); }">
+                                                        <button type="button" title="Delete" class="text-red-600 hover:text-red-800"
+                                                            onclick="if(confirm('Are you sure?')) { document.getElementById('deleteForm-{{ $event->id }}').submit(); }">
                                                             <i data-lucide="trash-2" class="w-4 h-4"></i>
                                                         </button>
-                                                        <form id="deleteForm-{{ $event->id }}"
-                                                            action="{{ route('admin.events.destroy', $event) }}" method="POST"
-                                                            class="hidden">
+                                                        <form id="deleteForm-{{ $event->id }}" action="{{ route('admin.events.destroy', $event) }}"
+                                                            method="POST" class="hidden">
                                                             @csrf
                                                             @method('DELETE')
                                                         </form>
@@ -130,18 +99,15 @@
                                             </tr>
                         @empty
                             <tr>
-                                <td colspan="7" class="px-6 py-12 text-center">
-                                    <div
-                                        class="mx-auto w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mb-4">
-                                        <i data-lucide="calendar-off" class="w-8 h-8 text-gray-400"></i>
+                                <td colspan="5" class="text-center py-12 text-gray-500">
+                                    <div class="flex flex-col items-center gap-3">
+                                        <i data-lucide="calendar-off" class="w-8 h-8 text-gray-300"></i>
+                                        <p class="text-sm">No events found. Create one to get started.</p>
+                                        <a href="{{ route('admin.events.create') }}"
+                                            class="inline-flex items-center px-4 py-2 bg-teal-600 text-white text-sm font-medium rounded hover:bg-teal-700 transition shadow-sm">
+                                            <i data-lucide="plus-circle" class="w-4 h-4 mr-2"></i> Create Event
+                                        </a>
                                     </div>
-                                    <h3 class="text-lg font-medium text-gray-900 mb-1">No events found</h3>
-                                    <p class="text-gray-500 mb-4">Create your first event to get started</p>
-                                    <a href="{{ route('admin.events.create') }}"
-                                        class="bg-teal-600 hover:bg-teal-700 text-white py-2 px-4 rounded-lg inline-flex items-center gap-2 transition-colors shadow-sm">
-                                        <i data-lucide="plus-circle" class="w-4 h-4"></i>
-                                        <span>Create Event</span>
-                                    </a>
                                 </td>
                             </tr>
                         @endforelse
@@ -150,14 +116,9 @@
             </form>
         </div>
 
-        <!-- Pagination -->
-        {{-- @if($events->hasPages())
-        <div class="px-6 py-4 border-t border-gray-200">
-            {{ $events->links() }}
-        </div>
-        @endif --}}
     </div>
 
+    <!-- Scripts -->
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const selectAll = document.getElementById('selectAll');
@@ -167,23 +128,6 @@
             const massDeleteBtn = document.getElementById('massDeleteBtn');
             const massActionForm = document.getElementById('massActionForm');
 
-            // Select/Deselect all checkboxes
-            selectAll.addEventListener('change', function () {
-                rowCheckboxes.forEach(checkbox => {
-                    checkbox.checked = selectAll.checked;
-                });
-                updateMassActionsBar();
-            });
-
-            // Update select all checkbox when individual checkboxes change
-            rowCheckboxes.forEach(checkbox => {
-                checkbox.addEventListener('change', function () {
-                    selectAll.checked = [...rowCheckboxes].every(cb => cb.checked);
-                    updateMassActionsBar();
-                });
-            });
-
-            // Update the mass actions bar
             function updateMassActionsBar() {
                 const selected = [...rowCheckboxes].filter(cb => cb.checked).length;
                 if (selected > 0) {
@@ -196,10 +140,21 @@
                 }
             }
 
-            // Mass delete button handler
-            massDeleteBtn.addEventListener('click', function (e) {
+            selectAll.addEventListener('change', () => {
+                rowCheckboxes.forEach(cb => cb.checked = selectAll.checked);
+                updateMassActionsBar();
+            });
+
+            rowCheckboxes.forEach(cb => {
+                cb.addEventListener('change', () => {
+                    selectAll.checked = [...rowCheckboxes].every(cb => cb.checked);
+                    updateMassActionsBar();
+                });
+            });
+
+            massDeleteBtn.addEventListener('click', (e) => {
                 e.preventDefault();
-                if (confirm('Are you sure you want to delete the selected events?')) {
+                if (confirm('Are you sure you want to delete selected events?')) {
                     massActionForm.submit();
                 }
             });

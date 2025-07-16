@@ -30,7 +30,6 @@ return new class extends Migration
                 'physical_address',
                 'venue',
                 'contact_email',
-                'is_published',
                 'entry_fee',
             ]);
         });

@@ -17,7 +17,7 @@ class ProgrammeController extends Controller
      */
     public function index()
     {
-       
+
         $events = Event::latest()->paginate(10)->withQueryString();
         return view("upcoming_events.index", compact("events"));
     }
