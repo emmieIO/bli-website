@@ -17,13 +17,8 @@ class ProgrammeController extends Controller
      */
     public function index()
     {
-        $page = request()->getQueryString();
-        $cache_key = "events_$page";
 
-        $events = Cache::remember($cache_key, now()->addMinutes(10),function(){
-            return Event::latest()->simplePaginate(10)->withQueryString();
-        });
-
+        $events = Event::latest()->paginate(10)->withQueryString();
         return view("upcoming_events.index", compact("events"));
     }
 

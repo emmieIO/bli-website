@@ -4,13 +4,13 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class CreateEventRequest extends FormRequest {
+class UpdateEventRequest extends FormRequest {
     /**
     * Determine if the user is authorized to make this request.
     */
 
     public function authorize(): bool {
-        return auth()->user()->checkPermissionTo( 'manage events' );
+        return auth()->user()->hasPermissionTo( 'manage events' );
     }
 
     /**
@@ -21,20 +21,20 @@ class CreateEventRequest extends FormRequest {
 
     public function rules(): array {
         return [
-            'title' => 'required|string|max:255|unique:events,title',
-            'description' => 'required|string',
-            'location' => 'required|string',
+            'title' => 'sometimes|required|string|max:255|unique:events,title,' . ( $this->event->id ?? 'NULL' ),
+            'description' => 'sometimes|required|string',
+            'location' => 'sometimes|required|string',
             'program_cover' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-            'mode' => 'required|string|in:' . implode( ',', array_column( \App\Enums\EventModeEnum::cases(), 'value' ) ),
-            'start_date' => 'required|date|after_or_equal:today',
-            'end_date' => 'required|date|after_or_equal:start_date',
+            'mode' => 'sometimes|required|string|in:' . implode( ',', array_column( \App\Enums\EventModeEnum::cases(), 'value' ) ),
+            'start_date' => 'sometimes|required|date|after_or_equal:today',
+            'end_date' => 'sometimes|required|date|after_or_equal:start_date',
             'physical_address' => 'nullable|string|max:255',
-            'creator_id' => 'required|exists:users,id',
+            'creator_id' => 'sometimes|required|exists:users,id',
             'is_active' => 'sometimes|boolean',
             'metadata' => 'nullable|array',
             'contact_email' => 'nullable|email|max:255',
             'is_published' => 'sometimes|boolean',
-            'entry_fee' => 'nullable|numeric|min:0|max:999999.99',
+            'entry_fee' => 'nullable|numeric|min:0|max:999999.99'
         ];
     }
 

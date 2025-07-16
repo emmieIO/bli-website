@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Speaker;
 use App\Models\User;
 use Hash;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
@@ -28,8 +29,12 @@ class AdminSeeder extends Seeder
             $user->assignRole('admin');
 
             // You can use a factory to create related events for the admin user
-            $user->eventsCreated()->createMany(
-                \App\Models\Event::factory()->count(20)->make()->toArray()
+            // $user->eventsCreated()->createMany(
+            //     \App\Models\Event::factory()->count(20)->make()->toArray()
+            // );
+
+            $user->speakers()->createMany(
+                Speaker::factory()->count(10)->make()->toArray()
             );
         }
 

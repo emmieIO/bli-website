@@ -1,57 +1,25 @@
-@props([
-    'label' => '',
-    'name',
-    'options' => [],
-    'value' => '',
-    'required' => false,
-    'icon' => '',
-    'autofocus' => false,
-    'disabled' => false,
-])
+@props(['name', 'label' => '', 'options' => [], 'selected' => '', 'icon' => null, 'required' => false])
 
-<div class="space-y-1">
+<div>
     @if($label)
-        <label for="{{ $name }}" class="block text-sm font-medium text-gray-700">
-            {{ $label }}
-            @if($required)
-                <span class="text-red-500">*</span>
-            @endif
-        </label>
+        <label for="{{ $name }}" class="block text-sm font-medium text-gray-700">{{ $label }}</label>
     @endif
 
-    <div class="relative rounded-md shadow-sm transition-all duration-150
-                border border-gray-300 hover:border-teal-600
-                focus-within:ring-2 focus-within:ring-teal-800/30 focus-within:border-teal-800
-                {{ $disabled ? 'bg-gray-100 opacity-75' : 'bg-white' }}">
-        @if($icon)
+    <div class="mt-1 relative rounded-md shadow-sm">
+        @if ($icon)
             <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <i data-lucide="{{ $icon }}" class="h-4 w-4 text-gray-500"></i>
+                <i data-lucide="{{ $icon }}" class="w-5 h-5 text-gray-400"></i>
             </div>
         @endif
 
-        <select
-            id="{{ $name }}"
-            name="{{ $name }}"
-            {{ $required ? 'required' : '' }}
-            {{ $autofocus ? 'autofocus' : '' }}
-            {{ $disabled ? 'disabled' : '' }}
-            {{ $attributes->merge([
-                'class' => 'block w-full pl-'.($icon ? '10' : '3').' pr-10 py-2.5 text-gray-900 rounded-md border-none focus:ring-0 sm:text-sm'
-            ]) }}
-        >
-            @foreach($options as $optionValue => $optionLabel)
-                <option value="{{ $optionValue }}" @selected(old($name, $value) == $optionValue)>
-                    {{ $optionLabel }}
+        <select name="{{ $name }}" id="{{ $name }}" @if($required) required @endif
+            class="block w-full pl-10 pr-10 py-2 border border-gray-300 rounded-md focus:ring-teal-500 focus:border-teal-500 sm:text-sm">
+            @foreach($options as $value => $display)
+                <option value="{{ $value }}" {{ $value == old($name, $selected) ? 'selected' : '' }}>
+                    {{ $display }}
                 </option>
             @endforeach
         </select>
-
-        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
-            <svg class="h-4 w-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
-            </svg>
-        </div>
     </div>
-
-    <x-input-error :messages="$errors->get($name)" class="mt-1" />
+    <x-input-error :messages="$errors->get($name)" class="mt-2" />
 </div>

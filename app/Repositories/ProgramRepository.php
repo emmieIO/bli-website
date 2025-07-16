@@ -13,6 +13,6 @@ class ProgramRepository implements ProgramRepositoryInterface
      */
 
     public function findProgramsBySlug(string $slug): ?Event{
-        return Event::with("attendees")->where('slug', $slug)->first();
+        return Event::with(["attendees", "resources"])->where('slug', $slug)->first();
     }
 }

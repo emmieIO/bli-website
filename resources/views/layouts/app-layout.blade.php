@@ -55,7 +55,7 @@
                     </div>
                 </div>
             </div>
-            <div class="content__parent overflow-x-scroll">
+            <div class="content__parent">
                 {{ $slot }}
             </div>
         </div>
