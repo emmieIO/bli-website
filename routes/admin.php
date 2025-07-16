@@ -2,7 +2,6 @@
 
 use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\AssignSpeakerToEvent;
-use App\Http\Controllers\Admin\Auth\AdminAuthController;
 use App\Http\Controllers\Admin\EventController;
 use App\Http\Controllers\Admin\EventResourceController;
 use App\Http\Controllers\Admin\SpeakersController;
