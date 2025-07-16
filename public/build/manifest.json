@@ -1,0 +1,20 @@
+{
+  "resources/css/app.css": {
+    "file": "assets/app-CFp1sIgj.css",
+    "src": "resources/css/app.css",
+    "isEntry": true
+  },
+  "resources/images/bg-pattern.png": {
+    "file": "assets/bg-pattern-zBsqcDRH.png",
+    "src": "resources/images/bg-pattern.png"
+  },
+  "resources/js/app.js": {
+    "file": "assets/app-DH96vLgK.js",
+    "name": "app",
+    "src": "resources/js/app.js",
+    "isEntry": true,
+    "css": [
+      "assets/app-KOmfmGu7.css"
+    ]
+  }
+}
