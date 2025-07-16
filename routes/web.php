@@ -4,7 +4,7 @@ use App\Actions\JoinEventAction;
 use App\Http\Controllers\CourseController;
 use App\Http\Controllers\ProgrammeController;
 use App\Http\Controllers\UserDashboard\RevokeRsvpAction;
-use App\Http\Controllers\UserDashBoard\ShowMyEventsController;
+use App\Http\Controllers\UserDashboard\ShowMyEventsController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
