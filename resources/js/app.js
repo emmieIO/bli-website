@@ -3,6 +3,7 @@ import { createIcons, icons } from 'lucide';
 import { Notyf } from 'notyf';
 import 'notyf/notyf.min.css';
 import Alpine from 'alpinejs';
+import 'flowbite';
 
 createIcons({ icons });
 

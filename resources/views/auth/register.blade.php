@@ -5,14 +5,28 @@
         <!-- Name -->
         <x-input name="name" label="Full Name" icon="user" autofocus  />
 
-        <!-- Email -->
-        <x-input name="email" type="email" label="Email address" icon="mail" />
-
-        <!-- Password -->
-        <x-input name="password" type="password" label="Password" icon="lock" />
-
-        <!-- Confirm Password -->
-        <x-input name="password_confirmation" type="password" label="Confirm Password" icon="lock" />
+        <div class="grid grid-cols-1 gap-2 md:grid-cols-2">
+            
+            <!-- Email -->
+            <x-input name="email" type="email" label="Email address" icon="mail" />
+            <!-- Email -->
+            <x-input
+                name="phone"
+                type="text"
+                label="Phone Number"
+                icon="phone"
+                pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}"
+                placeholder="123-456-7890"
+                autocomplete="tel"
+            />
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+            <!-- Password -->
+            <x-input name="password" type="password" label="Password" icon="lock" />
+    
+            <!-- Confirm Password -->
+            <x-input name="password_confirmation" type="password" label="Confirm Password" icon="lock" />
+        </div>
 
         <!-- Submit -->
         <div>
@@ -39,7 +53,7 @@
         </div>
 
         <!-- Login Redirect -->
-        <p class="text-center text-sm mt-6">
+        <p class="text-center text-sm mt-6 text-teal-100">
             Already have an account?
             <a href="{{ route('login') }}" class="text-teal-700 hover:underline font-medium">Sign in</a>
         </p>

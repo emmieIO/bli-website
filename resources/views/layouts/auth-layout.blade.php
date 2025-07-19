@@ -12,20 +12,21 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 
-<body class="font-[Outfit] bg-gray-50 text-gray-800">
-    <div class="min-h-screen grid  lg:grid-cols-2">
+<body class="text-gray-800 auth-layout">
+    <x-navbar/>
+    <div class="min-h-screen grid place-center">
         <!-- Left: Form -->
-        <div class="flex flex-col justify-center px-8 py-12 sm:px-12 lg:px-20 bg-white">
+        <div class="flex flex-col justify-center px-8 py-12 sm:px-12 lg:px-2">
             <div class="max-w-md w-full mx-auto">
                 <div class="mb-8">
-                    <h1 class="text-3xl font-semibold text-teal-800">{{ $title ?? 'Welcome' }}</h1>
-                    <p class="text-sm text-gray-600 mt-2">{{ $description ?? '' }}</p>
+                    <h1 class="text-3xl font-semibold text-white">{{ $title ?? 'Welcome' }}</h1>
+                    <p class="text-sm text-white mt-2">{{ $description ?? '' }}</p>
                 </div>
 
                 <!-- Slot for dynamic form content -->
                 {{ $slot }}
 
-                <a href="{{ route("homepage") }}" class="text-xs block text-teal-800 text-center mt-8 underline">go
+                <a href="{{ route("homepage") }}" class="text-xs block text-teal-100 text-center mt-8 underline">go
                     back home</a>
                 <p class="text-xs text-gray-500 text-center mt-8">&copy; 2025 Beacon Leadership Institute. All rights
                     reserved.</p>
@@ -33,14 +34,14 @@
         </div>
 
         <!-- Right: Image / Branding -->
-        <div class="hidden md:hidden lg:flex items-center justify-center bg-teal-800 text-white relative">
+        {{-- <div class="hidden md:hidden lg:flex items-center justify-center bg-teal-800 text-white relative">
             <div class="p-12 text-center">
                 <h2 class="md:text-2xl lg:text-3xl font-semibold leading-tight">Beacon Leadership Institute</h2>
                 <p class="text-white/80 mt-4">Raising visionary and value-driven leaders for global impact.</p>
                 <img src="{{ asset('images/logo.jpg') }}" alt="Leadership"
                     class="mt-10 w-full max-w-sm mx-auto object-contain">
             </div>
-        </div>
+        </div> --}}
     </div>
     <x-toast />
     <script src="https://unpkg.com/lucide@latest"></script>

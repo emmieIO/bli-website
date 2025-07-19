@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" x-data="{mainNavOpen:false}" x-cloak>
+<html lang="en" x-data="{ mainNavOpen: false }" x-cloak>
 
 <head>
     <meta charset="UTF-8" />
@@ -15,11 +15,12 @@
 </head>
 
 <body class="font-[Outfit] text-gray-800 bg-white min-h-screen">
-<div class="preload">
-   <div>
-    <img src="{{ asset("images/logo.jpg") }}" class="w-[100px] h-[100px] rounded-full animate-scale border-2 border-black" alt=""/>
-   </div>
-</div>
+    <div class="preload">
+        <div>
+            <img src="{{ asset('images/logo.jpg') }}"
+                class="w-[100px] h-[100px] rounded-full animate-scale border-2 border-black" alt="" />
+        </div>
+    </div>
     <!-- Top Contact Bar -->
     <header class="bg-gray-100 text-sm text-gray-700">
         <div class="flex flex-col md:flex-row md:justify-between items-center gap-2 px-4 py-2 max-w-7xl mx-auto">
@@ -31,7 +32,9 @@
     </header>
 
     <!-- Navigation -->
-    <nav class="navigation__container">
+    <x-navbar />
+
+    {{-- <nav class="navigation__container">
         <div class="navigation__parent">
             <!-- Logo -->
             <div class="logo__container">
@@ -89,7 +92,7 @@
                 </div>
             </div>
         </div>
-    </nav>
+    </nav> --}}
 
     <!-- Main Slot -->
     <main>
@@ -105,6 +108,7 @@
     <x-toast />
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
+
     <script>
         // lucide.createIcons();
     </script>

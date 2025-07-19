@@ -44,7 +44,8 @@ class AuthenticatedController extends Controller
     }
 
     public function showProfile(){
-        return view("user_dashboard.profile");
+        $user = auth()->user();
+        return view("user_dashboard.profile", compact('user'));
     }
 
     public function verifyEmail(Request $request){
