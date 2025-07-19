@@ -163,12 +163,12 @@ body, html {
   }
 }
 .hero{
-    @apply bg-neutral-600 text-white md:bg-top min-h-screen;
+    @apply bg-neutral-600 text-white;
     background-image: url(../images/hero-bg.jpg);
     background-blend-mode: multiply;
     background-repeat: no-repeat;
-    background-size: cover;
-    background-position: top;
+    background-size: cover, 100%;
+    background-position: center;
     background-attachment: fixed;
 }
 
