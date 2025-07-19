@@ -14,7 +14,7 @@
                 <span class="absolute inset-y-0 left-0 flex items-center pl-3">
                     <i data-lucide="user" class="w-4 h-4 text-gray-400"></i>
                 </span>
-                <input type="text" id="name" name="name" value="John Doe"
+                <input type="text" id="name" name="name" value="{{ old('name', $user->name) }}"
                     class="w-full rounded-md border border-gray-300 bg-white text-sm text-gray-800 pl-10 py-2 focus:ring-teal-500 focus:border-teal-500">
             </div>
         </div>
@@ -25,7 +25,7 @@
                 <span class="absolute inset-y-0 left-0 flex items-center pl-3">
                     <i data-lucide="phone" class="w-4 h-4 text-gray-400"></i>
                 </span>
-                <input type="text" id="phone" name="phone" value="+234 123 456 7890"
+                <input type="text" id="phone" name="phone" value="{{ old('phone', $user->phone) }}"
                     class="w-full rounded-md border border-gray-300 bg-white text-sm text-gray-800 pl-10 py-2 focus:ring-teal-500 focus:border-teal-500">
             </div>
         </div>
@@ -36,9 +36,10 @@
                 <span class="absolute inset-y-0 left-0 flex items-center pl-3">
                     <i data-lucide="mail" class="w-4 h-4 text-gray-400"></i>
                 </span>
-                <input type="email" id="email" name="email" value="john.doe@example.com"
+                <input type="email" id="email" name="email" value="{{ old('email', $user->email) }}"
+                    @if($user->hasRole(['student','user'])) readonly @endif
                     class="w-full rounded-md border border-gray-300 bg-white text-sm text-gray-800 pl-10 py-2 focus:ring-teal-500 focus:border-teal-500">
-            </div>
+                </div>
         </div>
 
         <div class="md:col-span-2 mt-4">

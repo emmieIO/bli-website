@@ -11,7 +11,7 @@
 
 <div class="space-y-1">
     @if($label)
-        <label for="{{ $name }}" class="block text-sm font-medium text-gray-700">
+        <label for="{{ $name }}" class="block text-sm font-medium text-white">
             {{ $label }}
             @if($required)
                 <span class="text-red-500">*</span>
@@ -38,7 +38,7 @@
             {{ $autofocus ? 'autofocus' : '' }}
             {{ $disabled ? 'disabled' : '' }}
             {{ $attributes->merge([
-                'class' => 'block w-full pl-'.($icon ? '10' : '3').' pr-3 py-2.5 text-gray-900 rounded-md border-none focus:ring-0 sm:text-sm placeholder-gray-400'
+                'class' => 'block w-full pl-'.($icon ? '10' : '3').' pr-3 py-2.5 text-gray-900 font-medium rounded-md border-none focus:ring-0 sm:text-sm placeholder-gray-400'
             ]) }}
         />
     </div>

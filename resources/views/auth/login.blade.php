@@ -13,10 +13,10 @@
             <label class="inline-flex items-center text-sm">
                 <input type="checkbox" name="remember"
                     class="rounded border-gray-300 text-teal-600 shadow-sm focus:ring-teal-500">
-                <span class="ml-2 text-gray-700">Remember me</span>
+                <span class="ml-2 text-white">Remember me</span>
             </label>
 
-            <a href="{{ route('password.request') }}" class="text-sm text-teal-700 hover:underline">Forgot password?</a>
+            <a href="{{ route('password.request') }}" class="text-sm text-white hover:underline">Forgot password?</a>
         </div>
 
         <!-- Submit -->
@@ -30,7 +30,7 @@
 
         <!-- Social Login -->
         <div class="mt-6 text-center">
-            <p class="text-sm text-gray-500 mb-4">or sign in with</p>
+            <p class="text-sm text-white mb-4">or sign in with</p>
             <div class="flex justify-center gap-4">
                 <a href=""
                     class="flex items-center gap-2 bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md text-sm font-medium">
@@ -44,7 +44,7 @@
         </div>
 
         <!-- Register -->
-        <p class="text-center text-sm mt-6">
+        <p class="text-center text-sm mt-6 text-teal-100">
             Don’t have an account?
             <a href="{{ route('register') }}" class="text-teal-700 hover:underline font-medium">Sign up</a>
         </p>

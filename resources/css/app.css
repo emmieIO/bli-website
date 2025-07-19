@@ -4,11 +4,15 @@
 @import 'tailwindcss';
 @import './dashboard.css';
 @import './home-nav.css';
+@import "flowbite/src/themes/default";
+
+@plugin "flowbite/plugin";
 
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../storage/framework/views/*.php';
 @source '../**/*.blade.php';
 @source '../**/*.js';
+@source "../../node_modules/flowbite";
 
 @theme {
     --font-sans: "Outfit" 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
@@ -159,12 +163,13 @@ body, html {
   }
 }
 .hero{
-    @apply bg-teal-800 text-white;
-    background-image: url(../images/bg-pattern.png);
+    @apply bg-neutral-600 text-white;
+    background-image: url(../images/hero-bg.jpg);
     background-blend-mode: multiply;
     background-repeat: no-repeat;
     background-size: cover;
     background-position: center;
+    background-attachment: fixed;
 }
 
 .preload{
@@ -190,6 +195,16 @@ body, html {
 
 .animate-scale{
     animation: scale 1s infinite;
+}
+
+.auth-layout{
+   background-image : url(../images/auth.jpg);
+   @apply bg-teal-800;
+   background-size: cover;
+   background-blend-mode: multiply;
+   background-repeat: no-repeat;
+   background-attachment: fixed;
+
 }
 
 @keyframes scale {
