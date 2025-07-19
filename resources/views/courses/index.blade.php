@@ -1,19 +1,24 @@
 <x-guest-layout>
-    <!-- Courses Listing Page -->
+    <!-- Hero Section -->
+    <section class="relative bg-white py-10 sm:py-16 text-center border-b border-teal-100">
+        <div class="max-w-3xl mx-auto px-4 sm:px-6">
+            <h1 class="text-2xl sm:text-4xl font-semibold mb-2 sm:mb-3 flex items-center justify-center gap-2 text-teal-700">
+                <i data-lucide="books" class="w-6 sm:w-7 h-6 sm:h-7 text-teal-600"></i>
+                <span class="leading-tight">Explore Our Courses</span>
+            </h1>
+            <p class="text-sm sm:text-lg text-gray-600">
+                Discover courses to empower your leadership, faith, and personal growth.
+            </p>
+        </div>
+    </section>
+
+    <!-- Courses Listing -->
     <section class="py-16 bg-gray-50 min-h-screen">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-12">
-                <h2 class="text-4xl font-bold text-teal-800">Our Courses</h2>
-                <p class="text-gray-600 mt-2 max-w-2xl mx-auto">
-                    Explore our range of transformative leadership programs designed for emerging and established
-                    leaders.
-                </p>
-            </div>
-
             <div class="grid md:grid-cols-3 gap-8">
                 <!-- Course Card 1 -->
                 <div
-                    class="bg-white border border-teal-100 rounded-xl overflow-hidden shadow hover:shadow-lg transition">
+                    class="bg-white border border-teal-100 rounded-xl overflow-hidden shadow-md hover:shadow-xl hover:scale-[1.02] transition-transform duration-300">
                     <img src="{{ asset('images/logo.jpg') }}" alt="Foundations of Leadership"
                         class="w-full h-40 object-cover">
                     <div class="p-5 space-y-3">
@@ -26,6 +31,9 @@
                         </p>
                         <div class="flex justify-between items-center">
                             <span class="text-xs bg-teal-100 text-teal-800 px-2 py-1 rounded-full">Beginner</span>
+                            <span class="text-sm font-medium text-gray-700">Free</span>
+                        </div>
+                        <div class="pt-2">
                             <a href="#"
                                 class="inline-flex items-center text-teal-700 text-sm font-medium hover:underline">
                                 View Details
@@ -37,7 +45,7 @@
 
                 <!-- Course Card 2 -->
                 <div
-                    class="bg-white border border-teal-100 rounded-xl overflow-hidden shadow hover:shadow-lg transition">
+                    class="bg-white border border-teal-100 rounded-xl overflow-hidden shadow-md hover:shadow-xl hover:scale-[1.02] transition-transform duration-300">
                     <img src="{{ asset('images/logo.jpg') }}" alt="Marketplace Leadership"
                         class="w-full h-40 object-cover">
                     <div class="p-5 space-y-3">
@@ -50,6 +58,9 @@
                         </p>
                         <div class="flex justify-between items-center">
                             <span class="text-xs bg-teal-100 text-teal-800 px-2 py-1 rounded-full">Intermediate</span>
+                            <span class="text-sm font-medium text-gray-700">$49</span>
+                        </div>
+                        <div class="pt-2">
                             <a href="#"
                                 class="inline-flex items-center text-teal-700 text-sm font-medium hover:underline">
                                 View Details
@@ -61,7 +72,7 @@
 
                 <!-- Course Card 3 -->
                 <div
-                    class="bg-white border border-teal-100 rounded-xl overflow-hidden shadow hover:shadow-lg transition">
+                    class="bg-white border border-teal-100 rounded-xl overflow-hidden shadow-md hover:shadow-xl hover:scale-[1.02] transition-transform duration-300">
                     <img src="{{ asset('images/logo.jpg') }}" alt="Vision Clarity Bootcamp"
                         class="w-full h-40 object-cover">
                     <div class="p-5 space-y-3">
@@ -74,6 +85,9 @@
                         </p>
                         <div class="flex justify-between items-center">
                             <span class="text-xs bg-teal-100 text-teal-800 px-2 py-1 rounded-full">Advanced</span>
+                            <span class="text-sm font-medium text-gray-700">$79</span>
+                        </div>
+                        <div class="pt-2">
                             <a href="#"
                                 class="inline-flex items-center text-teal-700 text-sm font-medium hover:underline">
                                 View Details

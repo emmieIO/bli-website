@@ -87,6 +87,8 @@
                 <x-navbar-link href="{{ route('courses.index') }}" icon="book" label="Courses" :isActive="request()->Routeis('courses.index')" />
                 <x-navbar-link href="/about" icon="info" label="About Us" :isActive="request()->is('about')" />
 
+                <x-navbar-link href="{{ route('contact-us') }}" icon="phone" label="Contact Us" :isActive="request()->routeIs('contact-us')" />
+
 
             </ul>
         </div>
