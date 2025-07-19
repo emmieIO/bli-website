@@ -1,14 +1,13 @@
 <x-guest-layout>
     <!-- Hero Section -->
-    <section class="relative bg-teal-700 text-white py-20 text-center overflow-hidden">
-        <div class="relative z-10 max-w-4xl mx-auto px-4">
-            <h1 class="text-4xl sm:text-5xl font-extrabold mb-4 flex items-center justify-center gap-3">
-                <i data-lucide="sparkles" class="w-8 h-8 text-white"></i>
-                Discover Upcoming Events
+    <section class="bg-teal-50 text-teal-900 py-12 text-center border-b border-teal-200">
+        <div class="max-w-3xl mx-auto px-4">
+            <h1 class="text-3xl sm:text-4xl font-semibold mb-3 flex items-center justify-center gap-2">
+                <i data-lucide="calendar-days" class="w-7 h-7 text-teal-600"></i>
+                Upcoming Events
             </h1>
-            <p class="text-lg sm:text-xl font-light">Get inspired. Stay updated. Join us on amazing journeys.</p>
+            <p class="text-base sm:text-lg font-normal text-teal-700">Stay informed and join us for our latest programs.</p>
         </div>
-        <div class="absolute inset-0 bg-teal-800/30"></div>
     </section>
 
     <!-- Events Section -->
