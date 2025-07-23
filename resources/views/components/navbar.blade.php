@@ -23,12 +23,12 @@
                     @endif
                 </button>
                 <!-- Dropdown menu -->
-                <div class="z-50 hidden my-4 text-base list-none bg-white divide-y divide-gray-100 rounded-lg shadow-sm dark:bg-teal-700 dark:divide-gray-600"
+                <div class="z-50 hidden my-4 text-base list-none  divide-y divide-gray-100 rounded-lg shadow-sm bg-teal-700 dark:divide-gray-600"
                     id="user-dropdown">
                     <div class="px-4 py-3">
-                        <span class="block text-sm text-gray-900 dark:text-white">{{ auth()->user()->name }}</span>
+                        <span class="block text-sm text-white">{{ auth()->user()->name }}</span>
                         <span
-                            class="block text-sm  text-gray-500 truncate dark:text-gray-400">{{ auth()->user()->email }}</span>
+                            class="block text-sm  truncate text-gray-400">{{ auth()->user()->email }}</span>
                     </div>
                     <ul class="py-2" aria-labelledby="user-menu-button">
                         <li>
