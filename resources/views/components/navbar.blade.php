@@ -1,4 +1,4 @@
-<nav class="bg-white border-gray-200 dark:bg-teal-900 py-2 px-3 sticky z-11 top-0">
+<nav class="border-gray-200bg-teal-900 py-2 px-3 sticky z-99 top-0">
     <div class="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto  md:px-4">
         <a href="{{ route('homepage') }}" class="flex w-20 h-10 items-center rtl:space-x-reverse">
             <img src="{{ asset('images/logo.jpg') }}" class="w-30 h-10 object-cover" alt="BLI Logo" />
@@ -68,7 +68,7 @@
             @endguest
 
             <button data-collapse-toggle="navbar-user" type="button"
-                class="inline-flex items-center p-2 w-10 h-10 justify-center text-sm text-gray-500 rounded-lg md:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:text-gray-400 dark:hover:bg-gray-700 dark:focus:ring-gray-600"
+                class="inline-flex items-center p-2 w-10 h-10 justify-center text-sm text-gray-500 rounded-lg md:hidden lg:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:text-gray-400 dark:hover:bg-gray-700 dark:focus:ring-gray-600"
                 aria-controls="navbar-user" aria-expanded="false">
                 <span class="sr-only">Open main menu</span>
                 <svg class="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none"
