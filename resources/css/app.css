@@ -126,11 +126,17 @@ body, html {
   }
 }
 
-
+/* 
 @media (max-width: 768px) {
   .hero {
     flex-direction: column;
     text-align: center;
+    @apply bg-neutral-600 text-te;
+    background-blend-mode: multiply;
+    background-repeat: no-repeat;
+    background-size: contain;
+    background-position: center;
+    background-attachment: fixed;
   }
 
   .hero-image img {
@@ -161,13 +167,14 @@ body, html {
       cursor: pointer;
     }
   }
-}
+
+} */
 .hero{
     @apply bg-neutral-600 text-white;
     background-image: url(../images/hero-bg.jpg);
     background-blend-mode: multiply;
     background-repeat: no-repeat;
-    background-size: cover, 100%;
+    background-size: cover;
     background-position: center;
     background-attachment: fixed;
 }

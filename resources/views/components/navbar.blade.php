@@ -1,96 +1,161 @@
-<nav class="border-gray-200 bg-teal-900 py-2 px-3 sticky z-99 top-0">
-    <div class="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto py-2  md:px-4">
-        <a href="{{ route('homepage') }}" class="flex w-20 h-10 items-center rtl:space-x-reverse">
-            <img src="{{ asset('images/logo.jpg') }}" class="w-30 h-10 object-cover" alt="BLI Logo" />
-            {{-- <span class="self-center text-2xl font-semibold whitespace-nowrap dark:text-white">BLI</span> --}}
-        </a>
-        <div class="flex items-center md:order-2 space-x-1 md:space-x-0 rtl:space-x-reverse">
+    <nav x-data="{ mainNavOpen: false, joinMenuOpen: false }"
+        @keydown.escape.window="mainNavOpen = false; joinMenuOpen = false"
+        class="top-0 sticky w-full border-b border-gray-200 shadow-sm bg-teal-950">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="flex items-center justify-between h-16">
+                <!-- Logo -->
+                <div class="flex items-center gap-3 shrink-0">
+                    <a href="{{ route('homepage') }}" class="inline-flex items-center"
+                        aria-label="Beacon Leadership Institute home">
+                        <img src="{{ asset('images/logo.jpg') }}" class="h-10 w-auto object-cover"
+                            alt="Beacon Leadership Institute logo" />
+                    </a>
+                </div>
 
-            @auth()
-                <button
-                    class="flex text-sm bg-gray-800 rounded-full md:me-0 focus:ring-4 focus:ring-gray-300 dark:focus:ring-gray-600"
-                    id="user-menu-button" aria-expanded="false" data-dropdown-toggle="user-dropdown"
-                    data-dropdown-placement="bottom">
-                    <span class="sr-only">Open user menu</span>
-                    @if (Auth::user()->profile_image)
-                        <img class="w-8 h-8 rounded-full object-cover" src="{{ Auth::user()->profile_image }}"
-                            alt="user photo">
-                    @else
-                        <span
-                            class="w-8 h-8 flex items-center justify-center rounded-full bg-teal-700 text-white font-bold text-sm">
-                            {{ strtoupper(Str::substr(Auth::user()->name, 0, 1) . (Str::contains(Auth::user()->name, ' ') ? Str::substr(Str::after(Auth::user()->name, ' '), 0, 1) : '')) }}
-                        </span>
-                    @endif
-                </button>
-                <!-- Dropdown menu -->
-                <div class="z-50 hidden my-4 text-base list-none  divide-y divide-gray-100 rounded-lg shadow-sm bg-teal-700 dark:divide-gray-600"
-                    id="user-dropdown">
-                    <div class="px-4 py-3">
-                        <span class="block text-sm text-white">{{ auth()->user()->name }}</span>
-                        <span
-                            class="block text-sm  truncate text-gray-400">{{ auth()->user()->email }}</span>
-                    </div>
-                    <ul class="py-2" aria-labelledby="user-menu-button">
+                <!-- Desktop Nav Links -->
+                <div class="hidden md:flex md:items-center md:gap-8 text-white">
+                    <ul class="flex items-center gap-6 text-sm font-medium text-white">
                         <li>
-                            <a href="{{ route('user_dashboard') }}"
-                                class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white">Dashboard</a>
+                            <a href="{{ route('homepage') }}" @class(['hover:text-teal-600 transition', 'text-teal-700 font-semibold' => request()->routeIs('homepage')])>
+                                <span class="inline-flex items-center gap-1"><i data-lucide="home"
+                                        class="w-4 h-4"></i>Home</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ route('events.index') }}" @class(['hover:text-teal-600 transition', 'text-teal-700 font-semibold' => request()->routeIs('events.*')])>
+                                <span class="inline-flex items-center gap-1"><i data-lucide="calendar"
+                                        class="w-4 h-4"></i>Events</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ route('courses.index') }}" @class(['hover:text-teal-600 transition', 'text-teal-700 font-semibold' => request()->routeIs('courses.*')])>
+                                <span class="inline-flex items-center gap-1"><i data-lucide="book-open"
+                                        class="w-4 h-4"></i>Courses</span>
+                            </a>
+                        </li>
+
+                        <!-- JOIN DROPDOWN (Desktop) -->
+                        <li class="relative" x-data="{ open:false }" @mouseenter="open=true" @mouseleave="open=false">
+                            <button type="button"
+                                class="inline-flex items-center gap-1 hover:text-teal-600 transition focus:outline-none focus-visible:ring focus-visible:ring-teal-500 rounded"
+                                @click.prevent="open = !open" :aria-expanded="open.toString()" aria-haspopup="menu">
+                                <i data-lucide="user-plus" class="w-4 h-4"></i>
+                                <span>Join</span>
+                                <i data-lucide="chevron-down" class="w-4 h-4 transition-transform duration-150"
+                                    :class="open ? 'rotate-180' : ''"></i>
+                            </button>
+                            <div x-cloak x-show="open" x-transition.origin.top.left @click.away="open=false"
+                                class="absolute left-0 mt-2 w-48 rounded-md shadow-lg bg-teal-900 ring-1 ring-black/5 divide-y divide-gray-100 text-sm z-50"
+                                role="menu">
+                                <!-- Update routes below to match your app -->
+                                <a href=""
+                                    class="block px-4 py-2 hover:bg-teal-50 hover:text-teal-700" role="menuitem">Become
+                                    an Instructor</a>
+                                <a href="{{ route('register') }}"
+                                    class="block px-4 py-2 hover:bg-teal-50 hover:text-teal-700" role="menuitem">Become
+                                    a Student</a>
+                                <a href=""
+                                    class="block px-4 py-2 hover:bg-teal-50 hover:text-teal-700" role="menuitem">Become
+                                    a Speaker</a>
+                            </div>
                         </li>
 
                         <li>
-                            <a href="#"
-                                class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white">Profile</a>
+                            <a href="#" class="hover:text-teal-600 transition">
+                                <span class="inline-flex items-center gap-1"><i data-lucide="users"
+                                        class="w-4 h-4"></i>The Team</span>
+                            </a>
                         </li>
                         <li>
-                            <form action="{{ route('logout') }}" method="post">
-                                @csrf
-                                <button type="submit"
-                                    class="block px-4 w-full py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white">Sign
-                                    out</button>
-                            </form>
+                            <a href="#" class="hover:text-teal-600 transition">
+                                <span class="inline-flex items-center gap-1"><i data-lucide="pen-line"
+                                        class="w-4 h-4"></i>Blog</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ route('contact-us') }}" @class(['hover:text-teal-600 transition', 'text-teal-700 font-semibold' => request()->routeIs('contact-us')])>
+                                <span class="inline-flex items-center gap-1"><i data-lucide="mail"
+                                        class="w-4 h-4"></i>Contact</span>
+                            </a>
                         </li>
                     </ul>
+
+                    <!-- Auth CTA -->
+                    <div class="pl-4 border-l border-gray-200">
+                        @auth
+                            <a href="{{ route('user_dashboard') }}"
+                                class="inline-flex items-center gap-2 text-sm hover:text-teal-600 transition">
+                                <i data-lucide="grid" class="h-4 w-4"></i>
+                                <span>Dashboard</span>
+                            </a>
+                        @else
+                            <a href="{{ route('login') }}"
+                                class="inline-flex items-center gap-2 text-sm hover:text-teal-600 transition">
+                                <i data-lucide="log-in" class="h-4 w-4"></i>
+                                <span>Login</span>
+                            </a>
+                        @endauth
+                    </div>
                 </div>
-            @endauth
 
-            @guest
-                <div class="flex space-x-1 md:space-x-3">
-                    <a href="{{ route('login') }}"
-                        class="flex items-center px-3 py-2 my-3 md:my-0 text-sm font-medium text-gray-700 bg-gray-100 rounded hover:bg-gray-200 dark:bg-teal-800 dark:text-gray-200 dark:hover:bg-teal-700">
-                        <i data-lucide="log-in" class="w-5 h-5 mr-2"></i>
-                        Login
-                    </a>
-                    <x-dropdown label="Get Started" class="whitespace-nowrap" :items="[
-                        ['label' => 'Become a Student', 'href' => route('register')],
-                        ['label' => 'Become an Instructor', 'href' => route('register')],
-                    ]" />
-                   
+                <!-- Mobile Menu Toggle -->
+                <div class="md:hidden flex items-center">
+                    <button type="button"
+                        class="inline-flex items-center justify-center p-2 rounded-md text-gray-600 hover:text-teal-700 hover:bg-gray-100 focus:outline-none focus-visible:ring focus-visible:ring-teal-500"
+                        aria-label="Toggle navigation menu" @click="mainNavOpen = !mainNavOpen"
+                        :aria-expanded="mainNavOpen.toString()">
+                        <i x-show="!mainNavOpen" data-lucide="menu" class="w-6 h-6"></i>
+                        <i x-show="mainNavOpen" data-lucide="x" class="w-6 h-6"></i>
+                    </button>
                 </div>
-            @endguest
-
-            <button data-collapse-toggle="navbar-user" type="button"
-                class="inline-flex items-center p-2 w-10 h-10 justify-center text-sm text-gray-500 rounded-lg md:hidden lg:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:text-gray-400 dark:hover:bg-gray-700 dark:focus:ring-gray-600"
-                aria-controls="navbar-user" aria-expanded="false">
-                <span class="sr-only">Open main menu</span>
-                <svg class="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none"
-                    viewBox="0 0 17 14">
-                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M1 1h15M1 7h15M1 13h15" />
-                </svg>
-            </button>
+            </div>
         </div>
-        <div class="items-center justify-between hidden w-full md:flex md:w-auto md:order-1" id="navbar-user">
-            <ul
-                class="flex flex-col font-medium p-4 md:p-0 mt-4 border border-gray-100 rounded-lg md:space-x-3 rtl:space-x-reverse md:flex-row md:mt-0 md:border-0  bg-teal-900 md:dark:bg-teal-900 dark:border-gray-700">
 
-                <x-navbar-link href="{{ route('homepage') }}" icon="home" label="Home" :isActive="request()->routeIs('homepage')" />
-                <x-navbar-link href="{{ route('events.index') }}" icon="calendar" label="Events" :isActive="request()->routeIs('events.index')" />
-                <x-navbar-link href="{{ route('courses.index') }}" icon="book" label="Courses" :isActive="request()->Routeis('courses.index')" />
-                <x-navbar-link href="/about" icon="info" label="About Us" :isActive="request()->is('about')" />
+        <!-- Mobile Menu Panel -->
+        <div x-cloak x-show="mainNavOpen" x-transition class="md:hidden border-t border-gray-200 bg-white shadow-inner">
+            <div class="px-4 pt-4 pb-6 space-y-4 text-sm">
+                <a href="{{ route('homepage') }}" class="flex items-center gap-2 py-2 hover:text-teal-700"><i
+                        data-lucide="home" class="w-4 h-4"></i>Home</a>
+                <a href="{{ route('events.index') }}" class="flex items-center gap-2 py-2 hover:text-teal-700"><i
+                        data-lucide="calendar" class="w-4 h-4"></i>Events</a>
+                <a href="{{ route('courses.index') }}" class="flex items-center gap-2 py-2 hover:text-teal-700"><i
+                        data-lucide="book-open" class="w-4 h-4"></i>Courses</a>
 
-                <x-navbar-link href="{{ route('contact-us') }}" icon="phone" label="Contact Us" :isActive="request()->routeIs('contact-us')" />
+                <!-- JOIN DROPDOWN (Mobile accordion style) -->
+                <div x-data="{ open:false }" class="border-y border-gray-200 py-2">
+                    <button type="button"
+                        class="w-full flex items-center justify-between gap-2 py-2 text-left hover:text-teal-700 focus:outline-none"
+                        @click="open = !open" :aria-expanded="open.toString()">
+                        <span class="inline-flex items-center gap-2"><i data-lucide="user-plus"
+                                class="w-4 h-4"></i>Join</span>
+                        <i data-lucide="chevron-down" class="w-4 h-4 transition-transform duration-150"
+                            :class="open ? 'rotate-180' : ''"></i>
+                    </button>
+                    <div x-cloak x-show="open" x-collapse class="mt-2 pl-6 space-y-2">
+                        <a href="" class="block py-1 hover:text-teal-700">Become an
+                            Instructor</a>
+                        <a href="{{ route('register') }}" class="block py-1 hover:text-teal-700">Become a Student</a>
+                        <a href="" class="block py-1 hover:text-teal-700">Become a
+                            Speaker</a>
+                    </div>
+                </div>
 
+                <a href="#" class="flex items-center gap-2 py-2 hover:text-teal-700"><i data-lucide="users"
+                        class="w-4 h-4"></i>The Team</a>
+                <a href="#" class="flex items-center gap-2 py-2 hover:text-teal-700"><i data-lucide="pen-line"
+                        class="w-4 h-4"></i>Blog</a>
+                <a href="{{ route('contact-us') }}" class="flex items-center gap-2 py-2 hover:text-teal-700"><i
+                        data-lucide="mail" class="w-4 h-4"></i>Contact</a>
 
-            </ul>
+                <div class="pt-4 border-t border-gray-200">
+                    @auth
+                        <a href="{{ route('user_dashboard') }}" class="flex items-center gap-2 py-2 hover:text-teal-700"><i
+                                data-lucide="grid" class="h-4 w-4"></i>Dashboard</a>
+                    @else
+                        <a href="{{ route('login') }}" class="flex items-center gap-2 py-2 hover:text-teal-700"><i
+                                data-lucide="log-in" class="h-4 w-4"></i>Login</a>
+                    @endauth
+                </div>
+            </div>
         </div>
-    </div>
-</nav>
+    </nav>
