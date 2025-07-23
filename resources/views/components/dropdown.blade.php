@@ -19,8 +19,8 @@
 </button>
 
 <!-- Dropdown menu -->
-<div id="dropdown" class="z-10 hidden bg-white divide-y divide-gray-100 rounded-lg shadow-sm w-44 dark:bg-teal-700">
-    <ul class="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="{{ $attributes->get('id', 'dropdownDefaultButton') }}">
+<div id="dropdown" class="z-10 hidden divide-y divide-gray-100 rounded-lg shadow-sm w-44 bg-teal-700">
+    <ul class="py-2 text-sm text-gray-200" aria-labelledby="{{ $attributes->get('id', 'dropdownDefaultButton') }}">
         @foreach ($items as $item)
             <li>
                 <a href="{{ $item['href'] ?? '#' }}"

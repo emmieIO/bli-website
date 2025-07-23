@@ -1,4 +1,4 @@
-{{-- <x-navbar/> --}}
+{{-- <x-navbar /> --}}
 <x-guest-layout>
 
     <!-- HERO Section -->
@@ -12,7 +12,7 @@
                 <p class="text-white/90 text-lg leading-relaxed">
                     Developing visionary leaders to drive positive change in organizations and communities.
                 </p>
-                <div>
+                <div class="flex space-x-2">
                     <a href="{{ route('courses.index') }}"
                         class="inline-flex items-center gap-2 px-4 py-3 bg-teal-900 text-white font-medium rounded-lg hover:bg-teal-700 transition">
                         <i data-lucide="book" class="w-5 h-5"></i>

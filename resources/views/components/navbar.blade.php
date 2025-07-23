@@ -1,5 +1,5 @@
 <nav class="border-gray-200 bg-teal-900 py-2 px-3 sticky z-99 top-0">
-    <div class="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto  md:px-4">
+    <div class="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto py-2  md:px-4">
         <a href="{{ route('homepage') }}" class="flex w-20 h-10 items-center rtl:space-x-reverse">
             <img src="{{ asset('images/logo.jpg') }}" class="w-30 h-10 object-cover" alt="BLI Logo" />
             {{-- <span class="self-center text-2xl font-semibold whitespace-nowrap dark:text-white">BLI</span> --}}
