@@ -56,6 +56,12 @@
         </div>
     </section>
 
+    <!-- Featured Events -->
+
+
+
+
+
     <!-- Featured Courses -->
     <section id="courses" class="py-16 bg-gray-100">
         <div class="max-w-6xl mx-auto px-5">
@@ -81,7 +87,8 @@
                     <img src="{{ asset('images/logo.jpg') }}" alt="Course 3" class="w-full h-40 object-cover" />
                     <div class="p-4">
                         <h3 class="font-semibold text-lg text-gray-800">Vision Clarity Bootcamp</h3>
-                        <p class="text-gray-600 text-sm mt-2">Gain clarity, confidence, and spiritual focus as a leader.
+                        <p class="text-gray-600 text-sm mt-2">Gain clarity, confidence, and spiritual focus as a
+                            leader.
                         </p>
                         <a href="#" class="text-teal-600 text-sm font-medium mt-4 inline-block">View Course</a>
                     </div>
@@ -133,5 +140,5 @@
             </div>
         </div>
     </section>
-<!-- <x-toast message="Hello world" type="success" /> -->
+    <!-- <x-toast message="Hello world" type="success" /> -->
 </x-guest-layout>
