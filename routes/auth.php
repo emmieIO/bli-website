@@ -28,6 +28,7 @@ Route::group(['middleware' => ['auth']], function () {
     // Profile Route
     Route::get('/profile', [AuthenticatedController::class, 'showProfile'])->name("profile");
     Route::patch('/profile/update-information', [AuthenticatedController::class, "updatePersonalInfo"])->name("profile.update");
+    Route::patch('/profile/update-password', [PasswordResetController::class, 'updatePassword'])->name('profile.update_password');
 
     // Email Verification Routes
     Route::get('/email/verify', [AuthenticatedController::class, 'showEmailVerificationNotice'])

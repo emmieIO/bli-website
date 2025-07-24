@@ -1,5 +1,6 @@
 <x-app-layout>
-    <section class="max-w-4xl mx-auto py-12" x-data="{ tab: 'profile', showModal: false }">
+    <section class="max-w-5xl mx-auto " x-data="{ tab: localStorage.getItem('userTab') || 'profile', showModal: false }"
+    x-init="$watch('tab', value => localStorage.setItem('userTab', value))">
         <!-- Profile Header -->
         <div class="relative bg-gradient-to-r from-teal-800 to-teal-600 rounded-xl shadow-md p-6 text-white mb-10">
             <div class="flex items-center gap-6">
@@ -33,7 +34,7 @@
         </div>
 
         <!-- Profile Tab -->
-        <div x-show="tab === 'profile'" x-transition>
+        <div x-show="tab === 'profile'" x-transition >
             <!-- Your profile form code here -->
             @include('user_dashboard.partials.update-profile-information-form')
         </div>

@@ -14,54 +14,75 @@
     <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </head>
 
-<body class="font-[Outfit] bg-gray-50 text-gray-800" >
+<body class="bg-gray-50 text-gray-800" >
 
-    <div class="dashboard_layout">
-        <div class="content__container">
-            <!-- header -->
-            <div class="top-nav__container bg-teal-800">
-                <button  x-on:click="mobileOpen = !mobileOpen" class="toggle-btn lg:hidden ">
-                    <i data-lucide="menu" class="cursor-pointer"></i>
-                </button>
-                <div class="relative w-[30px] h-[30px] border-2 rounded-full cursor-pointer"
-                    x-data="{ profilePopup: false }"
-                    @click.outside="profilePopup = false"
-                    @keydown.escape.window="profilePopup = false">
-                    <!-- Profile Image -->
-                    <img src="https://ui-avatars.com/api/?name={{ urlencode(auth()->user()->name) }}" alt="Profile"
-                        class="w-full h-full object-cover rounded-full ring-4 ring-white shadow-lg"
-                        @click="profilePopup = !profilePopup">
 
-                    <!-- Dropdown -->
-                    <div
-                        x-show="profilePopup"
-                        x-transition:enter="transition ease-out duration-200"
-                        x-transition:enter-start="opacity-0 scale-95"
-                        x-transition:enter-end="opacity-100 scale-100"
-                        x-transition:leave="transition ease-in duration-150"
-                        x-transition:leave-start="opacity-100 scale-100"
-                        x-transition:leave-end="opacity-0 scale-95"
-                        x-cloak
-                        class="absolute right-0 mt-2 w-48 bg-white text-sm text-gray-700 rounded-md shadow-lg p-4 z-50">
-                        <!-- Example Content -->
-                        <p class="font-semibold">{{ auth()->user()->name }}</p>
-                        <a href="{{ route('profile') }}" class="block mt-2 hover:underline text-teal-600">View
-                            Profile</a>
-                        <a href="{{ route('homepage') }}" class="block mt-2 hover:underline text-teal-600">Go back home</a>
-                        <form method="POST" action="{{ route('logout') }}" class="mt-2">
-                            @csrf
-                            <button type="submit" class="text-red-600 hover:underline">Logout</button>
-                        </form>
-                    </div>
-                </div>
+<nav class="sticky top-0 z-50 w-full bg-teal-950">
+  <div class="px-3 py-3 lg:px-5 lg:pl-3">
+    <div class="flex items-center justify-between">
+      <div class="flex items-center justify-start rtl:justify-end">
+        <button data-drawer-target="logo-sidebar" data-drawer-toggle="logo-sidebar" aria-controls="logo-sidebar" type="button" class="inline-flex items-center p-2 text-sm text-gray-500 rounded-lg sm:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:text-gray-400 dark:hover:bg-gray-700 dark:focus:ring-gray-600">
+            <span class="sr-only">Open sidebar</span>
+            <svg class="w-6 h-6" aria-hidden="true" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+               <path clip-rule="evenodd" fill-rule="evenodd" d="M2 4.75A.75.75 0 012.75 4h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 4.75zm0 10.5a.75.75 0 01.75-.75h7.5a.75.75 0 010 1.5h-7.5a.75.75 0 01-.75-.75zM2 10a.75.75 0 01.75-.75h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 10z"></path>
+            </svg>
+         </button>
+        <a href="https://flowbite.com" class="flex ms-2 md:me-24">
+          <img src="https://flowbite.com/docs/images/logo.svg" class="h-8 me-3" alt="FlowBite Logo" />
+          <span class="self-center text-xl font-semibold sm:text-2xl whitespace-nowrap dark:text-white">BLI</span>
+        </a>
+      </div>
+      <div class="flex items-center">
+          <div class="flex items-center ms-3">
+            <div>
+              <button type="button" class="flex text-sm bg-teal-950 rounded-full focus:ring-4 focus:ring-gray-300 dark:focus:ring-gray-600" aria-expanded="false" data-dropdown-toggle="dropdown-user">
+                <span class="sr-only">Open user menu</span>
+                <img class="w-8 h-8 rounded-full" src="https://flowbite.com/docs/images/people/profile-picture-5.jpg" alt="user photo">
+              </button>
             </div>
-            <div class="content__parent">
-                {{ $slot }}
+            <div class="z-50 hidden my-4 text-base list-none divide-y divide-gray-100 rounded-sm shadow-sm bg-teal-700 dark:divide-gray-600" id="dropdown-user">
+              <div class="px-4 py-3" role="none">
+                <p class="text-sm text-gray-900 dark:text-white" role="none">
+                  {{ auth()->user()->name }}
+                </p>
+                <p class="text-sm font-medium text-gray-900 truncate dark:text-gray-300" role="none">
+                  {{ auth()->user()->email }}
+                </p>
+              </div>
+              <ul class="py-1" role="none">
+                <li>
+                  <a href="{{ route("homepage") }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-600 dark:hover:text-white" role="menuitem">Go back home</a>
+                </li>
+                <li>
+                  <a href="{{ route("profile") }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-600 dark:hover:text-white" role="menuitem">Profile Settings</a>
+                </li>
+                <li>
+                  {{-- <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-600 dark:hover:text-white" role="menuitem">Earnings</a> --}}
+                </li>
+                <li>
+                    <form action="{{ route('logout') }}" method="post">
+                        @csrf
+                        <button type="submit" class="block w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-600 dark:hover:text-white" role="menuitem">Sign out</button>
+                    </form>
+                </li>
+              </ul>
             </div>
+          </div>
         </div>
-        <!-- sidebar-->
-        <x-sidebar />
     </div>
+  </div>
+</nav>
+
+<aside id="logo-sidebar" class="fixed top-0 left-0 z-40 w-64 h-screen pt-20 transition-transform -translate-x-full border-r  sm:translate-x-0 bg-teal-950" aria-label="Sidebar">
+   <div class="h-full px-3 pb-4 overflow-y-auto bg-teal-950">
+
+      <x-sidebar />
+   </div>
+</aside>
+
+<div class="p-4 sm:ml-64">
+    {{ $slot }}
+</div>
 
     <x-toast />
     <script src="https://unpkg.com/lucide@latest"></script>

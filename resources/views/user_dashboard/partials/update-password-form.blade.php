@@ -5,30 +5,36 @@
         Account Security
     </h3>
 
-    <form action="#" method="POST" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <form action="{{ route("profile.update_password") }}" method="POST" class="grid grid-cols-1 md:grid-cols-2 gap-6">
         @csrf
+        @method("PATCH")
 
-        <div class="relative">
-            <label for="password" class="block text-sm font-medium text-gray-700 mb-1">New Password</label>
-            <div class="relative">
-                <span class="absolute inset-y-0 left-0 flex items-center pl-3">
-                    <i data-lucide="lock" class="w-4 h-4 text-gray-400"></i>
-                </span>
-                <input type="password" id="password" name="password"
-                    class="w-full rounded-md border border-gray-300 bg-white text-sm text-gray-800 pl-10 py-2 focus:ring-teal-500 focus:border-teal-500">
-            </div>
-        </div>
+        <x-input
+            type="password"
+            name="current_password"
+            label="Current Password"
+            icon="lock"
+            class="w-full"
+            autocomplete="current-password"
+        />
 
-        <div class="relative">
-            <label for="confirm_password" class="block text-sm font-medium text-gray-700 mb-1">Confirm Password</label>
-            <div class="relative">
-                <span class="absolute inset-y-0 left-0 flex items-center pl-3">
-                    <i data-lucide="lock" class="w-4 h-4 text-gray-400"></i>
-                </span>
-                <input type="password" id="confirm_password" name="confirm_password"
-                    class="w-full rounded-md border border-gray-300 bg-white text-sm text-gray-800 pl-10 py-2 focus:ring-teal-500 focus:border-teal-500">
-            </div>
-        </div>
+        <x-input
+            type="password"
+            name="password"
+            label="New Password"
+            icon="lock"
+            class="w-full"
+            autocomplete="new-password"
+        />
+
+        <x-input
+            type="password"
+            name="password_confirmation"
+            label="Confirm Password"
+            icon="lock"
+            class="w-full"
+            autocomplete="new-password"
+        />
 
         <div class="md:col-span-2 mt-4">
             <button type="submit"
