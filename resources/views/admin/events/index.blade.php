@@ -1,13 +1,13 @@
 <x-app-layout>
-    <div class="py-8 px-4 sm:px-6 lg:px-8">
+    <div class="">
         <!-- Page Header -->
-        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+        <div class="flex items-center justify-between gap-4 mb-6">
             <h2 class="text-2xl font-bold text-teal-800 flex items-center gap-2">
                 <i data-lucide="calendar-days" class="w-6 h-6"></i>
                 Events
             </h2>
             <a href="{{ route('admin.events.create') }}"
-                class="inline-flex items-center px-4 py-2 bg-teal-600 text-white text-sm font-medium rounded hover:bg-teal-700 transition shadow-sm">
+                class="flex md:self-start md:items-center px-4 py-2 bg-teal-600 text-white text-sm font-medium rounded hover:bg-teal-700 transition shadow-sm">
                 <i data-lucide="plus-circle" class="w-4 h-4 mr-2"></i> Create Event
             </a>
         </div>

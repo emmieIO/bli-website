@@ -11,7 +11,7 @@
 
 <div class="space-y-1">
     @if($label)
-        <label for="{{ $name }}" class="block text-sm font-medium text-white">
+        <label for="{{ $name }}" class="block text-sm font-medium text-gray-900">
             {{ $label }}
             @if($required)
                 <span class="text-red-500">*</span>

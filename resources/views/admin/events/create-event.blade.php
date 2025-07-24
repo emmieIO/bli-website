@@ -9,7 +9,7 @@
             </ul>
         </div>
     @endif
-    <div class="py-8 px-4 sm:px-6 lg:px-8 max-w-5xl mx-auto">
+    <div class="max-w-5xl mx-auto">
         <h2 class="text-2xl font-bold text-teal-800 flex items-center gap-2 mb-6">
             <i data-lucide="calendar-plus" class="w-6 h-6"></i>
             Create New Event
