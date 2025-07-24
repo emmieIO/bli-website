@@ -26,7 +26,7 @@ class UpdateEventRequest extends FormRequest {
             'location' => 'sometimes|required|string',
             'program_cover' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
             'mode' => 'sometimes|required|string|in:' . implode( ',', array_column( \App\Enums\EventModeEnum::cases(), 'value' ) ),
-            'start_date' => 'sometimes|required|date|after_or_equal:today',
+            'start_date' => 'sometimes|required|date|after_or_equal:' . ($this->event->start_date ?? 'today'),
             'end_date' => 'sometimes|required|date|after_or_equal:start_date',
             'physical_address' => 'nullable|string|max:255',
             'creator_id' => 'sometimes|required|exists:users,id',

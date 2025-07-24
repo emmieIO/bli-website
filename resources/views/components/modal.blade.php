@@ -12,7 +12,7 @@
             }
         }" >
 
-    <div x-show="open" x-transition x-cloak class="fixed inset-0 z-[999999] flex items-center justify-center bg-black/50"
+    <div x-show="open" x-transition x-cloak class="fixed inset-0 z-[9999999] flex items-center justify-center bg-black/50"
         @click.outside="open = false; document.body.classList.remove('overflow-hidden')"
         @keydown.escape.window="open = false; document.body.classList.remove('overflow-hidden')">
         <div class="bg-white w-full max-w-md mx-4 p-6 rounded-lg shadow-xl relative" @click.stop>

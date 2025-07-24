@@ -26,7 +26,7 @@ class CreateEventResourceRequest extends FormRequest
             "description"=> "nullable|string",
             "file_path" => "nullable|mimes:jpeg,png,jpg,gif,svg,pdf,mp4|max:2048",
             "external_link" => "nullable|url",
-            "type" => "required|in:file,link,video,slide",
+            "type" => "required|in:file,link",
             "uploaded_by" => "nullable|exists:users,id",
             "is_downloadable" => "sometimes|boolean"
         ];

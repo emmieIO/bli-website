@@ -211,28 +211,22 @@
 
                 <!-- RSVP Button -->
                 <button onclick="window.dispatchEvent(new Event('{{ $programme->slug }}'))"
-                    @if ($programme->attendees->contains(auth()->id())) disabled @endif
+                    @if ($programme->isRegistered() || $programme->getRevokeCount() == 4) disabled @endif
                     class="w-full bg-teal-700 text-white py-2 px-4 rounded-lg hover:bg-teal-800 transition flex justify-center items-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed">
-                    @if ($programme->attendees->contains(auth()->id()))
+                    @if ($programme->isCanceled())
                         <i data-lucide="check-circle" class="text-green-500"></i>
-                        You're registered
+                        Register Again
+                    @elseif ($programme->isRegistered())
+                        <i data-lucide="handshake"></i> You're already registered
+                    @elseif($programme->getRevokeCount() == 4)
+                        <i data-lucide="check-circle" class="text-green-500"></i>
+                        You have reached the maximum number of registrations for this event.
                     @else
-                        <i data-lucide="handshake"></i> I’ll be attending
+                        <i data-lucide="handshake"></i> RSVP Now
                     @endif
                 </button>
 
-                <!-- Modal -->
-                <x-modal event="{{ $programme->slug }}" title="Confirm RSVP"
-                    description="Please confirm your attendance for this event.">
-                    <form method="POST" action="{{ route('events.join', $programme->slug) }}">
-                        @csrf
-                        <button type="submit"
-                            class="w-full mt-3 bg-teal-700 text-white py-2 px-4 rounded-lg hover:bg-teal-800 transition flex justify-center items-center gap-2"
-                            @if ($programme->attendees->contains(auth()->id())) disabled @endif>
-                            <i data-lucide="handshake"></i> Confirm Attendance
-                        </button>
-                    </form>
-                </x-modal>
+
 
                 @auth
                     <div class="pt-2">
@@ -246,4 +240,16 @@
             </div>
         </div>
     </section>
+
+    <!-- Modal -->
+    <x-modal event="{{ $programme->slug }}" title="Confirm RSVP"
+        description="Please confirm your attendance for this event.">
+        <form method="POST" action="{{ route('events.join', $programme->slug) }}">
+            @csrf
+            <button type="submit"
+                class="w-full mt-3 bg-teal-700 text-white py-2 px-4 rounded-lg hover:bg-teal-800 transition flex justify-center items-center gap-2">
+                <i data-lucide="handshake"></i> Confirm Attendance
+            </button>
+        </form>
+    </x-modal>
 </x-guest-layout>

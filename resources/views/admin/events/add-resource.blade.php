@@ -22,8 +22,6 @@
                 <x-select label="Resource Type" name="type" required icon="list" :options="[
                     'file' => 'File',
                     'link' => 'Link',
-                    'video' => 'Video',
-                    'slide' => 'Slide',
                 ]"
                     :selected="old('type')" />
 

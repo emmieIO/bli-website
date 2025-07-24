@@ -4,13 +4,15 @@ namespace App\Http\Controllers;
 
 use App\Contracts\ProgramRepositoryInterface;
 use App\Models\Event;
+use App\Services\Event\EventService;
 use Cache;
 use Illuminate\Http\Request;
 
 class ProgrammeController extends Controller
 {
     public function __construct(
-        protected ProgramRepositoryInterface $programRepository
+        protected ProgramRepositoryInterface $programRepository,
+        protected EventService $eventService
     ){}
     /**
      * Display a listing of the resource.
@@ -18,7 +20,7 @@ class ProgrammeController extends Controller
     public function index()
     {
 
-        $events = Event::latest()->paginate(10)->withQueryString();
+        $events = $this->eventService->getPublishedEvents();
         return view("upcoming_events.index", compact("events"));
     }
 

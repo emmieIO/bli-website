@@ -25,18 +25,43 @@ class JoinEventAction
     {
 
         $event = Event::findBySlug($slug)->firstOrFail();
-        $this->eventService->registerForEvent($event->id);
 
-        // Log the event registration for auditing purposes
-        logger()->info('User registered for event', [
-            'user_id' => $request->user()->id,
-            'event_id' => $event->id,
-            'timestamp' => now(),
-        ]);
+        // Check if event has expired
+        if (isset($event->end_date) && now()->greaterThan($event->end_date)) {
+            return back()->with([
+                "type" => "error",
+                "message" => "Registration failed. The event has already ended."
+            ]);
+        }
 
+        // Check if event has started
+        if (isset($event->start_date) && now()->greaterThanOrEqualTo($event->start_date)) {
+            return back()->with([
+                "type" => "error",
+                "message" => "Registration failed. The event has already started."
+            ]);
+        }
+
+        // Check for maximum registrations
+        $maxRevokes = $event->maxRevokes();
+        if (isset($maxRevokes) && $maxRevokes) {
+            return back()->with([
+                "type" => "error",
+                "message" => "Registration failed. The event has reached its maximum number of registrations."
+            ]);
+        }
+
+        if($this->eventService->registerForEvent($event->id)){
+            return back()->with([
+                "type" => "success",
+                "message" => "You have successfully registered for the event."
+            ]);
+        }
         return back()->with([
-            "type" => "success",
-            "message" => "You have successfully registered for the event."
+            "type" => "error",
+            "message" => "Registration failed. Please try again later or contact support."
         ]);
+
+
     }
 }

@@ -1,6 +1,6 @@
     <nav x-data="{ mainNavOpen: false, joinMenuOpen: false }"
         @keydown.escape.window="mainNavOpen = false; joinMenuOpen = false"
-        class="top-0 sticky w-full border-b border-gray-200 shadow-sm bg-teal-950">
+        class="top-0 sticky z-50 w-full border-b border-gray-200 shadow-sm bg-teal-950">
         <div class="max-w-7xl mx-auto px-4">
             <div class="flex items-center justify-between h-16">
                 <!-- Logo -->
@@ -13,7 +13,7 @@
                 </div>
 
                 <!-- Desktop Nav Links -->
-                <div class="hidden md:flex md:items-center md:gap-8 text-white">
+                <div class="hidden lg:flex lg:items-center lg:gap-8 text-white">
                     <ul class="flex items-center gap-6 text-sm font-medium text-white">
                         <li>
                             <a href="{{ route('homepage') }}" @class(['hover:text-teal-600 transition', 'text-teal-700 font-semibold' => request()->routeIs('homepage')])>
@@ -99,7 +99,7 @@
                 </div>
 
                 <!-- Mobile Menu Toggle -->
-                <div class="md:hidden flex items-center">
+                <div class="lg:hidden flex items-center">
                     <button type="button"
                         class="inline-flex items-center justify-center p-2 rounded-md text-gray-600 hover:text-teal-700 hover:bg-gray-100 focus:outline-none focus-visible:ring focus-visible:ring-teal-500"
                         aria-label="Toggle navigation menu" @click="mainNavOpen = !mainNavOpen"
@@ -112,7 +112,7 @@
         </div>
 
         <!-- Mobile Menu Panel -->
-        <div x-cloak x-show="mainNavOpen" x-transition class="md:hidden border-t border-gray-200 bg-white shadow-inner">
+        <div x-cloak x-show="mainNavOpen" x-transition class="lg:hidden border-t border-gray-200 bg-white shadow-inner">
             <div class="px-4 pt-4 pb-6 space-y-4 text-sm">
                 <a href="{{ route('homepage') }}" class="flex items-center gap-2 py-2 hover:text-teal-700"><i
                         data-lucide="home" class="w-4 h-4"></i>Home</a>

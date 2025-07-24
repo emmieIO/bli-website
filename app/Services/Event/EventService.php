@@ -24,6 +24,15 @@ class EventService
         //
     }
 
+    public function getPublishedEvents(){
+        $events = Event::where('is_published', true)
+            ->orderBy('created_at', 'asc')
+            ->paginate()
+            ->withQueryString();
+
+        return $events;
+    }
+
     public function getAllUpcomingEvents()
     {
 
@@ -42,11 +51,42 @@ class EventService
     {
         $userId = auth()->id();
         $event = Event::findOrFail($eventId);
-        $attached = $event->attendees()->syncWithoutDetaching([$userId]);
+        $existing = $event->attendees()->where('user_id', $userId)->first();
 
-        if (!empty($attached['attached'])) {
-            event(new EventRegisterEvent($event, auth()->user()));
+        if(now()->greaterThan($event->start_date)){
+            Log::info("User {$userId} attempted to register for event {$eventId} after the event start date.");
+            return false;
         }
+
+        // this conditions runs if a user is not registered
+        if($existing && $event->isRegistered()){
+            Log::info("User {$userId} successfully registered for event {$eventId}.");
+            return true;
+        }
+
+        // condition if event was previously canceled
+        if($existing && $event->isCanceled()){
+            if($event->getRevokeCount() >= 4){
+                Log::warning("User {$userId} attempted to re-register for event {$eventId} but has reached the maximum revoke count ({$event->getRevokeCount()}). Registration denied.");
+                return false;
+            }
+
+            $event->attendees()->updateExistingPivot($userId, [
+            'status' => 'registered',
+            'updated_at' => now(),
+        ]);
+
+        return true;
+        }
+
+        // conndition for fresh registration
+        $event->attendees()->attach($userId, [
+        'status' => 'registered',
+        'revoke_count' => 0,
+        'created_at' => now(),
+        'updated_at' => now(),
+        ]);
+        event(new EventRegisterEvent($event, auth()->user()));
 
         return true;
     }
@@ -55,17 +95,29 @@ class EventService
     {
         $user = auth()->user();
         if ($user) {
-            return $user->load('events')->events;
+            $events = $user->events()->wherePivot('status', '!=', 'cancelled')->get();
+            return $events;
         }
         return collect([]);
     }
 
     public function revokeRsvp(string $slug): bool
     {
+
         $event = Event::findBySlug($slug)->firstOrFail();
         $userId = auth()->id();
 
-        return (bool) $event->attendees()->detach($userId);
+        $registration = $event->attendees()->where("user_id", $userId);
+
+        if(!$registration){
+            return false;
+        }
+        $event->attendees()->updateExistingPivot($userId,[
+        'status' => 'cancelled',
+        'revoke_count' => DB::raw('revoke_count + 1'),
+        'updated_at' => now()
+        ]);
+        return true;
     }
 
     public function createEvent(CreateEventRequest $request)
