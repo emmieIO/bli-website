@@ -7,6 +7,7 @@
     'icon' => '',
     'autofocus' => false,
     'disabled' => false,
+    "readonly" =>false
 ])
 
 <div class="space-y-1">
@@ -37,6 +38,7 @@
             {{ $required ? 'required' : '' }}
             {{ $autofocus ? 'autofocus' : '' }}
             {{ $disabled ? 'disabled' : '' }}
+            {{ $readonly ? 'readonly' : '' }}
             {{ $attributes->merge([
                 'class' => 'block w-full pl-'.($icon ? '10' : '3').' pr-3 py-2.5 text-gray-900 font-medium rounded-md border-none focus:ring-0 sm:text-sm placeholder-gray-400'
             ]) }}

@@ -15,7 +15,7 @@
 @source "../../node_modules/flowbite";
 
 @theme {
-    --font-sans: "Outfit" 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
+    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
         'Segoe UI Symbol', 'Noto Color Emoji';
 }
 
@@ -24,7 +24,7 @@
 }
 
 :root {
-  font-family:'Instrument Sans', "Outfit", system-ui, Avenir, Helvetica, Arial, sans-serif;
+  font-family:"Outfit", 'Instrument Sans', system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
   outline: none;

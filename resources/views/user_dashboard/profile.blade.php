@@ -1,5 +1,5 @@
 <x-app-layout>
-    <section class="max-w-4xl mx-auto py-12" x-data="{ tab: 'profile' }">
+    <section class="max-w-4xl mx-auto py-12" x-data="{ tab: 'profile', showModal: false }">
         <!-- Profile Header -->
         <div class="relative bg-gradient-to-r from-teal-800 to-teal-600 rounded-xl shadow-md p-6 text-white mb-10">
             <div class="flex items-center gap-6">
@@ -60,10 +60,29 @@
                 </h3>
                 <p class="text-sm text-gray-600 mb-4">Permanently delete your account. This action cannot be undone.</p>
                 <button
+                    @click="showModal = true"
                     class="text-red-700 border border-red-500 hover:bg-red-500 hover:text-white font-semibold px-5 py-2 rounded-md transition">
                     <i data-lucide="trash" class="w-4 h-4 inline-block mr-2"></i>
                     Deactivate Account
                 </button>
+            </div>
+        </div>
+
+        <div x-show="showModal" x-transition class="fixed inset-0 flex items-center justify-center z-50 bg-black/30 bg-opacity-50">
+            <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
+                <h2 class="text-lg font-bold mb-4 text-red-700">Confirm Account Deactivation</h2>
+                <p class="mb-6 text-gray-700">Are you sure you want to deactivate your account? This action cannot be undone.</p>
+                <form method="POST" action="{{ route('account.destroy') }}" class="space-y-4">
+                    @csrf
+                    @method('DELETE')
+                    <div>
+                        <x-input label="Current Password" type="password" name="current_password_destroy" icon="lock" required="true" />
+                    </div>
+                    <div class="flex justify-end gap-3">
+                        <button type="button" @click="showModal = false" class="px-4 py-2 rounded bg-gray-200 text-gray-700 hover:bg-gray-300">Cancel</button>
+                        <button type="submit" class="px-4 py-2 rounded bg-red-600 text-white hover:bg-red-700">Deactivate</button>
+                    </div>
+                </form>
             </div>
         </div>
     </section>

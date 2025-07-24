@@ -3,7 +3,7 @@
         @csrf
 
         <!-- Email -->
-         <x-input label="Email Address" type="email" name="email" autofocus icon="mail"/>
+         <x-input placeholder="Email Address" type="email" name="email" autofocus icon="mail"/>
 
          <!-- Password -->
          <x-input label="Password" type="password" name="password" autofocus icon="lock"/>
@@ -11,7 +11,7 @@
         <!-- Remember Me & Forgot -->
         <div class="flex items-center justify-between">
             <label class="inline-flex items-center text-sm">
-                <input type="checkbox" name="remember"
+                <input type="checkbox" name="remember" placeholder="Password"
                     class="rounded border-gray-300 text-teal-600 shadow-sm focus:ring-teal-500">
                 <span class="ml-2 text-white">Remember me</span>
             </label>

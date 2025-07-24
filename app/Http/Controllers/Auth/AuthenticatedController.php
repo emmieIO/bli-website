@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\LoginRequest;
+use App\Http\Requests\UpdateUserProfileRequest;
 use App\Models\User;
 use App\Services\Auth\AuthService;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
@@ -21,6 +22,14 @@ class AuthenticatedController extends Controller
     }
     public function authenticate(LoginRequest $request)
     {
+        $user = User::withTrashed()->where('email', $request->input('email'))->first();
+
+        if($user && $user->trashed()){
+            return redirect()->back()->withErrors([
+                'email' => 'Your account has been deactivated. Please contact support for assistance.'
+            ])->onlyInput('email');
+        }
+
         if ($this->authService->loginUser($request)) {
             return redirect(route("homepage"))->with([
                 "type" => "success",
@@ -46,6 +55,19 @@ class AuthenticatedController extends Controller
     public function showProfile(){
         $user = auth()->user();
         return view("user_dashboard.profile", compact('user'));
+    }
+
+    public function updatePersonalInfo(UpdateUserProfileRequest $request){
+        if($this->authService->editPersonalInfo($request)){
+            return redirect()->back()->with([
+            'type' => 'success',
+            'message' => 'Profile updated successfully.'
+            ]);
+        }
+        return redirect()->back()->with([
+            'type' => 'error',
+            'message' => 'Failed to update profile. Please try again.'
+        ]);
     }
 
     public function verifyEmail(Request $request){
@@ -94,6 +116,22 @@ class AuthenticatedController extends Controller
         return redirect()->back()->with([
             "type" => "error",
             "message" => "Logout failed. Please try again."
+        ]);
+    }
+
+    public function destroyAccount(Request $request){
+        $current_password = $request->validate([
+            'current_password_destroy' => ['required', 'current_password'],
+        ]);
+        if($this->authService->distroyAccount($request)){
+            return redirect(route('homepage'))->with([
+                'type' => 'success',
+                'message' => 'Account deleted successfully.'
+            ]);
+        }
+        return redirect()->back()->with([
+            'type' => 'error',
+            'message' => 'Failed to delete account. Please try again.'
         ]);
     }
 }
