@@ -101,7 +101,7 @@
                 <!-- Mobile Menu Toggle -->
                 <div class="lg:hidden flex items-center">
                     <button type="button"
-                        class="inline-flex items-center justify-center p-2 rounded-md text-gray-600 hover:text-teal-700 hover:bg-gray-100 focus:outline-none focus-visible:ring focus-visible:ring-teal-500"
+                        class="inline-flex items-center justify-center p-2 rounded-md text-white hover:text-teal-700 hover:bg-gray-100 focus:outline-none focus-visible:ring focus-visible:ring-teal-500"
                         aria-label="Toggle navigation menu" @click="mainNavOpen = !mainNavOpen"
                         :aria-expanded="mainNavOpen.toString()">
                         <i x-show="!mainNavOpen" data-lucide="menu" class="w-6 h-6"></i>
@@ -132,7 +132,7 @@
                             :class="open ? 'rotate-180' : ''"></i>
                     </button>
                     <div x-cloak x-show="open" x-collapse class="mt-2 pl-6 space-y-2">
-                        <a href="" class="block py-1 hover:text-teal-700">Become an
+                        <a href="{{ route("instructors.become-an-instructor") }}" class="block py-1 hover:text-teal-700">Become an
                             Instructor</a>
                         <a href="{{ route('register') }}" class="block py-1 hover:text-teal-700">Become a Student</a>
                         <a href="" class="block py-1 hover:text-teal-700">Become a
