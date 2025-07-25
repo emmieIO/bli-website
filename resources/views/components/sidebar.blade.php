@@ -1,4 +1,4 @@
-<nav class="dark:text-white">
+<nav class="text-white">
     <ul class="transition-all ">
         <x-side-nav-link title="Dashoard" icon="chart-area" :to="route('user_dashboard')" />
         <x-side-nav-link title="My Courses" icon="library-big" />

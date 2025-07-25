@@ -52,6 +52,11 @@ class User extends Authenticatable implements MustVerifyEmail
         ->withTimestamps();
     }
 
+    public function instructorProfile()
+    {
+        return $this->hasOne(InstructorProfile::class, 'user_id');
+    }
+
     public function eventsCreated(){
         return $this->hasMany(Event::class, 'creator_id');
     }

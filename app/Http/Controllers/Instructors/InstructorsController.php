@@ -49,8 +49,20 @@ class InstructorsController extends Controller {
         }
     }
 
-    public function applyStepOne() {
-        // return view( 'instructors.apply.step-one' );
+    public function showApplicationForm(Request $request)
+    {
+        if (! $request->hasValidSignature()) {
+            abort(403, 'Invalid or expired application link');
+        }
+        $userId = $request->query('user');
+        $user = User::findOrFail($userId);
+        if($user){
+
+            $profile = $user->instructorProfile;
+        }
+
+
+        return view( 'instructors.application-form' ,compact('user', 'profile'));
     }
 
     public function applyStepTwo() {

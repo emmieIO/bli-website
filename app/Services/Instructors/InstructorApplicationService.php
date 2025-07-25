@@ -40,7 +40,6 @@ public function start(string $email): ?User
                     'status' => 'draft',
                 ]);
             }
-
             return $user;
         });
     }

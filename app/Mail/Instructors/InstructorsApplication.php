@@ -25,7 +25,7 @@ class InstructorsApplication extends Mailable
         $this->user = $user;
         $this->applicationUrl = URL::temporarySignedRoute(
             "instructors.application-form",
-            now()->addMinutes(10),
+            now()->addMinutes(30),
             ['user'=>$user->id]
         );
     }
