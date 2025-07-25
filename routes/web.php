@@ -33,3 +33,4 @@ Route::get("/courses", [CourseController::class, "index"])->name("courses.index"
 
 require __DIR__.'/auth.php';
 require __DIR__.'/admin.php';
+require __DIR__.'/instructor.php';

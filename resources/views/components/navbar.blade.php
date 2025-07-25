@@ -48,7 +48,7 @@
                                 class="absolute left-0 mt-2 w-48 rounded-md shadow-lg bg-teal-900 ring-1 ring-black/5 divide-y divide-gray-100 text-sm z-50"
                                 role="menu">
                                 <!-- Update routes below to match your app -->
-                                <a href=""
+                                <a href="{{ route('instructors.become-an-instructor') }}"
                                     class="block px-4 py-2 hover:bg-teal-50 hover:text-teal-700" role="menuitem">Become
                                     an Instructor</a>
                                 <a href="{{ route('register') }}"
