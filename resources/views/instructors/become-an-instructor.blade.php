@@ -70,10 +70,10 @@
     </section>
 
     <!-- Application Form Section -->
-    <section id="apply-now" class="py-12 md:py-20 bg-gray-50 p-3">
+    <section id="apply-now" class="py-12 md:py-20 bg-gray-50">
         <div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="bg-white p-8 rounded-xl shadow-sm">
-                <h2 class="text-2xl font-bold text-center text-gray-900 mb-6">Start Your Instructor Application</h2>
+                <h2 class="md:text-2xl text-xl font-bold text-center text-gray-900 mb-6 ">Start Your Instructor Application</h2>
                 <p class="text-gray-600 text-center mb-8">
                     Begin your journey by entering your email address. We'll send you a secure link to complete your
                     application.
