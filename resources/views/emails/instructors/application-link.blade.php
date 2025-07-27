@@ -7,7 +7,7 @@
 </head>
 
 <body>
-    <h2>Hello {{ $name }},</h2>
+    <h5>Hello {{ $name }},</h5>
 
     <p>Thank you for starting your instructor application.</p>
 

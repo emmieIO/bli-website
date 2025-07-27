@@ -190,13 +190,13 @@ body, html {
     justify-content: center;
     align-items: center;
     place-content: center;
-    z-index: 9999;
+    z-index: 60;
     transition: opacity 0.6s ease;
 
 }
 
 .hide-preload{
-    opacity: 0;
+    opacity: 1;
     pointer-events: none;
 }
 

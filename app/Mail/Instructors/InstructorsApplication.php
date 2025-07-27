@@ -10,6 +10,7 @@ use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\URL;
+use Carbon\Carbon;
 
 class InstructorsApplication extends Mailable
 {
@@ -22,12 +23,12 @@ class InstructorsApplication extends Mailable
      */
     public function __construct(User $user)
     {
-        $this->user = $user;
         $this->applicationUrl = URL::temporarySignedRoute(
             "instructors.application-form",
-            now()->addMinutes(30),
+            Carbon::now()->addDays(3),
             ['user'=>$user->id]
         );
+    
     }
 
     /**

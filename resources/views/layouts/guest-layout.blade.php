@@ -23,7 +23,7 @@
 
     <!-- Page Preloader (optional) -->
     <div id="page-preload"
-        class="fixed inset-0 z-50 flex items-center justify-center bg-white transition-opacity duration-300 opacity-100 pointer-events-auto">
+        class="fixed inset-0 z-60 flex items-center justify-center bg-white transition-opacity duration-300 opacity-100 pointer-events-auto">
         <div>
             <img src="{{ asset('images/logo.jpg') }}"
                 class="w-[100px] h-[100px] rounded-full animate-scale border-2 border-black"

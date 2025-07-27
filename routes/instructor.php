@@ -10,10 +10,7 @@ Route::prefix('instructors')->name('instructors.')->group(function () {
     ->name('application-form')
     ->middleware('signed');
 
-    Route::get('/apply/step1', [InstructorsController::class, 'applyStep1'])->name('apply.step1');
-    Route::get('/apply/step2', [InstructorsController::class, 'applyStep2'])->name('apply.step2');
-    Route::get('/apply/step3', [InstructorsController::class, 'applyStep3'])->name('apply.step3');
-    Route::post('/apply', [InstructorsController::class, 'store'])->name('submit-application');
+    Route::post('/apply/{user}', [InstructorsController::class, 'submitApplication'])->name('submit-application');
     Route::post('/start-application', [InstructorsController::class, 'startApplication'])->name('start-application');
     Route::get('/resume', [InstructorsController::class, 'resume'])->name('resume');
 });
