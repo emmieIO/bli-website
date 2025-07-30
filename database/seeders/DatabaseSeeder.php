@@ -24,7 +24,7 @@ class DatabaseSeeder extends Seeder
         // Programme::factory(20)->create();
         $this->call([
             RoleAndPermissionsSeeder::class,
-            AdminSeeder::class
+            // AdminSeeder::class
         ]);
     }
 }

@@ -4,6 +4,8 @@ namespace App\Services\Instructors;
 
 use App\Models\InstructorProfile;
 use App\Models\User;
+use App\Notifications\InstructorApplicationSubmitted;
+use App\Traits\HasFileUpload;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -11,6 +13,7 @@ use Illuminate\Support\Str;
 
 class InstructorApplicationService
 {
+    use HasFileUpload;
     /**
      * Create a new class instance.
      */
@@ -74,20 +77,123 @@ class InstructorApplicationService
 
     public function saveExperience(array $experienceData, User $user): bool
     {
-        dd($experienceData);
+
         try {
             DB::transaction(function () use ($experienceData, $user) {
                 $user->instructorProfile()->update([
                     "teaching_history" => $experienceData["experience"],
-                    "area_of_expertise"=> $experienceData['expertise'],
-                    "linkedin" => $experienceData['linkedin'],
+                    "area_of_expertise" => $experienceData['expertise'],
+                    "experience_years" => $experienceData["experience_years"],
+                    "linkedin_url" => $experienceData['linkedin'],
                     "website" => $experienceData['website']
                 ]);
             });
             return true;
         } catch (\Throwable $th) {
+            \Log::error('Error saving experience: ' . $th->getMessage(), [
+                'user_id' => $user->id ?? null,
+                'data' => $experienceData,
+            ]);
             return false;
         }
 
+    }
+
+    public function saveInstructorDocs(Request $request, User $user)
+    {
+        $profile = $user->instructorProfile;
+        $oldResumePath = $profile->resume_path;
+        try {
+            DB::transaction(function () use ($request, $profile, $oldResumePath) {
+                $docsToUpdate = [];
+
+                if ($request->hasFile('resume')) {
+
+                    $docsToUpdate['resume_path'] = $this->uploadFile(
+                        $request,
+                        "resume",
+                        'instructors/resumes'
+                    );
+                }
+
+                $docsToUpdate['intro_video_url'] = $request->video_url;
+
+                if (!empty($docsToUpdate)) {
+                    $profile->update($docsToUpdate);
+
+                    if (!empty($docsToUpdate['resume_path']) && $oldResumePath) {
+                        $this->deleteFile($oldResumePath);
+                    }
+                }
+
+            });
+            return true;
+        } catch (\Throwable $e) {
+            if (!empty($request->file('resume'))) {
+                $this->deleteFile($request->file('resume')->path());
+            }
+            \Log::error('Error saving instructor documents: ' . $e->getMessage(), [
+                'user_id' => $user->id ?? null,
+                'data' => $request->only(['video_url']),
+                'has_resume' => $request->hasFile('resume'),
+            ]);
+            return false;
+        }
+    }
+
+    public function getIncompleteFields(User $user): array
+    {
+        $profile = $user->instructorProfile;
+
+        if (!$profile)
+            return ['profile'];
+
+        $missing = [];
+
+        if ($user->name === 'Pending Instructor' || !filled($user->name)) {
+            $missing[] = 'name';
+        }
+
+        if (!filled($profile->headline))
+            $missing[] = 'headline';
+        if (!filled($profile->bio))
+            $missing[] = 'bio';
+        if (!filled($profile->teaching_history))
+            $missing[] = 'teaching_history';
+        if (!filled($profile->experience_years))
+            $missing[] = 'experience_years';
+        if (!filled($profile->area_of_expertise))
+            $missing[] = 'area_of_expertise';
+        if (!filled($profile->resume_path))
+            $missing[] = 'resume_path';
+        if (!filled($profile->intro_video_url))
+            $missing[] = 'intro_video_url';
+
+        return $missing;
+    }
+
+    public function isApplicationComplete(User $user): bool
+    {
+        return empty($this->getIncompleteFields($user));
+    }
+
+    public function submitApplication(User $user){
+        try {
+            DB::transaction(function () use ($user){
+                $profile = $user->instructorProfile;
+                if ($this->isApplicationComplete($user)) {
+                    $profile->update([
+                        "status" => "submitted"
+                    ]);
+                }
+            });
+            $user->notify(new InstructorApplicationSubmitted());
+            return true;
+        } catch (\Exception $e) {
+            \Log::error('Error submitting instructor application: ' . $e->getMessage(), [
+                'user_id' => $user->id ?? null,
+            ]);
+            return false;
+        }
     }
 }

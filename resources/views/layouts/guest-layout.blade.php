@@ -11,6 +11,20 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap" rel="stylesheet" />
+    <script>
+        // Save scroll position before unload
+        window.addEventListener('beforeunload', function () {
+            sessionStorage.setItem('scrollY', window.scrollY);
+        });
+
+        // Restore scroll position after load
+        window.addEventListener('load', function () {
+            const scrollY = sessionStorage.getItem('scrollY');
+            if (scrollY !== null) {
+                window.scrollTo(0, parseInt(scrollY));
+            }
+        });
+    </script>
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>

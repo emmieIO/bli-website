@@ -1,10 +1,10 @@
 @php
-    $expertiseRaw = old('expertise') ?? ($profile->expertise ?? '');
+$expertiseRaw = old('expertise') ?? ($profile->area_of_expertise ?? '');
 
-    // Normalize to array
-    $expertiseTags = is_array($expertiseRaw)
-        ? $expertiseRaw
-        : array_filter(array_map('trim', explode(',', $expertiseRaw)));
+// Normalize to array
+$expertiseTags = is_array($expertiseRaw)
+    ? $expertiseRaw
+    : array_filter(array_map('trim', explode(',', $expertiseRaw)));
 @endphp
 <x-guest-layout>
     <section class="py-12 md:py-16 bg-gray-50">
@@ -14,11 +14,11 @@
                     <h1 class="text-3xl font-bold text-gray-900">Instructor Application</h1>
                     <p class="text-gray-600 mt-2">Complete all sections to submit your instructor profile</p>
                 </div>
-
-                <form method="POST" action="{{ route('instructors.submit-application', $user) }}"
+                <form method="POST"
+                action="{{ route('instructors.submit-application', $user) }}" 
+                {{-- x-data="{ submitting: false }" @submit="submitting = true" --}}
                     enctype="multipart/form-data">
                     @csrf
-                    <input type="hidden" name="save_as_draft" value="0" id="save_as_draft">
 
                     <div class="grid md:grid-cols-2 gap-8">
                         <!-- Left Column -->
@@ -72,6 +72,7 @@
 
                                     <div class="pt-2">
                                         <button type="submit" name='submit_section' value='personal'
+                                            :disabled="submitting"
                                             class="inline-flex cursor-pointer items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500">
                                             Save Personal Info
                                         </button>
@@ -117,17 +118,18 @@
                                         <input type="url" id="video_url" name="video_url"
                                             class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-teal-500 focus:border-teal-500"
                                             placeholder="https://youtube.com/yourvideo"
-                                            value="{{ old('video_url', $profile->video_url) }}">
+                                            value="{{ old('video_url', $profile->intro_video_url) }}">
                                         <p class="mt-1 text-sm text-gray-500">Upload a 1-2 minute introduction video to
-                                            YouTube/Vimeo</p>
+                                            YouTube/Vimeo/Loom</p>
                                         @error('video_url')
                                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                                         @enderror
                                     </div>
 
                                     <div class="pt-2">
-                                        <button type="button"
-                                            class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500">
+                                        <button :disabled="submitting" type="submit" name="submit_section"
+                                            value="docs"
+                                            class="inline-flex cursor-pointer items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500">
                                             Save Documents
                                         </button>
                                     </div>
@@ -153,7 +155,7 @@
                                             Experience*</label>
                                         <textarea id="experience" name="experience" rows="4"
                                             class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-teal-500 focus:border-teal-500"
-                                            placeholder="Describe your teaching or mentorship background. For example: courses taught, institutions, duration, or informal mentoring roles.">{{ old('experience', $profile->experience) }}</textarea>
+                                            placeholder="Describe your teaching or mentorship background. For example: courses taught, institutions, duration, or informal mentoring roles.">{{ old('experience', $profile->teaching_history) }}</textarea>
                                         @error('experience')
                                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                                         @enderror
@@ -196,14 +198,14 @@
                                         <div class="relative">
                                             <input type="text" id="expertise-text-input"
                                                 class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-teal-500 focus:border-teal-500"
-                                                placeholder="Type expertise areas, separated by commas">
+                                                placeholder="">
                                             <div
                                                 class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
                                                 <span class="text-gray-500 text-sm">Press comma or enter</span>
                                             </div>
                                         </div>
 
-                                        <p class="mt-1 text-xs text-gray-500">
+                                        <p class="mt-1 text-xs text-teal-500">
                                             Type your expertise areas and press comma or enter to create tags
                                         </p>
 
@@ -222,7 +224,7 @@
                                             <input type="url" id="linkedin" name="linkedin"
                                                 class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-teal-500 focus:border-teal-500"
                                                 placeholder="https://linkedin.com/in/yourprofile"
-                                                value="{{ old('linkedin', $profile->linkedin) }}">
+                                                value="{{ old('linkedin', $profile->linkedin_url) }}">
 
                                         </div>
 
@@ -242,6 +244,7 @@
 
                                     <div class="pt-2">
                                         <button type="submit" name="submit_section" value="experience"
+                                            :disabled="submitting"
                                             class="inline-flex cursor-pointer items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500">
                                             Save Experience
                                         </button>
@@ -276,7 +279,8 @@
                                     </div>
 
                                     <div class="pt-4">
-                                        <button type="submit"
+                                        <button type="submit" :disabled="submitting" name="submit_section"
+                                            value="finalize"
                                             class="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-teal-600 hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500">
                                             Submit Application
                                         </button>

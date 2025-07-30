@@ -20,7 +20,7 @@ class RoleAndPermissionsSeeder extends Seeder
         ];
 
         $rolesPermissions = [
-            'admin' => ['manage events', "create-speaker",'view-speaker', "edit-speaker", 'delete-speaker', 'assign-speaker'],
+            'admin' => ['manage events', "create-speaker",'view-speaker', "edit-speaker", 'delete-speaker', 'assign-speaker',"manage-instructor-applications"],
             "instructor" => ["view-speaker", 'assign-speaker'],
             'student' => []
         ];
