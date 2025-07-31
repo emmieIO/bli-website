@@ -67,9 +67,9 @@ class InstructorsController extends Controller
         $userId = $request->query('user');
         $user = User::findOrFail($userId);
 
-        // if ($user->instructorProfile->status === 'submitted') {
-        //     return view('instructors.application-thank-you');
-        // }
+        if ($user->instructorProfile->status === 'submitted') {
+            return view('instructors.application-thank-you');
+        }
 
         $profile = $user->instructorProfile;
         return view('instructors.application-form', compact('user', 'profile'));
@@ -79,8 +79,11 @@ class InstructorsController extends Controller
     {
         $validatedData = $request->validate([
             'name' => 'required|string|max:50',
+            'phone' => ['required', 'phone:NG,GB,US'],
             'headline' => 'required|string|max:100',
             'bio' => 'required|string|max:1000',
+        ],[
+            "bio.required" => "Please tell us about yourself."
         ]);
 
         $saved = $this->instructorApplicationService->savePersonalInfo($validatedData, $user);

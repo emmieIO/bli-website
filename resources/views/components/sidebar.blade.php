@@ -9,6 +9,9 @@
         @can(["create-speaker", 'view-speaker'])
             <x-side-nav-link title="Manage Speakers" icon="mic" :to="route('admin.speakers.index')" />
         @endcan
+        @can(['manage-instructor-applications'])
+        <x-side-nav-link title="Instructors Management"  icon="users" :to="route('admin.instructors.index')" />
+        @endcan
         <x-side-nav-link title="Transaction History" icon="arrow-right-left" />
         <x-side-nav-link title="System Settings" icon="cog" />
     </ul>

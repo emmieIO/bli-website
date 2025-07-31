@@ -4,11 +4,14 @@ namespace App\Services\Instructors;
 
 use App\Models\InstructorProfile;
 use App\Models\User;
+use App\Notifications\InstructorApplicationApproved;
 use App\Notifications\InstructorApplicationSubmitted;
 use App\Traits\HasFileUpload;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Str;
 
 class InstructorApplicationService
@@ -55,11 +58,13 @@ class InstructorApplicationService
                 // Update user name
                 $user->update([
                     'name' => $personalInfo['name'],
+                    'phone'=>$personalInfo['phone']
                 ]);
 
                 // Update instructor profile
                 $user->instructorProfile()->update([
                     'headline' => $personalInfo['headline'],
+
                     'bio' => $personalInfo['bio'],
                 ]);
             });
@@ -192,6 +197,40 @@ class InstructorApplicationService
         } catch (\Exception $e) {
             \Log::error('Error submitting instructor application: ' . $e->getMessage(), [
                 'user_id' => $user->id ?? null,
+            ]);
+            return false;
+        }
+    }
+
+    public function approveApplication(InstructorProfile $application){
+        // guest application user
+        $user = $application->user;
+        
+        try{
+            DB::transaction(function() use($user, $application){
+                // assign instructor role
+                $user->syncRoles(['instructor']);
+                // update application status to approved
+                $application->update([
+                    'status' => "approved",
+                    "approved_at"=> now()
+                ]);
+
+            });
+        // Generate a secure shorlived password reset link
+        $resetUrl = URL::temporarySignedRoute(
+            'password.reset',
+            now()->addDays(3),
+            ["token" => Password::createToken($user), 'email' => $user->email]
+        );
+        // send approval notification with password reset link
+        $user->notify(new InstructorApplicationApproved($resetUrl));
+        return true;
+        }catch(\Exception $e)
+        {
+            \Log::error('Error approving instructor application: ' . $e->getMessage(), [
+                'user_id' => $user->id ?? null,
+                'application_id' => $application->id ?? null,
             ]);
             return false;
         }
