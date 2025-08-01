@@ -35,6 +35,7 @@
                         </li>
 
                         <!-- JOIN DROPDOWN (Desktop) -->
+                        @guest
                         <li class="relative" x-data="{ open:false }" @mouseenter="open=true" @mouseleave="open=false">
                             <button type="button"
                                 class="inline-flex items-center gap-1 hover:text-teal-600 transition focus:outline-none focus-visible:ring focus-visible:ring-teal-500 rounded"
@@ -59,6 +60,7 @@
                                     a Speaker</a>
                             </div>
                         </li>
+                        @endguest
 
                         <li>
                             <a href="#" class="hover:text-teal-600 transition">
@@ -85,7 +87,7 @@
                         @auth
                             <a href="{{ route('user_dashboard') }}"
                                 class="inline-flex items-center gap-2 text-sm hover:text-teal-600 transition">
-                                <i data-lucide="grid" class="h-4 w-4"></i>
+                                <i data-lucide="layout-dashboard" class="h-4 w-4"></i>    
                                 <span>Dashboard</span>
                             </a>
                         @else

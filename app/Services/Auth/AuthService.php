@@ -26,10 +26,16 @@ class AuthService {
             'password'=>$validated[ 'password' ]
         ];
 
+        $user = User::where('email', $validated['email'])->firstOrFail();
+        if(isset($user->instructorProfile) && !$user->isApproved()){
+            return false;
+        }
+
 
         $remember = $request->has( 'remember' );
 
         $attempted = Auth::guard( $guard )->attempt( $credentials, $remember );
+
 
         if ( $attempted ) {
             $request->session()->regenerate();

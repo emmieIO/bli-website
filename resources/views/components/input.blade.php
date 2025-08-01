@@ -12,10 +12,10 @@
 
 <div class="space-y-1">
     @if($label)
-        <label for="{{ $name }}" class="block text-sm font-medium text-gray-900">
+        <label for="{{ $name }}" class="inline-block text-sm font-medium text-gray-900 bg-white rounded-2xl px-1  ">
             {{ $label }}
             @if($required)
-                <span class="text-red-500">*</span>
+            <span class="text-red-500">*</span>
             @endif
         </label>
     @endif

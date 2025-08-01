@@ -21,14 +21,17 @@ class RoleAndPermissionsSeeder extends Seeder
 
         $rolesPermissions = [
             'admin' => ['manage events', "create-speaker", 'view-speaker', "edit-speaker", 'delete-speaker', 'assign-speaker', "manage-instructor-applications"],
-            "instructor" => ["create-speaker", "view-speaker", 'assign-speaker'],
+            "instructor" => [],
             'student' => []
         ];
 
         // Create permissions
         $allPermissions = collect($rolesPermissions)->flatten()->unique();
         foreach ($allPermissions as $permission) {
-            \Spatie\Permission\Models\Permission::firstOrCreate(['name' => $permission]);
+            \Spatie\Permission\Models\Permission::firstOrCreate([
+                'name' => $permission,
+                'guard_name'=>'web'
+            ]);
         }
 
 
@@ -37,9 +40,7 @@ class RoleAndPermissionsSeeder extends Seeder
             $roleModel = Role::firstOrCreate([
                 "name" => $role
             ]);
-            if (!empty($permissions)) {
-                $roleModel->syncPermissions($permissions);
-            }
+            $roleModel->syncPermissions($permissions);
         }
     }
 }

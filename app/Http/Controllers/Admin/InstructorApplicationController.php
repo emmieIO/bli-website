@@ -11,8 +11,12 @@ use Illuminate\Http\Request;
 class InstructorApplicationController extends Controller
 {
     public function __construct(protected InstructorApplicationService $application){}
+
+
     public function showApplications(){
-        $instructorProfiles = InstructorProfile::with('user')->get();
+        $instructorProfiles = InstructorProfile::with('user')
+        // ->where('status', 'draft')
+        ->get();
         return view('admin.instructors.applications', compact('instructorProfiles'));
     }
 
@@ -31,5 +35,7 @@ class InstructorApplicationController extends Controller
     }
     public function deny(){}
 
-    public function view(){}
+    public function view(InstructorProfile $application){
+        return view("admin.instructors.view-application", compact('application'));
+    }
 }

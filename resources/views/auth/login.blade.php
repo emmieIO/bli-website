@@ -3,7 +3,7 @@
         @csrf
 
         <!-- Email -->
-         <x-input placeholder="Email Address" type="email" name="email" autofocus icon="mail"/>
+         <x-input label="E-mail" placeholder="Email Address" type="email" name="email" autofocus icon="mail"/>
 
          <!-- Password -->
          <x-input label="Password" type="password" name="password" autofocus icon="lock"/>

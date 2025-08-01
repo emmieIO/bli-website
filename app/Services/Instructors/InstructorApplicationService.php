@@ -213,6 +213,7 @@ class InstructorApplicationService
                 // update application status to approved
                 $application->update([
                     'status' => "approved",
+                    'is_approved' => true,
                     "approved_at"=> now()
                 ]);
 

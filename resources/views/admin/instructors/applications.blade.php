@@ -1,6 +1,6 @@
 <x-app-layout>
     <x-instructor-dashbord-layout>
-        <div class="relative overflow-x-auto shadow-md sm:rounded-lg my-5">
+        <div class="relative overflow-x-auto my-5">
             <div class="flex flex-column sm:flex-row flex-wrap space-y-4 sm:space-y-0 items-center justify-between p-4">
                 <div>
                     <button id="dropdownRadioButton" data-dropdown-toggle="dropdownRadio"
@@ -122,53 +122,38 @@
                                 {{ $instructorProfile->status }}
                             </td>
                             <td class="px-6 py-4">
-                                <div class="flex items-center gap-4">
-                                    @if ($instructorProfile->status === 'submitted')
+                                <div class="flex items-center place-content-center gap-4">
+                                    
                                         <form action="{{ route('admin.instructors.applications.approve', $instructorProfile) }}" method="POST">
                                             @csrf
                                             @method("PATCH")
                                             <button 
                                                 title="Approve"
+                                                @if($instructorProfile->is_approved)
+                                                disabled
+                                                @endif
                                                 type="submit"
-                                                class="inline-flex items-center text-green-600 hover:text-green-800">
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"
-                                                    viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                                                    class="lucide lucide-check">
-                                                    <path d="M20 6 9 17l-5-5" />
-                                                </svg>
+                                                class="text-green-600 hover:text-green-800">
+                                               <i class="size-4" data-lucide='check'></i>
                                             </button>
                                         </form>
 
-                                            <a href="{{ route('admin.instructors.applications.view', $instructorProfile->id) }}"
-                                                title="View Application"
-                                                class="inline-flex items-center text-blue-600 hover:text-blue-800">
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"
-                                                    viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                                                    class="lucide lucide-eye">
-                                                    <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
-                                                    <circle cx="12" cy="12" r="3" />
-                                                </svg>
-                                            </a>
-
-                                            <form
-                                                action="{{ route('admin.instructors.applications.deny', $instructorProfile->id) }}"
-                                                method="POST" class="inline">
-                                                @csrf
-                                                @method('PATCH')
-                                                <button type="submit" title="Deny"
-                                                    class="inline-flex items-center text-red-600 hover:text-red-800">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"
-                                                        viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                                                        class="lucide lucide-x">
-                                                        <path d="M18 6 6 18" />
-                                                        <path d="m6 6 12 12" />
-                                                    </svg>
-                                                </button>
-                                            </form>
-                                    @endif
+                                        <a href="{{ route('admin.instructors.applications.view', $instructorProfile->id) }}"
+                                            title="View Application"
+                                            class=" text-blue-600 hover:text-blue-800">
+                                            <i data-lucide="eye" class="size-4"></i>
+                                        </a>
+{{-- 
+                                        <form
+                                            action="{{ route('admin.instructors.applications.deny', $instructorProfile->id) }}"
+                                            method="POST" class="">
+                                            @csrf
+                                            @method('PATCH')
+                                            <button type="submit" title="Deny"
+                                                class="text-red-600 hover:text-red-800">
+                                                <i data-lucide="x" class="size-4"></i>
+                                            </button>
+                                        </form> --}}
                                 </div>
                             </td>
                         </tr>

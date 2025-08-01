@@ -57,6 +57,10 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasOne(InstructorProfile::class, 'user_id');
     }
 
+    public function isApproved(){
+        return optional($this->instructorProfile)->is_approved;
+    }
+
     public function eventsCreated(){
         return $this->hasMany(Event::class, 'creator_id');
     }
