@@ -238,35 +238,36 @@
         </div>
 
         <!-- Action Buttons -->
-        @if ($application->status === 'draft')
-            <div class="flex flex-col sm:flex-row justify-end gap-4 mt-8">
+        <div class="flex flex-col sm:flex-row justify-end gap-4 mt-8">
+            @if ($application->status === 'approved')
                 <button onclick="showRejectModal()"
                     class="px-6 py-3 border border-red-500 text-red-500 rounded-lg hover:bg-red-50 transition flex items-center justify-center">
                     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M6 18L18 6M6 6l12 12"></path>
+                            d="M6 18L18 6M6 6l12 12">
+                        </path>
                     </svg>
                     Reject Application
                 </button>
-
-                <form method="POST" action="{{ route('admin.instructors.applications.approve', $application->id) }}"
-                    class="w-full sm:w-auto">
-                    @csrf
-                    <button type="submit"
-                        class="w-full px-6 py-3 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition flex items-center justify-center">
-                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7">
-                            </path>
-                        </svg>
-                        Approve Application
-                    </button>
-                </form>
-            </div>
-        @endif
+            @endif
+            @if (!$application->is_approved)
+                <button type="button" data-modal-target="approve-modal" data-modal-toggle="approve-modal"
+                    data-action-url = "{{ route('admin.instructors.applications.approve', $application) }}"
+                    onclick="confirmApproval(this, {{ $application }})"
+                    title="Approve"
+                    class=" px-6 py-3 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition flex items-center justify-center">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7">
+                        </path>
+                    </svg>
+                    Approve Application
+                </button>
+            @endif
+        </div>
 
         <!-- Rejection Modal -->
-        {{-- <div id="rejectModal"
-            class="hide-modal fixed inset-0 bg-gray-600/40 bg-opacity-50 flex items-center justify-center z-50 px-4">
+        <div id="rejectModal"
+            class="{{ $errors->any() ? 'fixed inset-0 bg-gray-600/40 bg-opacity-50 flex items-center justify-center z-50 px-4' : 'hide-modal fixed inset-0 bg-gray-600/40 bg-opacity-50 flex items-center justify-center z-50 px-4' }}">
             <div class="bg-white rounded-xl shadow-xl w-full max-w-md">
                 <div class="p-6">
                     <div class="flex justify-between items-center mb-4">
@@ -288,6 +289,7 @@
                             </label>
                             <textarea id="rejection_reason" name="rejection_reason" rows="4"
                                 class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-teal-500 focus:border-teal-500"></textarea>
+                            <x-input-error :messages="$errors->get('rejection_reason')" />
                         </div>
 
                         <div class="flex justify-end gap-3">
@@ -308,9 +310,55 @@
                 </div>
             </div>
         </div>
-        </div> --}}
+        </div>
+
+        {{-- approval Modal --}}
+        <div id="approve-modal" tabindex="-1"
+            class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
+            <div class="relative p-4 w-full max-w-md max-h-full">
+                <div class="relative bg-white rounded-lg shadow-sm">
+                    <button type="button"
+                        class="absolute top-3 end-2.5 text-gray-400 bg-transparent rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center hover:bg-gray-600 hover:text-white"
+                        data-modal-hide="approve-modal">
+                        <i data-lucide="x" class="w-3 h-3"></i>
+                        <span class="sr-only">Close modal</span>
+                    </button>
+                    <div class="p-4 md:p-5 text-center">
+                        <svg class="mx-auto mb-4 text-gray-400 w-12 h-12" aria-hidden="true"
+                            xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
+                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
+                                stroke-width="2" d="M10 11V6m0 8h.01M19 10a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                        </svg>
+                        <h3 class="mb-5 text-lg font-normal text-gray-500" id="confirmText"></h3>
+                        <div class="flex items-center justify-center">
+                            <form id='modal-form' method="post">
+                                @csrf
+                                @method('PATCH')
+                                <button data-modal-hide="approve-modal" type="submit"
+                                    class="text-white bg-green-600 hover:bg-green-800 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-sm inline-flex items-center px-5 py-2.5 text-center">
+                                    Yes, I'm sure
+                                </button>
+                            </form>
+                            <button data-modal-hide="approve-modal" type="button"
+                                class="py-2.5 px-5 ms-3 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-100">
+                                No, cancel
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
         <script>
+            const approvalForm = document.getElementById("modal-form");
+            const confirmText = document.getElementById("confirmText");
+
+            function confirmApproval(button, profile) {
+                console.log(button)
+                confirmText.innerText = `Are you sure you want to approve the application for ${profile.application_id}?`;
+                approvalForm.action = button.getAttribute('data-action-url');
+            }
+
             function showRejectModal() {
                 document.getElementById('rejectModal').classList.remove('hide-modal');
                 document.body.classList.add('overflow-hidden');

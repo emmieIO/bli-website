@@ -2,10 +2,14 @@
 
 namespace App\Services\Instructors;
 
+use App\Enums\UserRoles;
+use App\Models\ApplicationLog;
 use App\Models\InstructorProfile;
 use App\Models\User;
 use App\Notifications\InstructorApplicationApproved;
+use App\Notifications\InstructorApplicationRejection;
 use App\Notifications\InstructorApplicationSubmitted;
+use App\Traits\GeneratesApplicationId;
 use App\Traits\HasFileUpload;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -16,7 +20,7 @@ use Illuminate\Support\Str;
 
 class InstructorApplicationService
 {
-    use HasFileUpload;
+    use HasFileUpload, GeneratesApplicationId;
     /**
      * Create a new class instance.
      */
@@ -43,6 +47,7 @@ class InstructorApplicationService
 
             if (!$profile) {
                 InstructorProfile::create([
+                    'application_id' => $this->formatApplicationId($profile->id),
                     'user_id' => $user->id,
                     'status' => 'draft',
                 ]);
@@ -58,7 +63,7 @@ class InstructorApplicationService
                 // Update user name
                 $user->update([
                     'name' => $personalInfo['name'],
-                    'phone'=>$personalInfo['phone']
+                    'phone' => $personalInfo['phone']
                 ]);
 
                 // Update instructor profile
@@ -182,9 +187,10 @@ class InstructorApplicationService
         return empty($this->getIncompleteFields($user));
     }
 
-    public function submitApplication(User $user){
+    public function submitApplication(User $user)
+    {
         try {
-            DB::transaction(function () use ($user){
+            DB::transaction(function () use ($user) {
                 $profile = $user->instructorProfile;
                 if ($this->isApplicationComplete($user)) {
                     $profile->update([
@@ -202,36 +208,81 @@ class InstructorApplicationService
         }
     }
 
-    public function approveApplication(InstructorProfile $application){
+    public function approveApplication(InstructorProfile $application)
+    {
+        if ($application->is_approved) {
+            return true;
+        }
         // guest application user
         $user = $application->user;
-        
-        try{
-            DB::transaction(function() use($user, $application){
+        if (!$this->isApplicationComplete($user)) {
+            return false;
+        }
+        try {
+            DB::transaction(function () use ($user, $application) {
                 // assign instructor role
-                $user->syncRoles(['instructor']);
+                $user->syncRoles([UserRoles::INSTRUCTOR->value]);
                 // update application status to approved
                 $application->update([
                     'status' => "approved",
                     'is_approved' => true,
-                    "approved_at"=> now()
+                    "approved_at" => now()
                 ]);
-
             });
-        // Generate a secure shorlived password reset link
-        $resetUrl = URL::temporarySignedRoute(
-            'password.reset',
-            now()->addDays(3),
-            ["token" => Password::createToken($user), 'email' => $user->email]
-        );
-        // send approval notification with password reset link
-        $user->notify(new InstructorApplicationApproved($resetUrl));
-        return true;
-        }catch(\Exception $e)
-        {
+            // Generate a secure shorlived password reset link
+            $resetUrl = URL::temporarySignedRoute(
+                'password.reset',
+                now()->addDays(3),
+                ["token" => Password::createToken($user), 'email' => $user->email]
+            );
+            // send approval notification with password reset link
+            $user->notify(new InstructorApplicationApproved($resetUrl));
+            return true;
+        } catch (\Exception $e) {
             \Log::error('Error approving instructor application: ' . $e->getMessage(), [
                 'user_id' => $user->id ?? null,
                 'application_id' => $application->id ?? null,
+            ]);
+            return false;
+        }
+    }
+
+    public function rejectApplication(array $rejectionData, InstructorProfile $application){
+
+        try {
+            DB::transaction(function () use ($rejectionData, $application) {
+                $user = $application->user;
+
+                // 1. Revoke instructor role
+                $user->syncRoles([UserRoles::STUDENT->value]);
+
+                // 2. Update application status
+                $application->update([
+                    'is_approved' => false,
+                    'status' => 'rejected',
+                ]);
+
+                // 3. Log rejection
+                ApplicationLog::create([
+                    'instructor_profile_id' => $application->id,
+                    'application_id' => $application->application_id,
+                    'performed_by' => auth()->id(),
+                    'comment' => $rejectionData['rejection_reason'] ?? 'No reason provided',
+                    'action' => 'rejected',
+                ]);
+
+                // 4. Send rejection email
+                $user->notify(new InstructorApplicationRejection(
+                    $rejectionData['rejection_reason'],
+                    $application
+                ));
+            });
+
+            return true;
+        } catch (\Throwable $th) {
+            \Log::error('Error rejecting instructor application: ' . $th->getMessage(), [
+                'application_id' => $application->id ?? null,
+                'data' => $rejectionData,
             ]);
             return false;
         }

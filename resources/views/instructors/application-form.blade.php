@@ -75,7 +75,7 @@ $expertiseTags = is_array($expertiseRaw)
                                             class="block text-sm font-medium text-gray-700 mb-1">Bio*</label>
                                         <textarea id="bio" name="bio" rows="4"
                                             class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-teal-500 focus:border-teal-500"
-                                            placeholder="Tell us about yourself and your teaching philosophy">{{ old('bio', $profile->bio) }}</textarea>
+                                            placeholder="Tell us about yourself">{{ old('bio', $profile->bio) }}</textarea>
                                         @error('bio')
                                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                                         @enderror

@@ -2,6 +2,7 @@
 
 namespace App\Services\Instructors;
 
+use App\Models\ApplicationLog;
 use App\Models\InstructorProfile;
 use Illuminate\Support\Facades\Cache;
 
@@ -23,9 +24,27 @@ class InstructorService
 
         return Cache::remember($cacheKey, now()->addMinutes(10), function () use ($perPage) {
             return InstructorProfile::with('user')
-                // ->where('status', 'approved')
+                ->where('is_approved', true)
                 ->paginate($perPage);
         });
+    }
+
+    public function fetchApplicationLogs(){
+        $logs = ApplicationLog::with('user')->latest()->paginate()->withQueryString();
+
+        return $logs;
+    }
+
+    public function deleteApplicationLog(ApplicationLog $log){
+        try {
+            return $log->delete();
+        } catch (\Throwable $th) {
+            \Log::error('Failed to delete application log', [
+                'exception' => $th,
+                'log_id' => $log->id ?? null,
+            ]);
+            return false;
+        }
     }
 
 }

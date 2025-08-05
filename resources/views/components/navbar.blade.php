@@ -87,7 +87,7 @@
                         @auth
                             <a href="{{ route('user_dashboard') }}"
                                 class="inline-flex items-center gap-2 text-sm hover:text-teal-600 transition">
-                                <i data-lucide="layout-dashboard" class="h-4 w-4"></i>    
+                                <i data-lucide="layout-dashboard" class="h-4 w-4"></i>
                                 <span>Dashboard</span>
                             </a>
                         @else
@@ -124,6 +124,7 @@
                         data-lucide="book-open" class="w-4 h-4"></i>Courses</a>
 
                 <!-- JOIN DROPDOWN (Mobile accordion style) -->
+                @guest()
                 <div x-data="{ open:false }" class="border-y border-gray-200 py-2">
                     <button type="button"
                         class="w-full flex items-center justify-between gap-2 py-2 text-left hover:text-teal-700 focus:outline-none"
@@ -133,14 +134,16 @@
                         <i data-lucide="chevron-down" class="w-4 h-4 transition-transform duration-150"
                             :class="open ? 'rotate-180' : ''"></i>
                     </button>
+
                     <div x-cloak x-show="open" x-collapse class="mt-2 pl-6 space-y-2">
                         <a href="{{ route("instructors.become-an-instructor") }}" class="block py-1 hover:text-teal-700">Become an
                             Instructor</a>
-                        <a href="{{ route('register') }}" class="block py-1 hover:text-teal-700">Become a Student</a>
-                        <a href="" class="block py-1 hover:text-teal-700">Become a
-                            Speaker</a>
-                    </div>
-                </div>
+                            <a href="{{ route('register') }}" class="block py-1 hover:text-teal-700">Become a Student</a>
+                            <a href="" class="block py-1 hover:text-teal-700">Become a
+                                Speaker</a>
+                            </div>
+                        </div>
+                @endguest
 
                 <a href="#" class="flex items-center gap-2 py-2 hover:text-teal-700"><i data-lucide="users"
                         class="w-4 h-4"></i>The Team</a>

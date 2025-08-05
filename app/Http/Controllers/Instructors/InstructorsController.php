@@ -30,6 +30,19 @@ class InstructorsController extends Controller
         return view('instructors.become-an-instructor');
     }
 
+    public function resume(string $applicationId){
+        $profile = InstructorProfile::where("application_id", $applicationId)
+        ->with('user')->firstOrFail();
+        $user = $profile->user;
+        if(!$profile->is_approved){
+            return view('instructors.application-form', compact('user', 'profile'));
+        }
+        return redirect(route('homepage'))->with([
+            "type" => "error",
+            "message" => "Your application has already been approved."
+        ]);
+    }
+
     public function startApplication(Request $request)
     {
         $request->validate([
@@ -89,8 +102,7 @@ class InstructorsController extends Controller
         $saved = $this->instructorApplicationService->savePersonalInfo($validatedData, $user);
 
         if ($saved) {
-            logger()->info($saved);
-            return redirect(URL::signedRoute('instructors.application-form', ['user' => $user->id]))->with([
+            return back()->with([
                 "type" => "success",
                 "message" => "Personal information saved successfully.",
             ]);

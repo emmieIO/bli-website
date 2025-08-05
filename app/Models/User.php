@@ -68,4 +68,8 @@ class User extends Authenticatable implements MustVerifyEmail
     public function speakers(){
         return $this->hasMany(Speaker::class, 'created_by');
     }
+
+    public function applicationLogs(){
+        return $this->hasMany(ApplicationLog::class);
+    }
 }

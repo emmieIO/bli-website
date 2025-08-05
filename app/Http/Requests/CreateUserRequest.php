@@ -23,7 +23,7 @@ class CreateUserRequest extends FormRequest
     {
         return [
             "name" => ["required"],
-            "phone" => ['required', 'regex:/^\+?[0-9]{10,15}$/'],
+            "phone" => ['required', 'phone:NG'],
             "email" => ['required', 'email', 'unique:users,email'],
             "password" => ["required", "confirmed", "min:8"],
         ];
