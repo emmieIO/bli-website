@@ -239,7 +239,7 @@
 
         <!-- Action Buttons -->
         <div class="flex flex-col sm:flex-row justify-end gap-4 mt-8">
-            @if ($application->status === 'approved')
+            @if ($application->status === 'approved' || $application->status === 'submitted' )
                 <button onclick="showRejectModal()"
                     class="px-6 py-3 border border-red-500 text-red-500 rounded-lg hover:bg-red-50 transition flex items-center justify-center">
                     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
