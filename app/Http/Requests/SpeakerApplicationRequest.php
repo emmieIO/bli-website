@@ -33,7 +33,7 @@ class SpeakerApplicationRequest extends FormRequest
     {
         $rule = ['required', 'image', 'mimes:jpeg,png,jpg,gif,svg', 'max:2048'];
 
-        if ($this->existingApplication && $this->existingApplication->speaker->photo) {
+        if ($this->existingApplication && $this->existingApplication->speaker) {
             $rule[0] = 'nullable';
         }
         return $rule;

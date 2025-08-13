@@ -47,7 +47,7 @@
                             <!-- Organization -->
                             <div>
                                 <x-input label="Organization" name="organization"
-                                    value="{!! old('organization', htmlspecialchars_decode($application->speaker->organization) ?? '') !!}"
+                                    value="{!! old('organization', $application->speaker->organization ?? '') !!}"
                                     placeholder="Your company or affiliation" icon="building-2" />
                             </div>
 

@@ -26,27 +26,37 @@ class SpeakerApplicationService
         try {
             DB::transaction(function () use ($request, $event) {
                 $validated = $request->validated();
+                $speakerDp = null;
                 /**
                  * @var User $user
                  */
                 $user = auth()->user();
+                $existingApplication = $this->getExistingApplication($event);
 
                 // update user incase the need to reformat their name
-                if ($this->getExistingApplication($event)) {
-                    return $this->reApply($request, $event);
+                if ( $existingApplication && $existingApplication->speaker?->photo) {
+                    $speaker = $existingApplication->speaker;
+                    $speakerDp = $speaker?->photo;
                 }
 
                 // handle photo upload
                 if ($request->hasFile('photo')) {
                     $file_path = $this->uploadfile($request, 'photo', 'speakers_dp');
-                    $validated['speakerInfo']['photo'] = $file_path;
+                    if($file_path){
+                        $validated['speakerInfo']['photo'] = $file_path;
+                        if($speakerDp){
+                            $this->deleteFile($speakerDp);
+                        }
+                    }
+                } else {
+                    $validated['speakerInfo']['photo'] = $speakerDp;
                 }
 
 
                 // add speaker to database with status of inactive
-                $speaker = Speaker::firstOrCreate(["email" => auth()->user()->email], $validated['speakerInfo']);
+                $speaker = Speaker::updateOrCreate(["email" => $user->email], $validated['speakerInfo']);
                 // create a new application
-                $application = SpeakerApplication::create(array_merge(
+                $application = SpeakerApplication::updateOrCreate(['user_id'=>$user->id],array_merge(
                     $validated['applicationInfo'],
                     [
                         'user_id' => $user->id,
@@ -79,7 +89,8 @@ class SpeakerApplicationService
     {
         try {
             $existingApplication = $this->getExistingApplication($event);
-            DB::transaction(function () use ($existingApplication, $request) {
+            DB::transaction(function () use ($existingApplication, $request, $event) {
+                $user = auth()->user()->id;
                 $validated = $request->validated();
                 $speakerDp = $existingApplication->speaker->photo;
                 if ($request->hasFile('photo')) {
@@ -90,8 +101,18 @@ class SpeakerApplicationService
                         \Log::info('Speaker photo deleted successfully for re-application.', ['speaker_id' => $existingApplication->speaker->id]);
                     }
                 }
-                $existingApplication->speaker()->update($validated['speakerInfo']);
-                $existingApplication->update($validated['applicationInfo']);
+                $speaker = Speaker::updateOrCreate(
+                    ['email' => $user->email],
+                    $validated['speakerInfo']
+                );
+                $existingApplication->update(array_merge(
+                    $validated['applicationInfo'],
+                    [
+                        'user_id' => $user->id,
+                        'event_id' => $event->id,
+                        'speaker_id' => $speaker->id
+                    ]
+                ));
             });
             return true;
         } catch (\Exception $th) {
