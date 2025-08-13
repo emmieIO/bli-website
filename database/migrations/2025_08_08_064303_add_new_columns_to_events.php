@@ -12,11 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('events', function (Blueprint $table) {
-            $table->string("physical_address")->nullable();
-            $table->string("venue")->nullable();
-            $table->string('contact_email')->nullable();
-            $table->boolean('is_published')->default(false);
-            $table->decimal('entry_fee', 8, 2)->default(0.00);
+            $table->boolean("is_allowing_application")->default(false);
         });
     }
 
@@ -26,13 +22,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('events', function (Blueprint $table) {
-            $table->dropColumn([
-                'physical_address',
-                'venue',
-                'contact_email',
-                'is_published',
-                'entry_fee',
-            ]);
+            $table->dropColumn('is_allowing_applications');
         });
     }
 };

@@ -2,7 +2,11 @@
 
 namespace App\Enums;
 
-enum ApplicationStatus
+enum ApplicationStatus :string
 {
-    //
+    case DRAFT = 'draft';
+    case PENDING = 'pending';
+    case UNDER_REVIEW = 'under_review';
+    case APPROVED = 'approved';
+    case REJECTED = 'rejected';
 }

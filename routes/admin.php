@@ -25,7 +25,7 @@ Route::group([
     });
 
     // Event Speakers Management
-    Route::middleware([])->group(function(){
+    Route::middleware(['auth'])->group(function(){
         Route::delete('/speakers/{speaker}/destroy', [SpeakersController::class, 'destroySpeaker'])->name("speakers.destroy");
         Route::get('/events/{event}/assign-speakers', [SpeakersController::class, 'showAssignSpeakersPage'])->name('events.assign-speakers');
         Route::post('/events/{event}/assign-speaker', AssignSpeakerToEvent::class)->name('events.assign-speaker');

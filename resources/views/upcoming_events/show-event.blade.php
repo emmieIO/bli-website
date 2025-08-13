@@ -226,7 +226,15 @@
                     @endif
                 </button>
 
-
+                <!-- Apply as Speaker Button -->
+                @auth
+                @if($programme->is_allowing_application)
+                <a href="{{ URL::signedRoute('event.speakers.apply', [$programme]) }}"
+                    class="w-full border border-teal-700 text-teal-700 py-2 px-4 rounded-lg hover:bg-teal-50 transition flex justify-center items-center gap-2">
+                    <i data-lucide="mic"></i> Apply as Speaker
+                </a>
+                @endif
+                @endauth
 
                 @auth
                     <div class="pt-2">

@@ -128,6 +128,7 @@ class EventService
             $user = Auth::user();
             $validated['is_active'] = $request->has('is_active');
             $validated['is_published'] = $request->has('is_published');
+            $validated['is_allowing_application'] = $request->has('is_allowing_application');
             $validated = $request->validated();
 
             $validated['slug'] = $this->generateUniqueSlug($validated['title']);

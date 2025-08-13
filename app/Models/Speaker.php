@@ -20,4 +20,8 @@ class Speaker extends Model
     public function creator(){
         return $this->belongsTo(User::class);
     }
+
+    // public function speakerApplication(){
+    //     return $this->belongsTo(SpeakerApplication::class);
+    // }
 }

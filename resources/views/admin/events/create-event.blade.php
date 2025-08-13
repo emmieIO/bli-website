@@ -59,6 +59,11 @@
                     <input type="checkbox" name="is_published" class="rounded text-teal-600" {{ old('is_published') ? 'checked' : '' }}>
                     <span class="ml-2 text-sm text-gray-700">Published</span>
                 </label>
+
+                <label class="inline-flex items-center">
+                    <input type="checkbox" name="is_allowing_application" class="rounded text-teal-600" {{ old('is_allowing_application') ? 'checked' : '' }}>
+                    <span class="ml-2 text-sm text-gray-700">Allow Speaker Application</span>
+                </label>
             </div>
 
             <!-- Assuming creator_id is set in controller -->

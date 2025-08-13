@@ -21,12 +21,13 @@ class UpdateSpeakerRequest extends FormRequest
      */
     public function rules(): array
     {
+        dd($this->route('speaker'));
         return[
             "name" => ['required', "string"],
             "title" => ['sometimes'],
             "organization" => ["sometimes"],
-            "email"=>["required",'email', "unique:speakers,email,".$this->speaker->id],
-            "phone" => ["sometimes"],
+            "email"=>["required",'email', "unique:speakers,email,".$this->route('speaker')],
+            "phone" => ["sometimes", "phone:NG"],
             "photo" => "nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048",
             'linkedin'=> ['sometimes'],
             'website'=>['sometimes'],

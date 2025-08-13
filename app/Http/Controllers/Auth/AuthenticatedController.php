@@ -31,7 +31,7 @@ class AuthenticatedController extends Controller
         }
 
         if ($this->authService->loginUser($request)) {
-            return redirect(route("homepage"))->with([
+            return redirect(route("user_dashboard"))->with([
                 "type" => "success",
                 "message" => "Account Authenticated"
             ]);

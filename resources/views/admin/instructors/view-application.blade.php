@@ -90,8 +90,8 @@
                 </h2>
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     <div>
-                        <p class="text-sm text-gray-500 font-medium">User ID</p>
-                        <p class="font-medium text-gray-800">{{ $application->user_id }}</p>
+                        <p class="text-sm text-gray-500 font-medium">Profile ID</p>
+                        <p class="font-medium text-gray-800">{{ $application->application_id }}</p>
                     </div>
                     <div>
                         <p class="text-sm text-gray-500 font-medium">Professional Headline</p>

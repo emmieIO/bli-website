@@ -27,10 +27,10 @@ class CreateSpeakerRequest extends FormRequest
             "organization" => ["sometimes"],
             "email"=>["required",'email', "unique:speakers,email"],
             "photo" => "nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048",
-            "phone" => ["sometimes"],
+            "phone" => ["sometimes", 'phone:NG'],
             'linkedin'=> ['sometimes', 'url'],
             'website'=>['sometimes', 'url'],
-            "bio" => ['sometimes']
+            "bio" => ['sometimes'],
         ];
     }
 }

@@ -23,7 +23,7 @@ class UpdateUserProfileRequest extends FormRequest
     {
            return [
             "name" => ["required"],
-            "phone" => ['required', 'regex:/^\+?[0-9]{10,15}$/'],
+            "phone" => ['required', 'phone:NG'],
             "email" => ['required', 'email', 'unique:users,email,' . $this->user()->getkey()],
             "current_password" => ["required","min:8"],
         ];

@@ -36,7 +36,7 @@ class EventController extends Controller {
     public function store( CreateEventRequest $request ) {
         $event = $this->eventService->createEvent( $request );
         if ( $event ) {
-            return redirect()->route( 'admin.events.index' )->with( [
+            return redirect()->back()->with( [
                 'type' => 'success',
                 'message' => 'Event created successfully.'
             ] );
@@ -56,7 +56,7 @@ class EventController extends Controller {
         $event = $this->eventService->updateEvent( $request, $event );
 
         if ( $event ) {
-            return redirect()->route( 'admin.events.index')->with( [
+            return redirect()->back()->with( [
                 'type' => 'success',
                 'message' => 'Event updated successfully.'
             ] );

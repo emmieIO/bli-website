@@ -73,6 +73,11 @@
                            {{ old('is_published', $event->is_published) ? 'checked' : '' }}>
                     <span class="ml-2 text-sm text-gray-700">Published</span>
                 </label>
+                <label class="inline-flex items-center">
+                    <input type="checkbox" name="is_allowing_application" class="rounded text-teal-600"
+                           {{ old('is_allowing_application', $event->is_allowing_application) ? 'checked' : '' }}>
+                    <span class="ml-2 text-sm text-gray-700">Allow Speaker Application</span>
+                </label>
             </div>
 
             <!-- creator_id is optional here; could be locked/hidden -->

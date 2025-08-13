@@ -105,4 +105,9 @@ public function maxRevokes(){
     return false;
 }
 
+public function speakerApplications(){
+    return $this->hasMany(SpeakerApplication::class, 'event_id');
+}
+
+
 }

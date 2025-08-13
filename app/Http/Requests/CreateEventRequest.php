@@ -34,6 +34,7 @@ class CreateEventRequest extends FormRequest {
             'metadata' => 'nullable|array',
             'contact_email' => 'nullable|email|max:255',
             'is_published' => 'sometimes|boolean',
+            'is_allowing_application' => 'sometimes|boolean',
             'entry_fee' => 'nullable|numeric|min:0|max:999999.99',
         ];
     }
@@ -42,6 +43,7 @@ class CreateEventRequest extends FormRequest {
         $this->merge( [
             'is_active' => $this->has( 'is_active' ),
             'is_published' => $this->has( 'is_published' ),
+            'is_allowing_application' => $this->has('is_allowing_application')
         ] );
     }
 }
