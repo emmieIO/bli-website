@@ -22,7 +22,7 @@ class SpeakerService
     }
 
     public function fetchSpeakers(){
-        $speakers = Speaker::orderBy('name', 'asc')->get();
+        $speakers = Speaker::orderBy('name', 'asc')->paginate(10);
 
         return $speakers;
     }

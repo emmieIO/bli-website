@@ -6,47 +6,63 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BLI Auth</title>
+
+    <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap" rel="stylesheet">
+
+    <!-- Styles and Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 
-<body class="text-gray-800 auth-layout">
-    <x-navbar/>
-    <div class="min-h-screen grid place-center">
-        <!-- Left: Form -->
-        <div class="flex flex-col justify-center px-8 py-12 sm:px-12 lg:px-2">
+<body class="text-gray-800 bg-[#00275E] auth-layout">
+    <!-- Navbar -->
+    <x-navbar />
+
+    <!-- Main Content -->
+    <div class="min-h-screen grid lg:grid-cols-2 place-items-center">
+        <!-- Left: Form Section -->
+        <div class="flex flex-col justify-center px-8 py-12 sm:px-12 lg:px-20">
             <div class="max-w-md w-full mx-auto">
-                <div class="mb-8">
-                    <h1 class="text-3xl font-semibold text-white">{{ $title ?? 'Welcome' }}</h1>
-                    <p class="text-sm text-white mt-2">{{ $description ?? '' }}</p>
+                <!-- Title and Description -->
+                <div class="mb-8 text-center">
+                    <h1 class="text-3xl font-bold text-white">{{ $title ?? 'Welcome' }}</h1>
+                    <p class="text-sm text-gray-400 mt-2">{{ $description ?? '' }}</p>
                 </div>
 
-                <!-- Slot for dynamic form content -->
-                {{ $slot }}
+                <!-- Dynamic Form Content -->
+                <div class="space-y-6">
+                    {{ $slot }}
+                </div>
 
-                <a href="{{ route("homepage") }}" class="text-xs block text-teal-100 text-center mt-8 underline">go
-                    back home</a>
-                <p class="text-xs text-gray-500 text-center mt-8">&copy; 2025 Beacon Leadership Institute. All rights
-                    reserved.</p>
+                <!-- Footer Links -->
+                <div class="mt-8 text-center space-y-4">
+                    <a href="{{ route('homepage') }}"
+                        class="text-xs text-[#FF0000] underline hover:text-red-600 transition">
+                        Go back home
+                    </a>
+                    <p class="text-xs text-gray-500">
+                        &copy; 2025 Beacon Leadership Institute. All rights reserved.
+                    </p>
+                </div>
             </div>
         </div>
 
-        <!-- Right: Image / Branding -->
-        {{-- <div class="hidden md:hidden lg:flex items-center justify-center bg-teal-800 text-white relative">
-            <div class="p-12 text-center">
-                <h2 class="md:text-2xl lg:text-3xl font-semibold leading-tight">Beacon Leadership Institute</h2>
-                <p class="text-white/80 mt-4">Raising visionary and value-driven leaders for global impact.</p>
-                <img src="{{ asset('images/logo.jpg') }}" alt="Leadership"
-                    class="mt-10 w-full max-w-sm mx-auto object-contain">
-            </div>
-        </div> --}}
+        <!-- Right: Decorative Image or Background -->
+        <div class="hidden lg:block bg-gradient-to-br from-[#00275E] to-[#FF0000]/30 overflow-hidden">
+            <img src="{{ asset('images/logo.jpg') }}" alt="Authentication Background"
+                class="w-full  h-full object-cover opacity-90 mix-blend-overlay">
+        </div>
     </div>
+
+    <!-- Toast Notifications -->
     <x-toast />
+
+    <!-- Lucide Icons Script -->
     <script src="https://unpkg.com/lucide@latest"></script>
     <script>
-        // lucide.createIcons();
+        lucide.createIcons();
     </script>
 </body>
 

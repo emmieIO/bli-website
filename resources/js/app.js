@@ -16,9 +16,15 @@ window.notyf = new Notyf({
 });
 window.Alpine = Alpine;
 
+
 // Start Alpine when DOM is loaded
 document.addEventListener('DOMContentLoaded', function () {
     Alpine.start();
+    const modal = document.getElementById("action-modal");
+    const titleEl = document.getElementById("action-modal-title");
+    const messageEl = document.getElementById("action-modal-message");
+    const iconEl = document.getElementById("action-modal-icon");
+    const form = document.getElementById("action-modal-form");
 
     // Handle menu toggle
     const dashboardLayout = document.querySelector(".dashboard_layout");
@@ -29,6 +35,42 @@ document.addEventListener('DOMContentLoaded', function () {
             dashboardLayout.classList.toggle("toggle-sidebar");
         });
     }
+    document.querySelectorAll("[data-modal-target='action-modal']").forEach(button=>{
+        button.addEventListener('click',()=>{
+            form.action = button.getAttribute('data-action');
+            form.querySelector("input[name='_method']").value = button.getAttribute('data-method') || 'POST'
+            titleEl.textContent = button.getAttribute("data-title") || "Confirm Action";
+            messageEl.textContent = button.getAttribute("data-message") || "Are you sure you want to proceed with this action?";
+            const icon = button.getAttribute("data-icon");
+            if (icon) {
+                iconEl.innerHTML = icon;
+                iconEl.classList.remove("hidden");
+            } else {
+                iconEl.classList.add("hidden");
+            }
+            if (window.lucide) lucide.createIcons();
+        })
+    })
+
+
+    const feedbackModalTitle = document.getElementById("feedback-modal-title");
+    const feedbackModalMessage = document.getElementById("feedback-modal-message");
+    const feedbackModalConfirm = document.getElementById('feedback-modal-confirm');
+    const feedbackInput = document.getElementById('feedback-modal-feedback');
+    const feedbackForm = document.getElementById('feedback-modal-form')
+
+    document.querySelectorAll("[data-modal-target='feedback-modal']").forEach(button=>{
+
+        button.addEventListener('click', function(){
+            feedbackForm.action = button.getAttribute("data-action")
+            feedbackForm.method = button.getAttribute("data-method")
+            feedbackForm.querySelector("input[name='_method']").value = button.getAttribute("data-spoofMethod")
+            feedbackModalTitle.textContent = button.getAttribute('data-title')
+            feedbackModalMessage.textContent = button.getAttribute('data-message')
+            feedbackModalConfirm.textContent = button.getAttribute('data-confirm-text')
+            feedbackInput.name = button.getAttribute('data-input-name') || 'feedback';
+        })
+    })
 });
 
 // expertise-tags.js
@@ -118,3 +160,5 @@ export class ExpertiseTags {
     this.textInput.addEventListener('blur', () => this.addTags());
   }
 }
+
+

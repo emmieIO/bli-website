@@ -42,7 +42,7 @@ class EventService
     {
         $user = Auth::user();
         if ($user) {
-            return $user->eventsCreated()->get();
+            return $user->eventsCreated()->paginate()->withQueryString();
         }
         return collect([]);
     }

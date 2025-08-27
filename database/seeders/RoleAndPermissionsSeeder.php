@@ -16,13 +16,14 @@ class RoleAndPermissionsSeeder extends Seeder
         $roles = [
             "student",
             "instructor",
-            "admin"
+            "admin",
+
         ];
 
         $rolesPermissions = [
-            'admin' => ['manage events', "create-speaker", 'view-speaker', "edit-speaker", 'delete-speaker', 'assign-speaker', "manage-instructor-applications"],
-            "instructor" => [],
-            'student' => []
+            'admin' => ['manage events', "create-speaker", 'view-speaker', "edit-speaker", 'delete-speaker', 'assign-speaker', "manage-instructor-applications", 'approve-speaker-applications', 'track-applications', 'manage-activity-log'],
+            "instructor" => ['track-applications'],
+            'student' => ['track-applications']
         ];
 
         // Create permissions

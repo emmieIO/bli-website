@@ -11,6 +11,14 @@ Route::get('/', function () {
     return view('welcome');
 })->name('homepage');
 
+Route::get('/privacy-policy', function () {
+    return view('legal.privacy');
+})->name('privacy-policy');
+
+Route::get('/agreement-terms', function(){
+    return view('legal.terms');
+})->name('terms-of-service');
+
 // Contact-us
 Route::get("/contact-us", function(){
     return view("contact.contact");

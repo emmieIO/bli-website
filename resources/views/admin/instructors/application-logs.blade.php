@@ -1,4 +1,29 @@
 <x-app-layout>
+    <!-- Header and Controls -->
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+        <div>
+            <h2 class="text-xl font-semibold text-gray-800">Application Logs</h2>
+            <p class="text-sm text-gray-500 mt-1">Review all actions performed on instructor applications</p>
+        </div>
+        <div class="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+            <div class="relative w-full sm:w-64">
+                <input type="text" placeholder="Search logs..." id="searchInput"
+                    class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                    onkeyup="filterLogs()">
+                <i data-lucide="search" class="absolute left-3 top-2.5 text-gray-400 w-5 h-5"></i>
+            </div>
+        </div>
+    </div>
+    <script>
+        function filterLogs() {
+            const input = document.getElementById('searchInput');
+            const filter = input.value.toLowerCase();
+            const rows = document.querySelectorAll('tbody tr');
+            rows.forEach(row => {
+                row.style.display = row.textContent.toLowerCase().includes(filter) ? '' : 'none';
+            });
+        }
+    </script>
     <x-instructor-dashbord-layout>
 
 
@@ -42,7 +67,8 @@
                                     <i data-lucide="eye" class="size-4 stroke-blue-800"></i>
                                 </a>
 
-                                <button data-modal-target="popup-modal" data-modal-toggle="popup-modal" onclick="confirmDelete('{{ route('admin.instructors.application-logs.delete', $log) }}')"
+                                <button data-modal-target="popup-modal" data-modal-toggle="popup-modal"
+                                    onclick="confirmDelete('{{ route('admin.instructors.application-logs.delete', $log) }}')"
                                     class="font-medium text-red-600 hover:underline ms-3 flex items-center cursor-pointer">
                                     <i data-lucide="trash" class="size-4"></i>
                                 </button>
@@ -75,7 +101,8 @@
                                 <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
                                     stroke-width="2" d="M10 11V6m0 8h.01M19 10a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
                             </svg>
-                            <h3 class="mb-5 text-lg font-normal text-gray-500" id="confirmText">Are you sure you want to delete log?</h3>
+                            <h3 class="mb-5 text-lg font-normal text-gray-500" id="confirmText">Are you sure you want to
+                                delete log?</h3>
                             <div class="flex items-center justify-center">
                                 <form id='delete-form' method="post">
                                     @csrf
@@ -101,12 +128,10 @@
 
     <script>
         const deleteForm = document.getElementById('delete-form');
-        function confirmDelete(deleteRoute){
+        function confirmDelete(deleteRoute) {
             if (deleteForm) {
                 deleteForm.action = deleteRoute;
             }
         }
-
-
     </script>
 </x-app-layout>

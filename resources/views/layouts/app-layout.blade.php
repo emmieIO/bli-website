@@ -12,18 +12,34 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <script src="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.js"></script>
     <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <style>
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f3f4f6;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #00275e;
+            border-radius: 4px;
+        }
+    </style>
 </head>
 
-<body class="bg-gray-50 text-gray-800">
+<body class="bg-gray-50 text-gray-800 font-outfit">
 
-
-    <nav class="sticky top-0 z-50 w-full bg-teal-950">
+    <!-- Navigation Bar -->
+    <nav class="sticky top-0 z-50 w-full bg-[#00275E] shadow-md">
         <div class="px-3 py-3 lg:px-5 lg:pl-3">
             <div class="flex items-center justify-between">
-                <div class="flex items-center justify-start rtl:justify-end">
+                <!-- Logo Section -->
+                <div class="flex items-center justify-start">
                     <button data-drawer-target="logo-sidebar" data-drawer-toggle="logo-sidebar"
                         aria-controls="logo-sidebar" type="button"
-                        class="inline-flex items-center p-2 text-sm text-gray-500 rounded-lg sm:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:text-white dark:hover:bg-gray-700 dark:focus:ring-gray-600">
+                        class="inline-flex items-center p-2 text-sm text-white rounded-lg sm:hidden hover:bg-[#FF0000]/20 focus:outline-none focus:ring-2 focus:ring-[#FF0000]/50">
                         <span class="sr-only">Open sidebar</span>
                         <svg class="w-6 h-6" aria-hidden="true" fill="currentColor" viewBox="0 0 20 20"
                             xmlns="http://www.w3.org/2000/svg">
@@ -38,19 +54,21 @@
                             class="self-center text-xl font-semibold sm:text-2xl whitespace-nowrap text-white">BLI</span>
                     </a>
                 </div>
+
+                <!-- User Profile Dropdown -->
                 <div class="flex items-center relative">
                     <div class="flex items-center ms-3">
                         <div>
                             <button type="button"
-                                class="flex text-sm bg-teal-950 rounded-full focus:ring-4 focus:ring-gray-300 dark:focus:ring-gray-600"
+                                class="flex text-sm bg-[#FF0000]/20 rounded-full focus:ring-2 focus:ring-[#FF0000]/50"
                                 aria-expanded="false" data-dropdown-toggle="dropdown-user">
                                 <span class="sr-only">Open user menu</span>
                                 <img class="w-8 h-8 rounded-full"
-                                    src="https://ui-avatars.com/api/?name={{ urlencode(auth()->user()->name) }}&background=0d9488&color=fff"
+                                    src="https://ui-avatars.com/api/?name={{ urlencode(auth()->user()->name) }}&background=FF0000&color=fff"
                                     alt="{{ auth()->user()->name }}">
                             </button>
                         </div>
-                        <div class="z-50 absolute hidden my-4 text-base list-none divide-y divide-gray-100 rounded-sm shadow-sm bg-teal-700 dark:divide-gray-600"
+                        <div class="z-50 absolute hidden my-4 text-base list-none divide-y divide-[#FF0000]/20 rounded-sm shadow-md bg-[#00275E]"
                             id="dropdown-user">
                             <div class="px-4 py-3" role="none">
                                 <p class="text-sm text-white" role="none">
@@ -63,22 +81,19 @@
                             <ul class="py-1" role="none">
                                 <li>
                                     <a href="{{ route('homepage') }}"
-                                        class="block px-4 py-2 text-sm  text-white"
+                                        class="block px-4 py-2 text-sm text-white hover:bg-[#FF0000]/20"
                                         role="menuitem">Go back home</a>
                                 </li>
                                 <li>
                                     <a href="{{ route('profile') }}"
-                                        class="block px-4 py-2 text-sm text-white"
+                                        class="block px-4 py-2 text-sm text-white hover:bg-[#FF0000]/20"
                                         role="menuitem">Profile Settings</a>
-                                </li>
-                                <li>
-                                    {{-- <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-600 dark:hover:text-white" role="menuitem">Earnings</a> --}}
                                 </li>
                                 <li>
                                     <form action="{{ route('logout') }}" method="post">
                                         @csrf
                                         <button type="submit"
-                                            class="block w-full px-4 py-2 text-sm text-white cursor-pointer"
+                                            class="block w-full px-4 py-2 text-sm text-white hover:bg-[#FF0000]/20 cursor-pointer"
                                             role="menuitem">Sign out</button>
                                     </form>
                                 </li>
@@ -90,23 +105,45 @@
         </div>
     </nav>
 
+    <!-- Sidebar -->
     <aside id="logo-sidebar"
-        class="fixed top-0 left-0 z-40 w-64 h-screen pt-20 transition-transform -translate-x-full border-r  sm:translate-x-0 bg-teal-950"
+        class="fixed top-0 left-0 z-40 w-64 h-screen pt-20 transition-transform -translate-x-full border-r border-[#FF0000]/20 sm:translate-x-0 bg-[#00275E]"
         aria-label="Sidebar">
-        <div class="h-full px-3 pb-4 overflow-y-auto bg-teal-950 text-white">
-
+        <div class="h-full px-3 pb-4 overflow-y-auto text-white">
             <x-sidebar />
         </div>
     </aside>
 
+    <!-- Main Content -->
     <div class="p-4 sm:ml-64">
+        @if ($errors->any())
+            <div class="mb-4 p-6 bg-red-50 border border-red-200 shadow-md rounded-lg text-red-700">
+                <div class="flex items-center gap-3 mb-3">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-red-600 shrink-0" fill="none"
+                        viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 9c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                    <h3 class="text-lg font-semibold text-red-800">Whoops!</h3>
+                </div>
+                <p class="text-sm mb-2">Please fix the following issues:</p>
+                <ul class="list-disc list-inside space-y-1 text-sm">
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
         {{ $slot }}
     </div>
 
+    <!-- Toast Notifications -->
     <x-toast />
+
+    <!-- Scripts -->
     <script src="https://unpkg.com/lucide@latest"></script>
     <script>
-        // lucide.createIcons();
+        lucide.createIcons();
     </script>
 </body>
 

@@ -7,6 +7,7 @@
 @import "flowbite/src/themes/default";
 
 @plugin "flowbite/plugin";
+@plugin "tailwind-scrollbar";
 
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../storage/framework/views/*.php';
@@ -206,7 +207,6 @@ body, html {
 
 .auth-layout{
    background-image : url(../images/auth.jpg);
-   @apply bg-teal-800;
    background-size: cover;
    background-position: center;
    background-blend-mode: multiply;

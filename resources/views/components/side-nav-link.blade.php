@@ -1,12 +1,18 @@
 @props([
     "title" => "",
     "icon" => "grid-2x2",
-    "to" => ""
+    "to" => "#"
 ])
 
-<li  {{ $attributes->merge([
-    'class' => "flex items-center-safe gap-3 hover:bg-teal-900 rounded-md py-2 px-2 whitespace-nowrap"
+<li {{ $attributes->merge([
+    'class' => "flex items-center gap-3 hover:bg-[#FF0000]/10 rounded-md py-2 px-3 transition duration-300 whitespace-nowrap"
 ]) }}>
-    <i data-lucide="{{ $icon }}" class="w-4 h-4"></i>
-    <a href="{{$to}}" class="whitespace-nowrap">{{ $title }}</a>
+    <!-- Icon -->
+     <i data-lucide="{{ $icon }}" class="w-5 h-5 text-white"></i> <!-- Ensure icon is visible -->
+
+    <!-- Title -->
+    <a href="{{ $to }}"
+       class="text-white font-medium text-sm hover:text-[#FF0000] transition duration-300 whitespace-nowrap">
+        {{ $title }}
+    </a>
 </li>

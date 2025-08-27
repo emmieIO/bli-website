@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin\AssignSpeakerToEvent;
 use App\Http\Controllers\Admin\EventController;
 use App\Http\Controllers\Admin\EventResourceController;
 use App\Http\Controllers\Admin\SpeakersController;
+use App\Http\Controllers\SpeakerApplicationController;
 use Illuminate\Support\Facades\Route;
 
 Route::group([
@@ -31,6 +32,11 @@ Route::group([
         Route::post('/events/{event}/assign-speaker', AssignSpeakerToEvent::class)->name('events.assign-speaker');
         Route::get('/events/{event}/create-resource', [EventResourceController::class, "create"])->name('events.resources.create');
         Route::get('/speakers', [SpeakersController::class, 'index'])->name("speakers.index");
+        Route::get('/speakers/applications/pending', [SpeakerApplicationController::class, 'pendingApplications'])->name('speakers.applications.pending');
+        Route::get('/speakers/applications/approved', [SpeakerApplicationController::class, 'approvedApplications'])->name('speakers.applications.approved');
+        Route::get('/speakers/applications/{application}/review', [SpeakerApplicationController::class, 'reviewApplication'])->name('speakers.application.review');
+        Route::post('/speakers/applications/{application}/approve', [SpeakerApplicationController::class, 'approveApplication'])->name('speakers.application.approve');
+        Route::patch('/speakers/applications/{application}/reject', [SpeakerApplicationController::class,'rejectApplication'])->name('speakers.application.reject');
         Route::get('/speakers/create', [SpeakersController::class, 'create'])->name("speakers.create");
         Route::get('/speakers/{speaker}/edit', [SpeakersController::class, 'edit'])->name("speakers.edit");
         Route::get('/speakers/{speaker}/show', [SpeakersController::class, 'show'])->name("speakers.show");
@@ -38,5 +44,6 @@ Route::group([
         Route::delete('/events/{event}/destroy-resource/{resource}', [EventResourceController::class, "destroy"])->name('events.resources.destroy');
         Route::post('/speakers/store', [SpeakersController::class, 'store'])->name("speakers.store");
         Route::put('/speakers/{speaker}/edit', [SpeakersController::class, 'update'])->name("speakers.update");
+
     });
 });

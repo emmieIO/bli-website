@@ -20,6 +20,7 @@
         "alpinejs": "^3.14.9",
         "flowbite": "^3.1.2",
         "lucide": "^0.523.0",
-        "notyf": "^3.10.0"
+        "notyf": "^3.10.0",
+        "tailwind-scrollbar": "^4.0.2"
     }
 }

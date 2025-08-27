@@ -11,25 +11,29 @@
 ])
 
 <div class="space-y-1">
+    <!-- Label -->
     @if($label)
         <label for="{{ $name }}" class="inline-block text-sm font-medium text-gray-900 bg-white rounded-2xl px-1">
             {{ $label }}
             @if($required)
-                <span class="text-red-500">*</span>
+                <span class="text-[#FF0000]">*</span>
             @endif
         </label>
     @endif
 
-    <div 
-        class="relative rounded-md shadow-sm transition-all duration-150 border border-gray-300 hover:border-teal-600 focus-within:ring-2 focus-within:ring-teal-800/30 focus-within:border-teal-800 {{ $disabled ? 'bg-gray-100 opacity-75' : 'bg-white' }}"
+    <!-- Input Container -->
+    <div
+        class="relative rounded-md shadow-sm transition-all duration-150 border border-gray-300 hover:border-[#00275E] focus-within:ring-2 focus-within:ring-[#00275E]/30 focus-within:border-[#00275E] {{ $disabled ? 'bg-gray-100 opacity-75 cursor-not-allowed' : 'bg-white' }}"
         @if($type === 'password') x-data="{ show: false }" @endif
     >
+        <!-- Icon -->
         @if($icon)
             <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                 <i data-lucide="{{ $icon }}" class="h-4 w-4 text-gray-500"></i>
             </div>
         @endif
 
+        <!-- Input Field -->
         <input
             id="{{ $name }}"
             @if($type === 'password')
@@ -48,10 +52,12 @@
             ]) }}
         />
 
+        <!-- Password Toggle Button -->
         @if($type === 'password')
-            <button type="button"
+            <button
+                type="button"
                 tabindex="-1"
-                class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500"
+                class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 hover:text-[#00275E] focus:outline-none"
                 @click="show = !show"
             >
                 <svg x-show="!show" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -65,5 +71,6 @@
         @endif
     </div>
 
-    <x-input-error :messages="$errors->get($name)" class="mt-1" />
+    <!-- Error Message -->
+    <x-input-error :messages="$errors->get($name)" class="mt-1 text-[#FF0000] text-xs" />
 </div>
