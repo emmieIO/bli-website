@@ -51,7 +51,6 @@ class InstructorsController extends Controller
         $email = strtolower(trim($request->email));
         try {
             $user = $this->instructorApplicationService->start($request->email);
-
             // We silently succeed even if they're already onboarded
             if ($user) {
                 Mail::to($user->email)->send(new InstructorsApplication($user));
@@ -62,12 +61,13 @@ class InstructorsController extends Controller
                 'message' => 'Application started successfully. Please check your email for further instructions.'
             ]);
         } catch (\Exception $e) {
-            Log::error('Instructor application error', ['error' => $e->getMessage()]);
+            // Log::error('Instructor application error', ['error' => $e->getMessage()]);
+            throw $e;
 
-            return back()->with([
-                'type' => 'error',
-                'message' => 'There was a problem starting your application. Please try again.'
-            ]);
+            // return back()->with([
+            //     'type' => 'error',
+            //     'message' => 'There was a problem starting your application. Please try again.'
+            // ]);
         }
     }
 

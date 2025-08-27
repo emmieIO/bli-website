@@ -35,22 +35,24 @@ class InstructorApplicationService
 
         return DB::transaction(function () use ($email) {
             $user = User::firstOrCreate(['email' => $email], [
-                'name' => 'Pending Instructor',
+                'name' => 'Please add your name',
                 'password' => Hash::make(Str::random(16)),
             ]);
-
             $profile = InstructorProfile::where('user_id', $user->id)->first();
+
 
             if ($profile && in_array($profile->status, ['submitted', 'approved'])) {
                 return null; // Abort silently
             }
 
             if (!$profile) {
-                InstructorProfile::create([
-                    'application_id' => $this->formatApplicationId($profile->id),
+                $profile = InstructorProfile::create([
+                    // 'application_id' => $this->formatApplicationId($profile->id),
                     'user_id' => $user->id,
                     'status' => 'draft',
                 ]);
+                $profile->application_id = $this->formatApplicationId($profile->id);
+                $profile->save();
             }
             return $user;
         });

@@ -7,16 +7,15 @@ $expertiseTags = is_array($expertiseRaw)
     : array_filter(array_map('trim', explode(',', $expertiseRaw)));
 @endphp
 <x-guest-layout>
-    <section class="py-12 md:py-16 bg-gray-50">
+    <section class="py-12 md:py-16 bg-[#F8FAFC]">
         <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="bg-white p-8 md:p-10 rounded-xl shadow-sm">
-                <div class="mb-8 border-b pb-6">
-                    <h1 class="text-3xl font-bold text-gray-900">Instructor Application</h1>
+                <div class="mb-8 border-b border-gray-200 pb-6">
+                    <h1 class="text-3xl font-bold text-[#00275E]">Instructor Application</h1>
                     <p class="text-gray-600 mt-2">Complete all sections to submit your instructor profile</p>
                 </div>
                 <form method="POST"
-                action="{{ route('instructors.submit-application', $user) }}" 
-                {{-- x-data="{ submitting: false }" @submit="submitting = true" --}}
+                    action="{{ route('instructors.submit-application', $user) }}"
                     enctype="multipart/form-data">
                     @csrf
 
@@ -26,9 +25,9 @@ $expertiseTags = is_array($expertiseRaw)
                             <!-- Personal Information Card -->
                             <div class="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
                                 <div class="px-6 py-4 border-b border-gray-200 bg-gray-50">
-                                    <h3 class="text-lg font-medium text-gray-900 flex items-center">
+                                    <h3 class="text-lg font-medium text-[#00275E] flex items-center">
                                         <span
-                                            class="flex items-center justify-center w-6 h-6 bg-teal-100 text-teal-800 rounded-full mr-3 text-sm font-medium">1</span>
+                                            class="flex items-center justify-center w-6 h-6 bg-[#00275E] text-white rounded-full mr-3 text-sm font-medium">1</span>
                                         Personal Information
                                     </h3>
                                 </div>
@@ -38,21 +37,21 @@ $expertiseTags = is_array($expertiseRaw)
                                             <label for="first_name"
                                                 class="block text-sm font-medium text-gray-700 mb-1">Fullname*</label>
                                             <input type="text" id="name" name="name"
-                                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-teal-500 focus:border-teal-500"
+                                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-[#00275E] focus:border-[#00275E]"
                                                 value="{{ old('first_name', $user->name) }}">
                                             @error('name')
-                                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                                <p class="mt-1 text-sm text-[#FF0000]">{{ $message }}</p>
                                             @enderror
                                         </div>
                                         <div>
                                             <label for="phone"
                                                 class="block text-sm font-medium text-gray-700 mb-1">Phone Number*</label>
                                             <input type="tel" id="phone" name="phone"
-                                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-teal-500 focus:border-teal-500"
+                                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-[#00275E] focus:border-[#00275E]"
                                                 value="{{ old('phone', $user->phone ?? '') }}"
                                                 placeholder="e.g. 08031234567">
                                             @error('phone')
-                                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                                <p class="mt-1 text-sm text-[#FF0000]">{{ $message }}</p>
                                             @enderror
                                         </div>
                                     </div>
@@ -62,11 +61,11 @@ $expertiseTags = is_array($expertiseRaw)
                                             class="block text-sm font-medium text-gray-700 mb-1">Professional
                                             Headline*</label>
                                         <input type="text" id="headline" name="headline"
-                                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-teal-500 focus:border-teal-500"
+                                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-[#00275E] focus:border-[#00275E]"
                                             placeholder="e.g. Senior Web Developer, Education Specialist"
                                             value="{{ old('headline', $profile->headline) }}">
                                         @error('headline')
-                                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                            <p class="mt-1 text-sm text-[#FF0000]">{{ $message }}</p>
                                         @enderror
                                     </div>
 
@@ -74,17 +73,16 @@ $expertiseTags = is_array($expertiseRaw)
                                         <label for="bio"
                                             class="block text-sm font-medium text-gray-700 mb-1">Bio*</label>
                                         <textarea id="bio" name="bio" rows="4"
-                                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-teal-500 focus:border-teal-500"
+                                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-[#00275E] focus:border-[#00275E]"
                                             placeholder="Tell us about yourself">{{ old('bio', $profile->bio) }}</textarea>
                                         @error('bio')
-                                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                            <p class="mt-1 text-sm text-[#FF0000]">{{ $message }}</p>
                                         @enderror
                                     </div>
 
                                     <div class="pt-2">
                                         <button type="submit" name='submit_section' value='personal'
-                                            :disabled="submitting"
-                                            class="inline-flex cursor-pointer items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500">
+                                            class="inline-flex cursor-pointer items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#00275E]">
                                             Save Personal Info
                                         </button>
                                     </div>
@@ -94,9 +92,9 @@ $expertiseTags = is_array($expertiseRaw)
                             <!-- Documents Card -->
                             <div class="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
                                 <div class="px-6 py-4 border-b border-gray-200 bg-gray-50">
-                                    <h3 class="text-lg font-medium text-gray-900 flex items-center">
+                                    <h3 class="text-lg font-medium text-[#00275E] flex items-center">
                                         <span
-                                            class="flex items-center justify-center w-6 h-6 bg-teal-100 text-teal-800 rounded-full mr-3 text-sm font-medium">3</span>
+                                            class="flex items-center justify-center w-6 h-6 bg-[#00275E] text-white rounded-full mr-3 text-sm font-medium">3</span>
                                         Documents & Media
                                     </h3>
                                 </div>
@@ -110,15 +108,15 @@ $expertiseTags = is_array($expertiseRaw)
                                                 file:mr-4 file:py-2 file:px-4
                                                 file:rounded-md file:border-0
                                                 file:text-sm file:font-semibold
-                                                file:bg-teal-50 file:text-teal-700
-                                                hover:file:bg-teal-100">
+                                                file:bg-[#00275E] file:text-white
+                                                hover:file:bg-[#FF0000]">
                                         </div>
                                         @if ($profile->resume_path)
                                             <p class="mt-2 text-sm text-gray-500">Current file:
                                                 {{ basename($profile->resume_path) }}</p>
                                         @endif
                                         @error('resume')
-                                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                            <p class="mt-1 text-sm text-[#FF0000]">{{ $message }}</p>
                                         @enderror
                                     </div>
 
@@ -127,20 +125,19 @@ $expertiseTags = is_array($expertiseRaw)
                                             class="block text-sm font-medium text-gray-700 mb-1">Intro Video
                                             URL*</label>
                                         <input type="url" id="video_url" name="video_url"
-                                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-teal-500 focus:border-teal-500"
+                                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-[#00275E] focus:border-[#00275E]"
                                             placeholder="https://youtube.com/yourvideo"
                                             value="{{ old('video_url', $profile->intro_video_url) }}">
                                         <p class="mt-1 text-sm text-gray-500">Upload a 1-2 minute introduction video to
                                             YouTube/Vimeo/Loom</p>
                                         @error('video_url')
-                                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                            <p class="mt-1 text-sm text-[#FF0000]">{{ $message }}</p>
                                         @enderror
                                     </div>
 
                                     <div class="pt-2">
-                                        <button :disabled="submitting" type="submit" name="submit_section"
-                                            value="docs"
-                                            class="inline-flex cursor-pointer items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500">
+                                        <button type="submit" name="submit_section" value="docs"
+                                            class="inline-flex cursor-pointer items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#00275E]">
                                             Save Documents
                                         </button>
                                     </div>
@@ -153,9 +150,9 @@ $expertiseTags = is_array($expertiseRaw)
                             <!-- Experience Card -->
                             <div class="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
                                 <div class="px-6 py-4 border-b border-gray-200 bg-gray-50">
-                                    <h3 class="text-lg font-medium text-gray-900 flex items-center">
+                                    <h3 class="text-lg font-medium text-[#00275E] flex items-center">
                                         <span
-                                            class="flex items-center justify-center w-6 h-6 bg-teal-100 text-teal-800 rounded-full mr-3 text-sm font-medium">2</span>
+                                            class="flex items-center justify-center w-6 h-6 bg-[#00275E] text-white rounded-full mr-3 text-sm font-medium">2</span>
                                         Experience & Expertise
                                     </h3>
                                 </div>
@@ -165,10 +162,10 @@ $expertiseTags = is_array($expertiseRaw)
                                             class="block text-sm font-medium text-gray-700 mb-1">Teaching
                                             Experience*</label>
                                         <textarea id="experience" name="experience" rows="4"
-                                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-teal-500 focus:border-teal-500"
+                                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-[#00275E] focus:border-[#00275E]"
                                             placeholder="Describe your teaching or mentorship background. For example: courses taught, institutions, duration, or informal mentoring roles.">{{ old('experience', $profile->teaching_history) }}</textarea>
                                         @error('experience')
-                                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                            <p class="mt-1 text-sm text-[#FF0000]">{{ $message }}</p>
                                         @enderror
                                     </div>
                                     <div>
@@ -177,7 +174,7 @@ $expertiseTags = is_array($expertiseRaw)
                                             Years of Experience*
                                         </label>
                                         <select id="experience_years" name="experience_years"
-                                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-teal-500 focus:border-teal-500"
+                                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-[#00275E] focus:border-[#00275E]"
                                             required>
                                             <option value="" disabled
                                                 {{ old('experience_years', $profile->experience_years) === null ? 'selected' : '' }}>
@@ -190,10 +187,9 @@ $expertiseTags = is_array($expertiseRaw)
                                             @endfor
                                         </select>
                                         @error('experience_years')
-                                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                            <p class="mt-1 text-sm text-[#FF0000]">{{ $message }}</p>
                                         @enderror
                                     </div>
-
 
                                     <div id="expertise-tags-container" data-tags='@json($expertiseTags)'>
                                         <!-- Hidden input that will contain the array as JSON -->
@@ -208,7 +204,7 @@ $expertiseTags = is_array($expertiseRaw)
                                         <!-- Input field for adding new tags -->
                                         <div class="relative">
                                             <input type="text" id="expertise-text-input"
-                                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-teal-500 focus:border-teal-500"
+                                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-[#00275E] focus:border-[#00275E]"
                                                 placeholder="">
                                             <div
                                                 class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
@@ -216,16 +212,14 @@ $expertiseTags = is_array($expertiseRaw)
                                             </div>
                                         </div>
 
-                                        <p class="mt-1 text-xs text-teal-500">
+                                        <p class="mt-1 text-xs text-[#00275E]">
                                             Type your expertise areas and press comma or enter to create tags
                                         </p>
 
                                         @error('expertise')
-                                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                            <p class="mt-1 text-sm text-[#FF0000]">{{ $message }}</p>
                                         @enderror
                                     </div>
-
-
 
                                     <div class="grid md:grid-cols-2 gap-4">
                                         <div>
@@ -233,10 +227,9 @@ $expertiseTags = is_array($expertiseRaw)
                                                 class="block text-sm font-medium text-gray-700 mb-1">LinkedIn
                                                 Profile</label>
                                             <input type="url" id="linkedin" name="linkedin"
-                                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-teal-500 focus:border-teal-500"
+                                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-[#00275E] focus:border-[#00275E]"
                                                 placeholder="https://linkedin.com/in/yourprofile"
                                                 value="{{ old('linkedin', $profile->linkedin_url) }}">
-
                                         </div>
 
                                         <div>
@@ -244,19 +237,18 @@ $expertiseTags = is_array($expertiseRaw)
                                                 class="block text-sm font-medium text-gray-700 mb-1">Personal
                                                 Website</label>
                                             <input type="url" id="website" name="website"
-                                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-teal-500 focus:border-teal-500"
+                                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-[#00275E] focus:border-[#00275E]"
                                                 placeholder="https://yourwebsite.com"
                                                 value="{{ old('website', $profile->website) }}">
                                             @error('website')
-                                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                                <p class="mt-1 text-sm text-[#FF0000]">{{ $message }}</p>
                                             @enderror
                                         </div>
                                     </div>
 
                                     <div class="pt-2">
                                         <button type="submit" name="submit_section" value="experience"
-                                            :disabled="submitting"
-                                            class="inline-flex cursor-pointer items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500">
+                                            class="inline-flex cursor-pointer items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#00275E]">
                                             Save Experience
                                         </button>
                                     </div>
@@ -266,9 +258,9 @@ $expertiseTags = is_array($expertiseRaw)
                             <!-- Submission Card -->
                             <div class="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
                                 <div class="px-6 py-4 border-b border-gray-200 bg-gray-50">
-                                    <h3 class="text-lg font-medium text-gray-900 flex items-center">
+                                    <h3 class="text-lg font-medium text-[#00275E] flex items-center">
                                         <span
-                                            class="flex items-center justify-center w-6 h-6 bg-teal-100 text-teal-800 rounded-full mr-3 text-sm font-medium">4</span>
+                                            class="flex items-center justify-center w-6 h-6 bg-[#00275E] text-white rounded-full mr-3 text-sm font-medium">4</span>
                                         Submit Application
                                     </h3>
                                 </div>
@@ -276,23 +268,22 @@ $expertiseTags = is_array($expertiseRaw)
                                     <div class="flex items-start">
                                         <div class="flex items-center h-5">
                                             <input id="terms" name="terms" type="checkbox"
-                                                class="focus:ring-teal-500 h-4 w-4 text-teal-600 border-gray-300 rounded">
+                                                class="focus:ring-[#00275E] h-4 w-4 text-[#00275E] border-gray-300 rounded">
                                         </div>
                                         <div class="ml-3 text-sm">
                                             <label for="terms" class="font-medium text-gray-700">I agree to the <a
-                                                    href="#" class="text-teal-600 hover:underline">Instructor
+                                                    href="#" class="text-[#00275E] hover:underline">Instructor
                                                     Terms</a> and <a href="#"
-                                                    class="text-teal-600 hover:underline">Privacy Policy</a></label>
+                                                    class="text-[#00275E] hover:underline">Privacy Policy</a></label>
                                             @error('terms')
-                                                <p class="mt-1 text-red-600">{{ $message }}</p>
+                                                <p class="mt-1 text-[#FF0000]">{{ $message }}</p>
                                             @enderror
                                         </div>
                                     </div>
 
                                     <div class="pt-4">
-                                        <button type="submit" :disabled="submitting" name="submit_section"
-                                            value="finalize"
-                                            class="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-teal-600 hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500">
+                                        <button type="submit" name="submit_section" value="finalize"
+                                            class="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-[#00275E] hover:bg-[#FF0000] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#00275E]">
                                             Submit Application
                                         </button>
                                     </div>
@@ -320,14 +311,14 @@ $expertiseTags = is_array($expertiseRaw)
                 tags.forEach((tag, index) => {
                     const tagEl = document.createElement('div');
                     tagEl.className =
-                        'flex items-center bg-teal-100 text-teal-800 text-sm px-2 py-1 rounded-full';
+                        'flex items-center bg-[#E0F2FE] text-[#00275E] text-sm px-2 py-1 rounded-full';
 
                     const span = document.createElement('span');
                     span.textContent = tag;
 
                     const removeBtn = document.createElement('button');
                     removeBtn.type = 'button';
-                    removeBtn.className = 'ml-1 text-teal-500 hover:text-red-700 font-bold';
+                    removeBtn.className = 'ml-1 text-[#00275E] hover:text-[#FF0000] font-bold';
                     removeBtn.innerHTML = '&times;';
                     removeBtn.addEventListener('click', () => {
                         tags.splice(index, 1);
@@ -356,5 +347,4 @@ $expertiseTags = is_array($expertiseRaw)
             });
         });
     </script>
-
 </x-guest-layout>
