@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\UserDashboard;
+namespace App\Http\Controllers\UserDashBoard;
 
 use App\Http\Controllers\Controller;
 use App\Services\Event\EventService;
