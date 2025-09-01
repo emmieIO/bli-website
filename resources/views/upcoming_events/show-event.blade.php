@@ -272,17 +272,18 @@
                 const now = new Date().getTime();
                 let diff = target - now;
 
+                if (now > target) {
+                    countdownElement.textContent = "Event has ended!";
+                    clearInterval(timer);
+                    return;
+                }
+                
                 if (diff <= 0) {
                     countdownElement.textContent = "Event has started!";
                     clearInterval(timer);
                     return;
                 }
 
-                if (now > target) {
-                    countdownElement.textContent = "Event has ended!";
-                    clearInterval(timer);
-                    return;
-                }
 
                 const days = Math.floor(diff / (1000 * 60 * 60 * 24));
                 diff %= (1000 * 60 * 60 * 24);
