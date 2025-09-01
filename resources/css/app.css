@@ -129,16 +129,11 @@ body, html {
 
 
 @media (max-width: 768px) {
-  /* .hero {
-    flex-direction: column;
-    text-align: center;
-    @apply bg-neutral-600 text-white;
-    background-blend-mode: multiply;
-    background-repeat: no-repeat;
-    background-size: contain;
-    background-position: center;
-    background-attachment: fixed;
-  } */
+  .hero {
+    background-attachment: scroll; /* safer for mobile */
+    background-size: cover;        /* keep full coverage */
+    background-position: center;   /* center properly */
+  }
 
   .hero-image img {
     max-width: 100%;
