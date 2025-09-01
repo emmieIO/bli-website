@@ -278,6 +278,12 @@
                     return;
                 }
 
+                if (now > target) {
+                    countdownElement.textContent = "Event has ended!";
+                    clearInterval(timer);
+                    return;
+                }
+
                 const days = Math.floor(diff / (1000 * 60 * 60 * 24));
                 diff %= (1000 * 60 * 60 * 24);
 
