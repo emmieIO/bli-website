@@ -6,6 +6,7 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
+use Illuminate\Support\Facades\URL;
 
 class InstructorApplicationSubmitted extends Notification
 {
@@ -41,7 +42,7 @@ class InstructorApplicationSubmitted extends Notification
             ->line('Our team is currently reviewing your submission.')
             ->line('🕒 The review process typically takes 3–5 business days.')
             ->line('📬 You will receive a follow-up email once a decision has been made.')
-            ->action('View Your Application', url(route('instructors.application-form', ['user' => $notifiable->id], true)))
+            ->action('View Your Application', URL::signedRoute('instructors.view-application', ['user' => $notifiable->id]))
             ->line('Thank you for your interest in contributing as an instructor!');
     }
 

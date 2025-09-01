@@ -17,12 +17,12 @@
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap" rel="stylesheet" />
     <script>
         // Save scroll position before unload
-        window.addEventListener('beforeunload', function () {
+        window.addEventListener('beforeunload', function() {
             sessionStorage.setItem('scrollY', window.scrollY);
         });
 
         // Restore scroll position after load
-        window.addEventListener('load', function () {
+        window.addEventListener('load', function() {
             const scrollY = sessionStorage.getItem('scrollY');
             if (scrollY !== null) {
                 window.scrollTo(0, parseInt(scrollY));
@@ -44,8 +44,8 @@
     <div id="page-preload"
         class="fixed inset-0 z-60 flex items-center justify-center bg-white transition-opacity duration-300 opacity-100 pointer-events-auto">
         <div>
-                <i data-lucide="loader" class="w-[64px] h-[64px] text-[#00275e] animate-spin"></i>
-                <p class="mt-4 text-center text-4xl text-[#00275e] font-bold tracking-wide">BLI</p>
+            <i data-lucide="loader" class="w-[64px] h-[64px] text-[#00275e] animate-spin"></i>
+            <p class="mt-4 text-center text-4xl text-[#00275e] font-bold tracking-wide">BLI</p>
         </div>
     </div>
 

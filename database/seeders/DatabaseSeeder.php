@@ -25,8 +25,8 @@ class DatabaseSeeder extends Seeder
         // Event::factory(20)->create();
         $this->call([
             RoleAndPermissionsSeeder::class,
-            // BackFillApplicationIdsSeeder::class,
-            // AdminSeeder::class
+            BackFillApplicationIdsSeeder::class,
+            AdminSeeder::class
         ]);
     }
 }

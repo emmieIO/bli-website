@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\InstructorProfile;
 use App\Models\User;
+use Illuminate\Support\Facades\Auth;
 use App\Services\Instructors\InstructorApplicationService;
 use Illuminate\Http\Request;
 
@@ -52,5 +53,12 @@ class InstructorApplicationController extends Controller
 
     public function view(InstructorProfile $application){
         return view("admin.instructors.view-application", compact('application'));
+    }
+
+    public function viewOwnApplication(User $user){
+        $application = InstructorProfile::where('user_id', $user->id)
+        ->where('status',['submitted','pending', 'approved', 'denied'])
+        ->firstOrFail();
+        return view('instructors.view-application', compact('application'));
     }
 }

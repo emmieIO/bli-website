@@ -21,10 +21,9 @@
     <x-navbar />
 
     <!-- Main Content -->
-    <div class="min-h-screen grid lg:grid-cols-2 place-items-center">
-        <!-- Left: Form Section -->
-        <div class="flex flex-col justify-center px-8 py-12 sm:px-12 lg:px-20">
-            <div class="max-w-md w-full mx-auto">
+    <div class="min-h-screen">
+        <div class="flex flex-col justify-center items-center px-8 py-12 sm:px-12">
+            <div class="w-full lg:w-120">
                 <!-- Title and Description -->
                 <div class="mb-8 text-center">
                     <h1 class="text-3xl font-bold text-white">{{ $title ?? 'Welcome' }}</h1>
@@ -49,11 +48,6 @@
             </div>
         </div>
 
-        <!-- Right: Decorative Image or Background -->
-        <div class="hidden lg:block bg-gradient-to-br from-[#00275E] to-[#FF0000]/30 overflow-hidden">
-            <img src="{{ asset('images/logo.jpg') }}" alt="Authentication Background"
-                class="w-full  h-full object-cover opacity-90 mix-blend-overlay">
-        </div>
     </div>
 
     <!-- Toast Notifications -->

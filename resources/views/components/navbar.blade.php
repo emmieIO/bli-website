@@ -34,26 +34,27 @@
                     </li>
 
                     <!-- JOIN DROPDOWN (Desktop) -->
-                    @guest
                     <li class="relative" x-data="{ open: false }" @mouseenter="open = true" @mouseleave="open = false">
                         <button type="button"
-                            class="inline-flex items-center gap-1 hover:text-[#FF0000] transition focus:outline-none focus-visible:ring focus-visible:ring-[#FF0000]/50 rounded"
-                            @click.prevent="open = !open" :aria-expanded="open.toString()" aria-haspopup="menu">
-                            <i data-lucide="user-plus" class="w-4 h-4"></i>
-                            <span>Join</span>
-                            <i data-lucide="chevron-down" class="w-4 h-4 transition-transform duration-150"
-                                :class="open ? 'rotate-180' : ''"></i>
-                        </button>
-                        <div x-cloak x-show="open" x-transition.origin.top.left @click.away="open = false"
-                            class="absolute left-0 mt-2 w-48 rounded-md shadow-lg bg-[#00275E] ring-1 ring-black/5 divide-y divide-gray-100 text-sm z-50 text-white"
-                            role="menu">
-                            <a href="{{ route('instructors.become-an-instructor') }}"
-                                class="block px-4 py-2 hover:bg-[#FF0000]/20 hover:text-[#FF0000]" role="menuitem">Become an Instructor</a>
-                            <a href="{{ route('register') }}"
-                                class="block px-4 py-2 hover:bg-[#FF0000]/20 hover:text-[#FF0000]" role="menuitem">Become a Student</a>
+                        class="inline-flex items-center gap-1 hover:text-[#FF0000] transition focus:outline-none focus-visible:ring focus-visible:ring-[#FF0000]/50 rounded"
+                        @click.prevent="open = !open" :aria-expanded="open.toString()" aria-haspopup="menu">
+                        <i data-lucide="user-plus" class="w-4 h-4"></i>
+                        <span>Join Us</span>
+                        <i data-lucide="chevron-down" class="w-4 h-4 transition-transform duration-150"
+                        :class="open ? 'rotate-180' : ''"></i>
+                    </button>
+                    <div x-cloak x-show="open" x-transition.origin.top.left @click.away="open = false"
+                    class="absolute left-0 mt-2 w-48 rounded-md shadow-lg bg-[#00275E] ring-1 ring-black/5 divide-y divide-gray-100 text-sm z-50 text-white"
+                    role="menu">
+                    <a href="{{ route('instructors.become-an-instructor') }}"
+                    class="block px-4 py-2 hover:bg-[#FF0000]/20 hover:text-[#FF0000]" role="menuitem">Become an Instructor</a>
+                    @guest
+                    <a href="{{ route('register') }}"
+                        class="block px-4 py-2 hover:bg-[#FF0000]/20 hover:text-[#FF0000]" role="menuitem">Become a Student
+                        </a>
+                        @endguest
                         </div>
                     </li>
-                    @endguest
 
                     <li>
                         <a href="#" class="hover:text-[#FF0000] transition">

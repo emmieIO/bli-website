@@ -4,7 +4,6 @@ namespace Database\Seeders;
 
 use App\Models\Speaker;
 use App\Models\User;
-use Hash;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -20,7 +19,8 @@ class AdminSeeder extends Seeder
             [
                 'name' => 'Nnaemeka Mark Onuoha',
                 'email_verified_at' => now(),
-                'password' => Hash::make('password'), // Change to a secure password
+                'phone' => '123-456-7890',
+                'password' =>'password', // Change to a secure password
             ]
         );
 

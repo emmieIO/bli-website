@@ -11,6 +11,9 @@ Route::prefix('instructors')->name('instructors.')->group(function () {
     Route::get('/apply', [InstructorsController::class, 'showApplicationForm'])
     ->name('application-form')
     ->middleware('signed');
+    Route::get('/view-application/{user}', [InstructorApplicationController::class, 'viewOwnApplication'])
+    ->name('view-application')
+    ->middleware('signed');
 
     Route::post('/apply/{user}', [InstructorsController::class, 'submitApplication'])->name('submit-application');
     Route::post('/start-application', [InstructorsController::class, 'startApplication'])->name('start-application');
