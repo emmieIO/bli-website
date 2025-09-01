@@ -91,9 +91,7 @@ body, html {
 }
 
 /* .hero {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+
 } */
 
 .hero-text {
@@ -127,18 +125,25 @@ body, html {
   }
 }
 
+.hero{
+    height: 80vh;
+    background-image: url(../images/hero-bg.jpg);
+    background-color: rgba(38, 36, 36, 0.559);
+    background-blend-mode: multiply;
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: center;
+    background-attachment: scroll;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
 
 @media (max-width: 768px) {
-  .hero {
-    background-attachment: scroll; /* safer for mobile */
-    background-size: cover;        /* keep full coverage */
-    background-position: center;   /* center properly */
-  }
 
-  .hero-image img {
-    max-width: 100%;
-    margin-top: 20px;
-  }
+
+
 
   .quote-btn{
     display: none;
@@ -164,17 +169,6 @@ body, html {
     }
   }
 
-}
-
-.hero{
-    @apply bg-neutral-600 text-white;
-    height: 80vh;
-    background-image: url(../images/hero-bg.jpg);
-    background-blend-mode: multiply;
-    background-repeat: no-repeat;
-    background-size: cover;
-    background-position: center;
-    background-attachment: fixed;
 }
 
 .preload{

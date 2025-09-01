@@ -3,8 +3,8 @@
 
     <!-- HERO Section -->
     <section class="text-white bg-[#ff0000] hero">
-        <div class="md:flex md:justify-between lg:items-center py-16 w-[95%] mx-auto gap-6">
-            <div class="max-w-xl space-y-5">
+        <div class="flex items-center py-16 gap-6">
+            <div class=" space-y-5 text-center">
                 <h4 class="text-md font-semibold tracking-wide uppercase">Beacon Leadership Institute</h4>
                 <h1 class="text-3xl md:text-3xl lg:text-5xl font-extrabold leading-tight">
                     Empowering Leaders for Influence & Impact
@@ -12,7 +12,7 @@
                 <p class="text-white/90 text-lg leading-relaxed">
                     Developing visionary leaders to drive positive change in organizations and communities.
                 </p>
-                <div class="flex space-x-2">
+                <div class="flex space-x-2 justify-center items-center">
                     <a href="{{ route('courses.index') }}"
                         class="inline-flex items-center gap-2 px-4 py-3 bg-[#00275e] text-white font-medium rounded-lg hover:bg-blue-800 transition">
                         <i data-lucide="book" class="w-5 h-5"></i>
@@ -25,9 +25,7 @@
                     </a>
                 </div>
             </div>
-            {{-- <div class="md:w-[450px] mt-10 md:mt-0 hidden md:block">
-                <img src="{{ asset('images/family.png') }}" alt="family" class="w-full h-auto object-contain" />
-            </div> --}}
+
         </div>
     </section>
 
