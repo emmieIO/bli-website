@@ -28,22 +28,22 @@
         </div>
 
         <!-- Privacy Policy and Terms of Service -->
-        <div class="flex items-center space-x-2 text-sm text-gray-300">
+        <div class="flex items-center space-x-2 text-sm text-white">
             <input type="checkbox" name="agree_terms" id="agree_terms"
-                class="rounded border-gray-300 text-[#00275E] shadow-sm focus:ring-[#00275E]/50" required>
-            <label for="agree_terms" class="text-gray-300">
+                class="rounded border-gray-300 text-[#FF0000] shadow-sm focus:ring-[#FF0000]" required>
+            <label for="agree_terms" class="text-white">
                 I agree to the
-                <a href="{{ route('privacy-policy') }}" class="text-red-500 hover:underline">Privacy Policy</a>
+                <a href="{{ route('privacy-policy') }}" class="text-[#FF0000] hover:underline">Privacy Policy</a>
                 and
-                <a href="{{ route('terms-of-service') }}" class="text-red-500 hover:underline">Terms of Service</a>.
+                <a href="{{ route('terms-of-service') }}" class="text-[#FF0000] hover:underline">Terms of Service</a>.
             </label>
         </div>
 
         <!-- Marketing Consent (Optional) -->
-        <div class="flex items-center space-x-2 text-sm text-gray-300">
+        <div class="flex items-center space-x-2 text-sm text-white">
             <input type="checkbox" name="marketing_consent" id="marketing_consent"
-                class="rounded border-gray-300 text-[#00275E] shadow-sm focus:ring-[#00275E]/50">
-            <label for="marketing_consent" class="text-gray-300">
+                class="rounded border-gray-300 text-[#FF0000] shadow-sm focus:ring-[#FF0000]">
+            <label for="marketing_consent" class="text-white">
                 I agree to receive marketing emails and updates.
             </label>
         </div>
@@ -51,7 +51,7 @@
         <!-- Submit Button -->
         <div>
             <button type="submit"
-                class="w-full bg-[#00275E] hover:bg-[#00275E]/90 text-white font-semibold py-3 px-4 rounded-md transition flex items-center justify-center gap-2">
+                class="w-full bg-[#FF0000] hover:bg-[#cc0000] text-white font-semibold py-3 px-4 rounded-md transition flex items-center justify-center gap-2">
                 <i data-lucide="user-plus" class="w-5 h-5"></i>
                 Create Account
             </button>
@@ -59,26 +59,26 @@
 
         <!-- Social Registration -->
         <div class="mt-6 text-center">
-            <p class="text-sm text-gray-300 mb-4">or sign up with</p>
+            <p class="text-sm text-white mb-4">or sign up with</p>
             <div class="flex justify-center gap-4">
                 <!-- Google -->
                 <a href=""
-                    class="flex items-center gap-2 bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md text-sm font-medium transition">
+                    class="flex items-center gap-2 bg-white hover:bg-gray-100 text-[#00275E] px-4 py-2 rounded-md text-sm font-medium transition">
                     <i data-lucide="globe" class="w-4 h-4"></i> Google
                 </a>
 
                 <!-- Facebook -->
                 <a href=""
-                    class="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition">
+                    class="flex items-center gap-2 bg-white hover:bg-gray-100 text-[#00275E] px-4 py-2 rounded-md text-sm font-medium transition">
                     <i data-lucide="facebook" class="w-4 h-4"></i> Facebook
                 </a>
             </div>
         </div>
 
         <!-- Login Redirect -->
-        <p class="text-center text-sm mt-6 text-gray-300">
+        <p class="text-center text-sm mt-6 text-white">
             Already have an account?
-            <a href="{{ route('login') }}" class="text-teal-100 hover:text-teal-300 font-medium underline">
+            <a href="{{ route('login') }}" class="text-[#FF0000] hover:underline font-medium">
                 Sign in
             </a>
         </p>

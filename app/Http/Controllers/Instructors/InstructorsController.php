@@ -92,11 +92,12 @@ class InstructorsController extends Controller
     {
         $validatedData = $request->validate([
             'name' => 'required|string|max:50',
-            'phone' => ['required', 'phone:NG,GB,US'],
+            'phone' => ['required', 'phone:NG,GB,US', Rule::unique('users', 'phone')->ignore($user->id)],
             'headline' => 'required|string|max:100',
             'bio' => 'required|string|max:1000',
         ],[
-            "bio.required" => "Please tell us about yourself."
+            "bio.required" => "Please tell us about yourself.",
+            "phone.phone" => "Please enter a valid uk,us or ng phone number."
         ]);
 
         $saved = $this->instructorApplicationService->savePersonalInfo($validatedData, $user);
@@ -120,8 +121,8 @@ class InstructorsController extends Controller
             "experience" => 'required|string|max:3000',
             'experience_years' => ['required', 'integer', 'between:0,30'],
             'expertise' => "required|string",
-            'linkedin' => "nullable|url|max:250|",
-            'website' => 'nullable|url|max:255'
+            'linkedin' => "nullable|url",
+            'website' => 'nullable|url'
         ]);
         $saved = $this->instructorApplicationService->saveExperience($validated, $user);
         if ($saved) {

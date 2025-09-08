@@ -1,53 +1,90 @@
 <x-app-layout>
     <div class="py-10 px-4 sm:px-6 lg:px-8 max-w-5xl mx-auto">
         <!-- Page Header -->
-        <div class="flex items-center justify-between mb-8">
-            <h2 class="text-2xl font-bold text-teal-800 flex items-center gap-2">
-                <i data-lucide="mic" class="w-6 h-6"></i>
-                Update {{ $speaker->name }}
-            </h2>
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
+            <div class="flex items-center gap-3">
+                <div class="p-2.5 rounded-lg bg-[#00275E]/10">
+                    <i data-lucide="mic" class="w-6 h-6 text-[#00275E]"></i>
+                </div>
+                <div>
+                    <h2 class="text-2xl font-extrabold text-[#00275E]">Update {{ $speaker->name }}</h2>
+                    <p class="text-sm text-gray-500 mt-1">Edit speaker details and update their public profile.</p>
+                </div>
+            </div>
+
             <a href="{{ route('admin.speakers.index') }}"
-                class="inline-flex items-center text-sm font-medium text-teal-700 hover:underline">
-                <i data-lucide="arrow-left" class="w-4 h-4 mr-1"></i>
+                class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-[#00275E] bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#00275E] transition">
+                <i data-lucide="arrow-left" class="w-4 h-4 mr-2"></i>
                 Back to Speakers
             </a>
         </div>
 
-        <!-- Form -->
-        <form action="{{ route('admin.speakers.update', $speaker) }}" method="POST" enctype="multipart/form-data"
-            class="bg-white border border-gray-100 rounded-xl shadow-sm p-6 space-y-6">
-            @csrf
-            @method("PUT")
+        <!-- Form Card -->
+        <div class="bg-white border border-gray-100 rounded-xl shadow-sm p-6 md:p-8">
+            <form action="{{ route('admin.speakers.update', $speaker) }}" method="POST" enctype="multipart/form-data"
+                class="space-y-8">
+                @csrf
+                @method("PUT")
 
-            <!-- Input Fields Grid -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                <x-input label="Full Name" name="name" required icon="user" :value="old('name', $speaker->name ?? '')" />
-                <x-input label="Title" name="title" icon="briefcase" :value="old('title', $speaker->title ?? '')" />
-                <x-input label="Organization" name="organization" icon="building-2" :value="old('organization', $speaker->organization ?? '')" />
-                <x-input label="Email" name="email" type="email" required icon="mail" :value="old('email', $speaker->email ?? '')" />
-                <x-input label="Phone" name="phone" icon="phone" :value="old('phone', $speaker->phone ?? '')" />
-                <x-input label="LinkedIn" name="linkedin" type="url" icon="linkedin" :value="old('linkedin', $speaker->linkedin ?? '')" />
-                <x-input label="Website" name="website" type="url" icon="globe" :value="old('website', $speaker->website ?? '')" />
-                <x-input label="Photo" name="photo" type="file" icon="image" accept=".jpg,.png,.JPG,.PNG" />
-            </div>
+                <!-- Section: Personal & Contact Info -->
+                <div>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4 pb-2 border-b border-gray-200">👤 Personal & Contact Info</h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                        <x-input label="Full Name" name="name" required icon="user" :value="old('name', $speaker->name ?? '')" />
+                        <x-input label="Professional Title" name="title" icon="briefcase" :value="old('title', $speaker->title ?? '')" />
+                        <x-input label="Organization" name="organization" icon="building-2" :value="old('organization', $speaker->organization ?? '')" />
+                        <x-input label="Email Address" name="email" type="email" required icon="mail" :value="old('email', $speaker->email ?? '')" />
+                        <x-input label="Phone Number" name="phone" icon="phone" :value="old('phone', $speaker->phone ?? '')" />
+                        <x-input label="LinkedIn Profile" name="linkedin" type="url" icon="linkedin" placeholder="https://linkedin.com/in/..." :value="old('linkedin', $speaker->linkedin ?? '')" />
+                        <x-input label="Personal Website" name="website" type="url" icon="globe" placeholder="https://yoursite.com" :value="old('website', $speaker->website ?? '')" />
+                    </div>
+                </div>
 
-            <!-- Bio -->
-            <div>
-                <label for="bio" class="block text-sm font-medium text-gray-700">Bio</label>
-                <textarea id="bio" name="bio" rows="6"
-                    class="mt-1 p-2 block w-full border border-gray-300 rounded-lg shadow-sm focus:ring-teal-500 focus:border-teal-500 sm:text-sm resize-none"
-                    placeholder="Brief speaker biography...">{{ old('bio', $speaker->bio ?? '') }}</textarea>
-                <x-input-error :messages="$errors->get('bio')" class="mt-1" />
-            </div>
+                <!-- Section: Speaker Bio -->
+                <div>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4 pb-2 border-b border-gray-200">📝 Speaker Bio</h3>
+                    <div>
+                        <label for="bio" class="block text-sm font-medium text-gray-700 mb-2">Bio (Public-facing description)</label>
+                        <textarea id="bio" name="bio" rows="6"
+                            class="block w-full p-3 text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#00275E] focus:border-[#00275E] resize-none"
+                            placeholder="Write a compelling bio that highlights expertise, achievements, and speaking style...">{{ old('bio', $speaker->bio ?? '') }}</textarea>
+                        <x-input-error :messages="$errors->get('bio')" class="mt-1" />
+                        <p class="mt-2 text-xs text-gray-500">Ideal length: 100–300 words. This will be shown on event pages.</p>
+                    </div>
+                </div>
 
-            <!-- Submit Button -->
-            <div class="pt-4">
-                <button type="submit"
-                    class="inline-flex items-center px-4 py-2 bg-teal-600 text-white text-sm font-medium rounded hover:bg-teal-700 transition shadow-sm">
-                    <i data-lucide="save" class="w-4 h-4 mr-2"></i>
-                    Update Speaker
-                </button>
-            </div>
-        </form>
+                <!-- Section: Photo Upload -->
+                <div>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4 pb-2 border-b border-gray-200">🖼️ Profile Photo</h3>
+                    <div>
+                        <label for="photo" class="block text-sm font-medium text-gray-700 mb-2">Upload Photo (JPG/PNG)</label>
+                        <input type="file" name="photo" id="photo" accept=".jpg,.jpeg,.png,.JPG,.PNG"
+                            class="block w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#00275E] focus:border-[#00275E]
+                            file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium
+                            file:bg-[#00275E] file:text-white hover:file:bg-[#FF0000] transition" />
+
+                        @if($speaker->photo)
+                            <div class="mt-3 flex items-center gap-2">
+                                <img src="{{ asset('storage/' . $speaker->photo) }}" alt="Current speaker photo" class="w-16 h-16 object-cover rounded-lg border">
+                                <span class="text-sm text-gray-600">Current photo uploaded on {{ $speaker->updated_at->format('M d, Y') }}</span>
+                            </div>
+                        @endif
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="pt-6 border-t border-gray-200 flex flex-col sm:flex-row justify-end gap-3">
+                    <a href="{{ route('admin.speakers.index') }}"
+                        class="px-5 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-300 transition">
+                        Cancel
+                    </a>
+                    <button type="submit"
+                        class="px-6 py-2.5 inline-flex items-center text-sm font-medium text-white bg-[#00275E] rounded-lg hover:bg-[#FF0000] focus:ring-4 focus:ring-blue-300 focus:outline-none transition">
+                        <i data-lucide="save" class="w-4 h-4 mr-2"></i>
+                        Update Speaker Profile
+                    </button>
+                </div>
+            </form>
+        </div>
     </div>
 </x-app-layout>

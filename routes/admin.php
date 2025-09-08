@@ -22,7 +22,7 @@ Route::group([
         Route::get("/events/create", [EventController::class, "create"])->name("events.create");
         Route::get("/events/{event}/show", [EventController::class, "show"])->name("events.show");
         Route::get('/events/{slug}/edit', [EventController::class, "edit"])->name("events.edit");
-        Route::put("/events/{event}/update", [EventController::class, 'update'])->name('events.update');
+        Route::put("/events/{event}/edit", [EventController::class, 'update'])->name('events.update');
     });
 
     // Event Speakers Management
@@ -46,4 +46,6 @@ Route::group([
         Route::put('/speakers/{speaker}/edit', [SpeakersController::class, 'update'])->name("speakers.update");
 
     });
+
+
 });

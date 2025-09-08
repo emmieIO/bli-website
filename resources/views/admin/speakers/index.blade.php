@@ -1,43 +1,45 @@
 <x-app-layout>
-    <div class="px-4 mx-auto">
+    <div class="px-4 mx-auto max-w-7xl">
         <!-- Header Section -->
-        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
             <div class="flex items-center gap-3">
                 <a href="{{ url()->previous() }}"
-                    class="inline-flex items-center justify-center overflow-hidden w-10 h-10 bg-white border rounded-full border-gray-300 text-gray-700 text-sm font-medium hover:bg-gray-50 transition shadow-sm">
-                    <i data-lucide="arrow-left" class="w-6 h-6 mr-2"></i>
-
+                    class="inline-flex items-center justify-center overflow-hidden w-10 h-10 bg-white border rounded-full border-gray-300 text-gray-700 text-sm font-medium hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#00275E] transition shadow-sm">
+                    <i data-lucide="arrow-left" class="w-5 h-5"></i>
                 </a>
-                <div class="p-2 rounded-lg bg-teal-50">
-                    <i data-lucide="mic" class="w-6 h-6 text-teal-600"></i>
+                <div class="p-2.5 rounded-lg bg-[#00275E]/10">
+                    <i data-lucide="mic" class="w-6 h-6 text-[#00275E]"></i>
                 </div>
                 <div>
-                    <h1 class="text-2xl font-bold text-gray-900">Event Speakers</h1>
+                    <h1 class="text-2xl font-extrabold text-[#00275E]">Event Speakers</h1>
                     <p class="text-sm text-gray-500">Manage all conference speakers and their details</p>
                 </div>
             </div>
+
+            <a href="{{ route('admin.speakers.create') }}"
+                class="inline-flex items-center px-4 py-2 bg-[#00275E] text-white text-sm font-medium rounded-lg hover:bg-[#FF0000] focus:ring-4 focus:ring-blue-300 transition shadow-sm">
+                <i data-lucide="plus" class="w-4 h-4 mr-2"></i>
+                Add New Speaker
+            </a>
         </div>
 
         <!-- Status Tabs -->
         <x-speakers-applications-tabs />
 
         <!-- Main Content -->
-        <div class="bg-white shadow rounded-lg overflow-hidden">
+        <div class="bg-white shadow rounded-xl border border-gray-100 overflow-hidden">
             <!-- Table Header with Stats -->
-            <div
-                class="px-6 py-4 border-b border-gray-200 bg-gray-50 flex flex-wrap items-center justify-between gap-4">
+            <div class="px-6 py-4 border-b border-gray-200 bg-gray-50 flex flex-wrap items-center justify-between gap-4">
                 <div class="flex items-center gap-4">
                     <span class="text-sm font-medium text-gray-700">
-                        Showing <span
-                            class="font-semibold">{{ $speakers->firstItem() }}-{{ $speakers->lastItem() }}</span>
+                        Showing <span class="font-semibold">{{ $speakers->firstItem() }}–{{ $speakers->lastItem() }}</span>
                         of <span class="font-semibold">{{ $speakers->total() }}</span> speakers
                     </span>
                     @if(request()->has('search'))
-                        <span
-                            class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-teal-100 text-teal-800">
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-[#00275E]/10 text-[#00275E]">
                             Filtered
                             <button type="button"
-                                class="ml-1.5 flex-shrink-0 h-4 w-4 rounded-full inline-flex items-center justify-center text-teal-600 hover:bg-teal-200 hover:text-teal-800">
+                                class="ml-1.5 flex-shrink-0 h-4 w-4 rounded-full inline-flex items-center justify-center text-[#00275E] hover:bg-[#00275E]/20 hover:text-[#00275E]">
                                 <i data-lucide="x" class="w-3 h-3"></i>
                             </button>
                         </span>
@@ -46,7 +48,7 @@
                 <div class="flex items-center gap-2">
                     <label for="sort" class="text-sm font-medium text-gray-700 whitespace-nowrap">Sort by:</label>
                     <select id="sort"
-                        class="block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-teal-500 focus:border-teal-500 sm:text-sm rounded-md">
+                        class="block w-full pl-3 pr-10 py-2 text-sm border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#00275E] focus:border-[#00275E] rounded-md">
                         <option>Name (A-Z)</option>
                         <option>Name (Z-A)</option>
                         <option>Recently Added</option>
@@ -60,18 +62,10 @@
                 <table class="min-w-full divide-y divide-gray-200">
                     <thead class="bg-gray-50">
                         <tr>
-                            <th scope="col"
-                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Speaker</th>
-                            <th scope="col"
-                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Title & Organization</th>
-                            <th scope="col"
-                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Status</th>
-                            <th scope="col"
-                                class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Actions</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Speaker</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Title & Organization</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                            <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                         </tr>
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-200">
@@ -82,11 +76,10 @@
                                     <div class="flex items-center gap-3">
                                         <div class="flex-shrink-0 h-10 w-10 relative">
                                             <img class="h-10 w-10 rounded-full object-cover"
-                                                src="{{ $speaker->photo ? asset("storage/$speaker->photo") : 'https://i.pravatar.cc/40?u=' . $speaker->email }}"
+                                                src="{{ $speaker->photo ? asset('storage/' . $speaker->photo) : 'https://i.pravatar.cc/40?u=' . $speaker->email }}"
                                                 alt="{{ $speaker->name }}">
                                             @if($speaker->is_featured)
-                                                <span
-                                                    class="absolute -top-1 -right-1 bg-amber-500 text-white rounded-full p-0.5">
+                                                <span class="absolute -top-1 -right-1 bg-amber-500 text-white rounded-full p-0.5">
                                                     <i data-lucide="star" class="w-3 h-3 fill-current"></i>
                                                 </span>
                                             @endif
@@ -119,7 +112,7 @@
 
                                 <!-- Status Column -->
                                 <td class="px-6 py-4">
-                                    @if($speaker->status =='active')
+                                    @if($speaker->status == 'active')
                                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
                                             Active
                                         </span>
@@ -129,6 +122,7 @@
                                         </span>
                                     @endif
                                 </td>
+
                                 <!-- Actions Column -->
                                 <td class="px-6 py-4 text-right">
                                     <div class="inline-flex gap-2">
@@ -138,18 +132,18 @@
                                             <i data-lucide="eye" class="w-5 h-5"></i>
                                         </a>
                                         <a href="{{ route('admin.speakers.edit', $speaker) }}" title="Edit"
-                                            class="p-1.5 text-teal-600 hover:text-teal-800 rounded-full hover:bg-teal-50 transition-colors"
+                                            class="p-1.5 text-[#00275E] hover:text-[#FF0000] rounded-full hover:bg-[#00275E]/10 transition-colors"
                                             aria-label="Edit speaker">
                                             <i data-lucide="edit-3" class="w-5 h-5"></i>
                                         </a>
-                                        @if($speaker->application_status === 'pending')
-                                            <a href="{{ route('admin.speaker-applications.review', $speaker) }}"
+                                        {{-- @if($speaker->application_status === 'pending') --}}
+                                            <a href=""
                                                 title="Review Application"
                                                 class="p-1.5 text-amber-600 hover:text-amber-800 rounded-full hover:bg-amber-50 transition-colors"
                                                 aria-label="Review application">
                                                 <i data-lucide="clipboard-check" class="w-5 h-5"></i>
                                             </a>
-                                        @endif
+                                        {{-- @endif --}}
                                         <button data-delete-route="{{ route('admin.speakers.destroy', $speaker) }}"
                                             data-modal-target="delete-speaker-modal"
                                             data-modal-toggle="delete-speaker-modal"
@@ -163,20 +157,19 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="5" class="px-6 py-12 text-center">
+                                <td colspan="5" class="px-6 py-16 text-center">
                                     <div class="flex flex-col items-center justify-center space-y-4 text-gray-400">
                                         <i data-lucide="mic-off" class="w-12 h-12"></i>
                                         <h3 class="text-lg font-medium text-gray-900">No speakers found</h3>
-                                        <p class="max-w-md text-center">Get started by adding your first speaker to the
-                                            event.</p>
-                                        <div class="flex gap-3 mt-2">
+                                        <p class="max-w-md text-center">Get started by adding your first speaker to the event.</p>
+                                        <div class="flex flex-col sm:flex-row gap-3 mt-4">
                                             <a href="{{ route('admin.speakers.applications.pending') }}"
-                                                class="inline-flex items-center px-4 py-2 bg-white border border-gray-300 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50 transition shadow-sm">
+                                                class="inline-flex items-center px-4 py-2 bg-white border border-gray-300 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#00275E] transition shadow-sm">
                                                 <i data-lucide="list-checks" class="w-4 h-4 mr-2"></i>
                                                 View Pending Applications
                                             </a>
                                             <a href="{{ route('admin.speakers.create') }}"
-                                                class="inline-flex items-center px-4 py-2 bg-teal-600 text-white text-sm font-medium rounded-lg hover:bg-teal-700 transition shadow-sm">
+                                                class="inline-flex items-center px-4 py-2 bg-[#00275E] text-white text-sm font-medium rounded-lg hover:bg-[#FF0000] focus:ring-4 focus:ring-blue-300 transition shadow-sm">
                                                 <i data-lucide="plus" class="w-4 h-4 mr-2"></i>
                                                 Add Speaker
                                             </a>
@@ -202,14 +195,14 @@
     <div id="delete-speaker-modal" tabindex="-1" aria-hidden="true"
         class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
         <div class="relative p-4 w-full max-w-md max-h-full">
-            <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
+            <div class="relative bg-white rounded-xl shadow-sm border border-gray-200">
                 <!-- Modal header -->
-                <div class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600">
-                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                <div class="flex items-center justify-between p-4 md:p-5 border-b border-gray-200 rounded-t">
+                    <h3 class="text-lg font-semibold text-gray-900">
                         Confirm Speaker Deletion
                     </h3>
                     <button type="button"
-                        class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white"
+                        class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center"
                         data-modal-hide="delete-speaker-modal">
                         <i data-lucide="x" class="w-4 h-4"></i>
                         <span class="sr-only">Close modal</span>
@@ -218,30 +211,27 @@
                 <!-- Modal body -->
                 <div class="p-4 md:p-5 space-y-4">
                     <div class="flex flex-col items-center text-center">
-                        <div
-                            class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-100 mb-4">
+                        <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-100 mb-4">
                             <i data-lucide="alert-triangle" class="h-6 w-6 text-red-600"></i>
                         </div>
                         <h3 class="text-lg font-medium text-gray-900 mb-2" id="speaker-delete-title">Delete Speaker</h3>
                         <div class="text-sm text-gray-500">
-                            <p>Are you sure you want to delete <span id="speaker-name"
-                                    class="font-semibold text-gray-900"></span>?</p>
+                            <p>Are you sure you want to delete <span id="speaker-name" class="font-semibold text-gray-900"></span>?</p>
                             <p class="mt-1">This action cannot be undone.</p>
                         </div>
                     </div>
                 </div>
                 <!-- Modal footer -->
-                <div
-                    class="flex items-center justify-end p-4 md:p-5 border-t border-gray-200 rounded-b dark:border-gray-600 gap-3">
+                <div class="flex items-center justify-end p-4 md:p-5 border-t border-gray-200 rounded-b gap-3">
                     <button data-modal-hide="delete-speaker-modal" type="button"
-                        class="py-2.5 px-5 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700">
+                        class="py-2.5 px-5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-300 transition">
                         Cancel
                     </button>
                     <form method="POST" id="delete-speaker-form" class="inline">
                         @csrf
                         @method('DELETE')
                         <button type="submit"
-                            class="text-white bg-red-600 hover:bg-red-700 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center dark:bg-red-500 dark:hover:bg-red-600 dark:focus:ring-red-900">
+                            class="px-5 py-2.5 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 focus:ring-4 focus:outline-none focus:ring-red-300 transition inline-flex items-center">
                             <i data-lucide="trash-2" class="w-4 h-4 mr-2"></i>
                             Delete Speaker
                         </button>
@@ -263,15 +253,15 @@
             document.getElementById('speaker-delete-title').textContent = `Delete ${speaker.name}`;
         }
 
-        // Initialize tooltips for action buttons
-        document.addEventListener('DOMContentLoaded', function () {
-            const tooltipTriggerList = [].slice.call(document.querySelectorAll('[title]'));
-            tooltipTriggerList.map(function (tooltipTriggerEl) {
-                return new Tooltip(tooltipTriggerEl, {
-                    placement: 'top',
-                    trigger: 'hover focus'
-                });
-            });
-        });
+        // Optional: Initialize tooltips if you're using Bootstrap or similar
+        // document.addEventListener('DOMContentLoaded', function () {
+        //     const tooltipTriggerList = [].slice.call(document.querySelectorAll('[title]'));
+        //     tooltipTriggerList.map(function (tooltipTriggerEl) {
+        //         return new Tooltip(tooltipTriggerEl, {
+        //             placement: 'top',
+        //             trigger: 'hover focus'
+        //         });
+        //     });
+        // });
     </script>
 </x-app-layout>

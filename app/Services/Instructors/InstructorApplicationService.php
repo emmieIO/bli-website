@@ -2,6 +2,7 @@
 
 namespace App\Services\Instructors;
 
+use App\Enums\ApplicationStatus;
 use App\Enums\UserRoles;
 use App\Models\ApplicationLog;
 use App\Models\InstructorProfile;
@@ -12,8 +13,12 @@ use App\Notifications\InstructorApplicationSubmitted;
 use App\Traits\GeneratesApplicationId;
 use App\Traits\HasFileUpload;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\FacadesLog;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Str;
@@ -42,7 +47,7 @@ class InstructorApplicationService
 
 
             if ($profile && in_array($profile->status, ['submitted', 'approved'])) {
-                return null; // Abort silently
+                return null;
             }
 
             if (!$profile) {
@@ -79,7 +84,7 @@ class InstructorApplicationService
             return true;
 
         } catch (\Throwable $e) {
-            \Log::error('Error saving personal info: ' . $e->getMessage(), [
+            Log::error('Error saving personal info: ' . $e->getMessage(), [
                 'user_id' => $user->id ?? null,
                 'data' => $personalInfo,
             ]);
@@ -102,7 +107,7 @@ class InstructorApplicationService
             });
             return true;
         } catch (\Throwable $th) {
-            \Log::error('Error saving experience: ' . $th->getMessage(), [
+            Log::error('Error saving experience: ' . $th->getMessage(), [
                 'user_id' => $user->id ?? null,
                 'data' => $experienceData,
             ]);
@@ -144,7 +149,7 @@ class InstructorApplicationService
             if (!empty($request->file('resume'))) {
                 $this->deleteFile($request->file('resume')->path());
             }
-            \Log::error('Error saving instructor documents: ' . $e->getMessage(), [
+            Log::error('Error saving instructor documents: ' . $e->getMessage(), [
                 'user_id' => $user->id ?? null,
                 'data' => $request->only(['video_url']),
                 'has_resume' => $request->hasFile('resume'),
@@ -203,7 +208,7 @@ class InstructorApplicationService
             $user->notify(new InstructorApplicationSubmitted());
             return true;
         } catch (\Exception $e) {
-            \Log::error('Error submitting instructor application: ' . $e->getMessage(), [
+            Log::error('Error submitting instructor application: ' . $e->getMessage(), [
                 'user_id' => $user->id ?? null,
             ]);
             return false;
@@ -224,9 +229,10 @@ class InstructorApplicationService
             DB::transaction(function () use ($user, $application) {
                 // assign instructor role
                 $user->syncRoles([UserRoles::INSTRUCTOR->value]);
+                $user->email_verified_at = Carbon::now();
                 // update application status to approved
                 $application->update([
-                    'status' => "approved",
+                    'status' => ApplicationStatus::APPROVED->value,
                     'is_approved' => true,
                     "approved_at" => now()
                 ]);
@@ -237,11 +243,19 @@ class InstructorApplicationService
                 now()->addDays(3),
                 ["token" => Password::createToken($user), 'email' => $user->email]
             );
+            // log Activity
+            ApplicationLog::create([
+                'instructor_profile_id' => $application->id,
+                'application_id' => $application->application_id,
+                'performed_by' => Auth::id(),
+                'action' => 'approved',
+                'comment' => 'Application approved',
+            ]);
             // send approval notification with password reset link
             $user->notify(new InstructorApplicationApproved($resetUrl));
             return true;
         } catch (\Exception $e) {
-            \Log::error('Error approving instructor application: ' . $e->getMessage(), [
+            Log::error('Error approving instructor application: ' . $e->getMessage(), [
                 'user_id' => $user->id ?? null,
                 'application_id' => $application->id ?? null,
             ]);
@@ -250,7 +264,9 @@ class InstructorApplicationService
     }
 
     public function rejectApplication(array $rejectionData, InstructorProfile $application){
-
+        if($application->status == ApplicationStatus::REJECTED->value){
+            return true;
+        }
         try {
             DB::transaction(function () use ($rejectionData, $application) {
                 $user = $application->user;
@@ -261,14 +277,14 @@ class InstructorApplicationService
                 // 2. Update application status
                 $application->update([
                     'is_approved' => false,
-                    'status' => 'rejected',
+                    'status' => ApplicationStatus::REJECTED->value,
                 ]);
 
                 // 3. Log rejection
                 ApplicationLog::create([
                     'instructor_profile_id' => $application->id,
                     'application_id' => $application->application_id,
-                    'performed_by' => auth()->id(),
+                    'performed_by' => Auth::id(),
                     'comment' => $rejectionData['rejection_reason'] ?? 'No reason provided',
                     'action' => 'rejected',
                 ]);
@@ -282,7 +298,7 @@ class InstructorApplicationService
 
             return true;
         } catch (\Throwable $th) {
-            \Log::error('Error rejecting instructor application: ' . $th->getMessage(), [
+            Log::error('Error rejecting instructor application: ' . $th->getMessage(), [
                 'application_id' => $application->id ?? null,
                 'data' => $rejectionData,
             ]);

@@ -4,7 +4,7 @@
             <!-- Application Header with Stats -->
             <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
                 <div>
-                    <h1 class="text-3xl font-bold text-teal-800">Instructor Application Review</h1>
+                    <h1 class="text-3xl font-bold text-[#00275E]">Instructor Overview</h1>
                     <p class="text-gray-600">Submitted on {{ $application->created_at->format('M d, Y') }}</p>
                 </div>
 
@@ -22,23 +22,23 @@
 
                     <!-- Stats Cards -->
                     <div class="flex gap-2">
-                        <div class="bg-teal-50 px-3 py-1 rounded-lg flex items-center">
-                            <svg class="w-4 h-4 text-teal-600 mr-1" fill="none" stroke="currentColor"
+                        <div class="bg-[#f0f8ff] px-3 py-1 rounded-lg flex items-center">
+                            <svg class="w-4 h-4 text-[#00275E] mr-1" fill="none" stroke="currentColor"
                                 viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                             </svg>
-                            <span class="text-xs text-teal-800">{{ $application->experience_years }} yrs exp</span>
+                            <span class="text-xs text-[#00275E]">{{ $application->experience_years }} yrs exp</span>
                         </div>
-                        <div class="bg-teal-50 px-3 py-1 rounded-lg flex items-center">
-                            <svg class="w-4 h-4 text-teal-600 mr-1" fill="none" stroke="currentColor"
+                        <div class="bg-[#f0f8ff] px-3 py-1 rounded-lg flex items-center">
+                            <svg class="w-4 h-4 text-[#00275E] mr-1" fill="none" stroke="currentColor"
                                 viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z">
                                 </path>
                             </svg>
                             <span
-                                class="text-xs text-teal-800">{{ count(explode(',', $application->area_of_expertise)) }}
+                                class="text-xs text-[#00275E]">{{ count(explode(',', $application->area_of_expertise)) }}
                                 skills</span>
                         </div>
                     </div>
@@ -49,8 +49,8 @@
             <div class="bg-white rounded-xl shadow-lg overflow-hidden mb-8 border border-gray-100">
                 <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-200 w-full md:w-auto">
                     <div class="flex items-center space-x-4">
-                        <div class="bg-teal-100 p-3 rounded-full">
-                            <svg class="w-6 h-6 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <div class="bg-[#e6f7ff] p-3 rounded-full">
+                            <svg class="w-6 h-6 text-[#00275E]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
                             </svg>
@@ -79,10 +79,11 @@
                     </div>
                 </div>
             </div>
+
             <!-- Basic Information Section -->
             <div class="border-b border-gray-200 px-6 py-4">
-                <h2 class="text-xl font-semibold text-teal-700 mb-4 flex items-center">
-                    <svg class="w-5 h-5 mr-2 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <h2 class="text-xl font-semibold text-[#00275E] mb-4 flex items-center">
+                    <svg class="w-5 h-5 mr-2 text-[#00275E]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
                     </svg>
@@ -101,7 +102,7 @@
                         <p class="text-sm text-gray-500 font-medium">Years of Experience</p>
                         <div class="flex items-center">
                             <div class="w-full bg-gray-200 rounded-full h-2.5 mr-2">
-                                <div class="bg-teal-600 h-2.5 rounded-full"
+                                <div class="bg-[#00275E] h-2.5 rounded-full"
                                     style="width: {{ min(100, ($application->experience_years / 10) * 100) }}%"></div>
                             </div>
                             <span class="font-medium text-gray-800">{{ $application->experience_years }}</span>
@@ -112,8 +113,8 @@
 
             <!-- Expertise Section -->
             <div class="border-b border-gray-200 px-6 py-4">
-                <h2 class="text-xl font-semibold text-teal-700 mb-4 flex items-center">
-                    <svg class="w-5 h-5 mr-2 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <h2 class="text-xl font-semibold text-[#00275E] mb-4 flex items-center">
+                    <svg class="w-5 h-5 mr-2 text-[#00275E]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z">
                         </path>
@@ -122,8 +123,8 @@
                 </h2>
                 <div class="flex flex-wrap gap-2">
                     @foreach (explode(',', $application->area_of_expertise) as $expertise)
-                        <span class="px-3 py-1 bg-teal-50 text-teal-800 text-sm rounded-full flex items-center">
-                            <svg class="w-3 h-3 mr-1 text-teal-600" fill="none" stroke="currentColor"
+                        <span class="px-3 py-1 bg-[#e6f7ff] text-[#00275E] text-sm rounded-full flex items-center">
+                            <svg class="w-3 h-3 mr-1 text-[#00275E]" fill="none" stroke="currentColor"
                                 viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M5 13l4 4L19 7"></path>
@@ -136,8 +137,8 @@
 
             <!-- Bio Section -->
             <div class="border-b border-gray-200 px-6 py-4">
-                <h2 class="text-xl font-semibold text-teal-700 mb-4 flex items-center">
-                    <svg class="w-5 h-5 mr-2 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <h2 class="text-xl font-semibold text-[#00275E] mb-4 flex items-center">
+                    <svg class="w-5 h-5 mr-2 text-[#00275E]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
                     </svg>
@@ -148,8 +149,8 @@
 
             <!-- Teaching History Section -->
             <div class="border-b border-gray-200 px-6 py-4">
-                <h2 class="text-xl font-semibold text-teal-700 mb-4 flex items-center">
-                    <svg class="w-5 h-5 mr-2 text-teal-600" fill="none" stroke="currentColor"
+                <h2 class="text-xl font-semibold text-[#00275E] mb-4 flex items-center">
+                    <svg class="w-5 h-5 mr-2 text-[#00275E]" fill="none" stroke="currentColor"
                         viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253">
@@ -157,17 +158,13 @@
                     </svg>
                     Teaching Philosophy & History
                 </h2>
-                {{-- <div class="bg-teal-50 p-4 rounded-lg mb-4">
-                    <p class="whitespace-pre-line text-gray-700 italic leading-relaxed">
-                        "{{ Str::limit($application->teaching_history, 200) }}"</p>
-                </div> --}}
                 <p class="whitespace-pre-line text-gray-700 leading-relaxed">{{ $application->teaching_history }}</p>
             </div>
 
             <!-- Documents Section -->
             <div class="px-6 py-4">
-                <h2 class="text-xl font-semibold text-teal-700 mb-4 flex items-center">
-                    <svg class="w-5 h-5 mr-2 text-teal-600" fill="none" stroke="currentColor"
+                <h2 class="text-xl font-semibold text-[#00275E] mb-4 flex items-center">
+                    <svg class="w-5 h-5 mr-2 text-[#00275E]" fill="none" stroke="currentColor"
                         viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
@@ -177,10 +174,10 @@
                 </h2>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     @if ($application->resume_path)
-                        <div class="border border-gray-200 rounded-lg p-4 hover:border-teal-300 transition">
+                        <div class="border border-gray-200 rounded-lg p-4 hover:border-[#00275E] transition">
                             <div class="flex items-start">
-                                <div class="p-2 bg-teal-100 rounded-lg mr-4">
-                                    <svg class="w-6 h-6 text-teal-600" fill="none" stroke="currentColor"
+                                <div class="p-2 bg-[#e6f7ff] rounded-lg mr-4">
+                                    <svg class="w-6 h-6 text-[#00275E]" fill="none" stroke="currentColor"
                                         viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
@@ -191,7 +188,7 @@
                                     <h3 class="font-medium text-gray-800">Professional Resume</h3>
                                     <p class="text-sm text-gray-500 mb-2">PDF document</p>
                                     <a href="{{ asset('storage/' . $application->resume_path) }}" download
-                                        class="text-sm text-teal-600 hover:text-teal-800 font-medium inline-flex items-center">
+                                        class="text-sm text-[#00275E] hover:text-[#001a44] font-medium inline-flex items-center">
                                         Download
                                         <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor"
                                             viewBox="0 0 24 24">
@@ -206,10 +203,10 @@
                     @endif
 
                     @if ($application->intro_video_url)
-                        <div class="border border-gray-200 rounded-lg p-4 hover:border-teal-300 transition">
+                        <div class="border border-gray-200 rounded-lg p-4 hover:border-[#00275E] transition">
                             <div class="flex items-start">
-                                <div class="p-2 bg-teal-100 rounded-lg mr-4">
-                                    <svg class="w-6 h-6 text-teal-600" fill="none" stroke="currentColor"
+                                <div class="p-2 bg-[#e6f7ff] rounded-lg mr-4">
+                                    <svg class="w-6 h-6 text-[#00275E]" fill="none" stroke="currentColor"
                                         viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z">
@@ -220,7 +217,7 @@
                                     <h3 class="font-medium text-gray-800">Introduction Video</h3>
                                     <p class="text-sm text-gray-500 mb-2">YouTube link</p>
                                     <a href="{{ $application->intro_video_url }}" target="_blank"
-                                        class="text-sm text-teal-600 hover:text-teal-800 font-medium inline-flex items-center">
+                                        class="text-sm text-[#00275E] hover:text-[#001a44] font-medium inline-flex items-center">
                                         Watch Video
                                         <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor"
                                             viewBox="0 0 24 24">
@@ -239,9 +236,8 @@
 
         <!-- Action Buttons -->
         <div class="flex flex-col sm:flex-row justify-end gap-4 mt-8">
-            @if ($application->status === 'approved' || $application->status === 'submitted' )
                 <button onclick="showRejectModal()"
-                    class="px-6 py-3 border border-red-500 text-red-500 rounded-lg hover:bg-red-50 transition flex items-center justify-center">
+                    class="px-6 py-3 border border-[#ff0000] text-[#ff0000] rounded-lg hover:bg-[#ffe6e6] transition flex items-center justify-center">
                     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M6 18L18 6M6 6l12 12">
@@ -249,13 +245,12 @@
                     </svg>
                     Reject Application
                 </button>
-            @endif
             @if (!$application->is_approved)
                 <button type="button" data-modal-target="approve-modal" data-modal-toggle="approve-modal"
-                    data-action-url = "{{ route('admin.instructors.applications.approve', $application) }}"
+                    data-action-url="{{ route('admin.instructors.applications.approve', $application) }}"
                     onclick="confirmApproval(this, {{ $application }})"
                     title="Approve"
-                    class=" px-6 py-3 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition flex items-center justify-center">
+                    class="px-6 py-3 bg-[#00275E] text-white rounded-lg hover:bg-[#001a44] cursor-pointer transition flex items-center justify-center">
                     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7">
                         </path>
@@ -272,7 +267,7 @@
                 <div class="p-6">
                     <div class="flex justify-between items-center mb-4">
                         <h3 class="text-xl font-semibold text-gray-900">Reject Application</h3>
-                        <button onclick="hideRejectModal()" class="text-gray-400 hover:text-gray-500">
+                        <button onclick="hideRejectModal()" class="text-gray-400 cursor-pointer hover:text-gray-500">
                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M6 18L18 6M6 6l12 12"></path>
@@ -288,7 +283,7 @@
                                 Please provide a reason for rejection
                             </label>
                             <textarea id="rejection_reason" name="rejection_reason" rows="4"
-                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-teal-500 focus:border-teal-500"></textarea>
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-[#00275E] focus:border-[#00275E]"></textarea>
                             <x-input-error :messages="$errors->get('rejection_reason')" />
                         </div>
 
@@ -298,7 +293,7 @@
                                 Cancel
                             </button>
                             <button type="submit"
-                                class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 flex items-center">
+                                class="px-4 py-2 bg-[#ff0000] text-white rounded-lg hover:bg-[#cc0000] flex items-center">
                                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M6 18L18 6M6 6l12 12"></path>
@@ -310,9 +305,8 @@
                 </div>
             </div>
         </div>
-        </div>
 
-        {{-- approval Modal --}}
+        {{-- Approval Modal --}}
         <div id="approve-modal" tabindex="-1"
             class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
             <div class="relative p-4 w-full max-w-md max-h-full">
@@ -335,7 +329,7 @@
                                 @csrf
                                 @method('PATCH')
                                 <button data-modal-hide="approve-modal" type="submit"
-                                    class="text-white bg-green-600 hover:bg-green-800 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-sm inline-flex items-center px-5 py-2.5 text-center">
+                                    class="text-white bg-[#00275E] hover:bg-[#001a44] focus:ring-4 focus:outline-none focus:ring-[#00275E] font-medium rounded-lg text-sm inline-flex items-center px-5 py-2.5 text-center">
                                     Yes, I'm sure
                                 </button>
                             </form>
@@ -354,7 +348,7 @@
             const confirmText = document.getElementById("confirmText");
 
             function confirmApproval(button, profile) {
-                console.log(button)
+                console.log(button);
                 confirmText.innerText = `Are you sure you want to approve the application for ${profile.application_id}?`;
                 approvalForm.action = button.getAttribute('data-action-url');
             }

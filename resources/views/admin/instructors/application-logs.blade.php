@@ -42,6 +42,9 @@
                         <th scope="col" class="px-6 py-3 whitespace-nowrap">
                             Performed By
                         </th>
+                        <th scope="col" class="px-6 py-3 whitespace-nowrap">
+                            Comment
+                        </th>
 
                         <th scope="col" class="px-6 py-3">
                             Action
@@ -62,11 +65,10 @@
                             <td class="px-6 py-4">
                                 {{ $log->user->name }}
                             </td>
+                            <td class="px-6 py-4">
+                                {{ $log->comment }}
+                            </td>
                             <td class="flex items-center px-6 py-4">
-                                <a href="">
-                                    <i data-lucide="eye" class="size-4 stroke-blue-800"></i>
-                                </a>
-
                                 <button data-modal-target="popup-modal" data-modal-toggle="popup-modal"
                                     onclick="confirmDelete('{{ route('admin.instructors.application-logs.delete', $log) }}')"
                                     class="font-medium text-red-600 hover:underline ms-3 flex items-center cursor-pointer">

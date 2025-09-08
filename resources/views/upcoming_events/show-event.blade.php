@@ -1,7 +1,7 @@
 <x-guest-layout>
-    <section class="relative bg-white">
+    <section class="relative ">
         <!-- Cover Image with Overlay -->
-        <div class="relative h-[400px] overflow-hidden w-[90%] mx-auto rounded-2xl my-4 shadow-lg">
+        <div class="relative h-[400px] overflow-hidden w-[90%] mx-auto rounded-2xl my-4 shadow-lg bg-blue-400">
             <img src="{{ asset("storage/$programme->program_cover") ?? asset('images/logo.jpg') }}"
                 alt="{{ $programme->title }}" class="absolute inset-0 w-full h-full object-cover brightness-40">
             <div class="relative z-10 flex items-center h-full px-6 max-w-6xl mx-auto">
