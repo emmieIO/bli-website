@@ -27,5 +27,20 @@ class CreateUserRequest extends FormRequest
             "email" => ['required', 'email', 'unique:users,email'],
             "password" => ["required", "confirmed", "min:8"],
         ];
+
+    }
+    public function messages(): array
+    {
+        return [
+            'name.required' => 'Name is required.',
+            'phone.required' => 'Phone number is required.',
+            'phone.phone' => 'Please provide a valid Nigerian phone number.',
+            'email.required' => 'Email is required.',
+            'email.email' => 'Please provide a valid email address.',
+            'email.unique' => 'This email is already taken.',
+            'password.required' => 'Password is required.',
+            'password.confirmed' => 'Passwords do not match.',
+            'password.min' => 'Password must be at least 8 characters.',
+        ];
     }
 }

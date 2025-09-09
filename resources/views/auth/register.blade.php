@@ -3,28 +3,28 @@
         @csrf
 
         <!-- Full Name -->
-        <x-input name="name" label="Full Name" placeholder="Enter your full name" icon="user" autofocus required />
+        <x-input name="name" label="Full Name" placeholder="Enter your full name" icon="user" autofocus />
 
         <!-- Email and Phone Number -->
         <div class="grid grid-cols-1 gap-2 md:grid-cols-2">
             <!-- Email -->
             <x-input name="email" type="email" label="Email Address" placeholder="example@domain.com" icon="mail"
-                required />
+                 />
 
             <!-- Phone Number -->
-            <x-input name="phone" type="text" label="Phone Number" placeholder="123-456-7890" icon="phone"
-                pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}" autocomplete="tel" required />
+            <x-input name="phone" type="text" label="Phone Number" placeholder="e.g. +2348012345678" icon="phone"
+                 autocomplete="tel" description="Enter your Nigerian phone number in international format." />
         </div>
 
         <!-- Password and Confirm Password -->
         <div class="grid grid-cols-1 gap-2 md:grid-cols-2">
             <!-- Password -->
             <x-input name="password" type="password" label="Password" placeholder="Enter a strong password" icon="lock"
-                required />
+                />
 
             <!-- Confirm Password -->
             <x-input name="password_confirmation" type="password" label="Confirm Password"
-                placeholder="Re-enter your password" icon="lock" required />
+                placeholder="Re-enter your password" icon="lock" />
         </div>
 
         <!-- Privacy Policy and Terms of Service -->
