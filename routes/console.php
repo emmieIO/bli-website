@@ -9,3 +9,6 @@ Artisan::command('inspire', function () {
 
 Schedule::command('auth:clear-resets')->everyFifteenMinutes();
 Schedule::command('app:send-event-reminders')->everyMinute();
+Schedule::call(function () {
+        \Log::info('Cron job ran at ' . now());
+})->everyMinute();
