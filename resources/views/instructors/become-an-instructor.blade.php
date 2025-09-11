@@ -30,7 +30,8 @@
             <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                 <!-- Step 1 -->
                 <div class="bg-[#F0F8FF] p-6 rounded-xl shadow-sm border border-[#00275E]/20">
-                    <div class="w-10 h-10 bg-[#00275E] text-white rounded-full flex items-center justify-center text-sm font-bold mb-4">
+                    <div
+                        class="w-10 h-10 bg-[#00275E] text-white rounded-full flex items-center justify-center text-sm font-bold mb-4">
                         1
                     </div>
                     <h3 class="text-lg font-semibold mb-2 text-[#00275E]">Create Your Account</h3>
@@ -41,7 +42,8 @@
 
                 <!-- Step 2 -->
                 <div class="bg-[#F0F8FF] p-6 rounded-xl shadow-sm border border-[#00275E]/20">
-                    <div class="w-10 h-10 bg-[#00275E] text-white rounded-full flex items-center justify-center text-sm font-bold mb-4">
+                    <div
+                        class="w-10 h-10 bg-[#00275E] text-white rounded-full flex items-center justify-center text-sm font-bold mb-4">
                         2
                     </div>
                     <h3 class="text-lg font-semibold mb-2 text-[#00275E]">Start Instructor Application</h3>
@@ -52,7 +54,8 @@
 
                 <!-- Step 3 -->
                 <div class="bg-[#F0F8FF] p-6 rounded-xl shadow-sm border border-[#00275E]/20">
-                    <div class="w-10 h-10 bg-[#00275E] text-white rounded-full flex items-center justify-center text-sm font-bold mb-4">
+                    <div
+                        class="w-10 h-10 bg-[#00275E] text-white rounded-full flex items-center justify-center text-sm font-bold mb-4">
                         3
                     </div>
                     <h3 class="text-lg font-semibold mb-2 text-[#00275E]">Check Your Email</h3>
@@ -63,7 +66,8 @@
 
                 <!-- Step 4 -->
                 <div class="bg-[#F0F8FF] p-6 rounded-xl shadow-sm border border-[#00275E]/20">
-                    <div class="w-10 h-10 bg-[#00275E] text-white rounded-full flex items-center justify-center text-sm font-bold mb-4">
+                    <div
+                        class="w-10 h-10 bg-[#00275E] text-white rounded-full flex items-center justify-center text-sm font-bold mb-4">
                         4
                     </div>
                     <h3 class="text-lg font-semibold mb-2 text-[#00275E]">Complete Your Profile</h3>
@@ -74,7 +78,8 @@
 
                 <!-- Step 5 -->
                 <div class="bg-[#F0F8FF] p-6 rounded-xl shadow-sm border border-[#00275E]/20">
-                    <div class="w-10 h-10 bg-[#00275E] text-white rounded-full flex items-center justify-center text-sm font-bold mb-4">
+                    <div
+                        class="w-10 h-10 bg-[#00275E] text-white rounded-full flex items-center justify-center text-sm font-bold mb-4">
                         5
                     </div>
                     <h3 class="text-lg font-semibold mb-2 text-[#00275E]">Submit & Get Confirmation</h3>
@@ -85,7 +90,8 @@
 
                 <!-- Step 6 -->
                 <div class="bg-[#F0F8FF] p-6 rounded-xl shadow-sm border border-[#00275E]/20">
-                    <div class="w-10 h-10 bg-[#00275E] text-white rounded-full flex items-center justify-center text-sm font-bold mb-4">
+                    <div
+                        class="w-10 h-10 bg-[#00275E] text-white rounded-full flex items-center justify-center text-sm font-bold mb-4">
                         6
                     </div>
                     <h3 class="text-lg font-semibold mb-2 text-[#00275E]">Wait for Review</h3>
@@ -97,7 +103,8 @@
 
             <div class="mt-12 text-center">
                 <p class="text-gray-600 mb-4">Still have questions?</p>
-                <a href="#faq" class="text-[#00275E] font-medium hover:text-[#FF0000] hover:underline">See our FAQ below</a>
+                <a href="#faq" class="text-[#00275E] font-medium hover:text-[#FF0000] hover:underline">See our FAQ
+                    below</a>
             </div>
         </div>
     </section>
@@ -168,15 +175,20 @@
 
                 <form method="POST" action="{{ route('instructors.start-application') }}" class="space-y-6">
                     @csrf
-
+                    @auth()
+                        <input type="hidden" name="email" value="{{ auth()->user()->email }}">
+                    @endauth
                     <div>
-                        <label for="email" class="block text-sm font-medium text-[#e6f7ff] mb-1">Email Address</label>
-                        <input type="email" id="email" name="email" required
-                            class="w-full px-4 py-3 border border-[#00275E]/30 bg-white text-[#00275E] rounded-lg focus:ring-2 focus:ring-[#FF0000] focus:border-[#FF0000]"
-                            placeholder="your@email.com">
-                        @error('email')
-                            <p class="mt-1 text-sm text-[#FFBABA]">{{ $message }}</p>
-                        @enderror
+                        @guest()
+                        <label for="email" class="block text-sm font-medium text-[#e6f7ff] mb-1">Email
+                            Address</label>
+                            <input type="email" id="email" name="email" required
+                                class="w-full px-4 py-3 border border-[#00275E]/30 bg-white text-[#00275E] rounded-lg focus:ring-2 focus:ring-[#FF0000] focus:border-[#FF0000]"
+                                placeholder="Enter your email address">
+                            @error('email')
+                                <p class="mt-1 text-sm text-[#FFBABA]">{{ $message }}</p>
+                            @enderror
+                        @endguest
                     </div>
 
                     <div>
@@ -187,7 +199,8 @@
                     </div>
 
                     <p class="text-sm text-[#cce5ff] text-center">
-                        By applying, you agree to our <a href="#" class="text-white hover:underline">Instructor Terms</a>.
+                        By applying, you agree to our <a href="#" class="text-white hover:underline">Instructor
+                            Terms</a>.
                         We’ll email you a secure link — check your spam folder if you don’t see it.
                     </p>
                 </form>
@@ -195,7 +208,8 @@
 
             <div class="mt-6 text-center">
                 <p class="text-gray-600">
-                    Already started? <a href="#" class="text-[#00275E] hover:text-[#FF0000] hover:underline">Resend your application link</a>
+                    Already started? <a href="#"
+                        class="text-[#00275E] hover:text-[#FF0000] hover:underline">Resend your application link</a>
                 </p>
             </div>
         </div>
@@ -218,7 +232,8 @@
                         </div>
                     </div>
                     <p class="text-gray-600 italic">
-                        "Teaching on this platform has allowed me to reach students in over 30 countries. The support team is incredible, and the revenue share is very fair."
+                        "Teaching on this platform has allowed me to reach students in over 30 countries. The support
+                        team is incredible, and the revenue share is very fair."
                     </p>
                 </div>
 
@@ -233,7 +248,8 @@
                         </div>
                     </div>
                     <p class="text-gray-600 italic">
-                        "I've been able to turn my passion for coding into a full-time income. The course creation tools make it easy to produce professional content."
+                        "I've been able to turn my passion for coding into a full-time income. The course creation tools
+                        make it easy to produce professional content."
                     </p>
                 </div>
             </div>
@@ -249,13 +265,18 @@
                 <!-- FAQ Item 1 -->
                 <div class="bg-gray-50 p-6 rounded-lg shadow-sm border border-gray-200">
                     <button class="flex justify-between items-center w-full text-left group">
-                        <h3 class="font-medium text-[#00275E]">What qualifications do I need to become an instructor?</h3>
-                        <svg class="w-5 h-5 text-[#00275E] group-hover:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                        <h3 class="font-medium text-[#00275E]">What qualifications do I need to become an instructor?
+                        </h3>
+                        <svg class="w-5 h-5 text-[#00275E] group-hover:rotate-180 transition-transform" fill="none"
+                            stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7">
+                            </path>
                         </svg>
                     </button>
                     <div class="mt-3 text-gray-600">
-                        <p>We look for instructors with proven expertise in their field. This can be through professional experience, teaching experience, or specialized training. Formal qualifications are helpful but not always required.</p>
+                        <p>We look for instructors with proven expertise in their field. This can be through
+                            professional experience, teaching experience, or specialized training. Formal qualifications
+                            are helpful but not always required.</p>
                     </div>
                 </div>
 
@@ -263,12 +284,16 @@
                 <div class="bg-gray-50 p-6 rounded-lg shadow-sm border border-gray-200">
                     <button class="flex justify-between items-center w-full text-left group">
                         <h3 class="font-medium text-[#00275E]">How much can I earn as an instructor?</h3>
-                        <svg class="w-5 h-5 text-[#00275E] group-hover:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                        <svg class="w-5 h-5 text-[#00275E] group-hover:rotate-180 transition-transform" fill="none"
+                            stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7">
+                            </path>
                         </svg>
                     </button>
                     <div class="mt-3 text-gray-600">
-                        <p>Earnings vary based on course popularity and quality. Our top instructors earn over $10,000/month. We offer a competitive revenue share model and provide guidance on pricing strategies.</p>
+                        <p>Earnings vary based on course popularity and quality. Our top instructors earn over
+                            $10,000/month. We offer a competitive revenue share model and provide guidance on pricing
+                            strategies.</p>
                     </div>
                 </div>
 
@@ -276,12 +301,16 @@
                 <div class="bg-gray-50 p-6 rounded-lg shadow-sm border border-gray-200">
                     <button class="flex justify-between items-center w-full text-left group">
                         <h3 class="font-medium text-[#00275E]">What’s the application review timeline?</h3>
-                        <svg class="w-5 h-5 text-[#00275E] group-hover:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                        <svg class="w-5 h-5 text-[#00275E] group-hover:rotate-180 transition-transform" fill="none"
+                            stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7">
+                            </path>
                         </svg>
                     </button>
                     <div class="mt-3 text-gray-600">
-                        <p>After you submit your completed application, our team reviews it within 5–7 business days. You’ll receive email notifications at every stage: submission confirmation, review in progress, and final decision.</p>
+                        <p>After you submit your completed application, our team reviews it within 5–7 business days.
+                            You’ll receive email notifications at every stage: submission confirmation, review in
+                            progress, and final decision.</p>
                     </div>
                 </div>
 
@@ -289,12 +318,15 @@
                 <div class="bg-gray-50 p-6 rounded-lg shadow-sm border border-gray-200">
                     <button class="flex justify-between items-center w-full text-left group">
                         <h3 class="font-medium text-[#00275E]">What if I don’t get approved?</h3>
-                        <svg class="w-5 h-5 text-[#00275E] group-hover:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                        <svg class="w-5 h-5 text-[#00275E] group-hover:rotate-180 transition-transform" fill="none"
+                            stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7">
+                            </path>
                         </svg>
                     </button>
                     <div class="mt-3 text-gray-600">
-                        <p>Don’t worry! We provide feedback to all applicants. You can reapply after 30 days with improved materials. Many successful instructors weren’t approved on their first try.</p>
+                        <p>Don’t worry! We provide feedback to all applicants. You can reapply after 30 days with
+                            improved materials. Many successful instructors weren’t approved on their first try.</p>
                     </div>
                 </div>
             </div>

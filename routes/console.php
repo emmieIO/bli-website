@@ -8,3 +8,4 @@ Artisan::command('inspire', function () {
 })->purpose('Display an inspiring quote');
 
 Schedule::command('auth:clear-resets')->everyFifteenMinutes();
+Schedule::command('app:send-event-reminders')->everyMinute();

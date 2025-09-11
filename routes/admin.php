@@ -29,6 +29,7 @@ Route::group([
     Route::middleware(['auth'])->group(function(){
         Route::delete('/speakers/{speaker}/destroy', [SpeakersController::class, 'destroySpeaker'])->name("speakers.destroy");
         Route::get('/events/{event}/assign-speakers', [SpeakersController::class, 'showAssignSpeakersPage'])->name('events.assign-speakers');
+        Route::post('events/{event}/invite-speaker/',[EventController::class,'inviteSpeaker'])->name('events.invite-speaker');
         Route::post('/events/{event}/assign-speaker', AssignSpeakerToEvent::class)->name('events.assign-speaker');
         Route::get('/events/{event}/create-resource', [EventResourceController::class, "create"])->name('events.resources.create');
         Route::get('/speakers', [SpeakersController::class, 'index'])->name("speakers.index");

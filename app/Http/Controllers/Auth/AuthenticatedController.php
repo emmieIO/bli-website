@@ -31,7 +31,7 @@ class AuthenticatedController extends Controller
         }
 
         if ($this->authService->loginUser($request)) {
-            return redirect(route("user_dashboard"))->with([
+            return redirect()->intended(route("user_dashboard"))->with([
                 "type" => "success",
                 "message" => "Account Authenticated"
             ]);
@@ -76,13 +76,14 @@ class AuthenticatedController extends Controller
         if ($user && !$user->hasVerifiedEmail()) {
             $user->markEmailAsVerified();
         } else {
+            session(['url.intended' => $request->fullUrl()]);
             return redirect(route('login'))->with([
                 'message' => "You must be logged in to verify your email.",
                 "type" => 'error'
             ]);
         }
 
-        return redirect(route('user_dashboard'))->with([
+        return redirect()->intended(route('user_dashboard'))->with([
             'message' => "Account verified",
             "type" => 'success'
         ]);

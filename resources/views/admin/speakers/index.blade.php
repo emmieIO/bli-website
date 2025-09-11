@@ -136,14 +136,14 @@
                                             aria-label="Edit speaker">
                                             <i data-lucide="edit-3" class="w-5 h-5"></i>
                                         </a>
-                                        {{-- @if($speaker->application_status === 'pending') --}}
+                                        @if($speaker->application_status === 'pending')
                                             <a href=""
                                                 title="Review Application"
                                                 class="p-1.5 text-amber-600 hover:text-amber-800 rounded-full hover:bg-amber-50 transition-colors"
                                                 aria-label="Review application">
                                                 <i data-lucide="clipboard-check" class="w-5 h-5"></i>
                                             </a>
-                                        {{-- @endif --}}
+                                        @endif
                                         <button data-delete-route="{{ route('admin.speakers.destroy', $speaker) }}"
                                             data-modal-target="delete-speaker-modal"
                                             data-modal-toggle="delete-speaker-modal"

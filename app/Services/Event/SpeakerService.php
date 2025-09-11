@@ -27,6 +27,10 @@ class SpeakerService
         return $speakers;
     }
 
+    public function findOneSpeaker($id){
+        return Speaker::findOrFail($id);
+    }
+
     public function createSpeaker(CreateSpeakerRequest $request){
         DB::beginTransaction();
         $file_path = null;

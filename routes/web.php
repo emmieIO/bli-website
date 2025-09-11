@@ -31,8 +31,11 @@ Route::group([
     "middleware" =>['auth']
 ], function(){
     Route::post('/events/{slug}/join', JoinEventAction::class)->name("events.join");
-    Route::get("/user/events",ShowMyEventsController::class)->name('user.events');
+    Route::get("/user/events", ShowMyEventsController::class)->name('user.events');
     Route::delete("events/user/{slug}/revoke-rsvp", RevokeRsvpAction::class)->name("user.revoke.event");
+    Route::get('/events/{slug}/invitations/respond', function ($slug) {
+        return "Hello";
+    })->name('invitations.respond')->middleware('signed');
 });
 
 

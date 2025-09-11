@@ -6,12 +6,19 @@ use App\Events\EventRegisterEvent;
 use App\Events\Events\EventCreated;
 use App\Http\Requests\CreateEventRequest;
 use App\Http\Requests\UpdateEventRequest;
+use App\Mail\InvitationToSpeakerMail;
 use App\Models\Event;
+use App\Models\SpeakerInvite;
 use DB;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Str;
+use Mail;
+
+use Throwable;
 
 class EventService
 {
@@ -19,7 +26,7 @@ class EventService
      * Create a new class instance.
      */
 
-    public function __construct()
+    public function __construct(protected SpeakerService $speakerService)
     {
         //
     }
@@ -242,6 +249,30 @@ class EventService
 
         } catch (\Exception $e) {
             Log::error('Mass event deletion failed: ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    public function inviteSpeakerToEvent(Event $event, array $data): bool|string {
+        $speaker = $this->speakerService->findOneSpeaker($data['speaker_id']);
+        if (SpeakerInvite::where('event_id', $event->id)
+            ->where('speaker_id', $speaker->id)
+            ->exists()
+        ) {
+            return "already_invited";
+        }
+
+        $data['expires_at']= Carbon::now()->addDay();
+        DB::beginTransaction();
+        try{
+            $invitation = SpeakerInvite::create($data);
+            DB::commit();
+            // send Mail Notification
+            Mail::to($invitation->speaker->email)->send(new InvitationToSpeakerMail($invitation));
+            return true;
+        }catch(Throwable $e){
+            DB::rollBack();
+            Log::error('Speaker invitation failed: ' . $e->getMessage());
             return false;
         }
     }
