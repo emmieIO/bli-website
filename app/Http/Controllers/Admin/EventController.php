@@ -22,8 +22,9 @@ class EventController extends Controller
 
     public function index()
     {
+        $query = request()->query('status');
         return view('admin.events.index', [
-            'events' => $this->eventService->getEventsCreatedByUser()
+            'events' => $this->eventService->getEventsCreatedByUser($query)
         ]);
     }
 

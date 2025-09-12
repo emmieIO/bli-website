@@ -148,8 +148,4 @@ class SpeakerApplicationService
             return null;
         }
     }
-
-    public function inviteSpeakerToEvent(Speaker $speaker, Event $event){
-        
-    }
 }

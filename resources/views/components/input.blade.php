@@ -10,7 +10,7 @@
     'readonly' => false
 ])
 
-<div class="space-y-1">
+<div class="space-y-1" id="{{ $name }}">
     <!-- Label -->
     @if($label)
         <label for="{{ $name }}" class="inline-block text-sm font-medium text-gray-900 bg-white rounded-2xl px-1">
@@ -22,7 +22,7 @@
     @endif
 
     <!-- Input Container -->
-    <div
+    <div 
         class="relative rounded-md shadow-sm transition-all duration-150 border border-gray-300 hover:border-[#00275E] focus-within:ring-2 focus-within:ring-[#00275E]/30 focus-within:border-[#00275E] {{ $disabled ? 'bg-gray-100 opacity-75 cursor-not-allowed' : 'bg-white' }}"
         @if($type === 'password') x-data="{ show: false }" @endif
     >
@@ -35,7 +35,6 @@
 
         <!-- Input Field -->
         <input
-            id="{{ $name }}"
             @if($type === 'password')
                 x-bind:type="show ? 'text' : 'password'"
             @else

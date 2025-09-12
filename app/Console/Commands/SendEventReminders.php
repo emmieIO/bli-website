@@ -7,6 +7,7 @@ use App\Models\Event;
 use Illuminate\Console\Command;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Mail;
+use Log;
 
 class SendEventReminders extends Command
 {
@@ -37,6 +38,10 @@ class SendEventReminders extends Command
             '1 hour' => $now->copy()->addHour(),
             '30 mins' => $now->copy()->addMinutes(30),
         ];
+        Log::info('Preparing to send event reminders', [
+            'timeFrames' => $timeFrames,
+            'currentTime' => $now->toDateTimeString()
+        ]);
 
         foreach ($timeFrames as $label => $time) {
             $events = Event::whereBetween('start_date', [

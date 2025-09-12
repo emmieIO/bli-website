@@ -149,4 +149,39 @@
             </form>
         </div>
     </div>
+    <script>
+        const mode = document.getElementById('mode');
+        const locationInput = document.getElementById('location');
+        const physicalAddressInput = document.getElementById('physical_address');
+        // Helper function to toggle visibility and enable/disable inputs
+        function toggleInputs(modeValue) {
+            // Hide and disable both inputs initially
+            locationInput.hidden = true;
+            locationInput.querySelector('input').disabled = true;
+            physicalAddressInput.hidden = true;
+            physicalAddressInput.querySelector('input').disabled = true;
+
+            // Show and enable inputs based on the selected mode
+            if (modeValue === 'offline') {
+                physicalAddressInput.hidden = false;
+                physicalAddressInput.querySelector('input').disabled = false;
+            } else if (modeValue === 'online') {
+                locationInput.hidden = false;
+                locationInput.querySelector('input').disabled = false;
+            } else if (modeValue === 'hybrid') {
+                locationInput.hidden = false;
+                locationInput.querySelector('input').disabled = false;
+                physicalAddressInput.hidden = false;
+                physicalAddressInput.querySelector('input').disabled = false;
+            }
+        }
+
+        // Set initial state based on the pre-selected mode
+        toggleInputs(mode.value);
+
+        // Add event listener for mode changes
+        mode.addEventListener('change', () => {
+            toggleInputs(mode.value);
+        });
+    </script>
 </x-app-layout>

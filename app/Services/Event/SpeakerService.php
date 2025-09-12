@@ -5,8 +5,10 @@ namespace App\Services\Event;
 use App\Http\Requests\CreateSpeakerRequest;
 use App\Http\Requests\UpdateSpeakerRequest;
 use App\Models\Speaker;
+use App\Models\SpeakerInvite;
 use App\Services\Misc;
 use App\Traits\HasFileUpload;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -85,6 +87,13 @@ class SpeakerService
             return true;
         }
         return false;
+    }
+
+    public function getSpeakerInvites(int $perPage = 10)
+    {
+        // $user = auth()->user()->speaker->id;
+        // return SpeakerInvite::where('speaker_id', '')->paginate($perPage);
+        return true;
     }
 
 }

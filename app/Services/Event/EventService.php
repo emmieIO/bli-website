@@ -40,16 +40,26 @@ class EventService
         return $events;
     }
 
-    public function getAllUpcomingEvents()
-    {
 
-    }
 
-    public function getEventsCreatedByUser()
+    public function getEventsCreatedByUser(string|null $filter = null)
     {
         $user = Auth::user();
         if ($user) {
-            return $user->eventsCreated()->paginate()->withQueryString();
+            $query = $user->eventsCreated();
+
+            if ($filter === 'past') {
+            $query->where('start_date', '<', now());
+            } elseif ($filter === 'ongoing') {
+            $query->where('start_date', '<=', now())
+                  ->where('end_date', '>=', now());
+            } elseif ($filter === 'future') {
+            $query->where('start_date', '>', now());
+            }elseif ($filter === 'draft') {
+                $query->where('is_published','=', false);
+            }
+
+            return $query->orderBy('start_date', 'desc')->paginate()->withQueryString();
         }
         return collect([]);
     }
@@ -205,7 +215,7 @@ class EventService
         }
     }
 
-    protected function removeFile(string $file_path, string $type = 'public')
+    protected function removeFile(string|null $file_path, string $type = 'public')
     {
         if (!empty($file_path) && Storage::disk($type)->exists($file_path)) {
             Storage::disk($type)->delete($file_path);

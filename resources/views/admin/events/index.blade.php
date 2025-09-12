@@ -27,20 +27,17 @@
 
         <!-- Status Tabs -->
         <div class="mb-6 border-b border-gray-200">
-            <nav class="-mb-px flex space-x-8 overflow-x-auto scrollbar-thin scrollbar-thumb-[#00275E]/20 scrollbar-track-gray-100">
-                <x-tab-link label="All Events" icon="list" :to="route('admin.events.index').'?status=all'"
-                    :isActive="request()->get('status') === 'all' || !request()->has('status')" />
-                <x-tab-link label="Upcoming" icon="clock" :to="route('admin.events.index').'?status=upcoming'"
-                    :isActive="request()->get('status') === 'upcoming'" />
-                <x-tab-link label="Past Events" icon="archive" :to="route('admin.events.index').'?status=past'"
-                    :isActive="request()->get('status') === 'past'" />
-                <x-tab-link label="Drafts" icon="file-text" :to="route('admin.events.index').'?status=draft'"
-                    :isActive="request()->get('status') === 'draft'" />
+            <nav
+                class="-mb-px flex space-x-8 overflow-x-auto scrollbar-thin scrollbar-thumb-[#00275E]/20 scrollbar-track-gray-100">
+                <x-tab-link label="All Events" icon="list" :to="route('admin.events.index') . '?status=all'" :isActive="request()->get('status') === 'all' || !request()->has('status')" />
+                <x-tab-link label="Upcoming" icon="clock" :to="route('admin.events.index') . '?status=upcoming'" :isActive="request()->get('status') === 'upcoming'" />
+                <x-tab-link label="Past Events" icon="archive" :to="route('admin.events.index') . '?status=past'" :isActive="request()->get('status') === 'past'" />
+                <x-tab-link label="Drafts" icon="file-text" :to="route('admin.events.index') . '?status=draft'" :isActive="request()->get('status') === 'draft'" />
             </nav>
         </div>
 
         <!-- Filters -->
-        <div class="bg-white rounded-lg shadow-sm border border-gray-100 p-4 mb-6">
+        {{-- <div class="bg-white rounded-lg shadow-sm border border-gray-100 p-4 mb-6">
             <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <div>
                     <label for="event-type" class="block text-sm font-medium text-gray-700 mb-1">Event Type</label>
@@ -81,7 +78,7 @@
                     </button>
                 </div>
             </div>
-        </div>
+        </div> --}}
 
         <!-- Mass Actions Bar -->
         <div id="massActionsBar" class="hidden bg-gray-50 px-6 py-3 border-b border-gray-200 rounded-t-lg">
@@ -115,15 +112,26 @@
                 <table class="min-w-full divide-y divide-gray-200">
                     <thead class="bg-gray-50">
                         <tr>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-4">
+                            <th scope="col"
+                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-4">
                                 <input type="checkbox" id="selectAll"
                                     class="rounded border-gray-300 text-[#00275E] focus:ring-[#00275E]">
                             </th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Event</th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date & Time</th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Speakers</th>
-                            <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                            <th scope="col"
+                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Event</th>
+                            <th scope="col"
+                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Date & Time</th>
+                            <th scope="col"
+                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Status</th>
+                            <th scope="col"
+                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Speakers</th>
+                            <th scope="col"
+                                class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Actions</th>
                         </tr>
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-200">
@@ -138,7 +146,7 @@
                                 <!-- Event Column -->
                                 <td class="px-6 py-4">
                                     <div class="flex items-center gap-3">
-                                        @if($event->image)
+                                        @if ($event->image)
                                             <div class="flex-shrink-0 h-10 w-10">
                                                 <img class="h-10 w-10 rounded-md object-cover"
                                                     src="{{ asset('storage/' . $event->image) }}"
@@ -146,8 +154,10 @@
                                             </div>
                                         @endif
                                         <div>
-                                            <div class="font-medium text-gray-900 whitespace-nowrap">{{ $event->title }}</div>
-                                            <div class="text-sm text-gray-500">{{ $event->location ?? 'Online Event' }}</div>
+                                            <div class="font-medium text-gray-900 whitespace-nowrap">{{ $event->title }}
+                                            </div>
+                                            <div class="text-sm text-gray-500">{{ $event->location ?? 'Online Event' }}
+                                            </div>
                                         </div>
                                     </div>
                                 </td>
@@ -162,29 +172,37 @@
 
                                 <!-- Status Column -->
                                 <td class="px-6 py-4 whitespace-nowrap">
-                                    @if($event->is_published)
-                                        @if($event->end_date < now())
-                                            <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">
+                                    @if ($event->is_published)
+                                        @if ($event->end_date < now())
+                                            <span
+                                                class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">
                                                 Event Ended
                                             </span>
                                         @elseif($event->start_date > now())
-                                            <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                                            <span
+                                                class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
                                                 Upcoming
                                             </span>
                                         @else
-                                            <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
+                                            <span
+                                                class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
                                                 Live Now
                                             </span>
                                         @endif
                                     @else
-                                        <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
+                                        <span
+                                            class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
                                             Draft
                                         </span>
                                     @endif
                                     <div class="mt-1">
-                                        <span class="px-2 py-1 inline-flex text-xs font-semibold rounded-full
-                                            {{ $event->mode === 'online' ? 'bg-blue-100 text-blue-800' :
-                                                ($event->mode === 'offline' ? 'bg-green-100 text-green-800' : 'bg-purple-100 text-purple-800') }}">
+                                        <span
+                                            class="px-2 py-1 inline-flex text-xs font-semibold rounded-full
+                                            {{ $event->mode === 'online'
+                                                ? 'bg-blue-100 text-blue-800'
+                                                : ($event->mode === 'offline'
+                                                    ? 'bg-green-100 text-green-800'
+                                                    : 'bg-purple-100 text-purple-800') }}">
                                             {{ ucfirst($event->mode) }}
                                         </span>
                                     </div>
@@ -192,15 +210,16 @@
 
                                 <!-- Speakers Column -->
                                 <td class="px-6 py-4">
-                                    @if($event->speakers_count > 0)
+                                    @if (count($event->speakers) > 0)
                                         <div class="flex -space-x-2">
-                                            @foreach($event->speakers->take(3) as $speaker)
+                                            @foreach ($event->speakers->take(3) as $speaker)
                                                 <img class="inline-block h-8 w-8 rounded-full ring-2 ring-white"
                                                     src="{{ $speaker->photo ? asset('storage/' . $speaker->photo) : 'https://i.pravatar.cc/40?u=' . $speaker->email }}"
                                                     alt="{{ $speaker->name }}" title="{{ $speaker->name }}">
                                             @endforeach
-                                            @if($event->speakers_count > 3)
-                                                <span class="inline-flex items-center justify-center h-8 w-8 rounded-full bg-gray-200 text-xs font-medium text-gray-600 ring-2 ring-white">
+                                            @if ($event->speakers_count > 3)
+                                                <span
+                                                    class="inline-flex items-center justify-center h-8 w-8 rounded-full bg-gray-200 text-xs font-medium text-gray-600 ring-2 ring-white">
                                                     +{{ $event->speakers_count - 3 }}
                                                 </span>
                                             @endif
@@ -219,25 +238,21 @@
                                             aria-label="Manage speakers">
                                             <i data-lucide="users" class="w-5 h-5"></i>
                                         </a>
-                                        <a href="{{ route('admin.events.show', $event) }}"
-                                            title="View"
+                                        <a href="{{ route('admin.events.show', $event) }}" title="View"
                                             class="p-1.5 text-gray-500 hover:text-gray-700 rounded-full hover:bg-gray-100 transition-colors"
                                             aria-label="View event">
                                             <i data-lucide="eye" class="w-5 h-5"></i>
                                         </a>
-                                        <a href="{{ route('admin.events.edit', $event->slug) }}"
-                                            title="Edit"
+                                        <a href="{{ route('admin.events.edit', $event->slug) }}" title="Edit"
                                             class="p-1.5 text-blue-600 hover:text-blue-800 rounded-full hover:bg-blue-50 transition-colors"
                                             aria-label="Edit event">
                                             <i data-lucide="edit" class="w-5 h-5"></i>
                                         </a>
-                                        <button
-                                            type="button"
+                                        <button type="button"
                                             data-delete-route="{{ route('admin.events.destroy', $event) }}"
                                             data-modal-target="delete-event-modal"
                                             data-modal-toggle="delete-event-modal"
-                                            onclick="confirmEventDelete(this, '{{ $event->title }}')"
-                                            title="Delete"
+                                            onclick="confirmEventDelete(this, '{{ $event->title }}')" title="Delete"
                                             class="p-1.5 text-[#FF0000] hover:text-red-800 rounded-full hover:bg-red-50 transition-colors"
                                             aria-label="Delete event">
                                             <i data-lucide="trash-2" class="w-5 h-5"></i>
@@ -266,7 +281,7 @@
             </form>
 
             <!-- Pagination -->
-            @if($events->hasPages())
+            @if ($events->hasPages())
                 <div class="px-6 py-4 border-t border-gray-200 bg-gray-50">
                     {{ $events->links() }}
                 </div>
@@ -278,15 +293,14 @@
     <div id="delete-event-modal" tabindex="-1" aria-hidden="true"
         class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
         <div class="relative p-4 w-full max-w-md max-h-full">
-            <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
+            <div class="relative bg-white rounded-lg shadow">
                 <!-- Modal header -->
-                <div class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600">
-                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                <div class="flex items-center justify-between p-4 md:p-5 border-b rounded-t">
+                    <h3 class="text-lg font-semibold text-gray-900">
                         Confirm Event Deletion
                     </h3>
                     <button type="button"
-                        class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white"
-                        data-modal-hide="delete-event-modal">
+                        class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center">
                         <i data-lucide="x" class="w-4 h-4"></i>
                         <span class="sr-only">Close modal</span>
                     </button>
@@ -294,27 +308,30 @@
                 <!-- Modal body -->
                 <div class="p-4 md:p-5 space-y-4">
                     <div class="flex flex-col items-center text-center">
-                        <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-100 mb-4">
+                        <div
+                            class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-100 mb-4">
                             <i data-lucide="alert-triangle" class="h-6 w-6 text-red-600"></i>
                         </div>
                         <h3 class="text-lg font-medium text-gray-900 mb-2" id="event-delete-title">Delete Event</h3>
                         <div class="text-sm text-gray-500">
-                            <p>Are you sure you want to delete <span id="event-name" class="font-semibold text-gray-900"></span>?</p>
-                            <p class="mt-1">This will also remove all associated sessions and speaker assignments.</p>
+                            <p>Are you sure you want to delete <span id="event-name"
+                                    class="font-semibold text-gray-900"></span>?</p>
+                            <p class="mt-1">This will also remove all associated sessions and speaker assignments.
+                            </p>
                         </div>
                     </div>
                 </div>
                 <!-- Modal footer -->
-                <div class="flex items-center justify-end p-4 md:p-5 border-t border-gray-200 rounded-b dark:border-gray-600 gap-3">
+                <div class="flex items-center justify-end p-4 md:p-5 border-t border-gray-200 rounded-b gap-3">
                     <button data-modal-hide="delete-event-modal" type="button"
-                        class="py-2.5 px-5 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700">
+                        class="py-2.5 px-5 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 focus:z-10 focus:ring-4 focus:ring-gray-100">
                         Cancel
                     </button>
                     <form method="POST" id="delete-event-form" class="inline">
                         @csrf
                         @method('DELETE')
                         <button type="submit"
-                            class="text-white bg-[#FF0000] hover:bg-red-700 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center dark:bg-red-500 dark:hover:bg-red-600 dark:focus:ring-red-900">
+                            class="text-white bg-[#FF0000] hover:bg-red-700 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center">
                             <i data-lucide="trash-2" class="w-4 h-4 mr-2"></i>
                             Delete Event
                         </button>
@@ -325,7 +342,7 @@
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
+        document.addEventListener('DOMContentLoaded', function() {
             // Mass selection functionality
             const selectAll = document.getElementById('selectAll');
             const rowCheckboxes = document.querySelectorAll('.rowCheckbox');

@@ -17,8 +17,7 @@ class AssignSpeakerToEvent extends Controller
     public function __invoke(Request $request, Event $event)
     {
         $event->speakers()->sync($request->speaker_ids);
-        return redirect()
-            ->route("admin.events.show", $event)
+        return back()
             ->with([
             'type' => 'success',
             'message' => 'Speakers assigned successfully.'

@@ -1,90 +1,87 @@
-
 /* @media screen and (min-width: 1024px) { */
-    .dashboard_layout {
-        display: grid;
-        grid-template-columns: 300px 1fr;
-        grid-template-areas:
-            "sidebar content content"
-            "sidebar content content";
-    }
+.dashboard_layout {
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    grid-template-areas:
+        "sidebar content content"
+        "sidebar content content";
+}
 
-    .content__container{
-        grid-area: content;
-        position: absolute;
-        width: 100%;
-        z-index: -1;
+.content__container {
+    grid-area: content;
+    position: absolute;
+    width: 100%;
+    z-index: -1;
+}
 
+.sidebar__container {
+    color: white;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    @apply px-5;
+    overflow-x: hidden;
+    height: 100vh;
+    width: 300px;
+    position: fixed;
+    top: 0;
+    z-index: 60;
+    grid-area: sidebar;
+    transition: all 500ms;
+    * {
+        white-space: nowrap;
+        /* white-space: normal; */
     }
+}
 
-    .sidebar__container{
-        color:white;
-        display: flex;
-        flex-direction: column;
-        justify-content:space-between;
-        @apply px-5;
-        overflow-x: hidden;
-        height: 100vh;
-        width: 300px;
-        position: fixed;
-        top:0;
-        z-index:60;
-        grid-area: sidebar;
-        transition: all 500ms;
-        *{
-            white-space: nowrap;
-            /* white-space: normal; */
-        }
-    }
+.top-nav__container {
+    @apply py-3 px-10 text-white flex items-center justify-between sticky top-0;
+}
 
-    .top-nav__container{
-        @apply py-3 px-10 text-white flex items-center justify-between sticky top-0
-    }
+.toggle-sidebar {
+    width: 0;
+    @apply px-0;
+}
 
-    .toggle-sidebar{
-        width: 0;
-        @apply px-0;
-    }
-
-    .content__parent {
-        @apply px-10 py-10;
-    }
+.content__parent {
+    @apply px-10 py-10;
+}
 /* } */
-@media screen and (min-width:1024px){
-        .content__parent {
+@media screen and (min-width: 1024px) {
+    .content__parent {
         @apply px-5 py-5;
     }
-    .sidebar__container{
-        color:white;
+    .sidebar__container {
+        color: white;
         display: flex;
         flex-direction: column;
-        justify-content:space-between;
+        justify-content: space-between;
         @apply px-5;
         overflow-x: hidden;
         height: 100vh;
         width: 300px;
         position: sticky;
-        top:0;
-        z-index:60;
+        top: 0;
+        z-index: 60;
         grid-area: sidebar;
         transition: all 500ms;
-        *{
+        * {
             white-space: nowrap;
             /* white-space: normal; */
         }
     }
 
-    .content__container{
+    .content__container {
         grid-area: content;
         position: static;
         width: 100%;
         z-index: 10;
-
     }
-    .top-nav__container{
+    .top-nav__container {
         @apply py-3 px-10 text-white flex items-center justify-end sticky top-0 z-[40];
     }
 
-    .toggle-sidebar{
+    .toggle-sidebar {
         width: 100%;
         @apply px-3;
     }
@@ -93,8 +90,14 @@
     animation: fadeIn 0.2s ease-in-out;
 }
 @keyframes fadeIn {
-    from { opacity: 0; transform: scale(0.95); }
-    to { opacity: 1; transform: scale(1); }
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
 }
 .hide-modal {
     opacity: 0;
@@ -102,4 +105,19 @@
     transition: opacity 1s ease-in-out;
     animation: none;
     visibility: hidden;
+}
+
+.upcoming {
+    @apply text-orange-800 bg-orange-200 inline p-1 rounded-lg;
+}
+.ongoing,.online {
+    @apply text-green-800 bg-green-200 inline p-1 rounded-lg;
+}
+
+.offline {
+    @apply text-gray-800 bg-gray-200 inline p-1 rounded-lg;
+}
+
+.ended {
+    @apply text-red-800 bg-red-200 inline p-1 rounded-lg;
 }

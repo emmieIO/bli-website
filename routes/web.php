@@ -2,7 +2,9 @@
 
 use App\Actions\JoinEventAction;
 use App\Http\Controllers\CourseController;
+use App\Http\Controllers\Events\EventCalenderController;
 use App\Http\Controllers\ProgrammeController;
+use App\Http\Controllers\SpeakerInvitationController;
 use App\Http\Controllers\UserDashBoard\RevokeRsvpAction;
 use App\Http\Controllers\UserDashBoard\ShowMyEventsController;
 use Illuminate\Support\Facades\Route;
@@ -25,17 +27,17 @@ Route::get("/contact-us", function(){
 })->name('contact-us');
 
 Route::get("/events", [ProgrammeController::class, 'index'])->name("events.index");
-Route::get('/events/{slug}', [ProgrammeController::class, "show"])->name("events.show");
+Route::get('/events/{slug}/show', [ProgrammeController::class, "show"])->name("events.show");
 
 Route::group([
     "middleware" =>['auth']
 ], function(){
     Route::post('/events/{slug}/join', JoinEventAction::class)->name("events.join");
     Route::get("/user/events", ShowMyEventsController::class)->name('user.events');
+    Route::get('/events/{event}/calendar', [EventCalenderController::class, 'download'])
+     ->name('events.calendar');
     Route::delete("events/user/{slug}/revoke-rsvp", RevokeRsvpAction::class)->name("user.revoke.event");
-    Route::get('/events/{slug}/invitations/respond', function ($slug) {
-        return "Hello";
-    })->name('invitations.respond')->middleware('signed');
+    Route::get('/events/invitations',[SpeakerInvitationController::class, 'index'])->name('invitations.index');
 });
 
 

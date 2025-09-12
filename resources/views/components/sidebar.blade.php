@@ -6,6 +6,7 @@
         @can(['track-applications'])
         <x-side-nav-link title="My Applications" icon="file-text" :to="route('user.events')" />
         @endcan
+        <x-side-nav-link title="My Invitations" icon="send" :to="route('invitations.index')" />
         @can("manage events")
             <x-side-nav-link title="Event Manager " icon="calendar" :to="route('admin.events.index')" />
         @endcan
