@@ -82,6 +82,8 @@
     </footer>
 
     <x-toast />
+    <x-confirm-modal/>
+
 
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest" defer></script>
@@ -105,3 +107,4 @@
 </body>
 
 </html>
+

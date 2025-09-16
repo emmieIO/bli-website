@@ -435,7 +435,7 @@
                                                 <div class="h-8 w-8 rounded-full overflow-hidden flex-shrink-0">
                                                     @if (!empty($speaker->photo) && file_exists(public_path('storage/' . $speaker->photo)))
                                                         <img src="{{ asset('storage/' . $speaker->photo) }}"
-                                                            alt="{{ $speaker->name }}"
+                                                            alt="{{ $speaker->user->name }}"
                                                             class="w-full h-full object-cover">
                                                     @else
                                                         <img src="https://ui-avatars.com/api/?name={{ urlencode($speaker->name) }}"
@@ -445,7 +445,7 @@
                                                 </div>
                                                 <div>
                                                     <span
-                                                        class="text-sm font-medium text-gray-900">{{ $speaker->name }}</span>
+                                                        class="text-sm font-medium text-gray-900">{{ $speaker->user->name }}</span>
                                                     <span
                                                         class="text-xs text-gray-500 block">{{ $speaker->title }}</span>
                                                 </div>

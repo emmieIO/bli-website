@@ -9,7 +9,7 @@
                     <i data-lucide="arrow-left" class="w-5 h-5"></i>
                 </a>
                 <div>
-                    <h1 class="text-2xl md:text-3xl font-extrabold text-[#00275E]">{{ $speaker->name }}</h1>
+                    <h1 class="text-2xl md:text-3xl font-extrabold text-[#00275E]">{{ $speaker->user->name }}</h1>
                     <p class="text-sm text-gray-500">Speaker Profile Details</p>
                 </div>
             </div>
@@ -25,7 +25,7 @@
                     @csrf
                     @method('DELETE')
                     <button type="submit"
-                        onclick="return confirm('Are you sure you want to permanently delete {{ $speaker->name }}? This action cannot be undone.');"
+                        onclick="return confirm('Are you sure you want to permanently delete {{ $speaker->user->name }}? This action cannot be undone.');"
                         class="inline-flex items-center px-4 py-2.5 bg-red-600 text-white text-sm font-medium rounded-lg hover:bg-red-700 focus:ring-4 focus:ring-red-300 focus:outline-none transition shadow-sm">
                         <i data-lucide="trash-2" class="w-4 h-4 mr-2"></i>
                         Delete Speaker
@@ -45,7 +45,7 @@
                                 class="w-24 h-24 rounded-full object-cover border-2 border-gray-200 shadow-sm" alt="{{ $speaker->name }}">
                         </div>
                         <div class="flex-1 min-w-0">
-                            <h2 class="text-xl font-bold text-gray-900">{{ $speaker->name }}</h2>
+                            <h2 class="text-xl font-bold text-gray-900">{{ $speaker->user->name }}</h2>
                             @if($speaker->title || $speaker->organization)
                                 <p class="text-sm text-gray-600 mt-1">
                                     {{ $speaker->title ?? '—' }} @ {{ $speaker->organization ?? '—' }}
@@ -54,13 +54,13 @@
                             @if($speaker->email)
                                 <p class="mt-2 flex items-center gap-1.5 text-sm text-[#00275E] font-medium">
                                     <i data-lucide="mail" class="w-4 h-4"></i>
-                                    {{ $speaker->email }}
+                                    {{ $speaker->user->email }}
                                 </p>
                             @endif
                             @if($speaker->phone)
                                 <p class="mt-1 flex items-center gap-1.5 text-sm text-gray-600">
                                     <i data-lucide="phone" class="w-4 h-4"></i>
-                                    {{ $speaker->phone }}
+                                    {{ $speaker->user->phone }}
                                 </p>
                             @endif
                         </div>

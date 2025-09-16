@@ -56,10 +56,6 @@ class SendEventReminders extends Command
                 }
             }
         }
-
-
-
-
         $this->info('Event Reminder Sent');
     }
 }

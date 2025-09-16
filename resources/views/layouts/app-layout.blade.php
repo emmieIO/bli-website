@@ -139,7 +139,8 @@
 
     <!-- Toast Notifications -->
     <x-toast />
-
+    <x-confirm-modal/>
+    <x-feedback-modal/>
     <!-- Scripts -->
     <script src="https://unpkg.com/lucide@latest"></script>
     <script>

@@ -85,15 +85,15 @@
                                             @endif
                                         </div>
                                         <div>
-                                            <div class="font-medium text-gray-900">{{ $speaker->name }}</div>
+                                            <div class="font-medium text-gray-900">{{ $speaker->user->name }}</div>
                                             <div class="text-sm text-gray-500 flex items-center gap-1">
                                                 <i data-lucide="mail" class="w-3 h-3"></i>
-                                                {{ $speaker->email }}
+                                                {{ $speaker->user->email }}
                                             </div>
-                                            @if($speaker->phone)
+                                            @if($speaker->user->phone)
                                                 <div class="text-sm text-gray-500 flex items-center gap-1">
                                                     <i data-lucide="phone" class="w-3 h-3"></i>
-                                                    {{ $speaker->phone }}
+                                                    {{ $speaker->user->phone }}
                                                 </div>
                                             @endif
                                         </div>
@@ -144,10 +144,11 @@
                                                 <i data-lucide="clipboard-check" class="w-5 h-5"></i>
                                             </a>
                                         @endif
-                                        <button data-delete-route="{{ route('admin.speakers.destroy', $speaker) }}"
+                                        <button 
                                             data-modal-target="delete-speaker-modal"
                                             data-modal-toggle="delete-speaker-modal"
-                                            onclick="confirmSpeakerDelete(this, {{ $speaker }})" title="Delete"
+                                            data-delete-route="{{ route('admin.speakers.destroy', $speaker) }}"
+                                            onclick="confirmSpeakerDelete(this, {{ $speaker->user }})" title="Delete"
                                             class="p-1.5 text-red-600 hover:text-red-800 rounded-full hover:bg-red-50 transition-colors"
                                             aria-label="Delete speaker">
                                             <i data-lucide="trash-2" class="w-5 h-5"></i>

@@ -47,7 +47,6 @@ class SpeakerApplicationRequest extends FormRequest
     public function rules(): array
     {
         return [
-            "name" => ['required', "string"],
             "title" => ['required', 'string'],
             "organization" => ["required", 'string'],
             "photo" => $this->photoRule(),
@@ -72,15 +71,10 @@ class SpeakerApplicationRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'name.required' => 'Please enter your name.',
-            'name.string' => 'The name must be a valid string.',
             'title.required' => 'Please enter your professional title.',
             'title.string' => 'The title must be a valid string.',
             'organization.required' => 'Please enter your organization.',
             'organization.string' => 'The organization must be a valid string.',
-            'email.required' => 'Please provide your email address.',
-            'email.email' => 'Please provide a valid email address.',
-            'email.unique' => 'This email address has already been used.',
             'photo.image' => 'The photo must be an image file.',
             'bio.required' => 'Please provide your biography.',
             'bio.string' => 'The biography must be a valid string.',
@@ -93,10 +87,6 @@ class SpeakerApplicationRequest extends FormRequest
             'session_format.string' => 'The session format must be a valid string.',
             'notes.string' => 'Additional notes must be a valid string.',
             'notes.max' => 'Additional notes may not exceed 1000 characters.',
-            'photo.mimes' => 'The photo must be a file of type: jpeg, png, jpg, gif, svg.',
-            'photo.max' => 'The photo may not be greater than 2MB.',
-            'phone.required' => 'Please provide your phone number.',
-            'phone.phone' => 'Please provide a valid Nigerian phone number.',
             'linkedin.url' => 'Please provide a valid LinkedIn URL.',
             'website.url' => 'Please provide a valid website URL.',
         ];
@@ -108,9 +98,6 @@ class SpeakerApplicationRequest extends FormRequest
 
         return [
             'speakerInfo' => [
-                'name' => $data['name'] ?? null,
-                'email' => auth()->user()->email,
-                'phone' => auth()->user()->phone,
                 'title' => $data['title'] ?? null,
                 'organization' => trim($data['organization']) ?? null,
                 'photo' => $data['photo'] ?? null,

@@ -9,6 +9,7 @@ use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\URL;
 use Log;
 
@@ -23,8 +24,11 @@ class InvitationToSpeakerMail extends Mailable
     {
         $this->url = URL::temporarySignedRoute(
             "invitations.respond",
-            $this->invitation->expires_at,
-            ['slug' => $this->invitation->event->slug]
+            Carbon::parse($this->invitation->expires_at),
+            [
+                'event'=>$this->invitation->event,
+                'invite' => $this->invitation->id
+                ]
         );
     }
 
@@ -33,7 +37,6 @@ class InvitationToSpeakerMail extends Mailable
      */
     public function envelope(): Envelope
     {
-        Log::debug("invite", [""=> $this->invitation->event]);
         return new Envelope(
             subject: 'Invitation to speak at ' . $this->invitation->event->title,
         );

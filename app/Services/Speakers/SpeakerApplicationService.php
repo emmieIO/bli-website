@@ -4,6 +4,7 @@ namespace App\Services\Speakers;
 
 use App\Enums\ApplicationStatus;
 use App\Events\SpeakerApplicationApprovedEvent;
+use App\Events\SpeakerAppliedToEvent;
 use App\Http\Requests\SpeakerApplicationRequest;
 use App\Models\Event;
 use App\Models\Speaker;
@@ -11,6 +12,7 @@ use App\Models\SpeakerApplication;
 use App\Models\User;
 use App\Services\Event\EventService;
 use App\Traits\HasFileUpload;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -25,64 +27,59 @@ class SpeakerApplicationService
         //
     }
 
-    public function apply(SpeakerApplicationRequest $request, Event $event)
-    {
-        try {
-            DB::transaction(function () use ($request, $event) {
-                $validated = $request->validated();
-                $speakerDp = null;
-                /**
-                 * @var User $user
-                 */
-                $user = auth()->user();
-                $existingApplication = $this->getExistingApplication($event);
-
-                // update user incase the need to reformat their name
-                if ( $existingApplication && $existingApplication->speaker?->photo) {
-                    $speaker = $existingApplication->speaker;
-                    $speakerDp = $speaker?->photo;
-                }
-
-                // handle photo upload
-                if ($request->hasFile('photo')) {
-                    $file_path = $this->uploadfile($request, 'photo', 'speakers_dp');
-                    if($file_path){
-                        $validated['speakerInfo']['photo'] = $file_path;
-                        if($speakerDp){
-                            $this->deleteFile($speakerDp);
-                        }
-                    }
-                } else {
-                    $validated['speakerInfo']['photo'] = $speakerDp;
-                }
-
-
-                // add speaker to database with status of inactive
-                $speaker = Speaker::updateOrCreate(["email" => $user->email], $validated['speakerInfo']);
-                // create a new application
-                $application = SpeakerApplication::updateOrCreate([
-                    'user_id'=>$user->id,
-                    'event_id' => $event->id
-                ],array_merge(
-                    $validated['applicationInfo'],
-                    [
-                        'user_id' => $user->id,
-                        'event_id' => $event->id,
-                        'speaker_id' => $speaker->id
-                    ]
-                ));
-            });
-            // send mail to speaker if ACID transaction is successful
-            // return true for check in controller
-            return true;
-
-        } catch (\Exception $th) {
-            // log exception message
-            \Log::error('Speaker application failed: ' . $th->getMessage(), ['exception' => $th]);
-            //return false for controller check
-            return false;
-        }
+public function apply(array $data, Event $event, UploadedFile $file =null)
+{
+    $existing = $this->getExistingApplication($event);
+    if($existing->isApproved() || $existing->isPending()) {
+        return true;
     }
+    try {
+        $user = auth()->user();
+        $old_photo = $user->speaker?->photo;
+        $data['speakerInfo']['photo'] = $old_photo;
+
+        $speaker = DB::transaction(function () use ($data, $event, $user) {
+            $speaker = Speaker::updateOrCreate(
+                ["user_id" => $user->id],
+                $data['speakerInfo']
+            );
+            SpeakerApplication::updateOrCreate([
+                'user_id' => $user->id,
+                'event_id' => $event->id,
+            ], array_merge(
+                $data['applicationInfo'],
+                [
+                    'user_id' => $user->id,
+                    'event_id' => $event->id,
+                    'speaker_id' => $speaker->id,
+                    "status" => ApplicationStatus::PENDING->value
+
+                ]
+            ));
+            return $speaker;
+        });
+        // dd($speaker)
+        if ($file) {
+            $oldPhoto = $speaker->photo;
+            $file_path = $this->uploadfile($file, 'speakers_dp');
+            if ($file_path) {
+                $speaker->photo = $file_path;
+                $speaker->save();
+                if ($oldPhoto) {
+                    $this->deleteFile($oldPhoto);
+                }
+            }
+        }
+
+        event(new SpeakerAppliedToEvent($event, $user));
+
+        return $speaker;
+
+    } catch (\Exception $th) {
+        \Log::error('Speaker application failed: ' . $th->getMessage(), ['exception' => $th]);
+        return false;
+    }
+}
 
     public function getExistingApplication(Event $event)
     {
@@ -92,15 +89,18 @@ class SpeakerApplicationService
         return $application;
     }
 
-    public function fetchPendingSpeakerApplications(){
+    public function fetchPendingSpeakerApplications()
+    {
         return SpeakerApplication::with(['speaker'])->where('status', ApplicationStatus::PENDING->value)->lazy();
     }
 
-    public function fetchApprovedSpeakerApplications(){
+    public function fetchApprovedSpeakerApplications()
+    {
         return SpeakerApplication::with(['speaker'])->where('status', ApplicationStatus::APPROVED->value)->lazy();
     }
 
-    public function approveSpeakerApplication(SpeakerApplication $application){
+    public function approveSpeakerApplication(SpeakerApplication $application)
+    {
         try {
             // transaction block
             DB::beginTransaction();
@@ -109,13 +109,16 @@ class SpeakerApplicationService
             $application->save();
             // change speaker status to active
             $application->speaker->update([
-                "status" => 'active'
+                "status" => 'active',
+                "approved_at" => now(),
+                "reviewed_at" => now(),
             ]);
             // add speaker to event speaker list
             $application->event->speakers()->syncWithoutDetaching([$application->speaker->id]);
             DB::commit();
             // then send mail to speaker on approval success event
-            SpeakerApplicationApprovedEvent::dispatch($application);
+            event(new SpeakerApplicationApprovedEvent($application));
+
             return $application;
         } catch (\Throwable $th) {
             DB::rollBack();
@@ -124,21 +127,23 @@ class SpeakerApplicationService
         }
     }
 
-    public function rejectSpeakerApplication(SpeakerApplication $application, string $feedback)
+    public function rejectSpeakerApplication(SpeakerApplication $application, string $feedback, string $status = null)
     {
         try {
             DB::beginTransaction();
-            if($application->status == 'approved'){
                 $speaker = $application->speaker;
                 $event = $application->event;
 
                 $application->update([
                     "status" => ApplicationStatus::REJECTED->value,
-                    "feedback" => $feedback
+                    "feedback" => $feedback,
+                    'rejected_at' => now(),
+                    "reviewed_at" => now(),
+
                 ]);
 
                 $event->speakers()->detach($speaker->id);
-            }
+
             // code to reject application
 
             DB::commit();
@@ -148,4 +153,5 @@ class SpeakerApplicationService
             return null;
         }
     }
+
 }

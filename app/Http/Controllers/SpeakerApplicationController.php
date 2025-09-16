@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\ApplicationStatus;
 use App\Http\Requests\SpeakerApplicationRequest;
 use App\Models\Event;
 use App\Models\SpeakerApplication;
+use App\Models\SpeakerInvite;
 use App\Services\Speakers\SpeakerApplicationService;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
@@ -22,10 +24,15 @@ class SpeakerApplicationController extends Controller
     {
         $this->authorize('applyToSpeak', $event);
         $existing = $this->service->getExistingApplication($event);
-        if($existing && $existing->status == 'pending'){
-            return view("speakers.thank_you", compact("event"));
+
+        if ($existing && $existing->isApproved()) {
+            return redirect()->signedRoute('events.show', $event->slug)->with([
+                "type" => "warning",
+                "message" => "You have already been approved to speak at this event."
+            ]);
         }
-        $application = $this->service->getExistingApplication($event);
+
+        $application = $existing;
         return view('speakers.apply', compact("event", "application"));
     }
 
@@ -43,14 +50,16 @@ class SpeakerApplicationController extends Controller
         return view("admin.speakers.speaker-application.approved", compact("applications"));
     }
 
-    public function reviewApplication(SpeakerApplication $application){
+    public function reviewApplication(SpeakerApplication $application)
+    {
         return view("admin.speakers.speaker-application.review", compact('application'));
     }
 
-    public function approveApplication(SpeakerApplication $application){
-        $this->authorize('approveApplication', $application );
+    public function approveApplication(SpeakerApplication $application)
+    {
+        $this->authorize('approveApplication', $application);
 
-        if($this->service->approveSpeakerApplication($application)){
+        if ($this->service->approveSpeakerApplication($application)) {
             return back()->with([
                 'type' => 'success',
                 'message' => 'Speaker application approved successfully.'
@@ -62,13 +71,14 @@ class SpeakerApplicationController extends Controller
         ]);
     }
 
-    public function rejectApplication(Request $request, SpeakerApplication $application){
+    public function rejectApplication(Request $request, SpeakerApplication $application)
+    {
         $this->authorize('approveApplication', $application);
         $validated = $request->validate([
             'feedback' => 'required|string|min:50|max:1000'
         ]);
 
-        if($this->service->rejectSpeakerApplication($application, $validated['feedback'] )){
+        if ($this->service->rejectSpeakerApplication($application, $validated['feedback'])) {
             return back()->with([
                 'type' => 'success',
                 'message' => 'Speaker application rejected successfully.'
@@ -80,13 +90,29 @@ class SpeakerApplicationController extends Controller
         ]);
     }
 
+    public function revokeApproval(Request $request, SpeakerApplication $application)
+    {
+        dd($application);
+    }
+
     /**
      * Store a newly created resource in storage.
      */
     public function store(SpeakerApplicationRequest $request, Event $event)
     {
         $this->authorize('applyToSpeak', $event);
-        if ($this->service->apply($request, $event)) {
+        $existingApplication = $this->service->getExistingApplication($event);
+
+        if ($existingApplication && $existingApplication->isPending()) {
+            return redirect()->signedRoute('events.show', $event->slug)->with([
+                "type" => "warning",
+                "message" => "You already have a pending application for this event."
+            ]);
+        }
+        $data = $request->validated();
+        $photo = $request->file("photo");
+
+        if ($this->service->apply($data, $event, $photo)) {
             return redirect()->back()->with(
                 [
                     "type" => 'success',
@@ -104,9 +130,9 @@ class SpeakerApplicationController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function inviteRespondView(Event $event, SpeakerInvite $invite)
     {
-        //
+        return view('user_dashboard.invite-respond', compact('event', 'invite'));
     }
 
     /**

@@ -30,57 +30,80 @@
 
             <div class="overflow-x-auto">
                 <table class="min-w-full divide-y divide-gray-200">
-                    <thead class="bg-gray-50">
+                    <thead class="bg-gray-50 whitespace-nowrap">
                         <tr>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Topic Title</th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Speaker</th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Session Format</th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Approved At</th>
-                            <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                            <th scope="col"
+                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Topic Title</th>
+                            <th scope="col"
+                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Speaker</th>
+                            <th scope="col"
+                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Event</th>
+                            <th scope="col"
+                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Session Format</th>
+                            <th scope="col"
+                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Approved At</th>
+                            <th scope="col"
+                                class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Actions</th>
                         </tr>
                     </thead>
-                    <tbody class="bg-white divide-y divide-gray-200">
+                    <tbody class="bg-white divide-y divide-gray-200 whitespace-nowrap">
                         @forelse($applications as $application)
                             <tr class="hover:bg-gray-50 transition-colors">
                                 <td class="px-6 py-4">
                                     <div class="font-medium text-gray-900">{{ $application->topic_title }}</div>
-                                    @if($application->topic_description)
-                                        <div class="text-xs text-gray-500 mt-1 line-clamp-1">{{ Str::limit($application->topic_description, 60) }}</div>
+                                    @if ($application->topic_description)
+                                        <div class="text-xs text-gray-500 mt-1 line-clamp-1">
+                                            {{ Str::limit($application->topic_description, 60) }}</div>
                                     @endif
                                 </td>
-                                <td class="px-6 py-4">
+                                <td class="px-6 py-4 whitespace-nowrap">
                                     <div class="flex items-center gap-2">
-                                        <div class="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-xs font-medium text-gray-700">
-                                            {{ strtoupper(substr($application->speaker->name, 0, 1)) }}
+                                        <div
+                                            class="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-xs font-medium text-gray-700">
+                                            {{ strtoupper(substr($application->speaker->user->name, 0, 1)) }}
                                         </div>
-                                        <span class="text-sm text-gray-900">{{ $application->speaker->name }}</span>
+                                        <span
+                                            class="text-sm text-gray-900">{{ $application->speaker->user->name }}</span>
                                     </div>
                                 </td>
-                                <td class="px-6 py-4">
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="flex items-center gap-2">
+                                        <span
+                                            class="text-sm text-gray-900 font-bold">{{ $application->event->title }}</span>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span
+                                        class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
                                         {{ ucfirst(str_replace('_', ' ', $application->session_format->value)) }}
                                     </span>
                                 </td>
                                 <td class="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">
-                                    {{ $application->approved_at ? $application->approved_at->format('M d, Y \a\t g:i A') : '—' }}
+                                    {{ $application->approved_at ? sweet_date($application->approved_at) : '—' }}
                                 </td>
-                                <td class="px-6 py-4 text-right space-x-2">
+                                <td class="px-6 py-4 text-right space-x-2 whitespace-nowrap">
                                     <a href="{{ route('admin.speakers.application.review', $application) }}"
                                         class="inline-flex items-center px-3 py-1.5 bg-[#00275E] text-white text-xs font-medium rounded-lg hover:bg-[#001a44] focus:ring-2 focus:ring-offset-2 focus:ring-[#00275E] transition shadow-sm">
                                         <i data-lucide="eye" class="w-4 h-4 mr-1.5"></i>
                                         View Details
                                     </a>
 
-                                    <form action="{{ route('admin.speakers.applications.revoke', $application) }}" method="POST" class="inline">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit"
-                                            onclick="return confirm('Are you sure you want to revoke approval for "{{ $application->topic_title }}" by {{ $application->speaker->name }}? This will move the application back to pending status.');"
-                                            class="inline-flex items-center px-3 py-1.5 bg-red-600 text-white text-xs font-medium rounded-lg hover:bg-red-700 focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition shadow-sm">
-                                            <i data-lucide="rotate-ccw" class="w-4 h-4 mr-1.5"></i>
-                                            Revoke
-                                        </button>
-                                    </form>
+                                    <button type="button" data-modal-target="feedback-modal"
+                                        data-modal-toggle="feedback-modal" data-action="" data-method="POST"
+                                        data-spoofMethod="DELETE" data-title="Revoke Speaker Approval"
+                                        data-message="Please provide a reason for revoking approval for {{ $application->speaker->name }}’s application:"
+                                        data-confirm-text="Revoke Approval"
+                                        class="inline-flex items-center px-3 py-1.5 bg-red-600 text-white text-xs font-medium rounded-lg hover:bg-red-700 focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition shadow-sm">
+                                        <i data-lucide="rotate-ccw" class="w-4 h-4 mr-1.5"></i>
+                                        Revoke
+                                    </button>
+
                                 </td>
                             </tr>
                         @empty
@@ -89,7 +112,8 @@
                                     <div class="flex flex-col items-center space-y-4 text-gray-400">
                                         <i data-lucide="award" class="w-12 h-12"></i>
                                         <h3 class="text-lg font-medium text-gray-900">No approved applications yet</h3>
-                                        <p class="max-w-md text-center text-gray-500">Speaker applications will appear here once approved. Start by reviewing pending applications.</p>
+                                        <p class="max-w-md text-center text-gray-500">Speaker applications will appear
+                                            here once approved. Start by reviewing pending applications.</p>
                                         <a href="{{ route('admin.speakers.applications.pending') }}"
                                             class="mt-4 inline-flex items-center px-4 py-2 bg-[#00275E] text-white text-sm font-medium rounded-lg hover:bg-[#FF0000] focus:ring-4 focus:ring-blue-300 transition shadow-sm">
                                             <i data-lucide="list-checks" class="w-4 h-4 mr-2"></i>

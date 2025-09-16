@@ -4,10 +4,12 @@
     <!-- HERO Section -->
     <section class="text-white bg-[#ff0000] hero">
         <div class="flex items-center py-16 gap-6">
-            <div class=" space-y-5 text-center">
-                <h4 class="text-md font-semibold tracking-wide uppercase">Beacon Leadership Institute</h4>
-                <h1 class="text-3xl md:text-3xl lg:text-5xl font-extrabold leading-tight">
-                    Empowering Leaders for Influence & Impact
+            <div class="space-y-5 text-center hero-text">
+                <h4 class="text-md font-semibold tracking-wide uppercase">
+                    Beacon Leadership Institute
+                </h4>
+                <h1 class="hero-headline text-3xl md:text-3xl lg:text-5xl font-extrabold leading-tight">
+                    Empowering Leaders for Influence & Impact 
                 </h1>
                 <p class="text-white/90 text-lg leading-relaxed">
                     Developing visionary leaders to drive positive change in organizations and communities.
@@ -26,12 +28,13 @@
                 </div>
             </div>
 
+
         </div>
     </section>
 
     <!-- Why Choose Us -->
     <section class="py-16 bg-white">
-        <div class="max-w-6xl mx-auto px-5 text-center space-y-10">
+        <div class="max-w-6xl mx-auto px-5 text-center space-y-10" data-aos="zoom-in">
             <h2 class="text-3xl font-bold text-black">Why Choose Beacon LMS?</h2>
             <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6 text-left">
                 <div class="p-6 border rounded-lg bg-gray-50 shadow">

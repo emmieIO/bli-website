@@ -28,13 +28,14 @@ class SpeakersController extends Controller
 
     public function store(CreateSpeakerRequest $request){
         $this->authorize('create', Speaker::class);
-
-        $speaker = $this->speakerService->createSpeaker($request);
+        $validated = $request->validated();
+        $photo = $request->file('photo');
+        $speaker = $this->speakerService->createSpeaker($validated, $photo);
         if($speaker){
           return back()->with([
             "type"=>"success",
             "message" => "Speaker created successfully"
-          ]);
+          ]);   
         }
          return back()->with([
             "type"=>"error",
@@ -52,8 +53,11 @@ class SpeakersController extends Controller
 
     public function update(UpdateSpeakerRequest $request, Speaker $speaker)
     {
-        $speaker = $this->speakerService->updateSpeaker($request, $speaker);
+
         $this->authorize('update', $speaker);
+        $validated = $request->validated();
+        $photo = $request->file('photo');
+        $speaker = $this->speakerService->updateSpeaker($validated, $speaker, $photo);
 
         if($speaker){
             return back()->with([

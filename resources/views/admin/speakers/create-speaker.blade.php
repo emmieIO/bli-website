@@ -1,5 +1,5 @@
 <x-app-layout>
-    <div class="py-10 px-4 sm:px-6 lg:px-8 max-w-5xl mx-auto">
+    <div class="py-10 px-4 sm:px-6 mx-auto">
         <!-- Page Header -->
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
             <div class="flex items-center gap-3">
@@ -18,6 +18,9 @@
                 Back to Speakers
             </a>
         </div>
+
+        <!-- Status Tabs -->
+        <x-speakers-applications-tabs class="mb-8" />
 
         <!-- Form Card -->
         <div class="bg-white border border-gray-100 rounded-xl shadow-sm p-6 md:p-8">

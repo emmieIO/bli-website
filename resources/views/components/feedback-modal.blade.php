@@ -6,48 +6,50 @@
     'confirmText' => 'Submit Feedback',
 ])
 
-<div id="{{ $id ?? 'feedback-modal' }}" tabindex="-1" aria-hidden="true"
-    class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
-    <div class="relative p-4 w-full max-w-md max-h-full">
-        <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
+<div id="{{ $id }}" tabindex="-1" aria-hidden="true"
+    class="hidden fixed inset-0 z-50 items-center justify-center p-4 bg-black/40 backdrop-blur-sm transition-opacity duration-300">
+    <div class="relative w-full max-w-md mx-auto my-8 animate-fade-in-up">
+        <div class="relative bg-white rounded-3xl shadow-2xl border border-gray-100 overflow-hidden">
 
-            <!-- Header -->
-            <div class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600">
-                <h3 id="{{ $id }}-title" class="text-lg font-semibold text-gray-900 dark:text-white">
-                    {{ $title ?? 'Provide Feedback' }}
+            <!-- Modal Header -->
+            <div class="flex items-center justify-between p-6 bg-gray-50 border-b border-gray-100">
+                <h3 id="{{ $id }}-title" class="text-xl font-bold text-gray-800 tracking-tight">
+                    {{ $title }}
                 </h3>
                 <button type="button"
-                    class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white"
-                    data-modal-hide="{{ $id ?? 'feedback-modal' }}">
-                    <i data-lucide="x" class="w-4 h-4"></i>
+                    class="text-gray-400 hover:text-gray-600 hover:bg-gray-200 transition-all duration-200 rounded-full p-2 focus:outline-none focus:ring-2 focus:ring-gray-300"
+                    data-modal-hide="{{ $id }}">
+                    <i data-lucide="x" class="w-5 h-5"></i>
                     <span class="sr-only">Close modal</span>
                 </button>
             </div>
 
-            <!-- Body -->
-            <div class="p-4 md:p-5 space-y-4">
-                <form method="POST" action="{{ $action ?? '#' }}" id="{{ $id }}-form">
+            <!-- Modal Body -->
+            <div class="p-8">
+                <form method="POST" action="{{ $action }}" id="{{ $id }}-form" class="space-y-6">
                     @csrf
                     @method('POST')
 
-                    <p id="{{ $id }}-message" class="text-sm text-gray-500 mb-2">
-                        {{ $message ?? 'Please provide feedback below:' }}
+                    <p id="{{ $id }}-message" class="text-base text-gray-600 leading-relaxed">
+                        {{ $message }}
                     </p>
-                    <div class="">
-                        <textarea name="feedback" id="{{ $id }}-feedback" required rows="4"
-                            class="w-full border rounded-lg p-2 text-sm text-gray-700 focus:ring focus:ring-red-500 dark:bg-gray-800 dark:text-gray-200 dark:border-gray-600"></textarea>
-                            <x-input-error :messages="$errors->get('feedback')" />
+
+                    <div>
+                        <textarea name="feedback" id="{{ $id }}-feedback" required rows="5"
+                            class="w-full border border-gray-300 rounded-xl p-4 text-sm text-gray-700 placeholder-gray-400 focus:ring-2 focus:ring-blue-600 focus:border-blue-600 focus:outline-none transition-all duration-200 resize-none"
+                            placeholder="Share your thoughts...">{{ old('feedback') }}</textarea>
+                        <x-input-error :messages="$errors->get('feedback')" class="mt-2" />
                     </div>
 
-                    <!-- Footer -->
-                    <div class="flex justify-end gap-2 mt-4">
-                        <button type="button" data-modal-hide="{{ $id ?? 'feedback-modal' }}"
-                            class="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600">
+                    <!-- Modal Footer -->
+                    <div class="flex flex-col sm:flex-row gap-3 pt-2">
+                        <button type="button" data-modal-hide="{{ $id }}"
+                            class="flex-1 sm:flex-none py-3 px-6 text-sm font-semibold text-white bg-gradient-to-r from-red-600 to-red-700 rounded-xl hover:from-red-700 hover:to-red-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 shadow-md hover:shadow-lg transition-all duration-200">
                             Cancel
                         </button>
                         <button id="{{ $id }}-confirm" type="submit"
-                            class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">
-                            {{ $confirmText ?? 'Submit Feedback' }}
+                            class="flex-1 sm:flex-none py-3 px-6 text-sm font-semibold text-white bg-gradient-to-r from-blue-800 to-blue-900 rounded-xl hover:from-blue-900 hover:to-blue-950 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-600 shadow-md hover:shadow-lg transition-all duration-200">
+                            {{ $confirmText }}
                         </button>
                     </div>
                 </form>
@@ -55,3 +57,19 @@
         </div>
     </div>
 </div>
+
+<style>
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    .animate-fade-in-up {
+        animation: fadeInUp 0.3s ease-out forwards;
+    }
+</style>

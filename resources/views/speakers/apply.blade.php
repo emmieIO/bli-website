@@ -32,7 +32,7 @@
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <!-- Name -->
                             <div>
-                                <x-input label="Full Name" name="name" autofocus :value="auth()->user()->name" icon="user" required />
+                                <x-input label="Full Name" name="name" disabled autofocus :value="auth()->user()->name" icon="user" required />
                             </div>
 
                             <!-- Title -->
@@ -115,7 +115,7 @@
 
                         <!-- Bio -->
                         <div class="mb-6">
-                            <label for="bio" class="block text-sm font-medium text-gray-700 mb-2 flex items-center">
+                            <label for="bio" class=" text-sm font-medium text-gray-700 mb-2 flex items-center">
                                 <i data-lucide="file-text" class="w-4 h-4 mr-2 text-[#00275E]"></i>
                                 Professional Bio
                             </label>
@@ -165,7 +165,7 @@
 
                         <!-- Topic Description -->
                         <div class="mb-6">
-                            <label for="topic_description" class="block text-sm font-medium text-gray-700 mb-2 flex items-center">
+                            <label for="topic_description" class=" text-sm font-medium text-gray-700 mb-2 flex items-center">
                                 <i data-lucide="align-left" class="w-4 h-4 mr-2 text-[#00275E]"></i>
                                 Session Description
                             </label>
@@ -180,7 +180,7 @@
 
                         <!-- Session Format -->
                         <div class="mb-6">
-                            <label class="block text-sm font-medium text-gray-700 mb-3 flex items-center">
+                            <label class="text-sm font-medium text-gray-700 mb-3 flex items-center">
                                 <i data-lucide="layout" class="w-4 h-4 mr-2 text-[#00275E]"></i>
                                 Preferred Session Format
                             </label>
@@ -205,7 +205,7 @@
 
                         <!-- Additional Notes -->
                         <div>
-                            <label for="notes" class="block text-sm font-medium text-gray-700 mb-2 flex items-center">
+                            <label for="notes" class="text-sm font-medium text-gray-700 mb-2 flex items-center">
                                 <i data-lucide="message-square" class="w-4 h-4 mr-2 text-[#00275E]"></i>
                                 Additional Notes
                             </label>

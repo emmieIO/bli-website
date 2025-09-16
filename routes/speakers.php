@@ -9,6 +9,10 @@ Route::middleware(['auth'])->prefix('events/{event}')->group(function () {
         ->name('event.speakers.apply')
         ->middleware(['signed']);
 
+        Route::get('/invitations/{invite}/respond', [SpeakerApplicationController::class, 'inviteRespondView'])
+        ->name('invitations.respond')
+        ->middleware('signed');
+
     Route::post('/apply-to-speak', [SpeakerApplicationController::class, 'store'])
         ->name('event.speakers.store')
         ->middleware(['signed']);

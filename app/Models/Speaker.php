@@ -28,4 +28,8 @@ class Speaker extends Model
     public function speakerApplications(){
         return $this->belongsTo(Event::class);
     }
+
+    public function user(){
+        return $this->belongsTo(User::class);
+    }
 }

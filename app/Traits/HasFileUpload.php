@@ -2,7 +2,9 @@
 
 namespace App\Traits;
 
+
 use Illuminate\Http\Request;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
@@ -15,16 +17,14 @@ trait HasFileUpload
      * @param string $path
      * @return string|false
      */
-    public function uploadfile(Request $request, string $request_name, string $path, $disk_type='public')
+    public function uploadFile(UploadedFile $file, string $path, $disk_type='public')
     {
         $file_path = null;
 
         try {
-            if ($request->hasFile($request_name)) {
-            $file = $request->file($request_name);
+            if ($file) {
             $file_path = $file->store($path, $disk_type);
             }
-
             return $file_path;
         } catch (\Exception $e) {
             if (!empty($file_path) && Storage::disk($disk_type)->exists($file_path)) {
@@ -33,7 +33,7 @@ trait HasFileUpload
 
             Log::error('File upload failed', [
             'error' => $e->getMessage(),
-            'request_name' => $request_name,
+            'file' => $file->getClientOriginalName(),
             ]);
 
             return false;

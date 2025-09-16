@@ -38,6 +38,7 @@ Route::group([
         Route::get('/speakers/applications/{application}/review', [SpeakerApplicationController::class, 'reviewApplication'])->name('speakers.application.review');
         Route::post('/speakers/applications/{application}/approve', [SpeakerApplicationController::class, 'approveApplication'])->name('speakers.application.approve');
         Route::patch('/speakers/applications/{application}/reject', [SpeakerApplicationController::class,'rejectApplication'])->name('speakers.application.reject');
+        Route::patch('/speakers/applications/{application}/revoke', [SpeakerApplicationController::class,'revokeApproval'])->name('speakers.application.revoke');
         Route::get('/speakers/create', [SpeakersController::class, 'create'])->name("speakers.create");
         Route::get('/speakers/{speaker}/edit', [SpeakersController::class, 'edit'])->name("speakers.edit");
         Route::get('/speakers/{speaker}/show', [SpeakersController::class, 'show'])->name("speakers.show");

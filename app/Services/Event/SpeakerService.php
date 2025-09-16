@@ -8,6 +8,7 @@ use App\Models\Speaker;
 use App\Models\SpeakerInvite;
 use App\Services\Misc;
 use App\Traits\HasFileUpload;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -23,23 +24,27 @@ class SpeakerService
         //
     }
 
-    public function fetchSpeakers(){
-        $speakers = Speaker::orderBy('name', 'asc')->paginate(10);
+    public function fetchSpeakers()
+    {
+        $speakers = Speaker::latest()
+        ->where('status', 'active')
+        ->paginate(10);
 
         return $speakers;
     }
 
-    public function findOneSpeaker($id){
+    public function findOneSpeaker($id)
+    {
         return Speaker::findOrFail($id);
     }
 
-    public function createSpeaker(CreateSpeakerRequest $request){
+    public function createSpeaker(array $validated, UploadedFile $photo)
+    {
         DB::beginTransaction();
         $file_path = null;
         try {
             $user = auth()->user();
-            $validated = $request->validated();
-            $file_path = $this->uploadfile($request, 'photo', "speakers_dp");
+            $file_path = $this->uploadfile($photo, "speakers_dp");
             $validated['photo'] = $file_path;
             $speaker = $user->speakers()->create($validated);
             DB::commit();
@@ -54,27 +59,27 @@ class SpeakerService
         }
     }
 
-    public function updateSpeaker(UpdateSpeakerRequest $request, Speaker $speaker)
+    public function updateSpeaker(array $validated, Speaker $speaker, ?UploadedFile $photo)
     {
         try {
-            DB::beginTransaction();
-            $file_path = $speaker->photo;
-            $validated = $request->validated();
+            $existing_photo = $speaker->photo;
+            DB::transaction(function () use ($speaker, $validated) {
+                $speaker->update($validated);
+            });
 
-            if($request->hasFile('photo')){
-                $this->deleteFile($file_path);
-                $file_path = $this->uploadfile($request, 'photo', 'speakers_dp');
-                $validated['photo'] = $file_path;
-            }else{
-                $validated['photo'] = $file_path;
+            if ($photo) {
+                $new_photo = $this->uploadfile($photo, 'speakers_dp');
+                $speaker->photo = $new_photo;
+                $updatedPhoto = $speaker->save();
+                if ($updatedPhoto) {
+                    if ($existing_photo) {
+                        $this->deleteFile($existing_photo);
+                    }
+                }
             }
-            $speaker->update($validated);
-            DB::commit();
             return $speaker->fresh();
         } catch (\Exception $e) {
-            DB::rollBack();
-            $this->deleteFile($file_path);
-            Log::error( 'Speaker update failed: ' . $e->getMessage() );
+            Log::error('Speaker update failed: ' . $e->getMessage());
             return null;
         }
     }
@@ -82,7 +87,7 @@ class SpeakerService
     public function deleteSpeaker(Speaker $speaker)
     {
         $photo_path = $speaker->photo;
-        if($speaker->delete()){
+        if ($speaker->delete()) {
             $this->deleteFile($photo_path);
             return true;
         }
@@ -91,9 +96,13 @@ class SpeakerService
 
     public function getSpeakerInvites(int $perPage = 10)
     {
-        // $user = auth()->user()->speaker->id;
-        // return SpeakerInvite::where('speaker_id', '')->paginate($perPage);
-        return true;
+        $speaker_id = auth()->user()->speaker?->id;
+        if($speaker_id){
+            $invites = SpeakerInvite::where('speaker_id', $speaker_id)
+            ->paginate($perPage);
+            return $invites;
+        }
+        return collect([]);
     }
 
 }

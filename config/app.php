@@ -14,7 +14,7 @@ return [
     */
 
     'name' => env('APP_NAME', 'Laravel'),
-    'support_mail' => env('SUPPORT_MAIL', ''),
+    'support_mail' => env('SUPPORT_MAIL', 'info@wizbizhubltd.com'),
 
     /*
     |--------------------------------------------------------------------------

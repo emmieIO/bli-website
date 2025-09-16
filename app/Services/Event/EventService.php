@@ -31,7 +31,8 @@ class EventService
         //
     }
 
-    public function getPublishedEvents(){
+    public function getPublishedEvents()
+    {
         $events = Event::where('is_published', true)
             ->orderBy('created_at', 'asc')
             ->paginate()
@@ -49,14 +50,14 @@ class EventService
             $query = $user->eventsCreated();
 
             if ($filter === 'past') {
-            $query->where('start_date', '<', now());
+                $query->where('start_date', '<', now());
             } elseif ($filter === 'ongoing') {
-            $query->where('start_date', '<=', now())
-                  ->where('end_date', '>=', now());
+                $query->where('start_date', '<=', now())
+                    ->where('end_date', '>=', now());
             } elseif ($filter === 'future') {
-            $query->where('start_date', '>', now());
-            }elseif ($filter === 'draft') {
-                $query->where('is_published','=', false);
+                $query->where('start_date', '>', now());
+            } elseif ($filter === 'draft') {
+                $query->where('is_published', '=', false);
             }
 
             return $query->orderBy('start_date', 'desc')->paginate()->withQueryString();
@@ -70,38 +71,38 @@ class EventService
         $event = Event::findOrFail($eventId);
         $existing = $event->attendees()->where('user_id', $userId)->first();
 
-        if(now()->greaterThan($event->start_date)){
+        if (now()->greaterThan($event->start_date)) {
             Log::info("User {$userId} attempted to register for event {$eventId} after the event start date.");
             return false;
         }
 
         // this conditions runs if a user is not registered
-        if($existing && $event->isRegistered()){
+        if ($existing && $event->isRegistered()) {
             Log::info("User {$userId} successfully registered for event {$eventId}.");
             return true;
         }
 
         // condition if event was previously canceled
-        if($existing && $event->isCanceled()){
-            if($event->getRevokeCount() >= 4){
+        if ($existing && $event->isCanceled()) {
+            if ($event->getRevokeCount() >= 4) {
                 Log::warning("User {$userId} attempted to re-register for event {$eventId} but has reached the maximum revoke count ({$event->getRevokeCount()}). Registration denied.");
                 return false;
             }
 
             $event->attendees()->updateExistingPivot($userId, [
-            'status' => 'registered',
-            'updated_at' => now(),
-        ]);
+                'status' => 'registered',
+                'updated_at' => now(),
+            ]);
 
-        return true;
+            return true;
         }
 
         // conndition for fresh registration
         $event->attendees()->attach($userId, [
-        'status' => 'registered',
-        'revoke_count' => 0,
-        'created_at' => now(),
-        'updated_at' => now(),
+            'status' => 'registered',
+            'revoke_count' => 0,
+            'created_at' => now(),
+            'updated_at' => now(),
         ]);
         event(new EventRegisterEvent($event, auth()->user()));
 
@@ -126,13 +127,13 @@ class EventService
 
         $registration = $event->attendees()->where("user_id", $userId);
 
-        if(!$registration){
+        if (!$registration) {
             return false;
         }
-        $event->attendees()->updateExistingPivot($userId,[
-        'status' => 'cancelled',
-        'revoke_count' => DB::raw('revoke_count + 1'),
-        'updated_at' => now()
+        $event->attendees()->updateExistingPivot($userId, [
+            'status' => 'cancelled',
+            'revoke_count' => DB::raw('revoke_count + 1'),
+            'updated_at' => now()
         ]);
         return true;
     }
@@ -263,26 +264,31 @@ class EventService
         }
     }
 
-    public function inviteSpeakerToEvent(Event $event, array $data): bool|string {
+    public function inviteSpeakerToEvent(Event $event, array $data): bool|string
+    {
         $speaker = $this->speakerService->findOneSpeaker($data['speaker_id']);
-        if (SpeakerInvite::where('event_id', $event->id)
-            ->where('speaker_id', $speaker->id)
-            ->exists()
+        if (
+            SpeakerInvite::where('event_id', $event->id)
+                ->where('speaker_id', $speaker->id)
+                ->exists()
         ) {
             return "already_invited";
         }
 
-        $data['expires_at']= Carbon::now()->addDay();
-        DB::beginTransaction();
-        try{
-            $invitation = SpeakerInvite::create($data);
-            DB::commit();
-            // send Mail Notification
-            Mail::to($invitation->speaker->email)->send(new InvitationToSpeakerMail($invitation));
+        try {
+            $data['expires_at'] = Carbon::now()->addDay();
+            DB::transaction(function () use ($data) {
+                $invitation = SpeakerInvite::create($data);
+
+                Mail::to($invitation->speaker->user->email)->send(new InvitationToSpeakerMail($invitation));
+            });
             return true;
-        }catch(Throwable $e){
-            DB::rollBack();
-            Log::error('Speaker invitation failed: ' . $e->getMessage());
+        } catch (Throwable $e) {
+
+            Log::error('Speaker invitation failed: ', [
+                'exception' => $e->getMessage(),
+                // 'trace' => $e->getTraceAsString(),
+            ]);
             return false;
         }
     }

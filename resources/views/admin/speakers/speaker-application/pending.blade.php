@@ -31,9 +31,10 @@
             <div class="overflow-x-auto">
                 <table class="min-w-full divide-y divide-gray-200">
                     <thead class="bg-gray-50">
-                        <tr>
+                        <tr class="whitespace-nowrap">
                             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Topic Title</th>
                             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Speaker</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Event</th>
                             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Session Format</th>
                             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Submitted At</th>
                             <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
@@ -42,18 +43,28 @@
                     <tbody class="bg-white divide-y divide-gray-200">
                         @forelse($applications as $application)
                             <tr class="hover:bg-gray-50 transition-colors">
-                                <td class="px-6 py-4">
+                                <td class="px-6 py-4 whitespace-nowrap">
                                     <div class="font-medium text-gray-900">{{ $application->topic_title }}</div>
                                     @if($application->topic_description)
                                         <div class="text-xs text-gray-500 mt-1 line-clamp-1">{{ Str::limit($application->topic_description, 60) }}</div>
                                     @endif
                                 </td>
-                                <td class="px-6 py-4">
+                                <td class="px-6 py-4 whitespace-nowrap">
                                     <div class="flex items-center gap-2">
                                         <div class="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-xs font-medium text-gray-700">
-                                            {{ strtoupper(substr($application->speaker->name, 0, 1)) }}
+                                            {{ strtoupper(substr($application->user->name, 0, 1)) }}
                                         </div>
-                                        <span class="text-sm text-gray-900">{{ $application->speaker->name }}</span>
+                                        <span class="text-sm text-gray-900">{{ $application->user->name }}</span>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="flex flex-col items-start gap-2">
+                                        <span class="text-sm text-gray-900">{{ $application->event->title }}</span>
+                                        <span class="text-xs text-gray-500">
+                                            {{ $application->event->start_date }}
+                                            –
+                                            {{ $application->event->end_date }}
+                                        </span>
                                     </div>
                                 </td>
                                 <td class="px-6 py-4">

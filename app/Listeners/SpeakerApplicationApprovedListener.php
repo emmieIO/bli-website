@@ -25,6 +25,7 @@ class SpeakerApplicationApprovedListener
     {
         $speaker = $event->application->speaker;
         $application = $event->application;
-        Notification::send($speaker, new SpeakerApplicationApprovedNotification($application));
+
+        $speaker->user->notify(new SpeakerApplicationApprovedNotification($application));
     }
 }

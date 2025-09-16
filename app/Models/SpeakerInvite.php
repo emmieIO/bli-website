@@ -15,4 +15,5 @@ class SpeakerInvite extends Model
     public function speaker(){
         return $this->belongsTo(Speaker::class);
     }
+
 }
