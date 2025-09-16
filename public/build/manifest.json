@@ -1,6 +1,6 @@
 {
   "resources/css/app.css": {
-    "file": "assets/app-OZ72gJ4B.css",
+    "file": "assets/app-WYDfbZTz.css",
     "src": "resources/css/app.css",
     "isEntry": true
   },
@@ -13,12 +13,12 @@
     "src": "resources/images/hero-bg.jpg"
   },
   "resources/js/app.js": {
-    "file": "assets/app-CJwd9pIf.js",
+    "file": "assets/app-D5oM7gtu.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,
     "css": [
-      "assets/app-KOmfmGu7.css"
+      "assets/app-BYRhPc2t.css"
     ]
   }
 }
