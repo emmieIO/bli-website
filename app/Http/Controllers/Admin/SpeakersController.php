@@ -53,7 +53,7 @@ class SpeakersController extends Controller
 
     public function update(UpdateSpeakerRequest $request, Speaker $speaker)
     {
-
+        
         $this->authorize('update', $speaker);
         $validated = $request->validated();
         $photo = $request->file('photo');

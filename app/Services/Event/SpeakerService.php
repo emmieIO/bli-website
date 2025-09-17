@@ -27,8 +27,8 @@ class SpeakerService
     public function fetchSpeakers()
     {
         $speakers = Speaker::latest()
-        ->where('status', 'active')
-        ->paginate(10);
+            ->where('status', 'active')
+            ->paginate(10);
 
         return $speakers;
     }
@@ -63,20 +63,23 @@ class SpeakerService
     {
         try {
             $existing_photo = $speaker->photo;
-            DB::transaction(function () use ($speaker, $validated) {
-                $speaker->update($validated);
-            });
+            $validated['speakerProfile']['photo'] = $existing_photo;
+            DB::transaction(function () use ($speaker, $validated, $photo, $existing_photo) {
+                $speaker->user->update($validated['userInfo']);
+                $speaker->update($validated['speakerProfile']);
 
-            if ($photo) {
-                $new_photo = $this->uploadfile($photo, 'speakers_dp');
-                $speaker->photo = $new_photo;
-                $updatedPhoto = $speaker->save();
-                if ($updatedPhoto) {
-                    if ($existing_photo) {
-                        $this->deleteFile($existing_photo);
+                if ($photo) {
+                    $new_photo = $this->uploadfile($photo, 'speakers_dp');
+                    $speaker->photo = $new_photo;
+                    $updatedPhoto = $speaker->save();
+                    if ($updatedPhoto) {
+                        if ($existing_photo) {
+                            $this->deleteFile($existing_photo);
+                        }
                     }
                 }
-            }
+            });
+
             return $speaker->fresh();
         } catch (\Exception $e) {
             Log::error('Speaker update failed: ' . $e->getMessage());
@@ -97,9 +100,9 @@ class SpeakerService
     public function getSpeakerInvites(int $perPage = 10)
     {
         $speaker_id = auth()->user()->speaker?->id;
-        if($speaker_id){
+        if ($speaker_id) {
             $invites = SpeakerInvite::where('speaker_id', $speaker_id)
-            ->paginate($perPage);
+                ->paginate($perPage);
             return $invites;
         }
         return collect([]);

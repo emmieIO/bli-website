@@ -22,15 +22,15 @@ class UpdateSpeakerRequest extends FormRequest
     public function rules(): array
     {
 
-        return[
+        return [
             "name" => ['required', "string"],
             "title" => ['sometimes'],
             "organization" => ["sometimes"],
-            "email"=>["required",'email', "unique:speakers,email,".$this->route('speaker')->id],
+            "email" => ["required", 'email', "unique:users,email," . $this->route('speaker')->user->id],
             "phone" => ["sometimes", "phone:NG"],
             "photo" => "nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048",
-            'linkedin'=> ['sometimes'],
-            'website'=>['sometimes'],
+            'linkedin' => ['nullable', 'regex:/^https?:\/\/(www\.)?linkedin\.com\/in\/[a-zA-Z0-9_-]+\/?$/'],
+            'website' => ['nullable', 'url'],
             "bio" => ['sometimes']
         ];
     }
@@ -47,6 +47,29 @@ class UpdateSpeakerRequest extends FormRequest
             'photo.image' => 'The photo must be an image.',
             'photo.mimes' => 'The photo must be a file of type: jpeg, png, jpg, gif, svg.',
             'photo.max' => 'The photo may not be greater than 2MB.',
-        ] ;
+            'linkedin.regex' => 'Please enter a valid LinkedIn profile URL (e.g., https://linkedin.com/in/yourname)',
+
+        ];
+    }
+
+    public function validated($key = null, $default = null)
+    {
+        $data = parent::validated($key, $default);
+        return [
+            'userInfo' => [
+                'name' => $data['name'],
+                'email' => $data['email'],
+                'phone' => $data['phone'] ?? null,
+            ],
+
+            'speakerProfile' => [
+                'title' => $data['title'] ?? null,
+                'organization' => $data['organization'] ?? null,
+                'photo' => $data['photo'] ?? null,
+                'linkedin' => $data['linkedin'] ?? null,
+                'website' => $data['website'] ?? null,
+                'bio' => $data['bio'] ?? null,
+            ]
+        ];
     }
 }

@@ -50,8 +50,8 @@ class SpeakerApplicationRequest extends FormRequest
             "title" => ['required', 'string'],
             "organization" => ["required", 'string'],
             "photo" => $this->photoRule(),
-            'linkedin' => ['sometimes', 'url'],
-            'website' => ['sometimes', 'url'],
+            'linkedin' => ['nullable', 'regex:/^https?:\/\/(www\.)?linkedin\.com\/in\/[a-zA-Z0-9_-]+\/?$/'],
+            'website' => ['nullable', 'url'],
             "bio" => ['required', 'string', 'max:2000'],
             "topic_title" => ['required', "string"],
             "topic_description" => ['required', "string"],
@@ -87,7 +87,7 @@ class SpeakerApplicationRequest extends FormRequest
             'session_format.string' => 'The session format must be a valid string.',
             'notes.string' => 'Additional notes must be a valid string.',
             'notes.max' => 'Additional notes may not exceed 1000 characters.',
-            'linkedin.url' => 'Please provide a valid LinkedIn URL.',
+            'linkedin_url.regex' => 'Please enter a valid LinkedIn profile URL (e.g., https://linkedin.com/in/yourname)',
             'website.url' => 'Please provide a valid website URL.',
         ];
     }

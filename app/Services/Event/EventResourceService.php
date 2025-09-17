@@ -6,6 +6,7 @@ use App\Http\Requests\CreateEventResourceRequest;
 use App\Models\Event;
 use App\Models\EventResource;
 use App\Traits\HasFileUpload;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -19,13 +20,13 @@ class EventResourceService {
         //
     }
 
-    public function createEventResourse( CreateEventResourceRequest $request, Event $event ) {
+    public function createEventResourse( UploadedFile  $request, Event $event ) {
         try {
             DB::beginTransaction();
             $file_path = null;
             $validated = $request->validated();
             if ( $request->hasFile( 'file_path' ) ) {
-                $file_path = $this->uploadfile( $request, 'file_path', "event_resources");
+                $file_path = $this->uploadfile( $request,  "event_resources");
                 $validated[ 'file_path' ] = $file_path;
             }
             $validated[ 'uploaded_by' ] = auth()->id();

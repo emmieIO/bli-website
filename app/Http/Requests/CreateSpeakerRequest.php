@@ -28,8 +28,8 @@ class CreateSpeakerRequest extends FormRequest
             "email"=>["required",'email', "unique:speakers,email"],
             "photo" => "nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048",
             "phone" => ["sometimes", 'phone:NG'],
-            'linkedin'=> ['sometimes', 'url'],
-            'website'=>['sometimes', 'url'],
+            'linkedin'=> ['nullable', 'regex:/^https?:\/\/(www\.)?linkedin\.com\/in\/[a-zA-Z0-9_-]+\/?$/'],
+            'website'=>['nullable', 'url'],
             "bio" => ['sometimes'],
         ];
     }
