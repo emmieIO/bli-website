@@ -26,11 +26,7 @@ class AuthService {
             'password'=>$validated[ 'password' ]
         ];
 
-        $user = User::where('email', $validated['email'])->firstOrFail();
-        if(isset($user->instructorProfile) && !$user->isApproved()){
-            return false;
-        }
-
+        $user = User::where('email', $validated['email'])->first();
 
         $remember = $request->has( 'remember' );
 

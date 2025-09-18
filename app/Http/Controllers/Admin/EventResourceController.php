@@ -34,7 +34,8 @@ class EventResourceController extends Controller
     public function store(CreateEventResourceRequest $request, Event $event)
     {
         $file = $request->file("file_path");
-        $resource = $this->eventResourceService->createEventResourse($file, $event);
+        $validated = (object)$request->validated();
+        $resource = $this->eventResourceService->createEventResourse($validated, $event, $file);
         if($resource){
             return redirect()->route("admin.events.show", $event)->with([
                 'type' => "success",

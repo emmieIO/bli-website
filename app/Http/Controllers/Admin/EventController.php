@@ -131,9 +131,5 @@ class EventController extends Controller
     }
 
 
-    public function addEventToCalender(Event $event)
-    {
-
-    }
 }
 

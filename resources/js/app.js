@@ -7,7 +7,7 @@ import collapse from '@alpinejs/collapse'
 import AOS from 'aos';
 import 'aos/dist/aos.css';
 import 'flowbite';
-import './anime.js'
+// import './anime.js'
 
 createIcons({ icons });
 

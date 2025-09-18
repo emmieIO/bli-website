@@ -4,7 +4,9 @@ namespace App\Services\Event;
 
 use App\Http\Requests\CreateSpeakerRequest;
 use App\Http\Requests\UpdateSpeakerRequest;
+use App\Models\Event;
 use App\Models\Speaker;
+use App\Models\SpeakerApplication;
 use App\Models\SpeakerInvite;
 use App\Services\Misc;
 use App\Traits\HasFileUpload;
@@ -106,6 +108,27 @@ class SpeakerService
             return $invites;
         }
         return collect([]);
+    }
+
+    public function speakerAlreadyInvited(Event $event, Speaker $speaker){
+        $invite = SpeakerInvite::where('speaker_id', $speaker->id)
+        ->where('event_id', $event->id)->exists();
+
+        return $invite;
+    }
+
+    public function speakerHasAplication(Event $event, Speaker $speaker){
+        $application = SpeakerApplication::where('speaker_id', $speaker->id)
+        ->where('event_id', $event->id)->exists();
+
+        return $application;
+    }
+
+    public function findExistingSpeakerApplication(Event $event, Speaker $speaker){
+       $application = SpeakerApplication::where('speaker_id', $speaker->id)
+        ->where('event_id', $event->id);
+
+        return $application->firstOrFail();
     }
 
 }

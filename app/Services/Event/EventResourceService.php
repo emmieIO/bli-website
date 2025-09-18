@@ -10,44 +10,46 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
-class EventResourceService {
+class EventResourceService
+{
     use HasFileUpload;
     /**
-    * Create a new class instance.
-    */
+     * Create a new class instance.
+     */
 
-    public function __construct() {
+    public function __construct()
+    {
         //
     }
 
-    public function createEventResourse( UploadedFile  $request, Event $event ) {
+    public function createEventResourse(object $data, Event $event, ?UploadedFile $file)
+    {
         try {
-            DB::beginTransaction();
             $file_path = null;
-            $validated = $request->validated();
-            if ( $request->hasFile( 'file_path' ) ) {
-                $file_path = $this->uploadfile( $request,  "event_resources");
-                $validated[ 'file_path' ] = $file_path;
-            }
-            $validated[ 'uploaded_by' ] = auth()->id();
-            $resource = $event->resources()->create( $validated );
-            DB::commit();
-            return $resource;
-        } catch ( \Exception $e ) {
-            DB::rollBack();
+            $result = DB::transaction(function () use ($file, $event, $data) {
+                $file_path = $this->uploadFile($file, 'event_resources');
+                $data->file_path = $file_path;
+                $data->uploaded_by = auth()->id();
+                $resource = $event->resources()->create((array) $data);
+                return $resource;
+            });
+            return $result;
+        } catch (\Exception $e) {
+            Log::error('Error creating event resource: ' . $e->getMessage(), ['exception' => $e]);
             if($file_path){
                 $this->deleteFile( $file_path );
             }
-            Log::error( 'Error creating event resource: ' . $e->getMessage(), [ 'exception' => $e ] );
-            return null;
+            return false;
         }
     }
 
-    public function updateEventResource() {
+    public function updateEventResource()
+    {
     }
 
-    public function deleteEventResource(Event $event, EventResource $resource) {
-        if($resource->file_path){
+    public function deleteEventResource(Event $event, EventResource $resource)
+    {
+        if ($resource->file_path) {
             $this->deleteFile($resource->file_path);
         }
         $resource->delete();

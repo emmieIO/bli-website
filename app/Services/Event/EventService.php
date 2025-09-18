@@ -8,7 +8,9 @@ use App\Http\Requests\CreateEventRequest;
 use App\Http\Requests\UpdateEventRequest;
 use App\Mail\InvitationToSpeakerMail;
 use App\Models\Event;
+use App\Models\SpeakerApplication;
 use App\Models\SpeakerInvite;
+use App\Services\Speakers\SpeakerApplicationService;
 use DB;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
@@ -26,10 +28,10 @@ class EventService
      * Create a new class instance.
      */
 
-    public function __construct(protected SpeakerService $speakerService)
-    {
-        //
-    }
+    public function __construct(
+        protected SpeakerService $speakerService,
+        protected SpeakerApplicationService $speakerApplicationService
+        ){}
 
     public function getPublishedEvents()
     {
@@ -40,7 +42,6 @@ class EventService
 
         return $events;
     }
-
 
 
     public function getEventsCreatedByUser(string|null $filter = null)
@@ -267,12 +268,15 @@ class EventService
     public function inviteSpeakerToEvent(Event $event, array $data): bool|string
     {
         $speaker = $this->speakerService->findOneSpeaker($data['speaker_id']);
-        if (
-            SpeakerInvite::where('event_id', $event->id)
-                ->where('speaker_id', $speaker->id)
-                ->exists()
-        ) {
+        if ($this->speakerService->speakerAlreadyInvited($event, $speaker)) {
             return "already_invited";
+        }
+        if($this->speakerService->speakerHasAplication($event, $speaker)) {
+            $existingApplication = $this->speakerService->findExistingSpeakerApplication($event, $speaker);
+            if ($existingApplication) {
+                $this->speakerApplicationService->approveSpeakerApplication($existingApplication);
+                return "speaker_approved";
+            }
         }
 
         try {
@@ -284,12 +288,12 @@ class EventService
             });
             return true;
         } catch (Throwable $e) {
-
             Log::error('Speaker invitation failed: ', [
                 'exception' => $e->getMessage(),
-                // 'trace' => $e->getTraceAsString(),
             ]);
             return false;
         }
     }
+
+
 }
