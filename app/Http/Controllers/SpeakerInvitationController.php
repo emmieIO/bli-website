@@ -21,5 +21,9 @@ class SpeakerInvitationController extends Controller
         return view('user_dashboard.invite-respond', compact('invite', 'event'));
     }
 
+    public function acceptInvitation(){
+        
+    }
+
 
 }

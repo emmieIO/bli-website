@@ -48,16 +48,17 @@ class SpeakerApplicationApprovedNotification extends Notification
             : null;
 
         return (new MailMessage)
-            ->subject("You're Approved for {$event->title}!")
-            ->greeting("Hi {$notifiable->name},")
-            ->line("🎉 Congratulations! Your speaker application for **{$event->title}** has been approved.")
+            ->subject("Approval to Speak at {$event->title}")
+            ->greeting("Hello {$notifiable->name},")
+            ->line("Your application to speak at **{$event->title}** has been approved. We're delighted to have you on board as one of our speakers.")
             ->line("Here are the event details:")
             ->line("📅 **Date:** {$dateRange}")
             ->line("📍 **Location:** " . ($event->location ?? 'To be announced'))
             ->when($event->mode === 'online', fn($msg) =>
-                $msg->line("🌐 This is an online event — you’ll receive login details soon."))
+                $msg->line("🌐 **Mode:** Online"))
             ->action('View Event Details', route('events.show', $event->slug))
-            ->line("We’re excited to have you as a speaker!");
+            ->line("Please review the event page for your session details and updates. We’re looking forward to your contribution!");
+
     }
 
     /**

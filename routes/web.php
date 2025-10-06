@@ -3,15 +3,14 @@
 use App\Actions\JoinEventAction;
 use App\Http\Controllers\CourseController;
 use App\Http\Controllers\Events\EventCalenderController;
+use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ProgrammeController;
 use App\Http\Controllers\SpeakerInvitationController;
 use App\Http\Controllers\UserDashBoard\RevokeRsvpAction;
 use App\Http\Controllers\UserDashBoard\ShowMyEventsController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    return view('welcome');
-})->name('homepage');
+Route::get('/', [HomeController::class, 'index'])->name('homepage');
 
 Route::get('/privacy', function () {
     return view('legal.privacy');
@@ -45,7 +44,6 @@ Route::group([
 
 
 // Courses
-Route::get("/courses", [CourseController::class, "index"])->name("courses.index");
 
 require __DIR__ . '/auth.php';
 require __DIR__ . '/admin.php';

@@ -21,7 +21,11 @@ class ProgrammeController extends Controller
     {
 
         $events = $this->eventService->getPublishedEvents();
-        return view("upcoming_events.index", compact("events"));
+        return view("upcoming_events.index", [
+            'upcomingEvents' => Event::upcoming()->get(),
+            'ongoingEvents' => Event::ongoing()->get(),
+            'expiredEvents'=> Event::ended()->get(),
+        ]);
     }
 
     /**
@@ -46,8 +50,8 @@ class ProgrammeController extends Controller
     public function show(string $slug)
     {
         try {
-            $programme = $this->programRepository->findProgramsBySlug($slug);
-            return view('upcoming_events.show-event',compact("programme"));
+            $event = $this->programRepository->findProgramsBySlug($slug);
+            return view('upcoming_events.show-event',compact("event"));
         } catch (\Exception $e) {
             abort(404,"Event does not exist");
         }

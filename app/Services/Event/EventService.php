@@ -43,6 +43,14 @@ class EventService
         return $events;
     }
 
+    public function fetchFeaturedEvents(){
+        return Event::where('is_featured', true)
+        ->where('start_date', '>', Carbon::now())
+            ->latest()
+            ->take(5)
+            ->get();
+    }
+
 
     public function getEventsCreatedByUser(string|null $filter = null)
     {

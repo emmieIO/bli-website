@@ -25,7 +25,8 @@ class SpeakerApplicationService
      * Create a new class instance.
      */
     public function __construct()
-    {}
+    {
+    }
 
     public function apply(array $data, Event $event, UploadedFile $file = null)
     {
@@ -48,11 +49,12 @@ class SpeakerApplicationService
                 if ($file) {
                     $this->handleSpeakerPhoto($speaker, $file);
                 }
-
+                DB::afterCommit(function () use ($event) {
+                    event(new SpeakerAppliedToEvent($event, auth()->user()));
+                });
                 return $speaker;
             });
 
-            event(new SpeakerAppliedToEvent($event, auth()->user()));
 
             return $speaker;
         } catch (\Throwable $th) {
@@ -121,6 +123,10 @@ class SpeakerApplicationService
     public function fetchApprovedSpeakerApplications()
     {
         return SpeakerApplication::with(['speaker'])->where('status', ApplicationStatus::APPROVED->value)->lazy();
+    }
+    public function fetchRejectedSpeakerApplications()
+    {
+        return SpeakerApplication::with(['speaker'])->where('status', ApplicationStatus::REJECTED->value)->lazy();
     }
 
     public function approveSpeakerApplication(SpeakerApplication $application)

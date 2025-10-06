@@ -1,6 +1,6 @@
 {
   "resources/css/app.css": {
-    "file": "assets/app-WYDfbZTz.css",
+    "file": "assets/app-CC0Iq-1Z.css",
     "src": "resources/css/app.css",
     "isEntry": true
   },
@@ -13,12 +13,40 @@
     "src": "resources/images/hero-bg.jpg"
   },
   "resources/js/app.js": {
-    "file": "assets/app-D5oM7gtu.js",
+    "file": "assets/app-l0tAgDAi.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,
     "css": [
       "assets/app-BYRhPc2t.css"
     ]
+  },
+  "resources/theme-assets/img/discover-bg.png": {
+    "file": "assets/discover-bg-BHZgre_P.png",
+    "src": "resources/theme-assets/img/discover-bg.png"
+  },
+  "resources/theme-assets/img/fun-fact-bg-2.png": {
+    "file": "assets/fun-fact-bg-2-CU3gBgZp.png",
+    "src": "resources/theme-assets/img/fun-fact-bg-2.png"
+  },
+  "resources/theme-assets/img/hero-img-thumb.png": {
+    "file": "assets/hero-img-thumb-CS9KQv9p.png",
+    "src": "resources/theme-assets/img/hero-img-thumb.png"
+  },
+  "resources/theme-assets/img/inner-page-banner.png": {
+    "file": "assets/inner-page-banner-gFBkrITB.png",
+    "src": "resources/theme-assets/img/inner-page-banner.png"
+  },
+  "resources/theme-assets/img/min-contact-bg.png": {
+    "file": "assets/min-contact-bg-KEw91sTl.png",
+    "src": "resources/theme-assets/img/min-contact-bg.png"
+  },
+  "resources/theme-assets/img/progress-bg.svg": {
+    "file": "assets/progress-bg-BMaJQTOz.svg",
+    "src": "resources/theme-assets/img/progress-bg.svg"
+  },
+  "resources/theme-assets/img/service-area.png": {
+    "file": "assets/service-area-MZB1G2ca.png",
+    "src": "resources/theme-assets/img/service-area.png"
   }
 }

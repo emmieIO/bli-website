@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" x-data="{ mobileOpen: false }" x-cloak>
+<html lang="en" x-data="{ mobileOpen: false }" x-cloak data-theme="mintlify">
 
 <head>
     <meta charset="UTF-8" />
@@ -15,7 +15,7 @@
     <style>
         /* Custom scrollbar */
         ::-webkit-scrollbar {
-            width: 8px;
+            width: 5px;
         }
 
         ::-webkit-scrollbar-track {
@@ -29,17 +29,17 @@
     </style>
 </head>
 
-<body class="bg-gray-50 text-gray-800 font-outfit">
+<body class="bg-gray-50 text-gray-800 font-outfit relative">
 
     <!-- Navigation Bar -->
-    <nav class="sticky top-0 z-50 w-full bg-[#00275E] shadow-md">
-        <div class="px-3 py-3 lg:px-5 lg:pl-3">
+    <nav class="w-full sticky top-0 md:w-[inherit] md:ml-[250px] bg-gray-100 border-b-1 border-orange-400 py-2">
+        <div class="px-3 py-2 lg:px-5 lg:pl-3">
             <div class="flex items-center justify-between">
                 <!-- Logo Section -->
                 <div class="flex items-center justify-start">
                     <button data-drawer-target="logo-sidebar" data-drawer-toggle="logo-sidebar"
                         aria-controls="logo-sidebar" type="button"
-                        class="inline-flex items-center p-2 text-sm text-white rounded-lg sm:hidden hover:bg-[#FF0000]/20 focus:outline-none focus:ring-2 focus:ring-[#FF0000]/50">
+                        class="inline-flex items-center p-2 text-sm rounded-lg sm:hidden hover:text-white hover:bg-orange-400 focus:outline-none focus:ring-2 focus:ring-[#FF0000]/50">
                         <span class="sr-only">Open sidebar</span>
                         <svg class="w-6 h-6" aria-hidden="true" fill="currentColor" viewBox="0 0 20 20"
                             xmlns="http://www.w3.org/2000/svg">
@@ -48,11 +48,6 @@
                             </path>
                         </svg>
                     </button>
-                    <a href="{{ route('user_dashboard') }}" class="flex ms-2 md:me-24">
-                        <img src="{{ asset('images/logo.jpg') }}" class="h-8 me-3" alt="FlowBite Logo" />
-                        <span
-                            class="self-center text-xl font-semibold sm:text-2xl whitespace-nowrap text-white">BLI</span>
-                    </a>
                 </div>
 
                 <!-- User Profile Dropdown -->
@@ -107,15 +102,31 @@
 
     <!-- Sidebar -->
     <aside id="logo-sidebar"
-        class="fixed top-0 left-0 z-40 w-64 h-screen pt-20 transition-transform -translate-x-full border-r border-[#FF0000]/20 sm:translate-x-0 bg-[#00275E]"
+        class="fixed top-0 left-0 z-40 w-[250px] h-screen transition-transform -translate-x-full border-r border-[#FF0000]/20 sm:translate-x-0 bg-gray-200"
         aria-label="Sidebar">
-        <div class="h-full px-3 pb-4 overflow-y-auto text-white">
+        <div class="h-full overflow-y-auto">
+            <div class="flex items-center justify-between p-4 border-b-1 border-orange-400">
+                <a href="{{ route('user_dashboard') }}" class="flex ms-2 md:me-24">
+                    <img src="{{ asset('images/logo.jpg') }}" class="h-8 me-3" alt="FlowBite Logo" />
+                    <span class="self-center text-xl font-bold sm:text-2xl whitespace-nowrap">BLI</span>
+                </a>
+                <button data-drawer-target="logo-sidebar" data-drawer-toggle="logo-sidebar" aria-controls="logo-sidebar"
+                    type="button"
+                    class="inline-flex items-center p-2 text-sm text-gray-700 rounded-lg sm:hidden hover:bg-[#FF0000]/20 focus:outline-none focus:ring-2 focus:ring-[#FF0000]/50">
+                    <span class="sr-only">Open sidebar</span>
+                    <svg class="w-6 h-6" aria-hidden="true" fill="currentColor" viewBox="0 0 20 20"
+                        xmlns="http://www.w3.org/2000/svg">
+                        <path fill-rule="evenodd" clip-rule="evenodd"
+                            d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" />
+                    </svg>
+                </button>
+            </div>
             <x-sidebar />
         </div>
     </aside>
 
     <!-- Main Content -->
-    <div class="p-4 sm:ml-64">
+    <div class="p-4 sm:ml-[250px]">
         @if ($errors->any())
             <div class="mb-4 p-6 bg-red-50 border border-red-200 shadow-md rounded-lg text-red-700">
                 <div class="flex items-center gap-3 mb-3">
@@ -139,12 +150,26 @@
 
     <!-- Toast Notifications -->
     <x-toast />
-    <x-confirm-modal/>
-    <x-feedback-modal/>
+    <x-confirm-modal />
+    <x-feedback-modal />
     <!-- Scripts -->
     <script src="https://unpkg.com/lucide@latest"></script>
+    @stack('scripts')
     <script>
         lucide.createIcons();
+        // Save scroll position before unload
+        window.addEventListener("beforeunload", function() {
+            localStorage.setItem("scrollPosition", window.scrollY);
+        });
+
+        // Restore on load
+        window.addEventListener("load", function() {
+            const scroll = localStorage.getItem("scrollPosition");
+            if (scroll !== null) {
+                window.scrollTo(0, parseInt(scroll));
+                localStorage.removeItem("scrollPosition"); // optional
+            }
+        });
     </script>
 </body>
 

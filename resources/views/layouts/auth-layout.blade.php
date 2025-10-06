@@ -16,9 +16,9 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 
-<body class="text-gray-800 bg-[#00275E] auth-layout">
+<body class="text-gray-800 bg-orange-600 auth-layout">
     <!-- Navbar -->
-    <x-navbar />
+    {{-- <x-navbar /> --}}
 
     <!-- Main Content -->
     <div class="min-h-screen">

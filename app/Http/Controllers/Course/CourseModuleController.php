@@ -1,17 +1,22 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Course;
 
+use App\Http\Controllers\Controller;
+use App\Models\Course;
+use App\Models\CourseModule;
+use App\Services\Course\CourseModuleService;
 use Illuminate\Http\Request;
 
-class CourseController extends Controller
+class CourseModuleController extends Controller
 {
+    public function __construct(public CourseModuleService $courseModuleService){}
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        return view("courses.index");
+        //
     }
 
     /**
@@ -25,9 +30,18 @@ class CourseController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(Request $request, Course $course)
     {
-        //
+        $validated = $request->validate([
+            'title' => 'required|string|max:255',
+            'description' => 'nullable|string',
+        ]);
+        $courseModule = $this->courseModuleService->createModule($course, $validated);
+
+        return redirect()->back()->with([
+            'message'=> $courseModule ? 'Module created successfully' : 'Failed to create module',
+            'type' => $courseModule ? 'success' : 'error',
+        ]);
     }
 
     /**

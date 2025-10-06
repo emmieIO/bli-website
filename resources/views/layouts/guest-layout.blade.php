@@ -1,110 +1,140 @@
 <!DOCTYPE html>
-<html lang="en" x-data="{ mainNavOpen: false }" x-cloak>
+<html lang="en">
 
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Beacon Leadership Institute</title>
-    <meta name="theme-color" content="#00275E" />
-    <meta name="description" content="Empowering leaders for influence and impact at Beacon Leadership Institute.">
-    <meta property="og:title" content="Beacon Leadership Institute">
-    <meta property="og:description" content="Empowering leaders for influence and impact.">
-    <meta property="og:image" content="{{ asset('images/logo.jpg') }}">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ $title ?? 'Beacon Leadership Institute' }}</title>
 
-    <!-- Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap" rel="stylesheet" />
-    <script>
-        // Save scroll position before unload
-        window.addEventListener('beforeunload', function() {
-            sessionStorage.setItem('scrollY', window.scrollY);
-        });
-
-        // Restore scroll position after load
-        window.addEventListener('load', function() {
-            const scrollY = sessionStorage.getItem('scrollY');
-            if (scrollY !== null) {
-                window.scrollTo(0, parseInt(scrollY));
-            }
-        });
-    </script>
-
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="{{ asset('images/logo.jpg') }}">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+
+    <!-- Font Awesome for Social Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"/>
 </head>
 
-<body class="text-gray-800 min-h-screen antialiased">
-    <!-- Skip to content -->
-    <a href="#main-content"
-        class="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:p-2 focus:bg-[#FF0000] focus:text-white">Skip
-        to
-        main content</a>
+<body class="bg-white overflow-x-hidden min-h-screen flex flex-col">
+    <!-- Navbar -->
+    <nav class="bg-white shadow-sm sticky top-0 z-40">
+        <div class="max-w-7xl mx-auto flex justify-between items-center py-4 px-4 md:px-8">
+            <!-- Logo -->
+            <a href="{{ route('homepage') }}" class="flex items-center space-x-2">
+                <img src="{{ asset('images/logo.jpg') }}" alt="Logo" class="w-14 h-14 rounded-md object-cover shadow">
+                <span class="text-xl font-bold text-orange-700 tracking-tight hidden sm:inline-block">
+                    Beacon Leadership Institute
+                </span>
+            </a>
 
-    <!-- Page Preloader (optional) -->
-    <div id="page-preload"
-        class="fixed inset-0 z-60 flex items-center justify-center bg-white transition-opacity duration-300 opacity-100 pointer-events-auto">
-        <div>
-            <i data-lucide="loader" class="w-[64px] h-[64px] text-[#00275e] animate-spin"></i>
-            <p class="mt-4 text-center text-4xl text-[#00275e] font-bold tracking-wide">BLI</p>
+            <!-- Desktop Navigation -->
+            <ul class="hidden lg:flex gap-x-6 items-center font-medium">
+                <li><a href="{{ route('homepage') }}" class="text-gray-700 hover:text-orange-700 transition">Home</a></li>
+                <li><a href="{{ route('events.index') }}" class="text-gray-700 hover:text-orange-700 transition">Events</a></li>
+                <li><a href="{{ route('courses.index') }}" class="text-gray-700 hover:text-orange-700 transition">Courses</a></li>
+                <!-- Join Us Dropdown -->
+                <li class="relative" x-data="{ open: false }" @mouseleave="open = false">
+                    <a href="#" @mouseenter="open = true" @click.prevent="open = !open"
+                       class="flex items-center text-gray-700 hover:text-orange-700 transition">
+                        Join Us
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                    </a>
+                    <ul x-show="open" x-transition
+                        class="absolute left-0 bg-white shadow-lg rounded-lg p-2 mt-3 w-56 border border-gray-100 z-50"
+                        @mouseenter="open = true" @mouseleave="open = false"
+                        style="display: none;">
+                        <li>
+                            <a href="{{ route('instructors.become-an-instructor') }}"
+                               class="block px-4 py-2 text-gray-700 hover:bg-orange-50 hover:text-orange-700 rounded transition">
+                                Become an Instructor
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#"
+                               class="block px-4 py-2 text-gray-700 hover:bg-orange-50 hover:text-orange-700 rounded transition">
+                                Become a Speaker
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+                <li><a href="#" class="text-gray-700 hover:text-orange-700 transition">Blog</a></li>
+            </ul>
+
+            <!-- Account/Login -->
+            <div class="hidden lg:flex items-center space-x-4">
+                @auth
+                    <a href="{{ route('user_dashboard') }}"
+                       class="bg-orange-900 text-white px-4 py-2 rounded-lg hover:bg-orange-900 transition shadow">
+                        My Account
+                    </a>
+                @else
+                    <a href="{{ route('login.store') }}" class="text-gray-700 hover:text-orange-700 transition">Login</a>
+                @endauth
+            </div>
+
+            <!-- Mobile Menu Button -->
+            <button id="mobile-menu-btn" class="lg:hidden text-gray-700 focus:outline-none">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none" viewBox="0 0 24 24"
+                     stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M4 6h16M4 12h16M4 18h16"/>
+                </svg>
+            </button>
         </div>
-    </div>
-
-    <!-- Top Contact Bar -->
-    <header class="bg-gray-100 text-sm text-gray-700">
-        <div class="flex flex-col md:flex-row md:justify-between items-center gap-2 px-4 py-2 max-w-7xl mx-auto">
-            <p class="flex items-center gap-1">
-                <i data-lucide="mail" class="w-4 h-4 text-[#00275E]"></i>
-                <a href="mailto:info@beaconleadership.org"
-                    class="hover:underline text-[#00275E] hover:text-blue-800">info@beaconleadership.org</a>
-            </p>
-            <p class="flex items-center gap-1">
-                <i data-lucide="phone" class="w-4 h-4 text-[#00275E]"></i>
-                <a href="tel:+234-706-442-5639"
-                    class="hover:underline text-[#00275E] hover:text-blue-800">+234-706-442-5639</a>
-            </p>
+        <!-- Mobile Menu -->
+        <div id="mobile-menu" class="hidden lg:hidden bg-white border-t border-gray-200 shadow-md">
+            <ul class="flex flex-col space-y-3 p-4 text-gray-700 font-medium">
+                <li><a href="{{ route('homepage') }}" class="hover:text-orange-700">Home</a></li>
+                <li><a href="{{ route('events.index') }}" class="hover:text-orange-700">Events</a></li>
+                <li><a href="{{ route('courses.index') }}" class="hover:text-orange-700">Courses</a></li>
+                <li><a href="{{ route('instructors.become-an-instructor') }}" class="hover:text-orange-700">Become an Instructor</a></li>
+                <li><a href="#" class="hover:text-orange-700">Become a Speaker</a></li>
+                <li><a href="#" class="hover:text-orange-700">Blog</a></li>
+                <li>
+                    @auth
+                        <a href="{{ route('user_dashboard') }}" class="block bg-orange-600 text-white text-center px-4 py-2 rounded-lg hover:bg-orange-700">My Account</a>
+                    @else
+                        <a href="{{ route('login.store') }}" class="block text-center text-gray-700 hover:text-orange-700">Login</a>
+                    @endauth
+                </li>
+            </ul>
         </div>
-    </header>
+    </nav>
 
-    <!-- Primary Navigation -->
-    <!-- NOTE: Converted from custom CSS classes to mostly Tailwind for portability -->
-    <x-navbar />
-
-    <!-- Main Slot -->
-    <main id="main-content" class="min-h-screen">
+    <!-- Page Content -->
+    <main class="flex-1 min-h-[60vh] w-full px-4 md:px-8 py-8">
         {{ $slot }}
     </main>
 
     <!-- Footer -->
-    <footer class="mt-16">
-        <div class="bg-[#00275E] text-white p-4 text-center text-sm">
-            <p>&copy; {{ now()->year }} Beacon Leadership Institute. All rights reserved.</p>
+    <footer class="bg-gray-100 py-8 mt-16 border-t border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 md:px-8 flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
+            <p class="text-center md:text-left text-gray-700 text-sm">
+                &copy; {{ date('Y') }}
+                <span class="text-orange-700 font-semibold">Beacon Leadership Institute</span>.
+                All rights reserved.
+            </p>
+            <div class="flex items-center space-x-4">
+                <span class="text-gray-700">Connect:</span>
+                <div class="flex space-x-3">
+                    <a href="#" class="hover:text-orange-700 transition"><i class="fab fa-facebook text-xl"></i></a>
+                    <a href="#" class="hover:text-orange-700 transition"><i class="fab fa-instagram text-xl"></i></a>
+                    <a href="#" class="hover:text-orange-700 transition"><i class="fab fa-twitter text-xl"></i></a>
+                </div>
+            </div>
         </div>
     </footer>
-
-    <x-toast />
-    <x-confirm-modal/>
-
-
-    <!-- Lucide Icons -->
-    <script src="https://unpkg.com/lucide@latest" defer></script>
+    <x-toast/>
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            // Initialize Lucide icons after script loads (fallback check)
-            if (window.lucide && typeof window.lucide.createIcons === 'function') {
-                window.lucide.createIcons();
-            }
-
-            // Fade out preloader once page ready
-            const preload = document.getElementById('page-preload');
-            if (preload) {
-                requestAnimationFrame(() => {
-                    preload.classList.add('opacity-0', 'pointer-events-none');
-                    setTimeout(() => preload.remove(), 300);
-                });
-            }
+        const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+        const mobileMenu = document.getElementById('mobile-menu');
+        mobileMenuBtn.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
         });
     </script>
 </body>
-
 </html>
-

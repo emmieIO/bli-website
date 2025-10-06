@@ -23,9 +23,6 @@ return new class extends Migration
             $table->string('status')->default('draft');
             $table->boolean('is_free')->default(false);
             $table->decimal('price', 8, 2)->nullable();
-            // Foreign keys (optional, uncomment if you want constraints)
-            // $table->foreign('category_id')->references('id')->on('categories')->onDelete('cascade');
-            // $table->foreign('instructor_id')->references('id')->on('users')->onDelete('cascade');
             $table->timestamps();
         });
     }

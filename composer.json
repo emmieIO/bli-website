@@ -13,9 +13,11 @@
         "binarycabin/laravel-uuid": "^1.0",
         "laravel/framework": "^12.0",
         "laravel/tinker": "^2.10.1",
+        "muxinc/mux-php": "^5.1",
         "propaganistas/laravel-phone": "^6.0",
         "spatie/icalendar-generator": "^3.0",
-        "spatie/laravel-permission": "^6.20"
+        "spatie/laravel-permission": "^6.20",
+        "vimeo/laravel": "^5.10"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",

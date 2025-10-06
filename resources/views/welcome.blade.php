@@ -1,6 +1,6 @@
 {{-- <x-navbar /> --}}
 <x-guest-layout>
-
+{{-- <x-navbar /> --}}
     <!-- HERO Section -->
     <section class="text-white bg-[#ff0000] hero">
         <div class="flex items-center py-16 gap-6">
@@ -16,12 +16,12 @@
                 </p>
                 <div class="flex space-x-2 justify-center items-center">
                     <a href="{{ route('courses.index') }}"
-                        class="inline-flex items-center gap-2 px-4 py-3 bg-[#00275e] text-white font-medium rounded-lg hover:bg-blue-800 transition">
+                        class=" btn btn-primary btn-lg flex items-center gap-2 px-4 py-3 bg-[#00275e] hover:bg-blue-800">
                         <i data-lucide="book" class="w-5 h-5"></i>
                         Browse Courses
                     </a>
                     <a href="{{ route('events.index') }}"
-                        class="inline-flex items-center gap-2 px-4 py-3 bg-[#ff0000] text-white font-medium rounded-lg hover:bg-red-700 transition">
+                        class="btn btn-primary text-white btn-lg flex items-center gap-2  bg-[#ff0000]  hover:bg-red-700">
                         <i data-lucide="calendar" class="w-5 h-5"></i>
                         Discover Events
                     </a>

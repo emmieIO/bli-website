@@ -1,10 +1,18 @@
 @import url('https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400..700;1,400..700&display=swap');
-/* @import "flowbite/src/themes/default";
-@plugin "flowbite/plugin"; */
+@import "flowbite/src/themes/default";
+@plugin "flowbite/plugin";
 @import 'tailwindcss';
 @import './dashboard.css';
 @import './home-nav.css';
-@import "flowbite/src/themes/default";
+@import '../theme-assets/css/aos.css';
+/* @import '../theme-assets/css/output.css'; */
+@import '../theme-assets/css/style.css';
+@import '../theme-assets/css/swiper.min.css';
+/* @import "flowbite/src/themes/default";  */
+@plugin "flyonui" {
+  themes: light --default, dark --prefersdark, gourmet, claude, slack, soft, mintlify;
+}
+@import "../../node_modules/flyonui/variants.css";
 
 @plugin "flowbite/plugin";
 @plugin "tailwind-scrollbar";
@@ -16,6 +24,7 @@
 @source '../**/*.blade.php';
 @source '../**/*.js';
 @source "../../node_modules/flowbite";
+@source "../../node_modules/flyonui/dist/index.js";
 
 @theme {
     --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
@@ -27,7 +36,7 @@
 }
 
 :root {
-  font-family:"Outfit", 'Instrument Sans', system-ui, Avenir, Helvetica, Arial, sans-serif;
+  font-family:'Instrument Sans', system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
   outline: none;

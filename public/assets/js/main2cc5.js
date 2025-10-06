@@ -205,6 +205,7 @@ document.addEventListener("DOMContentLoaded", function () {
     // Form Login
     var handleLoginBtns = document.querySelectorAll('.handle-login');
     var modalLoginForm = document.querySelector('.modal-form-login');
+    
     var body = document.querySelector('body');
 
     function showLoginForm() {

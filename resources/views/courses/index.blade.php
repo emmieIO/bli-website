@@ -1,104 +1,310 @@
 <x-guest-layout>
-    <!-- Hero Section -->
-    <section class="relative bg-white py-10 sm:py-16 text-center border-b border-[#FF0000]/20">
-        <div class="max-w-3xl mx-auto px-4 sm:px-6">
-            <h1
-                class="text-2xl sm:text-4xl font-semibold mb-2 sm:mb-3 flex items-center justify-center gap-2 text-[#00275E]">
-                <i data-lucide="books" class="w-6 sm:w-7 h-6 sm:h-7 text-[#FF0000]"></i>
-                <span class="leading-tight">Explore Our Courses</span>
-            </h1>
-            <p class="text-sm sm:text-lg text-gray-600">
-                Discover courses to empower your leadership, faith, and personal growth.
-            </p>
+    <!-- Breadcrumb Navigation -->
+    <section class="py-5 border-b border-gray-200">
+        <div class="container mx-auto px-4">
+            <nav class="breadcrumb">
+                <ul class="flex items-center space-x-2 text-sm text-gray-600">
+                    <li class="inline-flex items-center">
+                        <a href="{{ route('homepage') }}"
+                            class="text-blue-600 hover:text-blue-800 transition-colors">Home</a>
+                    </li>
+                    <li class="inline-flex items-center">
+                        <i data-lucide="chevron-right" class="w-4 h-4 mx-1 text-gray-400"></i>
+                    </li>
+                    <li class="inline-flex items-center">
+                        <a href="{{ route('courses.index') }}"
+                            class="text-blue-600 hover:text-blue-800 transition-colors">Courses</a>
+                    </li>
+                </ul>
+            </nav>
         </div>
     </section>
 
-    <!-- Courses Listing -->
-    <section class="py-16 bg-gray-50 min-h-screen">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="grid md:grid-cols-3 gap-8">
-                <!-- Course Card 1 -->
-                <div
-                    class="bg-white border border-[#FF0000]/20 rounded-xl overflow-hidden shadow-md hover:shadow-xl hover:scale-[1.02] transition-transform duration-300">
-                    <img src="{{ asset('images/logo.jpg') }}" alt="Foundations of Leadership"
-                        class="w-full h-40 object-cover">
-                    <div class="p-5 space-y-3">
-                        <div class="flex items-center gap-2 text-[#FF0000]">
-                            <i data-lucide="compass" class="w-5 h-5"></i>
-                            <h3 class="text-lg font-semibold text-[#00275E]">Foundations of Leadership</h3>
-                        </div>
-                        <p class="text-sm text-gray-600">
-                            Learn the core principles of faith-driven leadership and spiritual influence.
-                        </p>
-                        <div class="flex justify-between items-center">
-                            <span class="text-xs bg-[#FF0000]/20 text-[#00275E] px-2 py-1 rounded-full">Beginner</span>
-                            <span class="text-sm font-medium text-[#00275E]">Free</span>
-                        </div>
-                        <div class="pt-2">
-                            <a href="#"
-                                class="inline-flex items-center text-[#FF0000] text-sm font-medium hover:underline">
-                                View Details
-                                <i data-lucide="arrow-right" class="w-4 h-4 ml-1"></i>
-                            </a>
+    <!-- Page Header -->
+    <div class="container mx-auto px-4 mt-10">
+        <div class="w-full">
+            <h1 class="text-4xl font-bold text-gray-900 mb-4">Courses</h1>
+        </div>
+    </div>
+
+    <!-- Courses Section -->
+    <section class="py-12 bg-gray-50">
+        <div class="container mx-auto px-4">
+            <!-- Introduction Text -->
+            <div class="mb-8 max-w-4xl">
+                <p class="text-lg text-gray-600 leading-relaxed">
+                    Unlock your potential with our curated online course marketplace. Explore a wide range of expert-led
+                    courses designed to help you achieve your personal and professional goals. Whether you're looking to
+                    advance your career or pursue a new passion, our diverse selection offers something for every
+                    learner.
+                </p>
+            </div>
+
+            <!-- Filter and Sort Section -->
+            <div class="mb-8">
+                <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 mb-8">
+                    <!-- Filter Button and Panel -->
+                    <div class="relative">
+                        <button id="filterToggle"
+                            class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-3 rounded-lg flex items-center gap-2 transition-colors">
+                            <i data-lucide="filter" class="w-5 h-5"></i>
+                            <span>Filter</span>
+                        </button>
+
+                        <!-- Filter Panel -->
+                        <div id="filterPanel"
+                            class="absolute top-full left-0 mt-2 bg-white rounded-lg shadow-xl border border-gray-200 p-6 min-w-80 z-50 hidden">
+                            <!-- Categories -->
+                            <div class="mb-6">
+                                <div class="flex justify-between items-center mb-4">
+                                    <h6 class="font-semibold text-gray-900">Categories</h6>
+                                </div>
+                                <div class="space-y-3">
+                                    {{-- @foreach ($categories as $category)
+                                        <label
+                                            class="flex items-center justify-between cursor-pointer hover:bg-gray-50 p-2 rounded">
+                                            <span class="text-gray-700">{{ $category->name }}</span>
+                                            <input type="checkbox"
+                                                class="w-4 h-4 text-blue-600 rounded focus:ring-blue-500">
+                                        </label>
+                                    @endforeach --}}
+                                </div>
+                            </div>
+
+                            <!-- Author -->
+                            <div class="mb-6">
+                                <div class="flex justify-between items-center mb-4">
+                                    <h6 class="font-semibold text-gray-900">Author</h6>
+                                </div>
+                                <div class="space-y-3">
+                                    <label
+                                        class="flex items-center justify-between cursor-pointer hover:bg-gray-50 p-2 rounded">
+                                        <span class="text-gray-700">Keny White</span>
+                                        <input type="checkbox"
+                                            class="w-4 h-4 text-blue-600 rounded focus:ring-blue-500">
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Price -->
+                            <div class="mb-6">
+                                <div class="flex justify-between items-center mb-4">
+                                    <h6 class="font-semibold text-gray-900">Price</h6>
+                                </div>
+                                <div class="space-y-3">
+                                    <label
+                                        class="flex items-center justify-between cursor-pointer hover:bg-gray-50 p-2 rounded">
+                                        <span class="text-gray-700">Free</span>
+                                        <input type="checkbox"
+                                            class="w-4 h-4 text-blue-600 rounded focus:ring-blue-500">
+                                    </label>
+                                    <label
+                                        class="flex items-center justify-between cursor-pointer hover:bg-gray-50 p-2 rounded">
+                                        <span class="text-gray-700">Paid</span>
+                                        <input type="checkbox"
+                                            class="w-4 h-4 text-blue-600 rounded focus:ring-blue-500">
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Filter Actions -->
+                            <div class="flex justify-between items-center gap-4 pt-4 border-t border-gray-200">
+                                <button class="text-blue-600 hover:text-blue-800 font-semibold transition-colors">
+                                    Reset
+                                </button>
+                                <button
+                                    class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2 rounded-lg transition-colors">
+                                    Apply Filters
+                                </button>
+                            </div>
                         </div>
                     </div>
-                </div>
 
-                <!-- Course Card 2 -->
-                <div
-                    class="bg-white border border-[#FF0000]/20 rounded-xl overflow-hidden shadow-md hover:shadow-xl hover:scale-[1.02] transition-transform duration-300">
-                    <img src="{{ asset('images/logo.jpg') }}" alt="Marketplace Leadership"
-                        class="w-full h-40 object-cover">
-                    <div class="p-5 space-y-3">
-                        <div class="flex items-center gap-2 text-[#FF0000]">
-                            <i data-lucide="briefcase" class="w-5 h-5"></i>
-                            <h3 class="text-lg font-semibold text-[#00275E]">Marketplace Leadership</h3>
-                        </div>
-                        <p class="text-sm text-gray-600">
-                            Practical training to help you lead with excellence in business and society.
-                        </p>
-                        <div class="flex justify-between items-center">
-                            <span
-                                class="text-xs bg-[#FF0000]/20 text-[#00275E] px-2 py-1 rounded-full">Intermediate</span>
-                            <span class="text-sm font-medium text-[#00275E]">$49</span>
-                        </div>
-                        <div class="pt-2">
-                            <a href="#"
-                                class="inline-flex items-center text-[#FF0000] text-sm font-medium hover:underline">
-                                View Details
-                                <i data-lucide="arrow-right" class="w-4 h-4 ml-1"></i>
-                            </a>
-                        </div>
-                    </div>
-                </div>
+                    <!-- Results and Sort -->
+                    <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+                        <p class="text-gray-600">Showing {{ $courses->firstItem() }} - {{ $courses->lastItem() }} of
+                            {{ $courses->total() }} results</p>
 
-                <!-- Course Card 3 -->
-                <div
-                    class="bg-white border border-[#FF0000]/20 rounded-xl overflow-hidden shadow-md hover:shadow-xl hover:scale-[1.02] transition-transform duration-300">
-                    <img src="{{ asset('images/logo.jpg') }}" alt="Vision Clarity Bootcamp"
-                        class="w-full h-40 object-cover">
-                    <div class="p-5 space-y-3">
-                        <div class="flex items-center gap-2 text-[#FF0000]">
-                            <i data-lucide="eye" class="w-5 h-5"></i>
-                            <h3 class="text-lg font-semibold text-[#00275E]">Vision Clarity Bootcamp</h3>
-                        </div>
-                        <p class="text-sm text-gray-600">
-                            Gain spiritual focus and actionable vision to lead in your God-given calling.
-                        </p>
-                        <div class="flex justify-between items-center">
-                            <span class="text-xs bg-[#FF0000]/20 text-[#00275E] px-2 py-1 rounded-full">Advanced</span>
-                            <span class="text-sm font-medium text-[#00275E]">$79</span>
-                        </div>
-                        <div class="pt-2">
-                            <a href="#"
-                                class="inline-flex items-center text-[#FF0000] text-sm font-medium hover:underline">
-                                View Details
-                                <i data-lucide="arrow-right" class="w-4 h-4 ml-1"></i>
-                            </a>
+                        <!-- Sort Dropdown -->
+                        <div class="relative">
+                            <select
+                                class="appearance-none bg-white border border-gray-300 rounded-lg px-4 py-2 pr-8 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 cursor-pointer">
+                                <option value="">Newly published</option>
+                                <option value="x">Title a-z</option>
+                                <option value="xx">Title z-a</option>
+                                <option value="xxx">Price high to low</option>
+                                <option value="xxxx">Price low to high</option>
+                                <option value="xxxxx">Popular</option>
+                                <option value="xxxxxx">Average Ratings</option>
+                            </select>
+                            <i data-lucide="chevron-down"
+                                class="absolute right-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none"></i>
                         </div>
                     </div>
                 </div>
             </div>
+
+            <!-- Courses Grid -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                @if ($courses->count())
+                    @foreach ($courses as $course)
+                        <article
+                            class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-lg transition-all duration-300">
+                            <!-- Course Image -->
+                            <div class="relative">
+                                <a href="{{ route('courses.show', $course) }}">
+                                    <img src="{{ asset('storage/' . $course->thumbnail_path) }}"
+                                        alt="{{ $course->title }}" class="w-full h-48 object-cover">
+                                </a>
+                                <div class="absolute top-3 left-3">
+                                    <span class="bg-blue-600 text-white text-xs px-2 py-1 rounded">
+                                        {{ $course->category->name }}
+                                    </span>
+                                </div>
+                            </div>
+
+                            <!-- Course Content -->
+                            <div class="p-4">
+                                <h6 class="font-semibold text-gray-900 mb-2 line-clamp-2 leading-tight">
+                                    <a href="{{ route('courses.show', $course) }}"
+                                        class="hover:text-blue-600 transition-colors">
+                                        {{ $course->title }}
+                                    </a>
+                                </h6>
+
+                                <!-- Course Stats -->
+                                <div class="flex items-center gap-4 mb-3 text-sm text-gray-600">
+                                    <span class="flex items-center gap-1">
+                                        <i data-lucide="users" class="w-4 h-4"></i>
+                                        <span>365 Students</span>
+                                    </span>
+                                    <span class="flex items-center gap-1">
+                                        <i data-lucide="clock" class="w-4 h-4"></i>
+                                        <span>10 Weeks</span>
+                                    </span>
+                                </div>
+
+                                <!-- Course Description -->
+                                <p class="text-gray-600 text-sm mb-4 line-clamp-2 leading-relaxed">
+                                    {{ $course->description }}
+                                </p>
+
+                                <!-- Price and CTA -->
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-gray-400 text-sm line-through">$39.00</span>
+                                        <span class="font-semibold text-gray-900">$69.00</span>
+                                    </div>
+                                    <a href="{{ route('courses.show', $course) }}"
+                                        class="bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold px-4 py-2 rounded-lg transition-colors">
+                                        Start Learning
+                                    </a>
+                                </div>
+                            </div>
+                        </article>
+                    @endforeach
+                @else
+                    <div class="col-span-full text-center py-12">
+                        <i data-lucide="book-open" class="w-16 h-16 text-gray-400 mx-auto mb-4"></i>
+                        <h3 class="text-xl font-semibold text-gray-900 mb-2">No courses found</h3>
+                        <p class="text-gray-600">Check back later for new courses.</p>
+                    </div>
+                @endif
+            </div>
+
+            <!-- Pagination -->
+            @if ($courses->hasPages())
+                <div class="mt-12 flex justify-center">
+                    <div class="flex items-center gap-2">
+                        <!-- Previous Page -->
+                        @if ($courses->onFirstPage())
+                            <span class="flex items-center justify-center w-10 h-10 text-gray-400 cursor-not-allowed">
+                                <i data-lucide="chevron-left" class="w-5 h-5"></i>
+                            </span>
+                        @else
+                            <a href="{{ $courses->previousPageUrl() }}"
+                                class="flex items-center justify-center w-10 h-10 text-gray-600 hover:text-blue-600 transition-colors">
+                                <i data-lucide="chevron-left" class="w-5 h-5"></i>
+                            </a>
+                        @endif
+
+                        <!-- Page Numbers -->
+                        @foreach (range(1, min(5, $courses->lastPage())) as $page)
+                            <a href="{{ $courses->url($page) }}"
+                                class="flex items-center justify-center w-10 h-10 rounded-lg font-semibold transition-colors
+                              {{ $courses->currentPage() == $page ? 'bg-blue-600 text-white' : 'text-gray-600 hover:text-blue-600' }}">
+                                {{ $page }}
+                            </a>
+                        @endforeach
+
+                        <!-- Next Page -->
+                        @if ($courses->hasMorePages())
+                            <a href="{{ $courses->nextPageUrl() }}"
+                                class="flex items-center justify-center w-10 h-10 text-gray-600 hover:text-blue-600 transition-colors">
+                                <i data-lucide="chevron-right" class="w-5 h-5"></i>
+                            </a>
+                        @else
+                            <span class="flex items-center justify-center w-10 h-10 text-gray-400 cursor-not-allowed">
+                                <i data-lucide="chevron-right" class="w-5 h-5"></i>
+                            </span>
+                        @endif
+                    </div>
+                </div>
+            @endif
         </div>
     </section>
+
+    <script>
+        // Initialize Lucide icons
+        document.addEventListener('DOMContentLoaded', function() {
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+            }
+
+            // Filter toggle functionality
+            const filterToggle = document.getElementById('filterToggle');
+            const filterPanel = document.getElementById('filterPanel');
+
+            if (filterToggle && filterPanel) {
+                filterToggle.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    filterPanel.classList.toggle('hidden');
+                });
+
+                // Close filter panel when clicking outside
+                document.addEventListener('click', function(e) {
+                    if (!filterPanel.contains(e.target) && !filterToggle.contains(e.target)) {
+                        filterPanel.classList.add('hidden');
+                    }
+                });
+            }
+
+            // Close filter panel when clicking on filter button again
+            filterPanel.addEventListener('click', function(e) {
+                e.stopPropagation();
+            });
+        });
+
+        // Add custom styles
+        const style = document.createElement('style');
+        style.textContent = `
+            .line-clamp-2 {
+                display: -webkit-box;
+                -webkit-line-clamp: 2;
+                -webkit-box-orient: vertical;
+                overflow: hidden;
+            }
+            
+            select {
+                background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+                background-position: right 0.5rem center;
+                background-repeat: no-repeat;
+                background-size: 1.5em 1.5em;
+                padding-right: 2.5rem;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
 </x-guest-layout>

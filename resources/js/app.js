@@ -1,31 +1,38 @@
 import './bootstrap';
+import AOS from 'aos';
+import '../theme-assets/js/jquery-3.6.0.min.js';
+// import '../theme-assets/js/aos';
+import '../theme-assets/js/swiper.min.js';
+import '../theme-assets/js/plugins';
+import '../theme-assets/js/purecounter';
+import '../theme-assets/js/main';
 import { createIcons, icons } from 'lucide';
 import { Notyf } from 'notyf';
 import 'notyf/notyf.min.css';
 import Alpine from 'alpinejs';
 import collapse from '@alpinejs/collapse'
-import AOS from 'aos';
 import 'aos/dist/aos.css';
 import 'flowbite';
-// import './anime.js'
+import "flyonui/flyonui"
+
+
 
 createIcons({ icons });
 
 // Create an instance of Notyf
 window.notyf = new Notyf({
-  duration: 7000,
+  duration: 3000,
   ripple: true,
   dismissible: true,
   position: { x: 'right', y: 'top' },
   types: [
     {
       type: 'warning',
-      className:'text-sm',
+      className: 'text-xs',
       background: 'orange',
       icon: {
-        className: 'icon-[mdi-light--alert]',
-        tagName: 'span',
-        // text: 'warning'
+        className: 'material-icons',
+        tagName: 'i',
       }
     },
   ]
@@ -37,6 +44,8 @@ AOS.init({
   startEvent: 'DOMContentLoaded'
 });
 
+window.$ = $;
+window.jQuery = $;
 
 // Start Alpine when DOM is loaded
 document.addEventListener('DOMContentLoaded', function () {
@@ -92,6 +101,8 @@ document.addEventListener('DOMContentLoaded', function () {
       feedbackInput.name = button.getAttribute('data-input-name') || 'feedback';
     })
   })
+
+
 });
 
 // expertise-tags.js

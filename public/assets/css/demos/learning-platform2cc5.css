@@ -1,62 +1,8 @@
-@font-face {
-  font-family: "Barlow";
-  src: url("https://html.thimpress.com/eduma-html/assets/fonts/Barlow/Barlow-Regular.woff2") format("woff2"), url("https://html.thimpress.com/eduma-html/assets/fonts/Barlow/Barlow-Regular.woff") format("woff");
-  font-weight: normal;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: "Barlow";
-  src: url("https://html.thimpress.com/eduma-html/assets/fonts/Barlow/Barlow-Medium.woff2") format("woff2"), url("https://html.thimpress.com/eduma-html/assets/fonts/Barlow/Barlow-Medium.woff") format("woff");
-  font-weight: 500;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: "Barlow";
-  src: url("https://html.thimpress.com/eduma-html/assets/fonts/Barlow/Barlow-SemiBold.woff2") format("woff2"), url("https://html.thimpress.com/eduma-html/assets/fonts/Barlow/Barlow-SemiBold.woff") format("woff");
-  font-weight: 600;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: "Barlow";
-  src: url("https://html.thimpress.com/eduma-html/assets/fonts/Barlow/Barlow-Bold.woff2") format("woff2"), url("https://html.thimpress.com/eduma-html/assets/fonts/Barlow/Barlow-Bold.woff") format("woff");
-  font-weight: bold;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: "Archivo";
-  src: url("https://html.thimpress.com/eduma-html/assets/fonts/Archivo/Archivo-Regular.woff2") format("woff2"), url("https://html.thimpress.com/eduma-html/assets/fonts/Archivo/Archivo-Regular.woff") format("woff");
-  font-weight: normal;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: "Archivo";
-  src: url("https://html.thimpress.com/eduma-html/assets/fonts/Archivo/Archivo-Medium.woff2") format("woff2"), url("https://html.thimpress.com/eduma-html/assets/fonts/Archivo/Archivo-Medium.woff") format("woff");
-  font-weight: 500;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: "Archivo";
-  src: url("https://html.thimpress.com/eduma-html/assets/fonts/Archivo/Archivo-SemiBold.woff2") format("woff2"), url("https://html.thimpress.com/eduma-html/assets/fonts/Archivo/Archivo-SemiBold.woff") format("woff");
-  font-weight: 600;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: "Archivo";
-  src: url("https://html.thimpress.com/eduma-html/assets/fonts/Archivo/Archivo-Bold.woff2") format("woff2"), url("https://html.thimpress.com/eduma-html/assets/fonts/Archivo/Archivo-Bold.woff") format("woff");
-  font-weight: bold;
-  font-style: normal;
-  font-display: swap;
-}
+@import url('https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400..700;1,400..700&display=swap');
+
 .plf-layout {
   font-size: 16px;
-  font-family: "Barlow", sans-serif;
+  font-family:'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji' ;
   color: var(--regal-grey-v2);
 }
 .plf-layout h1,
@@ -65,7 +11,7 @@
 .plf-layout h4,
 .plf-layout h5,
 .plf-layout h6 {
-  font-family: "Archivo", sans-serif;
+  font-family:'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji' ;
   color: var(--regal-black-v3);
 }
 .plf-layout a {
