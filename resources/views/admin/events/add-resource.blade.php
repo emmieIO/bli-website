@@ -34,18 +34,9 @@
 
                 <!-- File Upload -->
                 <div class="space-y-3">
-                    <label class="text-sm font-medium text-gray-700">Upload File</label>
-                    <div class="flex items-center justify-center w-full">
-                        <label for="file_path"
-                            class="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-primary-200 rounded-xl cursor-pointer bg-primary-50 hover:bg-primary-100 transition-all duration-200">
-                            <div class="flex flex-col items-center justify-center pt-5 pb-6">
-                                <i data-lucide="upload" class="w-8 h-8 text-primary mb-2"></i>
-                                <p class="text-sm text-gray-600"><span class="font-medium text-primary">Click to upload</span> or drag & drop</p>
-                                <p class="text-xs text-gray-500 mt-1">PDF, DOCX, or media files up to 10MB</p>
-                            </div>
-                            <input id="file_path" name="file_path" type="file" class="hidden" />
-                        </label>
-                    </div>
+                    <label for="file_path" class="block text-sm font-medium text-gray-700">Upload File</label>
+                    <input id="file_path" name="file_path" type="file"
+                        class="block w-full text-sm text-gray-700 border border-gray-300 rounded-xl shadow-sm focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-200" />
                     <x-input-error :messages="$errors->get('file_path')" class="mt-1" />
                 </div>
 
@@ -80,66 +71,6 @@
     </div>
 
     <script>
-        // File upload preview and validation
-        document.getElementById('file_path').addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            const label = this.parentElement;
-            
-            if (file) {
-                // Update label with file info
-                const fileName = file.name;
-                const fileSize = (file.size / (1024 * 1024)).toFixed(2);
-                
-                label.innerHTML = `
-                    <div class="flex flex-col items-center justify-center pt-5 pb-6">
-                        <i data-lucide="file-text" class="w-8 h-8 text-accent mb-2"></i>
-                        <p class="text-sm font-medium text-primary">${fileName}</p>
-                        <p class="text-xs text-gray-500 mt-1">${fileSize} MB</p>
-                        <p class="text-xs text-accent mt-2">File selected successfully</p>
-                    </div>
-                `;
-                lucide.createIcons();
-            }
-        });
 
-        // Drag and drop functionality
-        const dropArea = document.querySelector('label[for="file_path"]');
-        
-        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-            dropArea.addEventListener(eventName, preventDefaults, false);
-        });
-
-        function preventDefaults(e) {
-            e.preventDefault();
-            e.stopPropagation();
-        }
-
-        ['dragenter', 'dragover'].forEach(eventName => {
-            dropArea.addEventListener(eventName, highlight, false);
-        });
-
-        ['dragleave', 'drop'].forEach(eventName => {
-            dropArea.addEventListener(eventName, unhighlight, false);
-        });
-
-        function highlight() {
-            dropArea.classList.add('bg-accent-50', 'border-accent-300');
-        }
-
-        function unhighlight() {
-            dropArea.classList.remove('bg-accent-50', 'border-accent-300');
-        }
-
-        dropArea.addEventListener('drop', handleDrop, false);
-
-        function handleDrop(e) {
-            const dt = e.dataTransfer;
-            const files = dt.files;
-            document.getElementById('file_path').files = files;
-            
-            // Trigger change event
-            const event = new Event('change');
-            document.getElementById('file_path').dispatchEvent(event);
-        }
     </script>
 </x-app-layout>

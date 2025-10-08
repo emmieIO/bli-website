@@ -22,7 +22,8 @@
                         <span class="text-gray-400">/</span>
                     </li>
                     <li class="inline">
-                        <span class="text-gray-600 truncate max-w-[120px] sm:max-w-[200px] font-medium">{{ $event->title }}</span>
+                        <span
+                            class="text-gray-600 truncate max-w-[120px] sm:max-w-[200px] font-medium">{{ $event->title }}</span>
                     </li>
                 </ul>
             </nav>
@@ -37,7 +38,8 @@
                 <div class="lg:col-span-3 space-y-6 md:space-y-8">
                     <!-- Event Header -->
                     <div class="space-y-3 md:space-y-4">
-                        <h1 class="text-xl md:text-3xl lg:text-4xl font-bold text-primary leading-tight font-montserrat">
+                        <h1
+                            class="text-xl md:text-3xl lg:text-4xl font-bold text-primary leading-tight font-montserrat">
                             {{ $event->title }}
                         </h1>
 
@@ -64,7 +66,8 @@
                                     Coming Soon
                                 </span>
                             @else
-                                <span class="bg-gray-100 text-gray-800 px-3 py-2 rounded-full text-sm font-semibold font-montserrat shadow-sm">
+                                <span
+                                    class="bg-gray-100 text-gray-800 px-3 py-2 rounded-full text-sm font-semibold font-montserrat shadow-sm">
                                     Event Ended
                                 </span>
                             @endif
@@ -87,7 +90,8 @@
 
                     <!-- Event Description -->
                     <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 md:p-8">
-                        <h2 class="text-xl md:text-2xl font-bold text-primary mb-4 md:mb-6 flex items-center gap-3 font-montserrat">
+                        <h2
+                            class="text-xl md:text-2xl font-bold text-primary mb-4 md:mb-6 flex items-center gap-3 font-montserrat">
                             <div class="w-1 h-6 md:h-8 bg-secondary rounded-full"></div>
                             Event Description
                         </h2>
@@ -99,7 +103,8 @@
                     <!-- Event Speakers -->
                     @if ($event->speakers && $event->speakers->count())
                         <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 md:p-8">
-                            <h2 class="text-xl md:text-2xl font-bold text-primary mb-4 md:mb-6 flex items-center gap-3 font-montserrat">
+                            <h2
+                                class="text-xl md:text-2xl font-bold text-primary mb-4 md:mb-6 flex items-center gap-3 font-montserrat">
                                 <div class="w-1 h-6 md:h-8 bg-secondary rounded-full"></div>
                                 Event Speakers
                             </h2>
@@ -119,16 +124,19 @@
                                             @endif
                                         </div>
                                         <div class="flex-1 min-w-0">
-                                            <h3 class="font-bold text-primary text-base md:text-lg mb-1 font-montserrat">
+                                            <h3
+                                                class="font-bold text-primary text-base md:text-lg mb-1 font-montserrat">
                                                 {{ $speaker->user->name }}
                                             </h3>
                                             @if ($speaker->title)
-                                                <p class="text-secondary font-semibold text-xs md:text-sm mb-2 font-montserrat">
+                                                <p
+                                                    class="text-secondary font-semibold text-xs md:text-sm mb-2 font-montserrat">
                                                     {{ $speaker->title }}
                                                 </p>
                                             @endif
                                             @if ($speaker->bio)
-                                                <p class="text-gray-600 text-xs md:text-sm leading-relaxed line-clamp-2 font-lato">
+                                                <p
+                                                    class="text-gray-600 text-xs md:text-sm leading-relaxed line-clamp-2 font-lato">
                                                     {{ $speaker->bio }}
                                                 </p>
                                             @endif
@@ -140,41 +148,49 @@
                     @endif
 
                     <!-- Share Section -->
-                    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 md:p-8">
-                        <div class="flex flex-col sm:flex-row sm:items-center gap-3 md:gap-4">
-                            <span class="text-gray-700 font-semibold text-sm md:text-base font-montserrat">Share this event:</span>
-                            <div class="flex items-center gap-2 md:gap-3">
-                                <a href="#"
-                                    class="w-10 h-10 bg-primary text-white rounded-full flex items-center justify-center hover:bg-primary/90 transition-all duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-1">
-                                    <i class="fab fa-facebook-f text-sm"></i>
-                                </a>
-                                <a href="#"
-                                    class="w-10 h-10 bg-secondary text-white rounded-full flex items-center justify-center hover:bg-secondary/90 transition-all duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-1">
-                                    <i class="fab fa-twitter text-sm"></i>
-                                </a>
-                                <a href="#"
-                                    class="w-10 h-10 bg-accent text-white rounded-full flex items-center justify-center hover:bg-accent/90 transition-all duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-1">
-                                    <i class="fab fa-linkedin-in text-sm"></i>
-                                </a>
-                                <a href="#"
-                                    class="w-10 h-10 bg-green-500 text-white rounded-full flex items-center justify-center hover:bg-green-600 transition-all duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-1">
-                                    <i class="fab fa-whatsapp text-sm"></i>
-                                </a>
+                    @auth
+                        @if ($event->isRegistered() && $event->resources && count($event->resources))
+                            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 md:p-8">
+                                <h2 class="text-xl md:text-2xl font-bold text-primary mb-4 md:mb-6 flex items-center gap-3 font-montserrat">
+                                    <div class="w-1 h-6 md:h-8 bg-secondary rounded-full"></div>
+                                    Event Resources
+                                </h2>
+                                <ul class="space-y-3">
+                                    @foreach ($event->resources as $resource)
+                                        <li>
+                                            @if ($resource->type === 'file')
+                                                <a href="{{ asset('storage/' . $resource->file_path) }}" target="_blank"
+                                                    class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100 transition-all duration-300 font-lato">
+                                                    <i data-lucide="file-text" class="w-5 h-5 text-secondary"></i>
+                                                    <span class="font-medium">{{ $resource->title }}</span>
+                                                </a>
+                                            @elseif ($resource->type === 'link')
+                                                <a href="{{ $resource->external_link }}" target="_blank"
+                                                    class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100 transition-all duration-300 font-lato">
+                                                    <i data-lucide="link" class="w-5 h-5 text-secondary"></i>
+                                                    <span class="font-medium">{{ $resource->title }}</span>
+                                                </a>
+                                            @endif
+                                        </li>
+                                    @endforeach
+                                </ul>
                             </div>
-                        </div>
-                    </div>
+                        @endif
+                    @endauth
                 </div>
 
                 <!-- Sidebar -->
                 <div class="space-y-6">
                     <!-- Registration Card -->
                     <div class="bg-gradient-to-br from-primary to-secondary rounded-2xl shadow-xl p-6 text-white">
-                        <h3 class="text-xl font-bold text-center mb-6 text-white font-montserrat">Register For Event</h3>
+                        <h3 class="text-xl font-bold text-center mb-6 text-white font-montserrat">Register For Event
+                        </h3>
 
                         <div class="space-y-4 mb-6">
                             <div class="flex justify-between items-center py-3 border-b border-white/30">
                                 <span class="text-white/90 font-medium text-sm font-lato">Attendees</span>
-                                <span class="font-bold text-lg text-white font-montserrat">{{ count($event->attendees) }}</span>
+                                <span
+                                    class="font-bold text-lg text-white font-montserrat">{{ count($event->attendees) }}</span>
                             </div>
                             <div class="flex justify-between items-center py-3 border-b border-white/30">
                                 <span class="text-white/90 font-medium text-sm font-lato">Cost</span>
@@ -182,9 +198,7 @@
                             </div>
                         </div>
 
-                        <button 
-                            @if ($event->isRegistered() || $event->getRevokeCount() == 4) disabled @endif 
-                            data-modal-target="popup-modal"
+                        <button @if ($event->isRegistered() || $event->getRevokeCount() == 4) disabled @endif data-modal-target="popup-modal"
                             data-modal-toggle="popup-modal"
                             class="w-full bg-white text-primary py-4 px-6 rounded-xl font-bold text-lg hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 transform hover:-translate-y-1 shadow-lg hover:shadow-xl flex items-center justify-center gap-3 font-montserrat">
                             @if ($event->isRegistered())
@@ -207,7 +221,8 @@
                             </a>
                         @endif
 
-                        <p class="text-white/80 text-sm text-center mt-4 font-lato">You must be logged in to register for this event</p>
+                        <p class="text-white/80 text-sm text-center mt-4 font-lato">You must be logged in to register
+                            for this event</p>
                     </div>
 
                     <!-- Event Info Card -->
@@ -216,7 +231,8 @@
                         <div class="space-y-4">
                             <!-- Start Time -->
                             <div class="flex items-start gap-3">
-                                <div class="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                                <div
+                                    class="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center flex-shrink-0">
                                     <i data-lucide="clock" class="w-4 h-4 text-primary"></i>
                                 </div>
                                 <div class="flex-1 min-w-0">
@@ -232,7 +248,8 @@
 
                             <!-- End Time -->
                             <div class="flex items-start gap-3">
-                                <div class="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                                <div
+                                    class="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center flex-shrink-0">
                                     <i data-lucide="flag" class="w-4 h-4 text-primary"></i>
                                 </div>
                                 <div class="flex-1 min-w-0">
@@ -247,31 +264,36 @@
                             </div>
 
                             <!-- Location -->
-                            <div class="flex items-start gap-3">
-                                <div class="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center flex-shrink-0">
-                                    <i data-lucide="map-pin" class="w-4 h-4 text-primary"></i>
-                                </div>
-                                <div class="flex-1 min-w-0">
-                                    <p class="font-semibold text-primary text-sm font-montserrat">
-                                        @if ($event->mode == 'offline')
-                                            Venue Address
-                                        @else
-                                            Meeting Link
-                                        @endif
-                                    </p>
-                                    @if ($event->mode == 'offline')
-                                        <p class="text-gray-700 text-sm break-words font-lato">
-                                            {{ $event->physical_address }}
-                                        </p>
-                                    @elseif($event->mode == 'online')
-                                        <a href="{{ $event->location }}"
-                                            class="text-secondary font-semibold hover:underline break-all text-sm font-lato"
-                                            target="_blank">
-                                            Click to Join Meeting
-                                        </a>
-                                    @endif
-                                </div>
-                            </div>
+                            @auth
+                                @if ($event->isRegistered())
+                                    <div class="flex items-start gap-3">
+                                        <div
+                                            class="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                                            <i data-lucide="map-pin" class="w-4 h-4 text-primary"></i>
+                                        </div>
+                                        <div class="flex-1 min-w-0">
+                                            <p class="font-semibold text-primary text-sm font-montserrat">
+                                                @if ($event->mode == 'offline')
+                                                    Venue Address
+                                                @else
+                                                    Meeting Link
+                                                @endif
+                                            </p>
+                                            @if ($event->mode == 'offline')
+                                                <p class="text-gray-700 text-sm break-words font-lato">
+                                                    {{ $event->physical_address }}
+                                                </p>
+                                            @elseif($event->mode == 'online')
+                                                <a href="{{ $event->location }}"
+                                                    class="text-secondary font-semibold hover:underline break-all text-sm font-lato"
+                                                    target="_blank">
+                                                    Click to Join Meeting
+                                                </a>
+                                            @endif
+                                        </div>
+                                    </div>
+                                @endif
+                            @endauth
                         </div>
                     </div>
 
@@ -281,18 +303,21 @@
                         <div class="space-y-3">
                             <a href="{{ route('events.index') }}"
                                 class="flex items-center gap-3 p-3 bg-white/10 rounded-lg hover:bg-white/20 transition-all duration-300 font-lato group">
-                                <i data-lucide="calendar" class="w-5 h-5 text-accent group-hover:scale-110 transition-transform"></i>
+                                <i data-lucide="calendar"
+                                    class="w-5 h-5 text-accent group-hover:scale-110 transition-transform"></i>
                                 <span class="font-medium">View All Events</span>
                             </a>
                             <a href="{{ route('homepage') }}"
                                 class="flex items-center gap-3 p-3 bg-white/10 rounded-lg hover:bg-white/20 transition-all duration-300 font-lato group">
-                                <i data-lucide="home" class="w-5 h-5 text-accent group-hover:scale-110 transition-transform"></i>
+                                <i data-lucide="home"
+                                    class="w-5 h-5 text-accent group-hover:scale-110 transition-transform"></i>
                                 <span class="font-medium">Back to Home</span>
                             </a>
                             @auth
                                 <a href="{{ route('user.events') }}"
                                     class="flex items-center gap-3 p-3 bg-white/10 rounded-lg hover:bg-white/20 transition-all duration-300 font-lato group">
-                                    <i data-lucide="list" class="w-5 h-5 text-accent group-hover:scale-110 transition-transform"></i>
+                                    <i data-lucide="list"
+                                        class="w-5 h-5 text-accent group-hover:scale-110 transition-transform"></i>
                                     <span class="font-medium">My Events</span>
                                 </a>
                             @endauth
@@ -360,9 +385,9 @@
                 lucide.createIcons();
             }
 
-        // Only call if the function exists
-        startCountdown("{{ $event->start_date }}", "countdown", "{{ $event->end_date }}");
-    });
+            // Only call if the function exists
+            startCountdown("{{ $event->start_date }}", "countdown", "{{ $event->end_date }}");
+        });
     </script>
 
     <style>
@@ -372,7 +397,7 @@
             -webkit-box-orient: vertical;
             overflow: hidden;
         }
-        
+
         .line-clamp-3 {
             display: -webkit-box;
             -webkit-line-clamp: 3;
