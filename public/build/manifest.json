@@ -1,16 +1,16 @@
 {
   "resources/css/app.css": {
-    "file": "assets/app-YSId6SBc.css",
+    "file": "assets/app-DCgMM-Hm.css",
     "src": "resources/css/app.css",
     "isEntry": true
-  },
-  "resources/images/auth.jpg": {
-    "file": "assets/auth-DN7QJS_f.jpg",
-    "src": "resources/images/auth.jpg"
   },
   "resources/images/hero-bg.jpg": {
     "file": "assets/hero-bg-Cg79anmC.jpg",
     "src": "resources/images/hero-bg.jpg"
+  },
+  "resources/images/students.png": {
+    "file": "assets/students-Cty-s4R8.png",
+    "src": "resources/images/students.png"
   },
   "resources/js/app.js": {
     "file": "assets/app-IQwBH9Tx.js",
