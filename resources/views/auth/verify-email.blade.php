@@ -1,10 +1,10 @@
 <x-auth-layout title="Email Verification"
     description="A verification link has been sent to your email. Please check your inbox and click the link to continue.">
+    <x-slot name="pageTitle">Email Verification - Beacon Leadership Institute</x-slot>
 
     @if (session('status') == 'verification-link-sent')
         <div class="bg-accent-50 border border-accent-200 text-accent-800 text-sm rounded-lg p-4 mb-6 flex items-start gap-3"
-             data-aos="fade-down"
-             data-aos-duration="600">
+            data-aos="fade-down" data-aos-duration="600">
             <i data-lucide="check-circle" class="w-5 h-5 mt-0.5 text-accent-600"></i>
             <span class="font-lato">
                 A new verification link has been sent to your email address.
@@ -25,8 +25,8 @@
         </div>
     </form>
 
-    <form method="POST" action="{{ route("logout") }}" class="mt-4 text-center"
-          data-aos="fade" data-aos-duration="600" data-aos-delay="400">
+    <form method="POST" action="{{ route('logout') }}" class="mt-4 text-center" data-aos="fade" data-aos-duration="600"
+        data-aos-delay="400">
         @csrf
         <button type="submit" class="text-sm text-gray-500 hover:text-gray-700 underline transition font-lato">
             <i data-lucide="log-out" class="inline-block w-4 h-4 mr-1 -mt-1"></i>

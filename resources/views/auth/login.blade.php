@@ -1,4 +1,5 @@
 <x-auth-layout :title="'Welcome Back'" :description="'Sign in to your account'">
+    <x-slot name="pageTitle">Login - Beacon Leadership Institute</x-slot>
     <form method="POST" action="{{ route('login.store') }}" class="space-y-6">
         @csrf
 

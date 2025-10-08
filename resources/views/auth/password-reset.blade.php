@@ -1,4 +1,5 @@
 <x-auth-layout title="Reset Password" description="Set your new password and regain access to your account.">
+    <x-slot name="pageTitle">Password Reset - Beacon Leadership Institute</x-slot>
 
     <form method="post" action="{{ route('password.update') }}" class="space-y-6">
         @csrf

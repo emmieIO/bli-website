@@ -7,28 +7,34 @@
     <title>BLI Dashboard</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/png" href="{{ asset('images/logo.jpg') }}">
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Lato:wght@300;400;700&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.css">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <script src="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.js"></script>
     <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <style>
-        [x-cloak] { display: none !important; }
-        
+        [x-cloak] {
+            display: none !important;
+        }
+
         /* Custom scrollbar */
         .sidebar-scroll::-webkit-scrollbar {
             width: 4px;
         }
-        
+
         .sidebar-scroll::-webkit-scrollbar-track {
             background: transparent;
         }
-        
+
         .sidebar-scroll::-webkit-scrollbar-thumb {
             background: rgba(0, 33, 71, 0.2);
             border-radius: 10px;
         }
-        
+
         .sidebar-scroll::-webkit-scrollbar-thumb:hover {
             background: rgba(0, 33, 71, 0.4);
         }
@@ -38,7 +44,8 @@
 <body class="bg-gray-50 text-gray-800 font-lato relative min-h-screen">
 
     <!-- Navigation Bar -->
-    <nav class="w-full sticky z-40 top-0 md:w-[inherit] md:ml-[280px] bg-white border-b border-primary-200 shadow-sm py-3 transition-all duration-300">
+    <nav
+        class="w-full sticky z-40 top-0 md:w-[inherit] md:ml-[280px] bg-white border-b border-primary-200 shadow-sm py-3 transition-all duration-300">
         <div class="px-6 py-2">
             <div class="flex items-center justify-between">
                 <!-- Mobile Menu Button -->
@@ -84,7 +91,8 @@
                                     <a href="{{ route('homepage') }}"
                                         class="flex items-center gap-2 px-4 py-3 text-sm text-gray-700 hover:bg-primary/5 hover:text-primary transition-colors font-lato group"
                                         role="menuitem">
-                                        <i data-lucide="home" class="w-4 h-4 text-primary/60 group-hover:text-primary"></i>
+                                        <i data-lucide="home"
+                                            class="w-4 h-4 text-primary/60 group-hover:text-primary"></i>
                                         Go back home
                                     </a>
                                 </li>
@@ -92,7 +100,8 @@
                                     <a href="{{ route('profile') }}"
                                         class="flex items-center gap-2 px-4 py-3 text-sm text-gray-700 hover:bg-primary/5 hover:text-primary transition-colors font-lato group"
                                         role="menuitem">
-                                        <i data-lucide="user" class="w-4 h-4 text-primary/60 group-hover:text-primary"></i>
+                                        <i data-lucide="user"
+                                            class="w-4 h-4 text-primary/60 group-hover:text-primary"></i>
                                         Profile Settings
                                     </a>
                                 </li>
@@ -102,7 +111,8 @@
                                         <button type="submit"
                                             class="flex items-center gap-2 w-full px-4 py-3 text-sm text-secondary hover:bg-secondary/5 hover:text-secondary transition-colors font-lato group cursor-pointer"
                                             role="menuitem">
-                                            <i data-lucide="log-out" class="w-4 h-4 text-secondary/60 group-hover:text-secondary"></i>
+                                            <i data-lucide="log-out"
+                                                class="w-4 h-4 text-secondary/60 group-hover:text-secondary"></i>
                                             Sign out
                                         </button>
                                     </form>
@@ -121,13 +131,16 @@
         aria-label="Sidebar">
         <div class="h-full overflow-y-auto sidebar-scroll">
             <!-- Logo Section -->
-            <div class="flex items-center justify-between p-6 border-b border-primary-100 bg-gradient-to-r from-primary to-primary-700">
+            <div
+                class="flex items-center justify-between p-6 border-b border-primary-100 bg-gradient-to-r from-primary to-primary-700">
                 <a href="{{ route('user_dashboard') }}" class="flex items-center gap-3 group">
-                    <div class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm border border-white/30">
+                    <div
+                        class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm border border-white/30">
                         <i data-lucide="sparkles" class="w-5 h-5 text-white"></i>
                     </div>
                     <div>
-                        <span class="self-center text-xl font-bold text-white font-montserrat whitespace-nowrap">BLI</span>
+                        <span
+                            class="self-center text-xl font-bold text-white font-montserrat whitespace-nowrap">BLI</span>
                         <p class="text-xs text-white/80 font-lato">Dashboard</p>
                     </div>
                 </a>
@@ -142,7 +155,7 @@
                     </svg>
                 </button>
             </div>
-            
+
             <!-- Sidebar Content -->
             <div class="p-4">
                 <x-sidebar />
@@ -154,7 +167,8 @@
     <div class="p-6 sm:ml-[280px] min-h-screen bg-gradient-to-br from-gray-50 to-primary-50/30">
         <!-- Error Messages -->
         @if ($errors->any())
-            <div class="mb-6 p-6 bg-secondary-50 border border-secondary-200 rounded-2xl shadow-sm" data-aos="fade-down">
+            <div class="mb-6 p-6 bg-secondary-50 border border-secondary-200 rounded-2xl shadow-sm"
+                data-aos="fade-down">
                 <div class="flex items-start gap-4">
                     <div class="flex-shrink-0">
                         <div class="w-10 h-10 bg-secondary/20 rounded-xl flex items-center justify-center">
@@ -162,14 +176,16 @@
                         </div>
                     </div>
                     <div class="flex-1">
-                        <h3 class="text-lg font-semibold text-secondary-800 font-montserrat mb-2">Please check the following issues:</h3>
+                        <h3 class="text-lg font-semibold text-secondary-800 font-montserrat mb-2">Please check the
+                            following issues:</h3>
                         <ul class="list-disc list-inside space-y-1 text-secondary-700 font-lato">
                             @foreach ($errors->all() as $error)
                                 <li>{{ $error }}</li>
                             @endforeach
                         </ul>
                     </div>
-                    <button onclick="this.parentElement.parentElement.remove()" class="flex-shrink-0 text-secondary/60 hover:text-secondary transition-colors">
+                    <button onclick="this.parentElement.parentElement.remove()"
+                        class="flex-shrink-0 text-secondary/60 hover:text-secondary transition-colors">
                         <i data-lucide="x" class="w-5 h-5"></i>
                     </button>
                 </div>
@@ -192,7 +208,7 @@
     @stack('scripts')
     <script>
         lucide.createIcons();
-        
+
         // Save scroll position before unload
         window.addEventListener("beforeunload", function() {
             localStorage.setItem("scrollPosition", window.scrollY);

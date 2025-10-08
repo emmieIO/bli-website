@@ -1,4 +1,6 @@
 <x-auth-layout :title="'Create Account'" :description="'Start your leadership journey with us'">
+    <x-slot name="pageTitle">Register - Beacon Leadership Institute</x-slot>
+    
     <form method="POST" action="{{ route('register.store') }}" class="space-y-6">
         @csrf
 

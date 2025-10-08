@@ -1,6 +1,5 @@
-<div class="border-b border-[#FF0000]/20">
-    <ul
-        class="-mb-px flex space-x-4 overflow-x-auto overflow-y-hidden scrollbar-thin scrollbar-thumb-[#FF0000]/50 scrollbar-track-gray-100">
+<div class="border-b border-primary-100 whitespace-nowrap mb-6">
+    <ul class="-mb-px flex space-x-6 overflow-x-auto overflow-y-hidden scrollbar-thin scrollbar-thumb-primary/50 scrollbar-track-gray-100">
         <!-- Tab: All Speakers -->
         <x-tab-link label="All Speakers" icon="mic" :to="route('admin.speakers.index')"
             :isActive="request()->routeIs('admin.speakers.index')" />
@@ -12,9 +11,10 @@
         <!-- Tab: Approved Applications -->
         <x-tab-link label="Approved Applications" icon="check" :to="route('admin.speakers.applications.approved')"
             :isActive="request()->routeIs('admin.speakers.applications.approved')" />
+
         <!-- Tab: Rejected Applications -->
-        <x-tab-link label="Rejected Applications" icon="x" :to="route('admin.speakers.applications.approved')"
-            :isActive="request()->routeIs('admin.speakers.applications.approved')" />
+        {{-- <x-tab-link label="Rejected Applications" icon="x" :to="route('admin.speakers.applications.rejected')"
+            :isActive="request()->routeIs('admin.speakers.applications.rejected')" /> --}}
 
         <!-- Tab: Add Speaker -->
         <x-tab-link label="Add Speaker" icon="plus" :to="route('admin.speakers.create')"

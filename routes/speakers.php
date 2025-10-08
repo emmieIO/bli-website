@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\SpeakerApplicationController;
 use App\Http\Controllers\SpeakerInvitationController;
+use App\Http\Controllers\SpeakerUserController;
 use Illuminate\Support\Facades\Route;
 
 
@@ -20,4 +21,8 @@ Route::middleware(['auth'])->prefix('events/{event}')->group(function () {
         ->name('event.speakers.store')
         ->middleware(['signed']);
 });
-
+// register as speaker routes and invitation response routes
+Route::prefix("")->group(function(){
+    Route::get("/become-a-speaker", [SpeakerUserController::class, 'index'])
+    ->name('become-a-speaker');
+});

@@ -60,7 +60,7 @@
                             </a>
                         </li>
                         <li>
-                            <a href="#"
+                            <a href="{{ route('become-a-speaker') }}"
                                 class="block px-4 py-2 text-gray-700  hover:bg-secondary/20 hover:text-secondary rounded transition">
                                 Become a Speaker
                             </a>
@@ -104,7 +104,7 @@
                 <li><a href="{{ route('courses.index') }}" class="hover:text-primary">Courses</a></li>
                 <li><a href="{{ route('instructors.become-an-instructor') }}" class="hover:text-primary">Become an
                         Instructor</a></li>
-                <li><a href="#" class="hover:text-primary">Become a Speaker</a></li>
+                <li><a href="{{ route('become-a-speaker') }}" class="hover:text-primary">Become a Speaker</a></li>
                 <li><a href="#" class="hover:text-primary">Blog</a></li>
                 <li>
                     @auth

@@ -1,4 +1,5 @@
 <x-auth-layout title="Forgot Password?" description="No worries! Enter your email and we’ll send you a reset link.">
+    <x-slot name="pageTitle">Forgot Password - Beacon Leadership Institute</x-slot>
 
     @if (session('status'))
         <div class="bg-primary-50 border border-primary-200 text-primary-800 text-sm rounded-lg p-4 mb-6 flex items-start gap-3"
