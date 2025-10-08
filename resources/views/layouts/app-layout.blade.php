@@ -14,25 +14,14 @@
     <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <style>
         /* Custom scrollbar */
-        ::-webkit-scrollbar {
-            width: 5px;
-        }
 
-        ::-webkit-scrollbar-track {
-            background: #f3f4f6;
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: #00275e;
-            border-radius: 4px;
-        }
     </style>
 </head>
 
 <body class="bg-gray-50 text-gray-800 font-outfit relative">
 
     <!-- Navigation Bar -->
-    <nav class="w-full sticky top-0 md:w-[inherit] md:ml-[250px] bg-gray-100 border-b-1 border-orange-400 py-2">
+    <nav class="w-full sticky z-40 top-0 md:w-[inherit] md:ml-[250px] bg-gray-100 border-b-1 border-orange-400 py-2">
         <div class="px-3 py-2 lg:px-5 lg:pl-3">
             <div class="flex items-center justify-between">
                 <!-- Logo Section -->

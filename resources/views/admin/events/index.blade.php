@@ -1,13 +1,10 @@
 <x-app-layout>
-    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <div class="">
         <!-- Page Header -->
-        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
             <div class="flex items-center gap-3">
-                <div class="p-2 rounded-lg bg-[#00275E]/10">
-                    <i data-lucide="calendar-days" class="w-6 h-6 text-[#00275E]"></i>
-                </div>
                 <div>
-                    <h1 class="text-2xl font-bold text-gray-900">Events Management</h1>
+                    <h1 class="text-2xl font-bold">Events Management</h1>
                     <p class="text-sm text-gray-500">Organize and manage all your conference events</p>
                 </div>
             </div>
@@ -17,22 +14,18 @@
                         class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00275E] focus:border-[#00275E]">
                     <i data-lucide="search" class="absolute left-3 top-2.5 text-gray-400 w-5 h-5"></i>
                 </div>
-                <a href="{{ route('admin.events.create') }}"
-                    class="inline-flex items-center justify-center px-4 py-2 bg-[#00275E] text-white text-sm font-medium rounded-lg hover:bg-[#00275E]/90 transition-all shadow-sm hover:shadow-md whitespace-nowrap">
-                    <i data-lucide="plus-circle" class="w-4 h-4 mr-2"></i>
-                    Create Event
-                </a>
             </div>
         </div>
 
         <!-- Status Tabs -->
         <div class="mb-6 border-b border-gray-200">
             <nav
-                class="-mb-px flex space-x-8 overflow-x-auto scrollbar-thin scrollbar-thumb-[#00275E]/20 scrollbar-track-gray-100">
+                class="-mb-px flex space-x-8 overflow-x-auto scrollbar-track-gray-100">
                 <x-tab-link label="All Events" icon="list" :to="route('admin.events.index') . '?status=all'" :isActive="request()->get('status') === 'all' || !request()->has('status')" />
                 <x-tab-link label="Upcoming" icon="clock" :to="route('admin.events.index') . '?status=upcoming'" :isActive="request()->get('status') === 'upcoming'" />
                 <x-tab-link label="Past Events" icon="archive" :to="route('admin.events.index') . '?status=past'" :isActive="request()->get('status') === 'past'" />
                 <x-tab-link label="Drafts" icon="file-text" :to="route('admin.events.index') . '?status=draft'" :isActive="request()->get('status') === 'draft'" />
+                <x-tab-link label="Create Event" icon="plus" :to="route('admin.events.create')"  />
             </nav>
         </div>
 
@@ -86,7 +79,7 @@
                 <p class="text-sm text-gray-600"><span id="selectedCount">0</span> events selected</p>
                 <div class="flex gap-3">
                     <button id="massPublishBtn"
-                        class="text-green-600 hover:text-green-800 text-sm font-medium inline-flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                        class="text-orange-600 hover:text-orange-800 text-sm font-medium inline-flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                         disabled>
                         <i data-lucide="send" class="w-4 h-4"></i> Publish Selected
                     </button>
@@ -146,15 +139,15 @@
                                 <!-- Event Column -->
                                 <td class="px-6 py-4">
                                     <div class="flex items-center gap-3">
-                                        @if ($event->image)
+                                        @if ($event->program_cover)
                                             <div class="flex-shrink-0 h-10 w-10">
                                                 <img class="h-10 w-10 rounded-md object-cover"
-                                                    src="{{ asset('storage/' . $event->image) }}"
-                                                    alt="{{ $event->title }}">
+                                                    src="{{ asset('storage/'. $event->program_cover) }}"
+                                                    alt="{{ $event->title }}"/>
                                             </div>
                                         @endif
                                         <div>
-                                            <div class="font-medium text-gray-900 whitespace-nowrap">{{ $event->title }}
+                                            <div class="font-bold text-sm text-gray-900 whitespace-nowrap">{{ $event->title }}
                                             </div>
                                             <div class="text-sm text-gray-500">{{ $event->location ?? 'Online Event' }}
                                             </div>
@@ -180,7 +173,7 @@
                                             </span>
                                         @elseif($event->start_date > now())
                                             <span
-                                                class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                                                class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-orange-100 text-orange-800">
                                                 Upcoming
                                             </span>
                                         @else
@@ -201,7 +194,7 @@
                                             {{ $event->mode === 'online'
                                                 ? 'bg-blue-100 text-blue-800'
                                                 : ($event->mode === 'offline'
-                                                    ? 'bg-green-100 text-green-800'
+                                                    ? 'bg-orange-100 text-orange-800'
                                                     : 'bg-purple-100 text-purple-800') }}">
                                             {{ ucfirst($event->mode) }}
                                         </span>
@@ -406,15 +399,15 @@
                 }
             });
 
-            // Event deletion modal
-            const eventDeleteForm = document.getElementById('delete-event-form');
+            // // Event deletion modal
+            // const eventDeleteForm = document.getElementById('delete-event-form');
 
-            window.confirmEventDelete = function(button, eventName) {
-                const actionRoute = button.getAttribute('data-delete-route');
-                eventDeleteForm.action = actionRoute;
-                document.getElementById('event-name').textContent = eventName;
-                document.getElementById('event-delete-title').textContent = `Delete ${eventName}`;
-            }
+            // window.confirmEventDelete = function(button, eventName) {
+            //     const actionRoute = button.getAttribute('data-delete-route');
+            //     eventDeleteForm.action = actionRoute;
+            //     document.getElementById('event-name').textContent = eventName;
+            //     // document.getElementById('event-delete-title').textContent = `Delete ${eventName}`;
+            // }
         });
     </script>
 </x-app-layout>

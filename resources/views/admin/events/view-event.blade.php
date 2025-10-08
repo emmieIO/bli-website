@@ -4,29 +4,32 @@
             <!-- Header with back button and actions -->
             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
                 <div class="flex items-center gap-4">
-                    <a href="/admin/events" class="text-[#00275E] hover:text-teal-600 transition-colors">
+                    <a href="{{ route('admin.events.index') }}" class=" hover:text-orange-700 transition-colors">
                         <i data-lucide="arrow-left" class="w-5 h-5"></i>
                     </a>
-                    <h1 class="text-2xl font-bold text-gray-900">{{ $event->title }}</h1>
+                    <h1 class="text-xl font-bold text-gray-900">{{ $event->title }}</h1>
                 </div>
 
                 <div class="flex items-center gap-3">
                     <a href="{{ route('admin.events.edit', $event->slug) }}"
-                        class="inline-flex items-center px-4 py-2 bg-white border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#00275E]">
+                        class="flex items-center whitespace-nowrap px-4 py-2 bg-white border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#00275E]">
                         <i data-lucide="edit" class="w-4 h-4 mr-2"></i>
                         Edit Event
                     </a>
-
+                    <div>
+                        <button type="button" data-delete-route="{{ route('admin.events.destroy', $event) }}"
+                            data-modal-target="delete-event-modal" data-modal-toggle="delete-event-modal"
+                            onclick="confirmEventDelete(this, '{{ $event->title }}')"
+                            class="flex whitespace-nowrap items-center px-4 py-2 bg-[#FF0000] border border-transparent rounded-md shadow-sm text-sm font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
+                            <i data-lucide="trash-2" class="w-4 h-4 mr-2"></i>
+                            Delete Event
+                        </button>
+                    </div>
                     <form action="{{ route('admin.events.destroy', $event) }}" method="POST">
                         @csrf
                         @method('DELETE')
 
-                        <button type="submit"
-                            class="inline-flex items-center px-4 py-2 bg-[#FF0000] border border-transparent rounded-md shadow-sm text-sm font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
-                            onclick="return confirm('Are you sure you want to delete this event?')">
-                            <i data-lucide="trash-2" class="w-4 h-4 mr-2"></i>
-                            Delete Event
-                        </button>
+
                     </form>
                 </div>
             </div>
@@ -96,7 +99,7 @@
                                         <div>
                                             <h3 class="text-sm font-medium text-gray-700">Conference Meeting Link</h3>
                                             <a href="{{ $event->location }}" target="_blank"
-                                                class="text-sm text-[#00275E] hover:text-teal-800">
+                                                class="text-sm text-[#00275E] hover:text-orange-800">
                                                 Event Link
                                             </a>
                                         </div>
@@ -108,7 +111,7 @@
                                     <div>
                                         <h3 class="text-sm font-medium text-gray-700">Contact</h3>
                                         <a href="mailto:{{ $event->contact_email }}"
-                                            class="text-sm text-[#00275E] hover:text-teal-800">
+                                            class="text-sm text-[#00275E] hover:text-orange-800">
                                             {{ $event->contact_email }}
                                         </a>
                                     </div>
@@ -223,7 +226,7 @@
                         <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
                             <h2 class="text-lg font-medium text-gray-900">Recent Registrations</h2>
                             <a href="/admin/events/{{ $event->slug }}/registrations"
-                                class="text-sm text-[#00275E] hover:text-teal-800">View All</a>
+                                class="text-sm text-[#00275E] hover:text-orange-800">View All</a>
                         </div>
                         <div class="divide-y divide-gray-200">
                             @if ($event->recentRegistrations()->count() > 0)
@@ -257,7 +260,7 @@
                         <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
                             <h2 class="text-lg font-medium text-gray-900">Event Resources</h2>
                             <a href="{{ route('admin.events.resources.create', $event) }}"
-                                class="inline-flex items-center px-2 py-1 bg-[#00275E] text-white text-xs font-medium rounded-md shadow hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#00275E]">
+                                class="inline-flex items-center px-2 py-1 bg-[#00275E] text-white text-xs font-medium rounded-md shadow hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#00275E]">
                                 <i data-lucide="plus" class="w-4 h-4 mr-1"></i>
                                 Add Resource
                             </a>
@@ -286,7 +289,7 @@
                                                 {{ $resource->title }}</p>
                                             @if ($resource->type == 'link')
                                                 <a href="{{ $resource->external_link }}" target="_blank"
-                                                    class="text-xs text-[#00275E] hover:text-teal-800 break-all">
+                                                    class="text-xs text-[#00275E] hover:text-orange-800 break-all">
                                                     View link resource
                                                 </a>
                                             @endif
@@ -296,7 +299,7 @@
                                         <div class="flex items-center gap-2 ml-auto">
                                             @if ($resource->file_path && file_exists(public_path('storage/' . $resource->file_path)))
                                                 <a href="{{ asset('storage/' . $resource->file_path) }}" download
-                                                    class="text-[#00275E] hover:text-teal-800 flex items-center">
+                                                    class="text-[#00275E] hover:text-orange-800 flex items-center">
                                                     <i data-lucide="download" class="w-5 h-5"></i>
                                                 </a>
                                             @else
@@ -416,7 +419,8 @@
                     </div>
 
                     <!-- Modal body -->
-                    <form class="p-4 md:p-5" method="POST" action="{{ route("admin.events.invite-speaker", $event) }}">
+                    <form class="p-4 md:p-5" method="POST"
+                        action="{{ route('admin.events.invite-speaker', $event) }}">
                         @csrf
                         <input type="hidden" name="event_id" value="{{ $event->id }}">
                         <div class="grid gap-4 mb-4 grid-cols-2">
@@ -516,6 +520,60 @@
                             <span>Send Invitation</span>
                         </button>
                     </form>
+                </div>
+            </div>
+        </div>
+
+        {{-- delete event modal --}}
+        <div id="delete-event-modal" tabindex="-1" aria-hidden="true"
+            class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
+            <div class="relative p-4 w-full max-w-md max-h-full">
+                <div class="relative bg-white rounded-lg shadow">
+                    <!-- Modal header -->
+                    <div class="flex items-center justify-between p-4 md:p-5 border-b rounded-t">
+                        <h3 class="text-lg font-semibold text-gray-900">
+                            Confirm Event Deletion
+                        </h3>
+                        <button type="button"
+                            class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center">
+                            <i data-lucide="x" class="w-4 h-4"></i>
+                            <span class="sr-only">Close modal</span>
+                        </button>
+                    </div>
+                    <!-- Modal body -->
+                    <div class="p-4 md:p-5 space-y-4">
+                        <div class="flex flex-col items-center text-center">
+                            <div
+                                class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-100 mb-4">
+                                <i data-lucide="alert-triangle" class="h-6 w-6 text-red-600"></i>
+                            </div>
+                            <h3 class="text-lg font-medium text-gray-900 mb-2" id="event-delete-title">Delete Event
+                            </h3>
+                            <div class="text-sm text-gray-500">
+                                <p>Are you sure you want to delete <span id="event-name"
+                                        class="font-semibold text-gray-900"></span>?</p>
+                                <p class="mt-1">This will also remove all associated sessions and speaker
+                                    assignments.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Modal footer -->
+                    <div class="flex items-center justify-end p-4 md:p-5 border-t border-gray-200 rounded-b gap-3">
+                        <button data-modal-hide="delete-event-modal" type="button"
+                            class="py-2.5 px-5 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 focus:z-10 focus:ring-4 focus:ring-gray-100">
+                            Cancel
+                        </button>
+                        <form method="POST" id="delete-event-form" class="inline">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit"
+                                class="text-white bg-[#FF0000] hover:bg-red-700 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center">
+                                <i data-lucide="trash-2" class="w-4 h-4 mr-2"></i>
+                                Delete Event
+                            </button>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>

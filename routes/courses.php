@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Route;
 // Course category routes
 Route::group([
     "as" => "admin.",
+    "middleware" => ["auth"]
 ], function(){
     Route::resource('admin/courses/category', CourseCategoryController::class);
     Route::resource('admin/courses', CourseController::class);
@@ -26,6 +27,5 @@ Route::group([
 
 
 Route::resource("/courses", UserCourseController::class);
-
 
 

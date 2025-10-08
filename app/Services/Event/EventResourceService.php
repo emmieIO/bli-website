@@ -22,13 +22,15 @@ class EventResourceService
         //
     }
 
-    public function createEventResourse(object $data, Event $event, ?UploadedFile $file)
+    public function createEventResourse(object $data, Event $event, ?UploadedFile $file = null)
     {
         try {
             $file_path = null;
             $result = DB::transaction(function () use ($file, $event, $data) {
-                $file_path = $this->uploadFile($file, 'event_resources');
-                $data->file_path = $file_path;
+                if($file){
+                    $file_path = $this->uploadFile($file, 'event_resources');
+                    $data->file_path = $file_path;
+                }
                 $data->uploaded_by = auth()->id();
                 $resource = $event->resources()->create((array) $data);
                 return $resource;

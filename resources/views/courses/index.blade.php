@@ -6,14 +6,14 @@
                 <ul class="flex items-center space-x-2 text-sm text-gray-600">
                     <li class="inline-flex items-center">
                         <a href="{{ route('homepage') }}"
-                            class="text-blue-600 hover:text-blue-800 transition-colors">Home</a>
+                            class="text-primary hover:text-primary-600 transition-colors">Home</a>
                     </li>
                     <li class="inline-flex items-center">
                         <i data-lucide="chevron-right" class="w-4 h-4 mx-1 text-gray-400"></i>
                     </li>
                     <li class="inline-flex items-center">
                         <a href="{{ route('courses.index') }}"
-                            class="text-blue-600 hover:text-blue-800 transition-colors">Courses</a>
+                            class="text-primary hover:text-primary-600 transition-colors">Courses</a>
                     </li>
                 </ul>
             </nav>
@@ -46,7 +46,7 @@
                     <!-- Filter Button and Panel -->
                     <div class="relative">
                         <button id="filterToggle"
-                            class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-3 rounded-lg flex items-center gap-2 transition-colors">
+                            class="bg-secondary hover:bg-secondary-600 text-white font-semibold px-6 py-3 rounded-lg flex items-center gap-2 transition-colors">
                             <i data-lucide="filter" class="w-5 h-5"></i>
                             <span>Filter</span>
                         </button>
@@ -65,7 +65,7 @@
                                             class="flex items-center justify-between cursor-pointer hover:bg-gray-50 p-2 rounded">
                                             <span class="text-gray-700">{{ $category->name }}</span>
                                             <input type="checkbox"
-                                                class="w-4 h-4 text-blue-600 rounded focus:ring-blue-500">
+                                                class="w-4 h-4 text-primary rounded focus:ring-primary">
                                         </label>
                                     @endforeach --}}
                                 </div>
@@ -81,7 +81,7 @@
                                         class="flex items-center justify-between cursor-pointer hover:bg-gray-50 p-2 rounded">
                                         <span class="text-gray-700">Keny White</span>
                                         <input type="checkbox"
-                                            class="w-4 h-4 text-blue-600 rounded focus:ring-blue-500">
+                                            class="w-4 h-4 text-primary rounded focus:ring-primary">
                                     </label>
                                 </div>
                             </div>
@@ -96,24 +96,24 @@
                                         class="flex items-center justify-between cursor-pointer hover:bg-gray-50 p-2 rounded">
                                         <span class="text-gray-700">Free</span>
                                         <input type="checkbox"
-                                            class="w-4 h-4 text-blue-600 rounded focus:ring-blue-500">
+                                            class="w-4 h-4 text-primary rounded focus:ring-primary">
                                     </label>
                                     <label
                                         class="flex items-center justify-between cursor-pointer hover:bg-gray-50 p-2 rounded">
                                         <span class="text-gray-700">Paid</span>
                                         <input type="checkbox"
-                                            class="w-4 h-4 text-blue-600 rounded focus:ring-blue-500">
+                                            class="w-4 h-4 text-primary rounded focus:ring-primary">
                                     </label>
                                 </div>
                             </div>
 
                             <!-- Filter Actions -->
                             <div class="flex justify-between items-center gap-4 pt-4 border-t border-gray-200">
-                                <button class="text-blue-600 hover:text-blue-800 font-semibold transition-colors">
+                                <button class="text-primary hover:text-primary-600 font-semibold transition-colors">
                                     Reset
                                 </button>
                                 <button
-                                    class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2 rounded-lg transition-colors">
+                                    class="bg-secondary hover:bg-secondary-600 text-white font-semibold px-6 py-2 rounded-lg transition-colors">
                                     Apply Filters
                                 </button>
                             </div>
@@ -128,7 +128,7 @@
                         <!-- Sort Dropdown -->
                         <div class="relative">
                             <select
-                                class="appearance-none bg-white border border-gray-300 rounded-lg px-4 py-2 pr-8 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 cursor-pointer">
+                                class="appearance-none bg-white border border-gray-300 rounded-lg px-4 py-2 pr-8 focus:ring-2 focus:ring-primary focus:border-primary cursor-pointer">
                                 <option value="">Newly published</option>
                                 <option value="x">Title a-z</option>
                                 <option value="xx">Title z-a</option>
@@ -157,7 +157,7 @@
                                         alt="{{ $course->title }}" class="w-full h-48 object-cover">
                                 </a>
                                 <div class="absolute top-3 left-3">
-                                    <span class="bg-blue-600 text-white text-xs px-2 py-1 rounded">
+                                    <span class="bg-primary text-white text-xs px-2 py-1 rounded">
                                         {{ $course->category->name }}
                                     </span>
                                 </div>
@@ -167,7 +167,7 @@
                             <div class="p-4">
                                 <h6 class="font-semibold text-gray-900 mb-2 line-clamp-2 leading-tight">
                                     <a href="{{ route('courses.show', $course) }}"
-                                        class="hover:text-blue-600 transition-colors">
+                                        class="hover:text-primary transition-colors">
                                         {{ $course->title }}
                                     </a>
                                 </h6>
@@ -196,7 +196,7 @@
                                         <span class="font-semibold text-gray-900">$69.00</span>
                                     </div>
                                     <a href="{{ route('courses.show', $course) }}"
-                                        class="bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold px-4 py-2 rounded-lg transition-colors">
+                                        class="bg-secondary hover:bg-secondary-600 text-white text-sm font-semibold px-4 py-2 rounded-lg transition-colors">
                                         Start Learning
                                     </a>
                                 </div>
@@ -223,7 +223,7 @@
                             </span>
                         @else
                             <a href="{{ $courses->previousPageUrl() }}"
-                                class="flex items-center justify-center w-10 h-10 text-gray-600 hover:text-blue-600 transition-colors">
+                                class="flex items-center justify-center w-10 h-10 text-gray-600 hover:text-primary transition-colors">
                                 <i data-lucide="chevron-left" class="w-5 h-5"></i>
                             </a>
                         @endif
@@ -232,7 +232,7 @@
                         @foreach (range(1, min(5, $courses->lastPage())) as $page)
                             <a href="{{ $courses->url($page) }}"
                                 class="flex items-center justify-center w-10 h-10 rounded-lg font-semibold transition-colors
-                              {{ $courses->currentPage() == $page ? 'bg-blue-600 text-white' : 'text-gray-600 hover:text-blue-600' }}">
+                              {{ $courses->currentPage() == $page ? 'bg-primary text-white' : 'text-gray-600 hover:text-primary' }}">
                                 {{ $page }}
                             </a>
                         @endforeach
@@ -240,7 +240,7 @@
                         <!-- Next Page -->
                         @if ($courses->hasMorePages())
                             <a href="{{ $courses->nextPageUrl() }}"
-                                class="flex items-center justify-center w-10 h-10 text-gray-600 hover:text-blue-600 transition-colors">
+                                class="flex items-center justify-center w-10 h-10 text-gray-600 hover:text-primary transition-colors">
                                 <i data-lucide="chevron-right" class="w-5 h-5"></i>
                             </a>
                         @else

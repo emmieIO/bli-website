@@ -1,55 +1,17 @@
 import './bootstrap';
-import AOS from 'aos';
-import '../theme-assets/js/jquery-3.6.0.min.js';
-// import '../theme-assets/js/aos';
-import '../theme-assets/js/swiper.min.js';
-import '../theme-assets/js/plugins';
-import '../theme-assets/js/purecounter';
-import '../theme-assets/js/main';
-import { createIcons, icons } from 'lucide';
-import { Notyf } from 'notyf';
-import 'notyf/notyf.min.css';
-import Alpine from 'alpinejs';
-import collapse from '@alpinejs/collapse'
+import './plugins/aos';
+import './plugins/lucide'
+import './plugins/notyf'
+import './plugins/alpine'
 import 'aos/dist/aos.css';
 import 'flowbite';
 import "flyonui/flyonui"
+import './main';
 
 
 
-createIcons({ icons });
-
-// Create an instance of Notyf
-window.notyf = new Notyf({
-  duration: 3000,
-  ripple: true,
-  dismissible: true,
-  position: { x: 'right', y: 'top' },
-  types: [
-    {
-      type: 'warning',
-      className: 'text-xs',
-      background: 'orange',
-      icon: {
-        className: 'material-icons',
-        tagName: 'i',
-      }
-    },
-  ]
-  // className: 'bg-red-200'
-});
-window.Alpine = Alpine;
-Alpine.plugin(collapse)
-AOS.init({
-  startEvent: 'DOMContentLoaded'
-});
-
-window.$ = $;
-window.jQuery = $;
-
-// Start Alpine when DOM is loaded
 document.addEventListener('DOMContentLoaded', function () {
-  Alpine.start();
+
   const modal = document.getElementById("action-modal");
   const titleEl = document.getElementById("action-modal-title");
   const messageEl = document.getElementById("action-modal-message");

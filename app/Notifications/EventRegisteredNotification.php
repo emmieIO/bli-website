@@ -30,15 +30,22 @@ class EventRegisteredNotification extends Notification
     {
         $ics = $this->calendarService->downloadEventCalendar($this->event);
         return (new MailMessage)
-            ->subject('You’re Registered for ' . $this->event->title)
-            ->greeting('Hello ' . $notifiable->name . ',')
-            ->line('You have successfully registered for the event: **' . $this->event->title . '**.')
-            ->line('📅 Date: ' . Carbon::parse($this->event->start_date)->format('F j, Y \a\t g:i A'))
-            ->line('📍 Location: ' . $this->event->location)
-            ->action('View Event', url('/events/' . $this->event->slug))
-            ->line('An event calendar file is attached to this email. You can add it to your calendar application to save the event details.')
-            ->attachData($ics,"{$this->event->title}.ics",['mime' => 'text/calendar; method=REQUEST; charset=utf-8;'])
-            ->line('Thank you for your interest!');
+            ->subject('Registration Confirmed: ' . $this->event->title)
+            ->greeting('Hello ' . ucfirst($notifiable->name) . ',')
+            ->line("We're excited to confirm your registration for **{$this->event->title}**.")
+            ->line('Here are the event details:')
+            ->line('📅 **Date:** ' . Carbon::parse($this->event->start_date)->format('F j, Y \a\t g:i A'))
+            ->line('📍 **Location:** ' . $this->event->location)
+            ->action('View Event Details', route('events.show', $this->event->slug))
+            ->line('An event calendar file (.ics) is attached for your convenience — you can add it directly to your calendar to stay reminded.')
+            ->line('We look forward to seeing you there!')
+            ->salutation('Warm regards,  
+        The ' . config('app.name') . ' Team')
+            ->attachData(
+                $ics,
+                "{$this->event->title}.ics",
+                ['mime' => 'text/calendar; method=REQUEST; charset=utf-8;']
+            );
     }
 
     public function toArray(object $notifiable): array
