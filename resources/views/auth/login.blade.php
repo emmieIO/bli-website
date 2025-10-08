@@ -12,42 +12,42 @@
         <div class="flex items-center justify-between">
             <label class="inline-flex items-center text-sm">
                 <input type="checkbox" name="remember" placeholder="Password"
-                    class="rounded border-gray-300 text-orange-600 shadow-sm focus:ring-orange-600">
-                <span class="ml-2 text-white">Remember me</span>
+                    class="rounded border-gray-300 text-secondary focus:ring-secondary shadow-sm">
+                <span class="ml-2 text-gray-700 font-lato">Remember me</span>
             </label>
 
             <a href="{{ route('password.request') }}"
-                class="text-sm text-white hover:text-[#FF0000] hover:underline transition-colors">Forgot password?</a>
+                class="text-sm text-secondary hover:text-secondary-600 hover:underline transition-colors font-lato">Forgot password?</a>
         </div>
 
         <!-- Submit -->
         <div>
             <button type="submit"
-                class="w-full bg-orange-600 hover:bg-orange-400 text-xl text-white font-semibold py-4 px-4  transition flex items-center justify-center gap-2">
+                class="w-full bg-secondary hover:bg-secondary-600 text-white text-lg font-semibold py-3 px-4 rounded-lg transition-all duration-200 transform hover:scale-105 flex items-center justify-center gap-2 font-montserrat">
                 <i data-lucide="log-in" class="w-5 h-5"></i>
                 Sign In
             </button>
         </div>
 
         <!-- Social Login -->
-        {{-- <div class="mt-6 text-center">
-            <p class="text-sm text-white mb-4">or sign in with</p>
+        <div class="mt-6 text-center">
+            <p class="text-sm text-gray-600 mb-4 font-lato">or sign in with</p>
             <div class="flex justify-center gap-4">
                 <a href=""
-                    class="flex items-center gap-2 bg-white hover:bg-gray-100 text-[#00275E] px-4 py-2 rounded-md text-sm font-medium transition-colors">
+                    class="flex items-center gap-2 bg-white hover:bg-gray-100 text-primary border border-gray-300 px-4 py-2 rounded-lg text-sm font-medium transition-colors font-lato">
                     <i data-lucide="globe" class="w-4 h-4"></i> Google
                 </a>
                 <a href=""
-                    class="flex items-center gap-2 bg-white hover:bg-gray-100 text-[#00275E] px-4 py-2 rounded-md text-sm font-medium transition-colors">
+                    class="flex items-center gap-2 bg-white hover:bg-gray-100 text-primary border border-gray-300 px-4 py-2 rounded-lg text-sm font-medium transition-colors font-lato">
                     <i data-lucide="facebook" class="w-4 h-4"></i> Facebook
                 </a>
             </div>
-        </div> --}}
+        </div>
 
         <!-- Register -->
-        <p class="text-center text-sm mt-6 text-white">
+        <p class="text-center text-sm mt-6 text-gray-600 font-lato">
             Don't have an account?
-            <a href="{{ route('register') }}" class="text-[#FF0000] hover:underline font-medium">Sign up</a>
+            <a href="{{ route('register') }}" class="text-secondary hover:text-secondary-600 hover:underline font-medium font-montserrat">Sign up</a>
         </p>
     </form>
 </x-auth-layout>

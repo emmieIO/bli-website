@@ -1,6 +1,6 @@
 @props(['title' => null, 'description' => null])
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 
 <head>
     <meta charset="UTF-8">
@@ -10,44 +10,54 @@
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
 
     <!-- Styles and Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 
-<body class="text-gray-800 bg-orange-600 auth-layout">
-    <!-- Navbar -->
-    {{-- <x-navbar /> --}}
-
+<body class="min-h-screen text-gray-800 auth-layout">
     <!-- Main Content -->
-    <div class="min-h-screen">
-        <div class="flex flex-col justify-center items-center px-8 py-12 sm:px-12">
-            <div class="w-full lg:w-120">
+    <div class="flex items-center justify-center">
+        <div class="flex flex-col justify-center items-center px-8 py-12 sm:px-12 w-full max-w-xl">
+            <div class="w-full">
                 <!-- Title and Description -->
-                <div class="mb-8 text-center">
-                    <h1 class="text-3xl font-bold text-white">{{ $title ?? 'Welcome' }}</h1>
-                    <p class="text-sm text-gray-400 mt-2">{{ $description ?? '' }}</p>
+                <div class="mb-8 text-center"
+                     data-aos="fade-down"
+                     data-aos-duration="800">
+                    <h1 class="text-3xl font-bold text-primary font-montserrat">{{ $title ?? 'Welcome' }}</h1>
+                    <p class="text-sm text-gray-600 mt-2 font-lato">{{ $description ?? '' }}</p>
                 </div>
 
                 <!-- Dynamic Form Content -->
-                <div class="space-y-6">
+                <div class="space-y-6 bg-white rounded-2xl shadow-lg p-8"
+                     data-aos="fade-up"
+                     data-aos-duration="800"
+                     data-aos-delay="200">
                     {{ $slot }}
                 </div>
 
                 <!-- Footer Links -->
-                <div class="mt-8 text-center space-y-4">
+                <div class="mt-8 text-center space-y-4"
+                     data-aos="fade"
+                     data-aos-duration="800"
+                     data-aos-delay="400">
                     <a href="{{ route('homepage') }}"
-                        class="text-xs text-[#FF0000] underline hover:text-red-600 transition">
+                        class="text-xs text-secondary underline hover:text-secondary-600 transition font-lato"
+                        data-aos="zoom-in"
+                        data-aos-duration="400"
+                        data-aos-delay="500">
                         Go back home
                     </a>
-                    <p class="text-xs text-gray-500">
+                    {{-- <p class="text-xs text-gray-500 font-lato"
+                       data-aos="fade-up"
+                       data-aos-duration="600"
+                       data-aos-delay="600">
                         &copy; 2025 Beacon Leadership Institute. All rights reserved.
-                    </p>
+                    </p> --}}
                 </div>
             </div>
         </div>
-
     </div>
 
     <!-- Toast Notifications -->

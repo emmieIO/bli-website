@@ -216,22 +216,6 @@ html {
     cursor: pointer;
 }
 
-/* .hero {
-
-} */
-/* 
-.hero-text {
-  max-width: 600px;
-}
-
-.hero-text h4 {
-  color: #f0ad4e;
-}
-
-.hero-text h1 {
-  font-size: 40px;
-  margin: 20px 0;
-} */
 
 .cta-btn {
     padding: 10px 20px;
@@ -316,12 +300,13 @@ html {
 }
 
 .auth-layout {
-    background-image: url(../images/auth.jpg);
+    background-image: url(../images/students.png);
+    @apply bg-gradient-to-br from-primary-100 to-secondary-100;
     background-size: cover;
     background-position: center;
     background-blend-mode: multiply;
     background-repeat: no-repeat;
-    background-attachment: fixed;
+    /* background-attachment: fixed; */
 }
 
 @keyframes scale {

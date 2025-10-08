@@ -53,7 +53,7 @@
                     @csrf
                     @method('POST')
                     <button type="submit"
-                        class="flex-1 sm:flex-none w-full sm:w-auto inline-flex items-center justify-center px-6 py-3 text-sm font-semibold text-white bg-gradient-to-r from-blue-800 to-blue-900 rounded-xl hover:from-blue-900 hover:to-blue-950 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-600 shadow-md hover:shadow-lg transition-all duration-200">
+                        class="flex-1 sm:flex-none w-full sm:w-auto inline-flex items-center justify-center px-6 py-3 text-sm font-semibold text-white bg-gradient-to-r from-blue-800 to-blue-900 rounded-lg hover:from-blue-900 hover:to-blue-950 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-600 shadow-md hover:shadow-lg transition-all duration-200">
                         Confirm
                     </button>
                 </form>

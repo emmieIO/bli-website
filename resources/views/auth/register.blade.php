@@ -8,8 +8,7 @@
         <!-- Email and Phone Number -->
         <div class="grid grid-cols-1 gap-2 md:grid-cols-2">
             <!-- Email -->
-            <x-input name="email" type="email" label="Email Address" placeholder="example@domain.com" icon="mail"
-                 />
+            <x-input name="email" type="email" label="Email Address" placeholder="example@domain.com" icon="mail" />
 
             <!-- Phone Number -->
             <x-input name="phone" type="text" label="Phone Number" placeholder="e.g. +2348012345678" icon="phone"
@@ -19,8 +18,7 @@
         <!-- Password and Confirm Password -->
         <div class="grid grid-cols-1 gap-2 md:grid-cols-2">
             <!-- Password -->
-            <x-input name="password" type="password" label="Password" placeholder="Enter a strong password" icon="lock"
-                />
+            <x-input name="password" type="password" label="Password" placeholder="Enter a strong password" icon="lock" />
 
             <!-- Confirm Password -->
             <x-input name="password_confirmation" type="password" label="Confirm Password"
@@ -28,22 +26,22 @@
         </div>
 
         <!-- Privacy Policy and Terms of Service -->
-        <div class="flex items-center space-x-2 text-sm text-white">
+        <div class="flex items-start space-x-2 text-sm">
             <input type="checkbox" name="agree_terms" id="agree_terms"
-                class="rounded border-gray-300 text-[#FF0000] shadow-sm focus:ring-[#FF0000]" required>
-            <label for="agree_terms" class="text-white">
+                class="rounded border-gray-300 text-secondary focus:ring-secondary shadow-sm mt-0.5" required>
+            <label for="agree_terms" class="text-gray-700 font-lato">
                 I agree to the
-                <a href="{{ route('privacy-policy') }}" class="text-[#FF0000] hover:underline">Privacy Policy</a>
+                <a href="{{ route('privacy-policy') }}" class="text-secondary hover:text-secondary-600 hover:underline font-medium">Privacy Policy</a>
                 and
-                <a href="{{ route('terms-of-service') }}" class="text-[#FF0000] hover:underline">Terms of Service</a>.
+                <a href="{{ route('terms-of-service') }}" class="text-secondary hover:text-secondary-600 hover:underline font-medium">Terms of Service</a>.
             </label>
         </div>
 
         <!-- Marketing Consent (Optional) -->
-        <div class="flex items-center space-x-2 text-sm text-white">
+        <div class="flex items-start space-x-2 text-sm">
             <input type="checkbox" name="marketing_consent" id="marketing_consent"
-                class="rounded border-gray-300 text-[#FF0000] shadow-sm focus:ring-[#FF0000]">
-            <label for="marketing_consent" class="text-white">
+                class="rounded border-gray-300 text-secondary focus:ring-secondary shadow-sm mt-0.5">
+            <label for="marketing_consent" class="text-gray-700 font-lato">
                 I agree to receive marketing emails and updates.
             </label>
         </div>
@@ -51,16 +49,16 @@
         <!-- Submit Button -->
         <div>
             <button type="submit"
-                class="w-full bg-orange-600 hover:bg-orange-400 text-white font-semibold py-3 px-4 rounded-md transition flex items-center justify-center gap-2">
+                class="w-full bg-secondary hover:bg-secondary-600 text-white text-lg font-semibold py-3 px-4 rounded-lg transition-all duration-200 transform hover:scale-105 flex items-center justify-center gap-2 font-montserrat">
                 <i data-lucide="user-plus" class="w-5 h-5"></i>
                 Create Account
             </button>
         </div>
 
         <!-- Login Redirect -->
-        <p class="text-center text-sm mt-6 text-white">
+        <p class="text-center text-sm mt-6 text-gray-600 font-lato">
             Already have an account?
-            <a href="{{ route('login') }}" class="text-[#FF0000] hover:underline font-medium">
+            <a href="{{ route('login') }}" class="text-secondary hover:text-secondary-600 hover:underline font-medium font-montserrat">
                 Sign in
             </a>
         </p>

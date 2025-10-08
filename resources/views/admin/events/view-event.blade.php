@@ -4,33 +4,26 @@
             <!-- Header with back button and actions -->
             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
                 <div class="flex items-center gap-4">
-                    <a href="{{ route('admin.events.index') }}" class=" hover:text-orange-700 transition-colors">
+                    <a href="{{ route('admin.events.index') }}"
+                        class="text-primary hover:text-primary-600 transition-colors">
                         <i data-lucide="arrow-left" class="w-5 h-5"></i>
                     </a>
-                    <h1 class="text-xl font-bold text-gray-900">{{ $event->title }}</h1>
+                    <h1 class="text-xl font-bold text-primary">{{ $event->title }}</h1>
                 </div>
 
                 <div class="flex items-center gap-3">
                     <a href="{{ route('admin.events.edit', $event->slug) }}"
-                        class="flex items-center whitespace-nowrap px-4 py-2 bg-white border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#00275E]">
+                        class="flex items-center whitespace-nowrap px-4 py-2 bg-white border border-gray-300 rounded-lg shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors">
                         <i data-lucide="edit" class="w-4 h-4 mr-2"></i>
                         Edit Event
                     </a>
-                    <div>
-                        <button type="button" data-delete-route="{{ route('admin.events.destroy', $event) }}"
-                            data-modal-target="delete-event-modal" data-modal-toggle="delete-event-modal"
-                            onclick="confirmEventDelete(this, '{{ $event->title }}')"
-                            class="flex whitespace-nowrap items-center px-4 py-2 bg-[#FF0000] border border-transparent rounded-md shadow-sm text-sm font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
-                            <i data-lucide="trash-2" class="w-4 h-4 mr-2"></i>
-                            Delete Event
-                        </button>
-                    </div>
-                    <form action="{{ route('admin.events.destroy', $event) }}" method="POST">
-                        @csrf
-                        @method('DELETE')
-
-
-                    </form>
+                    <button type="button" data-delete-route="{{ route('admin.events.destroy', $event) }}"
+                        data-modal-target="delete-event-modal" data-modal-toggle="delete-event-modal"
+                        onclick="confirmEventDelete(this, '{{ $event->title }}')"
+                        class="flex whitespace-nowrap items-center px-4 py-2 bg-secondary border border-transparent rounded-lg shadow-sm text-sm font-medium text-white hover:bg-secondary-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-secondary transition-colors">
+                        <i data-lucide="trash-2" class="w-4 h-4 mr-2"></i>
+                        Delete Event
+                    </button>
                 </div>
             </div>
 
@@ -39,7 +32,7 @@
                 <!-- Left column - Event details -->
                 <div class="lg:col-span-2 space-y-8">
                     <!-- Event card -->
-                    <div class="bg-white shadow rounded-lg overflow-hidden">
+                    <div class="bg-white shadow rounded-lg overflow-hidden border border-primary-100">
                         <!-- Event cover image -->
                         <div class="h-48 bg-gray-100 overflow-hidden">
                             <img src="{{ asset('storage/' . $event->program_cover) }}" alt="{{ $event->title }}"
@@ -50,12 +43,12 @@
                             <!-- Event status badge -->
                             <div class="flex justify-between items-start mb-6">
                                 <span
-                                    class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
+                                    class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-accent-100 text-accent-800 border border-accent-200">
                                     {{ $event->is_active ? 'Published' : 'Not published' }}
                                 </span>
 
                                 <span
-                                    class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
+                                    class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-primary-100 text-primary-800 border border-primary-200">
                                     {{ ucfirst($event->mode) }}
                                 </span>
                             </div>
@@ -68,7 +61,7 @@
                             <!-- Details grid -->
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 border-t border-gray-200 pt-6 mt-6">
                                 <div class="flex items-start gap-3">
-                                    <i data-lucide="calendar" class="w-5 h-5 text-gray-400 mt-0.5 flex-shrink-0"></i>
+                                    <i data-lucide="calendar" class="w-5 h-5 text-primary mt-0.5 flex-shrink-0"></i>
                                     <div>
                                         <h3 class="text-sm font-medium text-gray-500">Dates</h3>
                                         <p class="text-sm text-gray-900">
@@ -81,7 +74,7 @@
 
                                 @if ($event->mode == 'hybrid' || $event->mode == 'offline')
                                     <div class="flex items-start gap-3">
-                                        <i data-lucide="map-pin" class="w-5 h-5 text-gray-400 mt-0.5 flex-shrink-0"></i>
+                                        <i data-lucide="map-pin" class="w-5 h-5 text-primary mt-0.5 flex-shrink-0"></i>
                                         <div>
                                             <h3 class="text-sm font-medium text-gray-700">Location/Meeting Link</h3>
                                             <p class="text-sm text-gray-900">
@@ -95,11 +88,11 @@
 
                                 @if ($event->mode == 'online' || $event->mode == 'hybrid')
                                     <div class="flex items-start gap-3">
-                                        <i data-lucide="link" class="w-5 h-5 text-gray-400 mt-0.5 flex-shrink-0"></i>
+                                        <i data-lucide="link" class="w-5 h-5 text-primary mt-0.5 flex-shrink-0"></i>
                                         <div>
                                             <h3 class="text-sm font-medium text-gray-700">Conference Meeting Link</h3>
                                             <a href="{{ $event->location }}" target="_blank"
-                                                class="text-sm text-[#00275E] hover:text-orange-800">
+                                                class="text-sm text-primary hover:text-primary-600 transition-colors">
                                                 Event Link
                                             </a>
                                         </div>
@@ -107,11 +100,11 @@
                                 @endif
 
                                 <div class="flex items-start gap-3">
-                                    <i data-lucide="mail" class="w-5 h-5 text-gray-400 mt-0.5 flex-shrink-0"></i>
+                                    <i data-lucide="mail" class="w-5 h-5 text-primary mt-0.5 flex-shrink-0"></i>
                                     <div>
                                         <h3 class="text-sm font-medium text-gray-700">Contact</h3>
                                         <a href="mailto:{{ $event->contact_email }}"
-                                            class="text-sm text-[#00275E] hover:text-orange-800">
+                                            class="text-sm text-primary hover:text-primary-600 transition-colors">
                                             {{ $event->contact_email }}
                                         </a>
                                     </div>
@@ -119,7 +112,7 @@
 
                                 <!-- Entry Fee -->
                                 <div class="flex items-start gap-3">
-                                    <i data-lucide="credit-card" class="w-5 h-5 text-gray-400 mt-0.5 flex-shrink-0"></i>
+                                    <i data-lucide="credit-card" class="w-5 h-5 text-primary mt-0.5 flex-shrink-0"></i>
                                     <div>
                                         <h3 class="text-sm font-medium text-gray-700">Entry Fee</h3>
                                         <p class="text-sm text-gray-900">
@@ -130,7 +123,7 @@
 
                                 <!-- Creator -->
                                 <div class="flex items-start gap-3">
-                                    <i data-lucide="user-circle" class="w-5 h-5 text-gray-400 mt-0.5 flex-shrink-0"></i>
+                                    <i data-lucide="user-circle" class="w-5 h-5 text-primary mt-0.5 flex-shrink-0"></i>
                                     <div>
                                         <h3 class="text-sm font-medium text-gray-700">Created By</h3>
                                         <p class="text-sm text-gray-900">
@@ -143,7 +136,7 @@
 
                                 <!-- Created / Updated -->
                                 <div class="flex items-start gap-3">
-                                    <i data-lucide="clock" class="w-5 h-5 text-gray-400 mt-0.5 flex-shrink-0"></i>
+                                    <i data-lucide="clock" class="w-5 h-5 text-primary mt-0.5 flex-shrink-0"></i>
                                     <div>
                                         <h3 class="text-sm font-medium text-gray-700">Timestamps</h3>
                                         <p class="text-sm text-gray-900">
@@ -157,19 +150,14 @@
                     </div>
 
                     <!-- Speakers section -->
-                    <div class="bg-white shadow rounded-lg overflow-hidden">
+                    <div class="bg-white shadow rounded-lg overflow-hidden border border-primary-100">
                         <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
-                            <h2 class="text-lg font-medium text-gray-900 flex items-center gap-2">
-                                <i data-lucide="mic" class="w-5 h-5 text-[#00275E]"></i> Speakers
+                            <h2 class="text-lg font-medium text-primary flex items-center gap-2">
+                                <i data-lucide="mic" class="w-5 h-5 text-primary"></i> Speakers
                             </h2>
-                            {{-- <a href="{{ route('admin.events.assign-speakers', $event) }}"
-                                class="text-sm text-[#00275E] hover:text-[#FF0000] inline-flex items-center gap-1 font-medium">
-                                <i data-lucide="user-plus" class="w-4 h-4"></i>
-                                Assign Speakers
-                            </a> --}}
                             <button data-modal-target="crud-modal" data-modal-toggle="crud-modal"
-                                class="block text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center"
-                                type="button">
+                                class="flex items-center gap-2 bg-primary hover:bg-primary-600 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors">
+                                <i data-lucide="user-plus" class="w-4 h-4"></i>
                                 Invite Speaker
                             </button>
                         </div>
@@ -179,7 +167,7 @@
                                 @foreach ($event->speakers as $speaker)
                                     <div class="p-6 flex items-start gap-4">
                                         <div
-                                            class="h-20 w-20 rounded-full border-2 border-gray-200 overflow-hidden flex-shrink-0">
+                                            class="h-20 w-20 rounded-full border-2 border-primary-100 overflow-hidden flex-shrink-0">
                                             @if (!empty($speaker->photo) && file_exists(public_path('storage/' . $speaker->photo)))
                                                 <img src="{{ asset('storage/' . $speaker->photo) }}"
                                                     alt="{{ $speaker->name }}"
@@ -191,7 +179,7 @@
                                             @endif
                                         </div>
                                         <div>
-                                            <h3 class="font-medium text-gray-900">{{ $speaker->name }}</h3>
+                                            <h3 class="font-medium text-primary">{{ $speaker->name }}</h3>
                                             <p class="text-sm text-gray-500">{{ $speaker->title }}</p>
                                             <p class="mt-2 text-sm text-gray-600">{{ $speaker->bio }}</p>
                                         </div>
@@ -209,36 +197,36 @@
                 <!-- Right column - Stats and attendees -->
                 <div class="space-y-8">
                     <!-- Stats card -->
-                    <div class="bg-white shadow rounded-lg overflow-hidden">
+                    <div class="bg-white shadow rounded-lg overflow-hidden border border-primary-100">
                         <div class="px-6 py-4 border-b border-gray-200">
-                            <h2 class="text-lg font-medium text-gray-900">Event Statistics</h2>
+                            <h2 class="text-lg font-medium text-primary">Event Statistics</h2>
                         </div>
                         <div class="p-6 space-y-4">
                             <div class="flex items-center justify-between">
                                 <div class="text-sm font-medium text-gray-500">Total Registrations</div>
-                                <div class="text-lg font-semibold text-gray-900">{{ $event->attendeesCount() }}</div>
+                                <div class="text-lg font-semibold text-primary">{{ $event->attendeesCount() }}</div>
                             </div>
                         </div>
                     </div>
 
                     <!-- Recent attendees -->
-                    <div class="bg-white shadow rounded-lg overflow-hidden">
+                    <div class="bg-white shadow rounded-lg overflow-hidden border border-primary-100">
                         <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
-                            <h2 class="text-lg font-medium text-gray-900">Recent Registrations</h2>
+                            <h2 class="text-lg font-medium text-primary">Recent Registrations</h2>
                             <a href="/admin/events/{{ $event->slug }}/registrations"
-                                class="text-sm text-[#00275E] hover:text-orange-800">View All</a>
+                                class="text-sm text-primary hover:text-primary-600 transition-colors">View All</a>
                         </div>
                         <div class="divide-y divide-gray-200">
                             @if ($event->recentRegistrations()->count() > 0)
                                 @foreach ($event->recentRegistrations() as $recent)
                                     <div class="p-4 flex items-center gap-3">
                                         <div class="flex-shrink-0">
-                                            <img class="h-10 w-10 rounded-full"
+                                            <img class="h-10 w-10 rounded-full border border-primary-100"
                                                 src="https://ui-avatars.com/api/?name={{ urlencode($recent->name) }}"
                                                 alt="{{ $recent->name }}">
                                         </div>
                                         <div class="min-w-0 flex-1">
-                                            <p class="text-sm font-medium text-gray-900 truncate">{{ $recent->name }}
+                                            <p class="text-sm font-medium text-primary truncate">{{ $recent->name }}
                                             </p>
                                             <p class="text-sm text-gray-500 truncate">{{ $recent->email }}</p>
                                         </div>
@@ -256,11 +244,11 @@
                     </div>
 
                     <!-- Event resources -->
-                    <div class="bg-white shadow rounded-lg overflow-hidden">
+                    <div class="bg-white shadow rounded-lg overflow-hidden border border-primary-100">
                         <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
-                            <h2 class="text-lg font-medium text-gray-900">Event Resources</h2>
+                            <h2 class="text-lg font-medium text-primary">Event Resources</h2>
                             <a href="{{ route('admin.events.resources.create', $event) }}"
-                                class="inline-flex items-center px-2 py-1 bg-[#00275E] text-white text-xs font-medium rounded-md shadow hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#00275E]">
+                                class="inline-flex items-center px-3 py-1 bg-primary text-white text-xs font-medium rounded-lg shadow hover:bg-primary-600 transition-colors">
                                 <i data-lucide="plus" class="w-4 h-4 mr-1"></i>
                                 Add Resource
                             </a>
@@ -274,9 +262,9 @@
                                                 $extension = pathinfo($resource->file_path, PATHINFO_EXTENSION);
                                             @endphp
                                             @if (Str::endsWith($extension, 'pdf'))
-                                                <i data-lucide="file-text" class="w-5 h-5 text-red-500"></i>
+                                                <i data-lucide="file-text" class="w-5 h-5 text-secondary"></i>
                                             @elseif(Str::endsWith($extension, 'zip'))
-                                                <i data-lucide="archive" class="w-5 h-5 text-blue-500"></i>
+                                                <i data-lucide="archive" class="w-5 h-5 text-primary"></i>
                                             @elseif(Str::endsWith($extension, ['doc', 'docx']))
                                                 <i data-lucide="file" class="w-5 h-5 text-gray-500"></i>
                                             @else
@@ -285,11 +273,11 @@
                                         </div>
 
                                         <div class="min-w-0 flex-1">
-                                            <p class="text-sm font-medium text-gray-900 truncate">
+                                            <p class="text-sm font-medium text-primary truncate">
                                                 {{ $resource->title }}</p>
                                             @if ($resource->type == 'link')
                                                 <a href="{{ $resource->external_link }}" target="_blank"
-                                                    class="text-xs text-[#00275E] hover:text-orange-800 break-all">
+                                                    class="text-xs text-primary hover:text-primary-600 break-all transition-colors">
                                                     View link resource
                                                 </a>
                                             @endif
@@ -299,7 +287,7 @@
                                         <div class="flex items-center gap-2 ml-auto">
                                             @if ($resource->file_path && file_exists(public_path('storage/' . $resource->file_path)))
                                                 <a href="{{ asset('storage/' . $resource->file_path) }}" download
-                                                    class="text-[#00275E] hover:text-orange-800 flex items-center">
+                                                    class="text-primary hover:text-primary-600 flex items-center transition-colors">
                                                     <i data-lucide="download" class="w-5 h-5"></i>
                                                 </a>
                                             @else
@@ -314,7 +302,7 @@
                                                 @csrf
                                                 @method('DELETE')
                                                 <button type="submit"
-                                                    class="text-[#FF0000] hover:text-red-800 flex items-center">
+                                                    class="text-secondary hover:text-secondary-600 flex items-center transition-colors">
                                                     <i data-lucide="trash-2" class="w-5 h-5"></i>
                                                 </button>
                                             </form>
@@ -332,88 +320,19 @@
             </div>
         </div>
 
-        {{-- speaker invitation modal --}}
-        {{-- <div id="crud-modal" tabindex="-1" aria-hidden="true"
-            class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
-            <div class="relative p-4 w-full max-w-[700px] max-h-full">
-                <!-- Modal content -->
-                <div class="relative bg-white rounded-lg shadow-sm">
-                    <!-- Modal header -->
-                    <div class="flex items-center justify-between p-4 md:p-5 border-b border-gray-200 rounded-t">
-                        <h3 class="text-lg font-semibold text-gray-900">
-                            Invitation to speak at {{ $event->title }}
-                        </h3>
-                        <button type="button"
-                            class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center"
-                            data-modal-toggle="crud-modal">
-                            <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
-                                fill="none" viewBox="0 0 14 14">
-                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
-                                    stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6" />
-                            </svg>
-                            <span class="sr-only">Close modal</span>
-                        </button>
-                    </div>
-                    <!-- Modal body -->
-                    <form class="p-4 md:p-5">
-                        <div class="grid gap-4 mb-4 grid-cols-2">
-                            <div class="col-span-2 h-[30vh] rounded-lg overflow-scroll bg-gray-200">
-                                @foreach ($speakers as $speaker)
-                                    <div class="flex items-center gap-3 px-4 py-2 border-b border-gray-300">
-                                        <input type="radio" name="speaker_id" value="{{ $speaker->id }}" id="speaker-{{ $speaker->id }}"
-                                            class="form-radio h-4 w-4 text-blue-600">
-                                        <label for="speaker-{{ $speaker->id }}" class="flex items-center gap-2 cursor-pointer w-full">
-                                            <div class="h-8 w-8 rounded-full overflow-hidden flex-shrink-0">
-                                                @if (!empty($speaker->photo) && file_exists(public_path('storage/' . $speaker->photo)))
-                                                    <img src="{{ asset('storage/' . $speaker->photo) }}" alt="{{ $speaker->name }}"
-                                                        class="w-full h-full object-cover">
-                                                @else
-                                                    <img src="https://ui-avatars.com/api/?name={{ urlencode($speaker->name) }}"
-                                                        alt="{{ $speaker->name }}" class="w-full h-full object-cover">
-                                                @endif
-                                            </div>
-                                            <span class="text-sm font-medium text-gray-900">{{ $speaker->name }}</span>
-                                            <span class="text-xs text-gray-500">{{ $speaker->title }}</span>
-                                        </label>
-                                    </div>
-                                @endforeach
-                            </div>
-
-                            <div class="col-span-2">
-                                <label for="invitation-message"
-                                    class="block mb-2 text-sm font-medium text-gray-900">Invitation Message
-                                    </label>
-                                <textarea id="invitation-message" rows="10"
-                                    class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 resize-none"
-                                    placeholder=""></textarea>
-                        </div>
-                        <button type="submit"
-                            class="text-white flex items-center bg-[#00275E] hover:bg-[#FF0000] focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center">
-                            <i data-lucide="plus"></i>
-                            <span>Send Invitation</span>
-                        </button>
-                    </form>
-                </div>
-            </div>
-        </div> --}}
+        <!-- Speaker invitation modal -->
         <div id="crud-modal" tabindex="-1" aria-hidden="true"
-            class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
+            class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full bg-black/50 backdrop-blur-sm">
             <div class="relative p-4 w-full max-w-[700px] max-h-full">
-                <!-- Modal content -->
-                <div class="relative bg-white rounded-lg shadow-sm">
+                <div class="relative bg-white rounded-lg shadow border border-primary-100">
                     <!-- Modal header -->
                     <div class="flex items-center justify-between p-4 md:p-5 border-b border-gray-200 rounded-t">
-                        <h3 class="text-lg font-semibold text-gray-900">
+                        <h3 class="text-lg font-semibold text-primary">
                             Invitation to speak at {{ $event->title }}
                         </h3>
-                        <button type="button"
-                            class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center"
-                            data-modal-toggle="crud-modal">
-                            <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
-                                fill="none" viewBox="0 0 14 14">
-                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
-                                    stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6" />
-                            </svg>
+                        <button type="button" data-modal-toggle="crud-modal"
+                            class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-primary rounded-lg text-sm w-8 h-8 inline-flex justify-center items-center transition-colors">
+                            <i data-lucide="x" class="w-4 h-4"></i>
                             <span class="sr-only">Close modal</span>
                         </button>
                     </div>
@@ -426,17 +345,19 @@
                         <div class="grid gap-4 mb-4 grid-cols-2">
 
                             <!-- Speakers list -->
-                            <div class="col-span-2 h-[30vh] rounded-lg overflow-scroll bg-gray-200">
+                            <div
+                                class="col-span-2 h-[30vh] rounded-lg overflow-scroll bg-gray-50 border border-gray-200">
                                 @foreach ($speakers as $speaker)
                                     <div
-                                        class="flex items-center justify-between gap-3 px-4 py-2 border-b border-gray-300">
+                                        class="flex items-center justify-between gap-3 px-4 py-2 border-b border-gray-200">
                                         <div class="flex items-center gap-3">
                                             <input type="radio" name="speaker_id" value="{{ $speaker->id }}"
                                                 id="speaker-{{ $speaker->id }}"
-                                                class="form-radio h-4 w-4 text-blue-600">
+                                                class="form-radio h-4 w-4 text-primary focus:ring-primary">
                                             <label for="speaker-{{ $speaker->id }}"
                                                 class="flex items-center gap-2 cursor-pointer">
-                                                <div class="h-8 w-8 rounded-full overflow-hidden flex-shrink-0">
+                                                <div
+                                                    class="h-8 w-8 rounded-full overflow-hidden flex-shrink-0 border border-primary-100">
                                                     @if (!empty($speaker->photo) && file_exists(public_path('storage/' . $speaker->photo)))
                                                         <img src="{{ asset('storage/' . $speaker->photo) }}"
                                                             alt="{{ $speaker->user->name }}"
@@ -449,28 +370,26 @@
                                                 </div>
                                                 <div>
                                                     <span
-                                                        class="text-sm font-medium text-gray-900">{{ $speaker->user->name }}</span>
+                                                        class="text-sm font-medium text-primary">{{ $speaker->user->name }}</span>
                                                     <span
                                                         class="text-xs text-gray-500 block">{{ $speaker->title }}</span>
                                                 </div>
                                             </label>
                                         </div>
                                         <a href="{{ route('admin.speakers.show', $speaker) }}" target="_blank"
-                                            class="text-xs text-blue-600 hover:text-blue-800 underline whitespace-nowrap">
+                                            class="text-xs text-primary hover:text-primary-600 underline whitespace-nowrap transition-colors">
                                             View Profile
                                         </a>
                                     </div>
                                 @endforeach
                             </div>
 
-
-
                             <!-- Suggested topic -->
                             <div>
                                 <label for="suggested_topic"
                                     class="block mb-2 text-sm font-medium text-gray-900">Suggested Topic</label>
                                 <input type="text" id="suggested_topic" name="suggested_topic"
-                                    class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+                                    class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-primary focus:border-primary"
                                     placeholder="Enter suggested topic">
                             </div>
 
@@ -480,7 +399,7 @@
                                     class="block mb-2 text-sm font-medium text-gray-900">Suggested Duration
                                     (minutes)</label>
                                 <input type="number" id="suggested_duration" name="suggested_duration"
-                                    class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+                                    class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-primary focus:border-primary"
                                     placeholder="e.g. 45">
                             </div>
 
@@ -489,7 +408,7 @@
                                 <label for="audience_expectations"
                                     class="block mb-2 text-sm font-medium text-gray-900">Audience Expectations</label>
                                 <textarea id="audience_expectations" name="audience_expectations" rows="3"
-                                    class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 resize-none"
+                                    class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-primary focus:border-primary resize-none"
                                     placeholder="Describe what the audience expects from this talk..."></textarea>
                             </div>
 
@@ -498,7 +417,7 @@
                                 <label for="expected_format"
                                     class="block mb-2 text-sm font-medium text-gray-900">Expected Format</label>
                                 <input type="text" id="expected_format" name="expected_format"
-                                    class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+                                    class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-primary focus:border-primary"
                                     placeholder="Workshop, keynote, panel, etc.">
                             </div>
 
@@ -507,35 +426,33 @@
                                 <label for="special_instructions"
                                     class="block mb-2 text-sm font-medium text-gray-900">Special Instructions</label>
                                 <textarea id="special_instructions" name="special_instructions" rows="3"
-                                    class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 resize-none"
+                                    class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-primary focus:border-primary resize-none"
                                     placeholder="Any other instructions for the speaker..."></textarea>
                             </div>
-
-
                         </div>
 
                         <button type="submit"
-                            class="text-white flex items-center bg-[#00275E] hover:bg-[#FF0000] focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center">
-                            <i data-lucide="plus"></i>
-                            <span>Send Invitation</span>
+                            class="flex items-center gap-2 bg-primary hover:bg-primary-600 text-white font-medium rounded-lg text-sm px-5 py-2.5 transition-colors">
+                            <i data-lucide="send" class="w-4 h-4"></i>
+                            Send Invitation
                         </button>
                     </form>
                 </div>
             </div>
         </div>
 
-        {{-- delete event modal --}}
+        <!-- Delete event modal -->
         <div id="delete-event-modal" tabindex="-1" aria-hidden="true"
-            class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
+            class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full bg-black/50 backdrop-blur-sm">
             <div class="relative p-4 w-full max-w-md max-h-full">
-                <div class="relative bg-white rounded-lg shadow">
+                <div class="relative bg-white rounded-lg shadow border border-secondary-100">
                     <!-- Modal header -->
                     <div class="flex items-center justify-between p-4 md:p-5 border-b rounded-t">
-                        <h3 class="text-lg font-semibold text-gray-900">
+                        <h3 class="text-lg font-semibold text-secondary">
                             Confirm Event Deletion
                         </h3>
-                        <button type="button"
-                            class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center">
+                        <button type="button" data-modal-hide="delete-event-modal"
+                            class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-secondary rounded-lg text-sm w-8 h-8 inline-flex justify-center items-center transition-colors">
                             <i data-lucide="x" class="w-4 h-4"></i>
                             <span class="sr-only">Close modal</span>
                         </button>
@@ -543,33 +460,30 @@
                     <!-- Modal body -->
                     <div class="p-4 md:p-5 space-y-4">
                         <div class="flex flex-col items-center text-center">
-                            <div
-                                class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-100 mb-4">
-                                <i data-lucide="alert-triangle" class="h-6 w-6 text-red-600"></i>
+                            <div class="w-12 h-12 bg-secondary-100 rounded-full flex items-center justify-center mb-4">
+                                <i data-lucide="alert-triangle" class="w-6 h-6 text-secondary"></i>
                             </div>
-                            <h3 class="text-lg font-medium text-gray-900 mb-2" id="event-delete-title">Delete Event
-                            </h3>
+                            <h3 class="text-lg font-medium text-secondary mb-2">Delete Event</h3>
                             <div class="text-sm text-gray-500">
                                 <p>Are you sure you want to delete <span id="event-name"
-                                        class="font-semibold text-gray-900"></span>?</p>
+                                        class="font-semibold text-primary"></span>?</p>
                                 <p class="mt-1">This will also remove all associated sessions and speaker
-                                    assignments.
-                                </p>
+                                    assignments.</p>
                             </div>
                         </div>
                     </div>
                     <!-- Modal footer -->
                     <div class="flex items-center justify-end p-4 md:p-5 border-t border-gray-200 rounded-b gap-3">
                         <button data-modal-hide="delete-event-modal" type="button"
-                            class="py-2.5 px-5 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 focus:z-10 focus:ring-4 focus:ring-gray-100">
+                            class="py-2.5 px-5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
                             Cancel
                         </button>
                         <form method="POST" id="delete-event-form" class="inline">
                             @csrf
                             @method('DELETE')
                             <button type="submit"
-                                class="text-white bg-[#FF0000] hover:bg-red-700 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center">
-                                <i data-lucide="trash-2" class="w-4 h-4 mr-2"></i>
+                                class="py-2.5 px-5 text-sm font-medium text-white bg-secondary hover:bg-secondary-600 rounded-lg transition-colors inline-flex items-center gap-2">
+                                <i data-lucide="trash-2" class="w-4 h-4"></i>
                                 Delete Event
                             </button>
                         </form>
@@ -577,7 +491,14 @@
                 </div>
             </div>
         </div>
-
-
     </div>
+
+    <script>
+        // Event deletion modal
+        window.confirmEventDelete = function(button, eventName) {
+            const actionRoute = button.getAttribute('data-delete-route');
+            document.getElementById('delete-event-form').action = actionRoute;
+            document.getElementById('event-name').textContent = eventName;
+        }
+    </script>
 </x-app-layout>

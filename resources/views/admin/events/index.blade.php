@@ -398,16 +398,6 @@
                     massActionForm.submit();
                 }
             });
-
-            // // Event deletion modal
-            // const eventDeleteForm = document.getElementById('delete-event-form');
-
-            // window.confirmEventDelete = function(button, eventName) {
-            //     const actionRoute = button.getAttribute('data-delete-route');
-            //     eventDeleteForm.action = actionRoute;
-            //     document.getElementById('event-name').textContent = eventName;
-            //     // document.getElementById('event-delete-title').textContent = `Delete ${eventName}`;
-            // }
         });
     </script>
 </x-app-layout>

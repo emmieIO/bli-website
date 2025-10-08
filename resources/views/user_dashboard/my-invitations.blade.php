@@ -1,18 +1,31 @@
 <x-app-layout>
     <div class="max-w-7xl mx-auto py-10 px-4 sm:px-6 lg:px-8">
-
-        <div class="mb-10">
-            <h1 class="text-3xl font-extrabold text-gray-900 tracking-tight">Your Event Invitations</h1>
-            <p class="mt-2 text-lg text-gray-600">Review and manage invitations you've received.</p>
+        <!-- Header Section -->
+        <div class="mb-12 text-center" data-aos="fade-down">
+            <h1 class="text-4xl font-bold text-primary font-montserrat tracking-tight">Your Event Invitations</h1>
+            <p class="mt-4 text-lg text-gray-600 max-w-2xl mx-auto font-lato leading-relaxed">
+                Review and manage the exclusive event invitations you've received from Beacon Leadership Institute
+            </p>
         </div>
 
         @if (empty($invitations))
-            <div class="bg-gray-50 rounded-2xl p-12 text-center">
-                <i data-lucide="inbox" class="w-16 h-16 text-gray-400 mx-auto mb-4" aria-hidden="true"></i>
-                <h3 class="text-xl font-medium text-gray-900">No invitations yet</h3>
-                <p class="mt-2 text-gray-500">You’ll see invitations here when you receive them.</p>
+            <!-- Empty State -->
+            <div class="bg-white rounded-2xl shadow-sm border border-primary-100 p-16 text-center max-w-2xl mx-auto" data-aos="fade-up">
+                <div class="w-20 h-20 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                    <i data-lucide="inbox" class="w-10 h-10 text-primary" aria-hidden="true"></i>
+                </div>
+                <h3 class="text-2xl font-bold text-primary font-montserrat mb-3">No invitations yet</h3>
+                <p class="text-gray-600 font-lato leading-relaxed mb-6">
+                    You'll see exclusive event invitations here when organizers send them your way.
+                </p>
+                <a href="{{ route('events.index') }}" 
+                   class="inline-flex items-center gap-2 bg-primary hover:bg-primary-600 text-white font-semibold px-6 py-3 rounded-xl transition-all duration-300 transform hover:scale-105 font-montserrat">
+                    <i data-lucide="calendar" class="w-4 h-4"></i>
+                    Browse Public Events
+                </a>
             </div>
         @else
+            <!-- Invitations Grid -->
             <div class="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
                 @foreach ($invitations as $invite)
                     @php
@@ -22,66 +35,115 @@
                         $expiresIn = \Carbon\Carbon::parse($invite->expires_at)->diffForHumans();
                     @endphp
 
-                    <div
-                        class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1 flex flex-col">
+                    <div class="bg-white rounded-2xl shadow-lg border border-primary-100 overflow-hidden hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 flex flex-col group"
+                         data-aos="fade-up" data-aos-delay="{{ $loop->index * 100 }}">
+                        <!-- Card Header -->
                         <div class="p-6 flex-grow">
                             <div class="flex items-start justify-between mb-4">
-                                <div class="p-2 bg-indigo-50 rounded-lg">
+                                <!-- Event Type Icon -->
+                                <div class="p-3 rounded-xl bg-primary/10 text-primary group-hover:bg-primary/20 transition-colors">
                                     <i data-lucide="{{ $invite->event->mode === 'offline' ? 'map-pin' : 'globe' }}"
-                                        class="w-5 h-5 text-indigo-600" aria-hidden="true"></i>
+                                       class="w-5 h-5" aria-hidden="true"></i>
                                 </div>
 
                                 <!-- Status Badge -->
-                                <span
-                                    class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
-                                    @if ($status === 'accepted') bg-green-100 text-green-800
-                                    @elseif($status === 'declined') bg-red-100 text-red-800
-                                    @elseif($status === 'expired') bg-gray-100 text-gray-800
-                                    @else bg-amber-100 text-amber-800 @endif">
+                                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold font-montserrat
+                                    @if ($status === 'accepted') bg-accent/10 text-accent border border-accent/20
+                                    @elseif($status === 'declined') bg-secondary/10 text-secondary border border-secondary/20
+                                    @elseif($status === 'expired') bg-gray-100 text-gray-600 border border-gray-200
+                                    @else bg-primary/10 text-primary border border-primary/20 @endif">
+                                    <i data-lucide="
+                                        @if ($status === 'accepted') check-circle
+                                        @elseif($status === 'declined') x-circle
+                                        @elseif($status === 'expired') clock
+                                        @else mail @endif" 
+                                        class="w-3 h-3 mr-1.5">
+                                    </i>
                                     {{ ucfirst($status) }}
                                 </span>
                             </div>
 
-                            <h3 class="text-xl font-bold text-gray-900 mb-2 leading-tight">
+                            <!-- Event Title -->
+                            <h3 class="text-xl font-bold text-primary font-montserrat mb-3 leading-tight group-hover:text-primary-600 transition-colors">
                                 {{ Str::limit($invite->event->title, 50) }}
                             </h3>
 
-                            <div class="flex items-center text-sm text-gray-600 mt-2 mb-3">
-                                <i data-lucide="calendar" class="w-4 h-4 mr-1.5" aria-hidden="true"></i>
+                            <!-- Event Date -->
+                            <div class="flex items-center text-sm text-gray-600 mb-3 font-lato">
+                                <i data-lucide="calendar" class="w-4 h-4 mr-2 text-primary/60" aria-hidden="true"></i>
                                 {{ $eventDate->format('M j, Y • g:i A') }}
                             </div>
 
-                            <div class="flex items-start text-sm text-gray-600 mb-4">
-                                <i data-lucide="map-pin" class="w-4 h-4 mr-1.5 mt-0.5 flex-shrink-0"
-                                    aria-hidden="true"></i>
-                                <span
-                                    class="break-words">{{ $invite->event->mode === 'online' ? $invite->event->location : $invite->event->physical_address }}</span>
+                            <!-- Event Location -->
+                            <div class="flex items-start text-sm text-gray-600 mb-4 font-lato">
+                                <i data-lucide="map-pin" class="w-4 h-4 mr-2 mt-0.5 flex-shrink-0 text-primary/60"
+                                   aria-hidden="true"></i>
+                                <span class="break-words leading-relaxed">
+                                    {{ $invite->event->mode === 'online' ? $invite->event->location : $invite->event->physical_address }}
+                                </span>
                             </div>
 
-                            <div class="mt-auto">
-                                <div class="flex items-center text-xs text-gray-500 mb-3">
-                                    <i data-lucide="timer" class="w-3.5 h-3.5 mr-1" aria-hidden="true"></i>
+                            <!-- Additional Info -->
+                            <div class="mt-auto space-y-3">
+                                <!-- Expiration -->
+                                <div class="flex items-center text-xs text-gray-500 font-lato">
+                                    <i data-lucide="timer" class="w-3.5 h-3.5 mr-1.5 text-primary/50" aria-hidden="true"></i>
                                     Expires {{ $expiresIn }}
                                 </div>
 
-                                <div class="text-sm text-gray-700 mb-4 line-clamp-2">
-                                    <span class="font-medium">Topic:</span>
-                                    {{ Str::limit($invite->suggested_topic, 100) }}
-                                </div>
+                                <!-- Suggested Topic -->
+                                @if($invite->suggested_topic)
+                                    <div class="text-sm text-gray-700 font-lato leading-relaxed bg-primary/5 rounded-lg p-3 border border-primary/10">
+                                        <span class="font-semibold text-primary font-montserrat">Suggested Topic:</span>
+                                        <span class="block mt-1">{{ Str::limit($invite->suggested_topic, 100) }}</span>
+                                    </div>
+                                @endif
                             </div>
                         </div>
 
-                        <div class="px-6 pb-6 pt-2 border-t border-gray-100">
-                            <a href="{{ URL::signedRoute('invitations.show',$invite) }}"
-                                class="w-full inline-flex items-center justify-center px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-medium text-sm shadow transition-colors">
-                                <i data-lucide="eye" class="w-4 h-4 mr-2" aria-hidden="true"></i>
-                                View Details
+                        <!-- Action Button -->
+                        <div class="px-6 pb-6 pt-4 border-t border-primary-100 bg-gray-50/50">
+                            <a href="{{ URL::signedRoute('invitations.show', $invite) }}"
+                               class="w-full inline-flex items-center justify-center px-5 py-3 rounded-xl bg-primary hover:bg-primary-600 text-white font-semibold text-sm shadow-md hover:shadow-lg transition-all duration-300 transform hover:scale-105 font-montserrat group/btn">
+                                <i data-lucide="eye" class="w-4 h-4 mr-2 group-hover/btn:scale-110 transition-transform" aria-hidden="true"></i>
+                                View Invitation Details
                             </a>
                         </div>
                     </div>
                 @endforeach
             </div>
-        @endif
 
+            <!-- Footer Stats -->
+            <div class="mt-12 bg-white rounded-2xl shadow-sm border border-primary-100 p-6" data-aos="fade-up">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-6 text-center">
+                    <div>
+                        <div class="text-2xl font-bold text-primary font-montserrat">{{ count($invitations) }}</div>
+                        <div class="text-sm text-gray-600 font-lato">Total Invitations</div>
+                    </div>
+                    <div>
+                        <div class="text-2xl font-bold text-accent font-montserrat">
+                            {{ $invitations->where('status', 'accepted')->count() }}
+                        </div>
+                        <div class="text-sm text-gray-600 font-lato">Accepted</div>
+                    </div>
+                    <div>
+                        <div class="text-2xl font-bold text-secondary font-montserrat">
+                            {{ $invitations->where('status', 'declined')->count() }}
+                        </div>
+                        <div class="text-sm text-gray-600 font-lato">Declined</div>
+                    </div>
+                    <div>
+                        <div class="text-2xl font-bold text-primary font-montserrat">
+                            {{ $invitations->where('status', 'pending')->count() }}
+                        </div>
+                        <div class="text-sm text-gray-600 font-lato">Pending</div>
+                    </div>
+                </div>
+            </div>
+        @endif
     </div>
+
+    <script>
+        lucide.createIcons();
+    </script>
 </x-app-layout>

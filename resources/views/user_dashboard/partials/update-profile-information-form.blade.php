@@ -1,7 +1,9 @@
 {{-- resources/views/profile/partials/update-profile-information-form.blade.php --}}
-<div class="bg-white border border-teal-100 rounded-xl shadow-sm p-6">
-    <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
-        <i data-lucide="user" class="w-5 h-5 text-teal-600"></i>
+<div class="bg-white border border-primary-100 rounded-xl shadow-sm p-6"
+     data-aos="fade-up"
+     data-aos-duration="600">
+    <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2 font-montserrat">
+        <i data-lucide="user" class="w-5 h-5 text-primary-600"></i>
         Personal Information
     </h3>
 
@@ -10,7 +12,6 @@
         @method("PATCH")
 
         <div class="relative">
-
             <x-input
                 label="Full Name"
                 type="text"
@@ -54,7 +55,7 @@
 
         <div class="md:col-span-2 mt-4">
             <button type="submit"
-                class="inline-flex items-center gap-2 bg-teal-700 hover:bg-teal-800 text-white font-medium px-6 py-2 rounded-md transition">
+                class="inline-flex items-center gap-2 bg-primary hover:bg-primary-600 text-white font-medium px-6 py-3 rounded-lg transition-all duration-200 transform hover:scale-105 font-montserrat">
                 <i data-lucide="save" class="w-4 h-4"></i>
                 Save Changes
             </button>

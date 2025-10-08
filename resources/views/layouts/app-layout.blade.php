@@ -7,28 +7,45 @@
     <title>BLI Dashboard</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.css">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <script src="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.js"></script>
     <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <style>
+        [x-cloak] { display: none !important; }
+        
         /* Custom scrollbar */
-
+        .sidebar-scroll::-webkit-scrollbar {
+            width: 4px;
+        }
+        
+        .sidebar-scroll::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        
+        .sidebar-scroll::-webkit-scrollbar-thumb {
+            background: rgba(0, 33, 71, 0.2);
+            border-radius: 10px;
+        }
+        
+        .sidebar-scroll::-webkit-scrollbar-thumb:hover {
+            background: rgba(0, 33, 71, 0.4);
+        }
     </style>
 </head>
 
-<body class="bg-gray-50 text-gray-800 font-outfit relative">
+<body class="bg-gray-50 text-gray-800 font-lato relative min-h-screen">
 
     <!-- Navigation Bar -->
-    <nav class="w-full sticky z-40 top-0 md:w-[inherit] md:ml-[250px] bg-gray-100 border-b-1 border-orange-400 py-2">
-        <div class="px-3 py-2 lg:px-5 lg:pl-3">
+    <nav class="w-full sticky z-40 top-0 md:w-[inherit] md:ml-[280px] bg-white border-b border-primary-200 shadow-sm py-3 transition-all duration-300">
+        <div class="px-6 py-2">
             <div class="flex items-center justify-between">
-                <!-- Logo Section -->
+                <!-- Mobile Menu Button -->
                 <div class="flex items-center justify-start">
                     <button data-drawer-target="logo-sidebar" data-drawer-toggle="logo-sidebar"
                         aria-controls="logo-sidebar" type="button"
-                        class="inline-flex items-center p-2 text-sm rounded-lg sm:hidden hover:text-white hover:bg-orange-400 focus:outline-none focus:ring-2 focus:ring-[#FF0000]/50">
+                        class="inline-flex items-center p-2 text-sm rounded-lg sm:hidden hover:bg-primary hover:text-white focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all duration-200">
                         <span class="sr-only">Open sidebar</span>
                         <svg class="w-6 h-6" aria-hidden="true" fill="currentColor" viewBox="0 0 20 20"
                             xmlns="http://www.w3.org/2000/svg">
@@ -44,41 +61,50 @@
                     <div class="flex items-center ms-3">
                         <div>
                             <button type="button"
-                                class="flex text-sm bg-[#FF0000]/20 rounded-full focus:ring-2 focus:ring-[#FF0000]/50"
+                                class="flex text-sm bg-primary/10 rounded-full focus:ring-2 focus:ring-primary/50 hover:bg-primary/20 transition-all duration-200 group"
                                 aria-expanded="false" data-dropdown-toggle="dropdown-user">
                                 <span class="sr-only">Open user menu</span>
-                                <img class="w-8 h-8 rounded-full"
-                                    src="https://ui-avatars.com/api/?name={{ urlencode(auth()->user()->name) }}&background=FF0000&color=fff"
+                                <img class="w-8 h-8 rounded-full border-2 border-primary/20 group-hover:border-primary/40 transition-colors"
+                                    src="https://ui-avatars.com/api/?name={{ urlencode(auth()->user()->name) }}&background=002147&color=fff"
                                     alt="{{ auth()->user()->name }}">
                             </button>
                         </div>
-                        <div class="z-50 absolute hidden my-4 text-base list-none divide-y divide-[#FF0000]/20 rounded-sm shadow-md bg-[#00275E]"
+                        <div class="z-50 absolute hidden my-4 text-base list-none divide-y divide-primary/20 rounded-xl shadow-2xl bg-white border border-primary-100 top-full right-0 min-w-[200px] overflow-hidden"
                             id="dropdown-user">
-                            <div class="px-4 py-3" role="none">
-                                <p class="text-sm text-white" role="none">
+                            <div class="px-4 py-3 bg-primary/5" role="none">
+                                <p class="text-sm font-semibold text-primary font-montserrat" role="none">
                                     {{ auth()->user()->name }}
                                 </p>
-                                <p class="text-sm font-medium text-white truncate" role="none">
+                                <p class="text-sm text-primary/70 truncate font-lato" role="none">
                                     {{ auth()->user()->email }}
                                 </p>
                             </div>
                             <ul class="py-1" role="none">
                                 <li>
                                     <a href="{{ route('homepage') }}"
-                                        class="block px-4 py-2 text-sm text-white hover:bg-[#FF0000]/20"
-                                        role="menuitem">Go back home</a>
+                                        class="flex items-center gap-2 px-4 py-3 text-sm text-gray-700 hover:bg-primary/5 hover:text-primary transition-colors font-lato group"
+                                        role="menuitem">
+                                        <i data-lucide="home" class="w-4 h-4 text-primary/60 group-hover:text-primary"></i>
+                                        Go back home
+                                    </a>
                                 </li>
                                 <li>
                                     <a href="{{ route('profile') }}"
-                                        class="block px-4 py-2 text-sm text-white hover:bg-[#FF0000]/20"
-                                        role="menuitem">Profile Settings</a>
+                                        class="flex items-center gap-2 px-4 py-3 text-sm text-gray-700 hover:bg-primary/5 hover:text-primary transition-colors font-lato group"
+                                        role="menuitem">
+                                        <i data-lucide="user" class="w-4 h-4 text-primary/60 group-hover:text-primary"></i>
+                                        Profile Settings
+                                    </a>
                                 </li>
                                 <li>
                                     <form action="{{ route('logout') }}" method="post">
                                         @csrf
                                         <button type="submit"
-                                            class="block w-full px-4 py-2 text-sm text-white hover:bg-[#FF0000]/20 cursor-pointer"
-                                            role="menuitem">Sign out</button>
+                                            class="flex items-center gap-2 w-full px-4 py-3 text-sm text-secondary hover:bg-secondary/5 hover:text-secondary transition-colors font-lato group cursor-pointer"
+                                            role="menuitem">
+                                            <i data-lucide="log-out" class="w-4 h-4 text-secondary/60 group-hover:text-secondary"></i>
+                                            Sign out
+                                        </button>
                                     </form>
                                 </li>
                             </ul>
@@ -91,61 +117,82 @@
 
     <!-- Sidebar -->
     <aside id="logo-sidebar"
-        class="fixed top-0 left-0 z-40 w-[250px] h-screen transition-transform -translate-x-full border-r border-[#FF0000]/20 sm:translate-x-0 bg-gray-200"
+        class="fixed top-0 left-0 z-40 w-[280px] h-screen transition-transform -translate-x-full border-r border-primary-100 sm:translate-x-0 bg-white shadow-lg"
         aria-label="Sidebar">
-        <div class="h-full overflow-y-auto">
-            <div class="flex items-center justify-between p-4 border-b-1 border-orange-400">
-                <a href="{{ route('user_dashboard') }}" class="flex ms-2 md:me-24">
-                    <img src="{{ asset('images/logo.jpg') }}" class="h-8 me-3" alt="FlowBite Logo" />
-                    <span class="self-center text-xl font-bold sm:text-2xl whitespace-nowrap">BLI</span>
+        <div class="h-full overflow-y-auto sidebar-scroll">
+            <!-- Logo Section -->
+            <div class="flex items-center justify-between p-6 border-b border-primary-100 bg-gradient-to-r from-primary to-primary-700">
+                <a href="{{ route('user_dashboard') }}" class="flex items-center gap-3 group">
+                    <div class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm border border-white/30">
+                        <i data-lucide="sparkles" class="w-5 h-5 text-white"></i>
+                    </div>
+                    <div>
+                        <span class="self-center text-xl font-bold text-white font-montserrat whitespace-nowrap">BLI</span>
+                        <p class="text-xs text-white/80 font-lato">Dashboard</p>
+                    </div>
                 </a>
                 <button data-drawer-target="logo-sidebar" data-drawer-toggle="logo-sidebar" aria-controls="logo-sidebar"
                     type="button"
-                    class="inline-flex items-center p-2 text-sm text-gray-700 rounded-lg sm:hidden hover:bg-[#FF0000]/20 focus:outline-none focus:ring-2 focus:ring-[#FF0000]/50">
-                    <span class="sr-only">Open sidebar</span>
-                    <svg class="w-6 h-6" aria-hidden="true" fill="currentColor" viewBox="0 0 20 20"
+                    class="inline-flex items-center p-2 text-sm text-white/80 rounded-lg sm:hidden hover:bg-white/20 focus:outline-none focus:ring-2 focus:ring-white/50 transition-all duration-200">
+                    <span class="sr-only">Close sidebar</span>
+                    <svg class="w-5 h-5" aria-hidden="true" fill="currentColor" viewBox="0 0 20 20"
                         xmlns="http://www.w3.org/2000/svg">
                         <path fill-rule="evenodd" clip-rule="evenodd"
                             d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" />
                     </svg>
                 </button>
             </div>
-            <x-sidebar />
+            
+            <!-- Sidebar Content -->
+            <div class="p-4">
+                <x-sidebar />
+            </div>
         </div>
     </aside>
 
     <!-- Main Content -->
-    <div class="p-4 sm:ml-[250px]">
+    <div class="p-6 sm:ml-[280px] min-h-screen bg-gradient-to-br from-gray-50 to-primary-50/30">
+        <!-- Error Messages -->
         @if ($errors->any())
-            <div class="mb-4 p-6 bg-red-50 border border-red-200 shadow-md rounded-lg text-red-700">
-                <div class="flex items-center gap-3 mb-3">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-red-600 shrink-0" fill="none"
-                        viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round"
-                            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 9c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                    </svg>
-                    <h3 class="text-lg font-semibold text-red-800">Whoops!</h3>
+            <div class="mb-6 p-6 bg-secondary-50 border border-secondary-200 rounded-2xl shadow-sm" data-aos="fade-down">
+                <div class="flex items-start gap-4">
+                    <div class="flex-shrink-0">
+                        <div class="w-10 h-10 bg-secondary/20 rounded-xl flex items-center justify-center">
+                            <i data-lucide="alert-triangle" class="w-5 h-5 text-secondary"></i>
+                        </div>
+                    </div>
+                    <div class="flex-1">
+                        <h3 class="text-lg font-semibold text-secondary-800 font-montserrat mb-2">Please check the following issues:</h3>
+                        <ul class="list-disc list-inside space-y-1 text-secondary-700 font-lato">
+                            @foreach ($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                    <button onclick="this.parentElement.parentElement.remove()" class="flex-shrink-0 text-secondary/60 hover:text-secondary transition-colors">
+                        <i data-lucide="x" class="w-5 h-5"></i>
+                    </button>
                 </div>
-                <p class="text-sm mb-2">Please fix the following issues:</p>
-                <ul class="list-disc list-inside space-y-1 text-sm">
-                    @foreach ($errors->all() as $error)
-                        <li>{{ $error }}</li>
-                    @endforeach
-                </ul>
             </div>
         @endif
-        {{ $slot }}
+
+        <!-- Main Content Slot -->
+        <div data-aos="fade-up" data-aos-duration="600">
+            {{ $slot }}
+        </div>
     </div>
 
     <!-- Toast Notifications -->
     <x-toast />
     <x-confirm-modal />
     <x-feedback-modal />
+
     <!-- Scripts -->
     <script src="https://unpkg.com/lucide@latest"></script>
     @stack('scripts')
     <script>
         lucide.createIcons();
+        
         // Save scroll position before unload
         window.addEventListener("beforeunload", function() {
             localStorage.setItem("scrollPosition", window.scrollY);
@@ -156,9 +203,18 @@
             const scroll = localStorage.getItem("scrollPosition");
             if (scroll !== null) {
                 window.scrollTo(0, parseInt(scroll));
-                localStorage.removeItem("scrollPosition"); // optional
+                localStorage.removeItem("scrollPosition");
             }
         });
+
+        // Initialize AOS if available
+        if (typeof AOS !== 'undefined') {
+            AOS.init({
+                duration: 600,
+                once: true,
+                offset: 100
+            });
+        }
     </script>
 </body>
 
