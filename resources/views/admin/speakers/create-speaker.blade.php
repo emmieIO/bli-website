@@ -37,6 +37,9 @@
                         <x-input label="Organization" name="organization" icon="building-2" :value="old('organization')" />
                         <x-input label="Email Address" name="email" type="email" required icon="mail" :value="old('email')" />
                         <x-input label="Phone Number" name="phone" icon="phone" :value="old('phone')" />
+                        <x-input label="Password" name="password" type="password" icon="key"  />
+                        <x-input label="Password Confirmation" type="password" name="password_confirmation" icon="key" />
+
                         <x-input label="LinkedIn Profile" name="linkedin" type="url" icon="linkedin" placeholder="https://linkedin.com/in/..." :value="old('linkedin')" />
                         <x-input label="Personal Website" name="website" type="url" icon="globe" placeholder="https://yoursite.com" :value="old('website')" />
                     </div>

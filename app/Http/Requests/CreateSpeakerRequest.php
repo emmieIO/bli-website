@@ -25,12 +25,57 @@ class CreateSpeakerRequest extends FormRequest
             "name" => ['required', "string"],
             "title" => ['sometimes'],
             "organization" => ["sometimes"],
-            "email"=>["required",'email', "unique:speakers,email"],
-            "photo" => "nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048",
-            "phone" => ["sometimes", 'phone:NG'],
-            'linkedin'=> ['nullable', 'regex:/^https?:\/\/(www\.)?linkedin\.com\/in\/[a-zA-Z0-9_-]+\/?$/'],
-            'website'=>['nullable', 'url'],
+            "email" => ["required", 'email', "unique:users,email"],
+            "photo" => "required|image|mimes:jpeg,png,jpg,gif,svg|max:2048",
+            "phone" => ["sometimes", 'phone:NG', 'unique:users,phone'],
+            'linkedin' => ['nullable', 'regex:/^https?:\/\/(www\.)?linkedin\.com\/in\/[a-zA-Z0-9_-]+\/?$/'],
+            'website' => ['nullable', 'url'],
+            "password" => ["required", "string", 'confirmed', "min:6"],
             "bio" => ['sometimes'],
+        ];
+    }
+
+    public function messages(){
+        return [
+            'name.required' => 'Name is required.',
+            'name.string' => 'Name must be a string.',
+            'email.required' => 'Email is required.',
+            'email.email' => 'Please provide a valid email address.',
+            'email.unique' => 'This email is already taken.',
+            'photo.image' => 'Photo must be an image file.',
+            'photo.required' => 'Speaker Photo is required',
+            'photo.mimes' => 'Photo must be a file of type: jpeg, png, jpg, gif, svg.',
+            'photo.max' => 'Photo size must not exceed 2MB.',
+            'phone.phone' => 'Please provide a valid Nigerian phone number.',
+            'phone.unique' => 'This phone number is already taken.',
+            'linkedin.regex' => 'Please provide a valid LinkedIn profile URL.',
+            'website.url' => 'Please provide a valid website URL.',
+            'password.required' => 'Password is required.',
+            'password.string' => 'Password must be a string.',
+            'password.confirmed' => 'Password confirmation does not match.',
+            'password.min' => 'Password must be at least 6 characters.',
+        ];
+    }
+
+    public function validated($key = null, $default = null)
+    {
+        $data = parent::validated($key, $default);
+
+        return [
+            'userInfo' => [
+                'name' => $data['name'],
+                'email' => $data['email'],
+                'phone' => $data['phone'],
+                'password' => $data['password']
+            ],
+            'speakerInfo' => [
+                'title' => $data['title'],
+                'organization' => $data['organization'],
+                'bio' => $data['bio'],
+                'photo' => $data['photo'],
+                'linkedin' => $data['linkedin'] ?? null,
+                'website' => $data['website'] ?? null,
+            ]
         ];
     }
 }

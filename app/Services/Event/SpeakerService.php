@@ -2,18 +2,22 @@
 
 namespace App\Services\Event;
 
-use App\Http\Requests\CreateSpeakerRequest;
-use App\Http\Requests\UpdateSpeakerRequest;
+
+use App\Enums\SpeakerStatus;
 use App\Models\Event;
 use App\Models\Speaker;
 use App\Models\SpeakerApplication;
 use App\Models\SpeakerInvite;
-use App\Services\Misc;
+use App\Models\User;
+use App\Notifications\SpeakerAccountApprovedNotification;
+use App\Notifications\SpeakerAccountCreatedNotification;
+use App\Services\MiscService;
 use App\Traits\HasFileUpload;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Password;
 
 class SpeakerService
 {
@@ -21,19 +25,21 @@ class SpeakerService
     /**
      * Create a new class instance.
      */
-    public function __construct(protected Misc $miscService)
+    public function __construct(protected MiscService $miscService)
     {
         //
     }
 
-    public function fetchSpeakers()
+    public function fetchSpeakers(string $status = "active")
     {
         $speakers = Speaker::latest()
-            ->where('status', 'active')
+            ->where('status', $status)
             ->paginate(10);
 
         return $speakers;
     }
+
+
 
     public function findOneSpeaker($id)
     {
@@ -42,25 +48,51 @@ class SpeakerService
 
     public function createSpeaker(array $validated, UploadedFile $photo)
     {
-        DB::beginTransaction();
-        $file_path = null;
+        $photoPath = null;
         try {
-            $user = auth()->user();
-            $file_path = $this->uploadfile($photo, "speakers_dp");
-            $validated['photo'] = $file_path;
-            $speaker = $user->speakers()->create($validated);
-            DB::commit();
+            $speaker = DB::transaction(function () use ($validated, $photo) {
+                // we register the user :which definitely would need to be verified
+                $user = User::create($validated['userInfo']);
+                if ($this->miscService->isAdmin()) {
+                    $user->forceFill(['email_verified_at' => now()])->save();
+                }
+                // we  save the speaker info
+                $photoPath = $this->uploadFile($photo, "speakers_dp");
+                if (!$photoPath) {
+                    throw new \Exception('Photo upload failed.');
+                }
+                $speakerData = array_merge($validated['speakerInfo'], [
+                    'photo' => $photoPath,
+                    'user_id' => $user->id,
+                    'status' => $this->miscService->isAdmin() ? 'active' : 'pending',
+                ]);
+                $speaker = Speaker::create($speakerData);
+
+
+                DB::afterCommit(function () use ($user) {
+                    if ($this->miscService->isAdmin()) {
+                        Password::sendResetLink(['email' => $user->email]);
+                        $user->notify(new SpeakerAccountCreatedNotification(true));
+                    } else {
+                        // $user->sendEmailVerificationNotification();
+                        $user->notify(new SpeakerAccountCreatedNotification(false));
+                    }
+                });
+                return $speaker;
+            });
+            // then we trigger the  notifications for account confirmation and speaker account creation notification
+            // how can i send a  password reset, 
+
             return $speaker;
         } catch (\Exception $e) {
-            DB::rollBack();
-            if ($file_path) {
-                $this->deleteFile($file_path);
+            if ($photoPath) {
+                $this->deleteFile($photoPath);
             }
             Log::error('Speaker creation failed: ' . $e->getMessage());
             return null;
         }
-    }
 
+    }
     public function updateSpeaker(array $validated, Speaker $speaker, ?UploadedFile $photo)
     {
         try {
@@ -89,6 +121,25 @@ class SpeakerService
         }
     }
 
+    public function activateSpeaker(Speaker $speaker)
+    {
+        try {
+            $user = $speaker->user;
+
+            return DB::transaction(function () use ($speaker, $user) {
+                $user->forceFill(['email_verified_at' => now()])->save();
+                $speaker->Fill(['status' => SpeakerStatus::ACTIVE->value])->save();
+                DB::afterCommit(function () use ($user) {
+                    $user->notifyNow(new SpeakerAccountApprovedNotification());
+                });
+                return true;
+            });
+        } catch (\Exception $e) {
+            Log::error('Speaker Activation Failed', ['error' => $e->getMessage()]);
+            return false;
+        }
+    }
+
     public function deleteSpeaker(Speaker $speaker)
     {
         $photo_path = $speaker->photo;
@@ -110,23 +161,26 @@ class SpeakerService
         return collect([]);
     }
 
-    public function speakerAlreadyInvited(Event $event, Speaker $speaker){
+    public function speakerAlreadyInvited(Event $event, Speaker $speaker)
+    {
         $invite = SpeakerInvite::where('speaker_id', $speaker->id)
-        ->where('event_id', $event->id)->exists();
+            ->where('event_id', $event->id)->exists();
 
         return $invite;
     }
 
-    public function speakerHasAplication(Event $event, Speaker $speaker){
+    public function speakerHasAplication(Event $event, Speaker $speaker)
+    {
         $application = SpeakerApplication::where('speaker_id', $speaker->id)
-        ->where('event_id', $event->id)->exists();
+            ->where('event_id', $event->id)->exists();
 
         return $application;
     }
 
-    public function findExistingSpeakerApplication(Event $event, Speaker $speaker){
-       $application = SpeakerApplication::where('speaker_id', $speaker->id)
-        ->where('event_id', $event->id);
+    public function findExistingSpeakerApplication(Event $event, Speaker $speaker)
+    {
+        $application = SpeakerApplication::where('speaker_id', $speaker->id)
+            ->where('event_id', $event->id);
 
         return $application->firstOrFail();
     }

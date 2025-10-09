@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+
+use App\Enums\SpeakerStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -13,6 +15,12 @@ class Speaker extends Model
     use HasFactory, Notifiable;
 
     protected $guarded = [];
+
+    protected $casts = [
+        'status' => SpeakerStatus::class,
+    ];
+
+    protected $with=['user'];
 
     public function routeNotificationForMail(){
         return $this->email;
@@ -31,5 +39,9 @@ class Speaker extends Model
 
     public function user(){
         return $this->belongsTo(User::class);
+    }
+
+    public function isActive(){
+        return $this->status == SpeakerStatus::ACTIVE->value;
     }
 }

@@ -8,7 +8,6 @@
                     <p class="text-sm text-gray-500 font-lato">Organize and manage all your conference events</p>
                 </div>
             </div>
-         
         </div>
 
         <!-- Status Tabs -->

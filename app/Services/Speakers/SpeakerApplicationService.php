@@ -28,6 +28,14 @@ class SpeakerApplicationService
     {
     }
 
+    public function createSpeakerAccount(array $data){
+        try {
+            
+        } catch (\Throwable $th) {
+            //throw $th;
+        }
+    }
+
     public function apply(array $data, Event $event, UploadedFile $file = null)
     {
         $existing = $this->getExistingApplication($event);

@@ -1,8 +1,11 @@
 <div class="border-b border-primary-100 whitespace-nowrap mb-6">
     <ul class="-mb-px flex space-x-6 overflow-x-auto overflow-y-hidden scrollbar-thin scrollbar-thumb-primary/50 scrollbar-track-gray-100">
         <!-- Tab: All Speakers -->
-        <x-tab-link label="All Speakers" icon="mic" :to="route('admin.speakers.index')"
+        <x-tab-link label="Active Speakers" icon="mic" :to="route('admin.speakers.index')"
             :isActive="request()->routeIs('admin.speakers.index')" />
+            {{-- Pending speakers --}}
+        <x-tab-link label="Pending Speakers" icon="mic" :to="route('admin.speakers.pending')"
+            :isActive="request()->routeIs('admin.speakers.pending')" />
 
         <!-- Tab: Pending Applications -->
         <x-tab-link label="Pending Applications" icon="clock" :to="route('admin.speakers.applications.pending')"
