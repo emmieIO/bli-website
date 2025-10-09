@@ -1,6 +1,7 @@
 <x-auth-layout :title="'Welcome Back'" :description="'Sign in to your account'">
     <x-slot name="pageTitle">Login - Beacon Leadership Institute</x-slot>
-    <form method="POST" action="{{ route('login.store') }}" class="space-y-6">
+    <form method="POST" action="{{ route('login.store') }}" class="space-y-6" x-data="{ processing: false }"
+        x-on:submit="processing=true">
         @csrf
 
         <!-- Email -->
@@ -18,20 +19,26 @@
             </label>
 
             <a href="{{ route('password.request') }}"
-                class="text-sm text-secondary hover:text-secondary-600 hover:underline transition-colors font-lato">Forgot password?</a>
+                class="text-sm text-secondary hover:text-secondary-600 hover:underline transition-colors font-lato">Forgot
+                password?</a>
         </div>
 
         <!-- Submit -->
         <div>
-            <button type="submit"
+            <button type="submit" x-bind:disabled="processing"
                 class="w-full bg-secondary hover:bg-secondary-600 text-white text-lg font-semibold py-3 px-4 rounded-lg transition-all duration-200 transform hover:scale-105 flex items-center justify-center gap-2 font-montserrat">
-                <i data-lucide="log-in" class="w-5 h-5"></i>
+                <span x-show="processing">
+                    <i data-lucide="loader-2" class="w-5 h-5 animate-spin mr-2"></i>
+                </span>
+                <span x-show="!processing">
+                    <i data-lucide="log-in" class="w-5 h-5"></i>
+                </span>
                 Sign In
             </button>
         </div>
 
         <!-- Social Login -->
-        <div class="mt-6 text-center">
+        {{-- <div class="mt-6 text-center">
             <p class="text-sm text-gray-600 mb-4 font-lato">or sign in with</p>
             <div class="flex justify-center gap-4">
                 <a href=""
@@ -43,12 +50,13 @@
                     <i data-lucide="facebook" class="w-4 h-4"></i> Facebook
                 </a>
             </div>
-        </div>
+        </div> --}}
 
         <!-- Register -->
         <p class="text-center text-sm mt-6 text-gray-600 font-lato">
             Don't have an account?
-            <a href="{{ route('register') }}" class="text-secondary hover:text-secondary-600 hover:underline font-medium font-montserrat">Sign up</a>
+            <a href="{{ route('register') }}"
+                class="text-secondary hover:text-secondary-600 hover:underline font-medium font-montserrat">Sign up</a>
         </p>
     </form>
 </x-auth-layout>
