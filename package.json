@@ -29,6 +29,7 @@
         "jquery": "^3.7.1",
         "lucide": "^0.523.0",
         "notyf": "^3.10.0",
-        "tailwind-scrollbar": "^4.0.2"
+        "tailwind-scrollbar": "^4.0.2",
+        "trix": "^2.1.15"
     }
 }

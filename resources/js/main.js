@@ -139,3 +139,20 @@ window.startCountdown = function (targetStartDateTime, targetId, targetEndDateTi
     updateCountdown();
     timer = setInterval(updateCountdown, 1000);
 };
+
+// expertise logic
+const expertiseContainer = document.getElementById('expertise-container')
+const expertiseInput = document.getElementById('expertise-input')
+
+expertiseInput.addEventListener('keypress', function (e) {
+    if (e.key === ',') {
+        e.preventDefault();
+        if (e.target.value.trim() !== "") {
+            const pill = document.createElement('span');
+            pill.className = 'pill';
+            pill.textContent = e.target.value.trim();
+            expertiseContainer.appendChild(pill);
+            e.target.value = '';
+        }
+    }
+})

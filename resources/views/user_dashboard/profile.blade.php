@@ -1,15 +1,39 @@
 <x-app-layout>
     <section class="max-w-5xl mx-auto" x-data="{ tab: localStorage.getItem('userTab') || 'profile', showModal: false }" x-init="$watch('tab', value => localStorage.setItem('userTab', value))">
         <!-- Profile Header -->
-        <div class=" bg-gradient-to-r from-primary to-primary-700 rounded-xl shadow-lg p-6 text-white mb-10"
+        <div class="bg-gradient-to-r from-primary to-primary-700 rounded-xl shadow-lg p-6 text-white mb-10"
             data-aos="fade-down" data-aos-duration="800">
             <div class="flex items-center gap-6">
+
+                <form action="{{ route('profile.photo.update') }}" method="POST" enctype="multipart/form-data">
+                    @csrf
+                    @method('PATCH')
+                    <div class="relative group">
+                        <img class="w-20 h-20 rounded-full object-cover border-2 border-white/50 group-hover:opacity-80 transition-opacity"
+                            src="{{ auth()->user()->photo ? asset('storage/' . auth()->user()->photo) : 'https://ui-avatars.com/api/?name=' . urlencode(auth()->user()->name) . '&color=7F9CF5&background=EBF4FF' }}"
+                            alt="{{ auth()->user()->name }}'s profile photo">
+
+                        <input type="file" name="photo" id="profile_photo_input" class="hidden"
+                            accept="image/png, image/jpeg, image/gif" onchange="this.form.submit()">
+
+                        <label for="profile_photo_input"
+                            class="absolute bottom-0 right-0 bg-white rounded-full p-1.5 cursor-pointer shadow-md transform transition-transform group-hover:scale-110">
+                            <svg class="w-4 h-4 text-primary" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
+                                fill="currentColor">
+                                <path fill-rule="evenodd"
+                                    d="M4 5a2 2 0 00-2 2v8a2 2 0 002 2h12a2 2 0 002-2V7a2 2 0 00-2-2h-1.586a1 1 0 01-.707-.293l-1.121-1.121A2 2 0 0011.172 3H8.828a2 2 0 00-1.414.586L6.293 4.707A1 1 0 015.586 5H4zm6 9a3 3 0 100-6 3 3 0 000 6z"
+                                    clip-rule="evenodd" />
+                            </svg>
+                        </label>
+                    </div>
+                </form>
                 <div>
                     <h2 class="text-2xl font-bold font-montserrat">{{ __(auth()->user()->name) }}</h2>
                     <p class="text-sm opacity-90 font-lato">{{ __(auth()->user()->email) }}</p>
                     <p class="text-xs text-white/70 mt-1 font-lato">Member since
-                        {{ \Carbon\Carbon::parse(auth()->user()->created_at)->format('M d Y') }}</p>
+                        {{ \Carbon\Carbon::parse(auth()->user()->created_at)->format('M d, Y') }}</p>
                 </div>
+
             </div>
         </div>
 
@@ -28,12 +52,22 @@
                     class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm font-montserrat transition-colors">
                     Security
                 </button>
-                {{-- <button @click="tab = 'notifications'"
+                @if ($user->hasInstructorProfile())
+                    <button @click="tab = 'instructor'"
+                        :class="tab === 'notifications' ? 'border-primary text-primary' :
+                            'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+                        class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm font-montserrat transition-colors">
+                        Instructor Information
+                    </button>
+                @endif
+                @if ($user->hasSpeakerProfile())
+                <button @click="tab = 'speaker'"
                     :class="tab === 'notifications' ? 'border-primary text-primary' :
                         'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
                     class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm font-montserrat transition-colors">
-                    Notifications
-                </button> --}}
+                    Speaker Information
+                </button>
+                @endif
             </nav>
         </div>
 
@@ -47,10 +81,13 @@
             @include('user_dashboard.partials.update-password-form')
         </div>
 
-        {{-- <!-- Notifications Tab -->
-        <div x-show="tab === 'notifications'" x-transition data-aos="fade-up" data-aos-duration="600">
-            @include('user_dashboard.partials.notifications-settings')
-        </div> --}}
+        <!-- Notifications Tab -->
+        <div x-show="tab === 'instructor'" x-transition data-aos="fade-up" data-aos-duration="600">
+            @include('user_dashboard.partials.update-instructor-info')
+        </div>
+        <div x-show="tab === 'speaker'" x-transition data-aos="fade-up" data-aos-duration="600">
+            @include('user_dashboard.partials.update-speaker-information')
+        </div>
 
         <!-- Danger Zone -->
         <div class="mt-10" data-aos="fade-up" data-aos-duration="600" data-aos-delay="200">

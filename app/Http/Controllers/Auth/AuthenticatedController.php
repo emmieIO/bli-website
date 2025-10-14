@@ -57,6 +57,10 @@ class AuthenticatedController extends Controller
         return view("user_dashboard.profile", compact('user'));
     }
 
+    public function updatePhoto(Request $request){
+        
+    }
+
     public function updatePersonalInfo(UpdateUserProfileRequest $request){
         if($this->authService->editPersonalInfo($request)){
             return redirect()->back()->with([

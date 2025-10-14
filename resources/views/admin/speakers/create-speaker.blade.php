@@ -33,7 +33,7 @@
                     <h3 class="text-lg font-semibold text-gray-900 mb-4 pb-2 border-b border-gray-200">👤 Personal & Contact Info</h3>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
                         <x-input label="Full Name" name="name" required icon="user" :value="old('name')" />
-                        <x-input label="Professional Title" name="title" icon="briefcase" :value="old('title')" />
+                        <x-input label="Professional headline" name="headline" icon="briefcase" :value="old('headline')" />
                         <x-input label="Organization" name="organization" icon="building-2" :value="old('organization')" />
                         <x-input label="Email Address" name="email" type="email" required icon="mail" :value="old('email')" />
                         <x-input label="Phone Number" name="phone" icon="phone" :value="old('phone')" />

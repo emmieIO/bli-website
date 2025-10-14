@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Str;
 use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable implements MustVerifyEmail
@@ -31,6 +32,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'remember_token',
     ];
 
+
     /**
      * Get the attributes that should be cast.
      *
@@ -44,12 +46,22 @@ class User extends Authenticatable implements MustVerifyEmail
         ];
     }
 
-    public function events(){
+    public static function boot()
+    {
+        parent::boot();
+        static::creating(function ($model) {
+            $model->slug = (string) Str::uuid();
+        });
+    }
+
+    public function events()
+    {
         return $this->belongsToMany(Event::class, "event_attendees", 'user_id', "event_id")
-        ->withPivot([
-            'status', 'revoke_count'
-        ])
-        ->withTimestamps();
+            ->withPivot([
+                'status',
+                'revoke_count'
+            ])
+            ->withTimestamps();
     }
 
     public function instructorProfile()
@@ -57,27 +69,43 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasOne(InstructorProfile::class, 'user_id');
     }
 
-    public function coursesTeaching(){
-        return $this->hasMany(Course::class,'instructor_id');
+    public function coursesTeaching()
+    {
+        return $this->hasMany(Course::class, 'instructor_id');
     }
 
-    public function isApproved(){
+    public function isApproved()
+    {
         return optional($this->instructorProfile)->is_approved;
     }
 
-    public function eventsCreated(){
+    public function eventsCreated()
+    {
         return $this->hasMany(Event::class, 'creator_id');
     }
 
-    public function speakers(){
+    public function speakers()
+    {
         return $this->hasMany(Speaker::class, 'created_by');
     }
 
-    public function speaker(){
-        return $this->hasOne(Speaker::class,'user_id');
+    public function speaker()
+    {
+        return $this->hasOne(Speaker::class, 'user_id');
     }
 
-    public function applicationLogs(){
+    public function applicationLogs()
+    {
         return $this->hasMany(ApplicationLog::class);
+    }
+
+    public function hasSpeakerProfile()
+    {
+        return $this->speaker !== null;
+    }
+
+    public function hasInstructorProfile()
+    {
+        return $this->instructorProfile !== null;
     }
 }

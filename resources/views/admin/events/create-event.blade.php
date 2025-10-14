@@ -31,9 +31,15 @@
                         <x-select name="mode" label="Event Mode" required :options="[
                             'online' => 'Online',
                             'offline' => 'Offline',
-                            'hybrid' => 'Hybrid'
-                        ]" :selected="old('mode')" icon="activity" />
+                            'hybrid' => 'Hybrid',
+                        ]" :selected="old('mode')"
+                            icon="activity" />
+
+                        <div class="col-span-2">
+                            <x-input name="theme" class="font-bold" label="Event Theme" icon="type" :value="old('theme')" />
+                        </div>
                     </div>
+
                 </div>
 
                 <!-- Section: Date & Location -->
@@ -86,12 +92,11 @@
                     <div>
                         <label for="description"
                             class="block text-sm font-medium text-gray-700 mb-2">Description</label>
-                        <textarea name="description" id="description" rows="6"
+                        <textarea hidden name="description" id="description" rows="6"
                             class="block w-full p-3 text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-2 focus:ring-orange-600 focus:border-orange-600 resize-none"
                             placeholder="Describe your event, audience, highlights, and what attendees can expect...">{{ old('description') }}</textarea>
                         <x-input-error :messages="$errors->get('description')" class="mt-1" />
-                        <p class="mt-2 text-xs text-gray-500">Use clear, engaging language. Markdown or HTML not
-                            supported.</p>
+                        <trix-editor input="description" class="trix-content"></trix-editor>
                     </div>
                 </div>
 

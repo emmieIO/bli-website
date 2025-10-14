@@ -22,6 +22,7 @@ class UpdateEventRequest extends FormRequest {
     public function rules(): array {
         return [
             'title' => 'sometimes|required|string|max:255|unique:events,title,' . ( $this->event->id ?? 'NULL' ),
+            'theme' => 'sometimes|string|max:100',
             'description' => 'sometimes|required|string',
             'location' => 'sometimes|required|string|required_if:mode,online,hybrid',
             'program_cover' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
@@ -35,7 +36,47 @@ class UpdateEventRequest extends FormRequest {
             'contact_email' => 'nullable|email|max:255',
             'is_published' => 'sometimes|boolean',
             'is_allowing_application' => 'sometimes|boolean',
-            'entry_fee' => 'nullable|numeric|min:0|max:999999.99'
+            'entry_fee' => 'nullable|numeric|min:0|max:999999.99',
+        ];
+    }
+
+    /**
+     * Get the error messages for the defined validation rules.
+     *
+     * @return array<string, string>
+     */
+    public function messages(): array
+    {
+        return [
+            'title.required' => 'The event title is required.',
+            'title.unique' => 'An event with this title already exists.',
+            'theme.max' => 'The theme may not be greater than 100 characters.',
+            'description.required' => 'The event description is required.',
+            'location.required_if' => 'Location is required for online or hybrid events.',
+            'program_cover.image' => 'The program cover must be an image.',
+            'program_cover.mimes' => 'The program cover must be a file of type: jpeg, png, jpg, gif, svg.',
+            'program_cover.max' => 'The program cover may not be greater than 2MB.',
+            'mode.required' => 'The event mode is required.',
+            'mode.in' => 'The selected mode is invalid.',
+            'start_date.required' => 'The start date is required.',
+            'start_date.date' => 'The start date must be a valid date.',
+            'start_date.after_or_equal' => 'The start date must be today or later.',
+            'end_date.required' => 'The end date is required.',
+            'end_date.date' => 'The end date must be a valid date.',
+            'end_date.after_or_equal' => 'The end date must be after or equal to the start date.',
+            'physical_address.required_if' => 'Physical address is required for offline or hybrid events.',
+            'physical_address.max' => 'The physical address may not be greater than 255 characters.',
+            'creator_id.required' => 'The creator is required.',
+            'creator_id.exists' => 'The selected creator does not exist.',
+            'is_active.boolean' => 'The active status must be true or false.',
+            'metadata.array' => 'The metadata must be an array.',
+            'contact_email.email' => 'The contact email must be a valid email address.',
+            'contact_email.max' => 'The contact email may not be greater than 255 characters.',
+            'is_published.boolean' => 'The published status must be true or false.',
+            'is_allowing_application.boolean' => 'The application status must be true or false.',
+            'entry_fee.numeric' => 'The entry fee must be a number.',
+            'entry_fee.min' => 'The entry fee must be at least 0.',
+            'entry_fee.max' => 'The entry fee may not be greater than 999999.99.',
         ];
     }
 

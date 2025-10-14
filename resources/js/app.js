@@ -3,6 +3,7 @@ import './plugins/aos';
 import './plugins/lucide'
 import './plugins/notyf'
 import './plugins/alpine'
+import './plugins/trix'
 import 'aos/dist/aos.css';
 import 'flowbite';
 import "flyonui/flyonui"

@@ -11,7 +11,10 @@ use App\Models\Event;
 use App\Models\SpeakerApplication;
 use App\Models\SpeakerInvite;
 use App\Services\Speakers\SpeakerApplicationService;
+use App\Traits\HasFileUpload;
 use DB;
+
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -24,6 +27,7 @@ use Throwable;
 
 class EventService
 {
+    use HasFileUpload;
     /**
      * Create a new class instance.
      */
@@ -147,22 +151,18 @@ class EventService
         return true;
     }
 
-    public function createEvent(CreateEventRequest $request)
+    public function createEvent(array $validated, UploadedFile $program_cover = null)
     {
+
         try {
             DB::beginTransaction();
             $filepath = null;
             $user = Auth::user();
-            $validated['is_active'] = $request->has('is_active');
-            $validated['is_published'] = $request->has('is_published');
-            $validated['is_allowing_application'] = $request->has('is_allowing_application');
-            $validated = $request->validated();
 
-            $validated['slug'] = $this->generateUniqueSlug($validated['title']);
+            $validated['slug'] = (string) Str::uuid();
 
-            if ($request->hasFile('program_cover')) {
-                $file = $request->file('program_cover');
-                $filepath = $file->store('program_covers/' . now()->format('Y/m'), 'public');
+            if($program_cover){
+                $filepath = $this->uploadFile($program_cover, 'program_covers');
                 $validated['program_cover'] = $filepath;
             }
 
@@ -171,7 +171,6 @@ class EventService
             event(new EventCreated($event));
 
             return $event;
-
         } catch (\Exception $e) {
             DB::rollback();
             if (!empty($filepath) && Storage::disk('public')->exists($filepath)) {
@@ -189,27 +188,28 @@ class EventService
         return $count ? "{$slug}-{$count}" : $slug;
     }
 
-    public function updateEvent(UpdateEventRequest $request, Event $event)
+    public function updateEvent(array $validated, Event $event, UploadedFile $program_cover = null)
     {
         DB::beginTransaction();
         try {
             $user = Auth::user();
+            $file_path = $event->program_cover;
+
             if (
                 $event->creator_id !== $user->id &&
                 !$user->hasAnyRole(['admin', 'super-admin'])
             ) {
                 abort(403, "You do not have permission to update this event.");
             }
-            $file_path = $event->program_cover;
-            $validated = $request->validated();
 
-            if ($request->hasFile('program_cover')) {
-                if (!empty($file_path) && Storage::disk('public')->exists($file_path)) {
-                    Storage::disk('public')->delete($file_path);
+            if ($program_cover) {
+                $new_file_path = $this->uploadFile($program_cover, 'program_covers');
+                if($new_file_path){
+                    $validated['program_cover'] = $new_file_path;
+                    if(!empty($file_path)){
+                        $this->removeFile($file_path);
+                    }
                 }
-                $file = $request->file('program_cover');
-                $file_path = $file->store('program_covers/' . now()->format('Y/m'), 'public');
-                $validated['program_cover'] = $file_path;
             } else {
                 $validated['program_cover'] = $file_path;
             }

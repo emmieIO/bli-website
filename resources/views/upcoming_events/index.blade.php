@@ -134,79 +134,94 @@
             <!-- Happening Events Tab -->
             <div class="tab-content active" id="happening" data-aos="fade-up" data-aos-delay="200">
                 @if (count($ongoingEvents))
-                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-8">
                         @foreach ($ongoingEvents as $event)
                             <div
-                                class="bg-white rounded-2xl shadow-lg overflow-hidden transition-all duration-300 hover:shadow-xl border border-secondary/20 hover:border-secondary/40 group">
-                                <div class="flex flex-col md:flex-row h-full">
-                                    <!-- Event Image -->
-                                    <div class="md:w-2/5 relative">
-                                        <img src="{{ asset('storage/' . $event->program_cover) }}"
-                                            alt="{{ $event->title }}"
-                                            class="w-full h-48 md:h-full object-cover group-hover:scale-105 transition-transform duration-500">
-                                        <div
-                                            class="absolute top-4 left-4 bg-secondary text-white px-3 py-2 rounded-full text-sm font-semibold font-montserrat shadow-lg animate-pulse">
-                                            🔴 Live Now
+                                class="bg-white rounded-2xl shadow-md overflow-hidden transition-all duration-300 hover:shadow-xl border border-gray-200 hover:border-primary/30 group">
+                                <!-- Event Image -->
+                                <div class="relative">
+                                    <img src="{{ asset('storage/' . $event->program_cover) }}" alt="{{ $event->title }}"
+                                        class="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-500">
+                                    <div
+                                        class="absolute top-4 left-4 bg-primary text-white px-3 py-2 rounded-full text-sm font-semibold font-montserrat shadow-lg">
+                                        Coming Soon
+                                    </div>
+                                    <div
+                                        class="absolute top-4 right-4 bg-white/90 backdrop-blur-sm rounded-xl p-3 text-center border border-white/20">
+                                        <div class="text-xl font-bold text-primary font-montserrat">
+                                            {{ \Carbon\Carbon::parse($event->start_date)->format('d') }}</div>
+                                        <div class="text-xs text-gray-600 uppercase font-montserrat tracking-wide">
+                                            {{ \Carbon\Carbon::parse($event->start_date)->format('M') }}</div>
+                                    </div>
+                                    <div
+                                        class="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                    </div>
+                                </div>
+
+                                <!-- Event Content -->
+                                <div class="p-6">
+                                    <h3
+                                        class="text-lg font-bold text-primary mb-3 line-clamp-2 font-montserrat group-hover:text-secondary transition-colors">
+                                        <a href="{{ route('events.show', $event->slug) }}">
+                                            {{ $event->title }}
+                                        </a>
+                                    </h3>
+
+                                    <p
+                                        class="font-bold text-accent mb-4 line-clamp-3 text-sm leading-relaxed font-montserrat">
+                                        {{ $event->theme }}</p>
+
+                                    <div class="space-y-3 mb-4">
+                                        <div class="flex items-center gap-3 text-gray-600 text-sm font-lato">
+                                            <i class="far fa-clock text-secondary"></i>
+                                            <span>{{ \Carbon\Carbon::parse($event->start_date)->format('g:i A') }}</span>
                                         </div>
-                                        <div
-                                            class="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                        <div class="flex items-center gap-3 text-gray-600 text-sm font-lato">
+                                            <i class="fas fa-map-marker-alt text-secondary"></i>
+                                            <span class="capitalize">{{ $event->mode }}</span>
                                         </div>
+
+                                        @if ($event->isRegistered())
+                                            @if ($event->mode == 'hybrid')
+                                                <div class="flex items-center gap-3 text-gray-600 text-sm font-lato">
+                                                    <i class="fas fa-link text-secondary"></i>
+                                                    <span class="capitalize">
+                                                        <a href="{{ $event->location }}" target="_blank"
+                                                            class="hover:underline">{{ $event->location }}</a>
+                                                    </span>
+                                                </div>
+                                                <div class="flex items-center gap-3 text-gray-600 text-sm font-lato">
+                                                    <i class="fas fa-location-arrow text-secondary"></i>
+                                                    <span class="capitalize">{{ $event->physical_address }}</span>
+                                                </div>
+                                            @elseif($event->mode == 'offline')
+                                                <div class="flex items-center gap-3 text-gray-600 text-sm font-lato">
+                                                    <i class="fas fa-location-arrow text-secondary"></i>
+                                                    <span class="capitalize">{{ $event->physical_address }}</span>
+                                                </div>
+                                            @elseif($event->mode == 'online')
+                                                <div class="flex items-center gap-3 text-gray-600 text-sm font-lato">
+                                                    <i class="fas fa-link text-secondary"></i>
+                                                    <span class="capitalize">
+                                                        <a href="{{ $event->location }}" target="_blank"
+                                                            class="hover:underline">{{ $event->location }}</a>
+                                                    </span>
+                                                </div>
+                                            @endif
+                                        @endif
                                     </div>
 
-                                    <!-- Event Content -->
-                                    <div class="md:w-3/5 p-6 flex flex-col">
-                                        <div class="flex items-start justify-between mb-3">
-                                            <h3
-                                                class="text-xl font-bold text-primary line-clamp-2 flex-1 mr-4 font-montserrat group-hover:text-secondary transition-colors">
-                                                <a href="{{ route('events.show', $event->slug) }}">
-                                                    {{ $event->title }}
-                                                </a>
-                                            </h3>
-                                            @if ($event->entry_fee > 0)
-                                                <span
-                                                    class="bg-accent/20 text-accent px-3 py-1 rounded-full text-sm font-semibold whitespace-nowrap font-montserrat border border-accent/30">
-                                                    ₦{{ number_format($event->entry_fee, 2) }}
-                                                </span>
-                                            @else
-                                                <span
-                                                    class="bg-secondary/20 text-secondary px-3 py-1 rounded-full text-sm font-semibold whitespace-nowrap font-montserrat border border-secondary/30">
-                                                    Free
-                                                </span>
-                                            @endif
-                                        </div>
-
-                                        <p class="text-gray-600 mb-4 line-clamp-3 font-lato leading-relaxed flex-grow">
-                                            {{ $event->description }}</p>
-
-                                        <div class="space-y-3 mb-4">
-                                            <div class="flex items-center gap-3 text-gray-600 font-lato">
-                                                <i class="far fa-calendar text-secondary"></i>
-                                                <span>{{ \Carbon\Carbon::parse($event->start_date)->format('F j, Y') }}</span>
-                                            </div>
-                                            <div class="flex items-center gap-3 text-gray-600 font-lato">
-                                                <i class="far fa-clock text-secondary"></i>
-                                                <span>{{ \Carbon\Carbon::parse($event->start_date)->format('g:i A') }}</span>
-                                            </div>
-                                            <div class="flex items-center gap-3 text-gray-600 font-lato">
-                                                <i class="fas fa-map-marker-alt text-secondary"></i>
-                                                <span class="capitalize">{{ $event->mode }}</span>
-                                            </div>
-                                        </div>
-
-                                        <div
-                                            class="flex items-center justify-between mt-auto pt-4 border-t border-gray-100">
-                                            <a href="{{ route('events.show', $event->slug) }}"
-                                                class="bg-secondary hover:bg-primary text-white px-6 py-3 rounded-lg font-semibold transition-all duration-300 transform hover:-translate-y-1 shadow-md hover:shadow-lg flex items-center gap-2 font-montserrat">
-                                                Join Now
-                                                <i
-                                                    class="fas fa-arrow-right group-hover:translate-x-1 transition-transform"></i>
-                                            </a>
+                                    <div class="flex items-center justify-between pt-4 border-t border-gray-100">
+                                        @if ($event->entry_fee > 0)
                                             <span
-                                                class="text-sm text-secondary font-semibold flex items-center gap-2 font-montserrat">
-                                                <i class="fas fa-circle animate-pulse"></i>
-                                                Live Event
-                                            </span>
-                                        </div>
+                                                class="text-lg font-bold text-accent font-montserrat">₦{{ number_format($event->entry_fee, 2) }}</span>
+                                        @else
+                                            <span class="text-lg font-bold text-secondary font-montserrat">Free</span>
+                                        @endif
+                                        <a href="{{ route('events.show', $event->slug) }}"
+                                            class="bg-primary hover:bg-secondary text-white px-4 py-2 rounded-lg text-sm font-semibold transition-colors font-montserrat">
+                                            View Details
+                                        </a>
                                     </div>
                                 </div>
                             </div>
@@ -266,8 +281,9 @@
                                         </a>
                                     </h3>
 
-                                    <p class="text-gray-600 mb-4 line-clamp-3 text-sm font-lato leading-relaxed">
-                                        {{ $event->description }}</p>
+                                    <p
+                                        class="font-bold text-accent mb-4 line-clamp-3 text-sm leading-relaxed font-montserrat">
+                                        {{ $event->theme }}</p>
 
                                     <div class="space-y-3 mb-4">
                                         <div class="flex items-center gap-3 text-gray-600 text-sm font-lato">
@@ -278,6 +294,35 @@
                                             <i class="fas fa-map-marker-alt text-secondary"></i>
                                             <span class="capitalize">{{ $event->mode }}</span>
                                         </div>
+
+                                        @if ($event->isRegistered())
+                                            @if ($event->mode == 'hybrid')
+                                                <div class="flex items-center gap-3 text-gray-600 text-sm font-lato">
+                                                    <i class="fas fa-link text-secondary"></i>
+                                                    <span class="capitalize">
+                                                        <a href="{{ $event->location }}" target="_blank"
+                                                            class="hover:underline">{{ $event->location }}</a>
+                                                    </span>
+                                                </div>
+                                                <div class="flex items-center gap-3 text-gray-600 text-sm font-lato">
+                                                    <i class="fas fa-location-arrow text-secondary"></i>
+                                                    <span class="capitalize">{{ $event->physical_address }}</span>
+                                                </div>
+                                            @elseif($event->mode == 'offline')
+                                                <div class="flex items-center gap-3 text-gray-600 text-sm font-lato">
+                                                    <i class="fas fa-location-arrow text-secondary"></i>
+                                                    <span class="capitalize">{{ $event->physical_address }}</span>
+                                                </div>
+                                            @elseif($event->mode == 'online')
+                                                <div class="flex items-center gap-3 text-gray-600 text-sm font-lato">
+                                                    <i class="fas fa-link text-secondary"></i>
+                                                    <span class="capitalize">
+                                                        <a href="{{ $event->location }}" target="_blank"
+                                                            class="hover:underline">{{ $event->location }}</a>
+                                                    </span>
+                                                </div>
+                                            @endif
+                                        @endif
                                     </div>
 
                                     <div class="flex items-center justify-between pt-4 border-t border-gray-100">
@@ -334,7 +379,7 @@
                                         </h3>
 
                                         <p class="text-gray-500 mb-4 line-clamp-3 font-lato leading-relaxed">
-                                            {{ $event->description }}</p>
+                                            {!! $event->theme !!}</p>
 
                                         <div class="space-y-3 mb-4">
                                             <div class="flex items-center gap-3 text-gray-500 font-lato">
@@ -374,8 +419,10 @@
     <section class="py-20 bg-gradient-to-r from-primary to-secondary text-white">
         <div class="container mx-auto px-4">
             <div class="max-w-4xl mx-auto text-center">
-                <h2 class="text-3xl md:text-4xl font-bold mb-6 font-montserrat">Never Miss a Transformational Event</h2>
-                <p class="text-xl text-white/90 mb-8 font-lato leading-relaxed">Subscribe to our newsletter and be the first to know about
+                <h2 class="text-3xl md:text-4xl font-bold mb-6 font-montserrat">Never Miss a Transformational Event
+                </h2>
+                <p class="text-xl text-white/90 mb-8 font-lato leading-relaxed">Subscribe to our newsletter and be the
+                    first to know about
                     upcoming programs, prophetic workshops, and leadership gatherings.</p>
                 <div class="flex flex-col sm:flex-row gap-4 max-w-md mx-auto">
                     <input type="email" placeholder="Enter your email"
@@ -385,7 +432,8 @@
                         Subscribe Now
                     </button>
                 </div>
-                <p class="text-white/70 text-sm mt-4 font-lato">Join thousands of leaders staying informed about kingdom events</p>
+                <p class="text-white/70 text-sm mt-4 font-lato">Join thousands of leaders staying informed about
+                    kingdom events</p>
             </div>
         </div>
     </section>

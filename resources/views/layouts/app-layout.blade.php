@@ -16,6 +16,7 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <script src="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.js"></script>
     <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
     <style>
         [x-cloak] {
             display: none !important;
@@ -71,8 +72,8 @@
                                 class="flex text-sm bg-primary/10 rounded-full focus:ring-2 focus:ring-primary/50 hover:bg-primary/20 transition-all duration-200 group"
                                 aria-expanded="false" data-dropdown-toggle="dropdown-user">
                                 <span class="sr-only">Open user menu</span>
-                                <img class="w-8 h-8 rounded-full border-2 border-primary/20 group-hover:border-primary/40 transition-colors"
-                                    src="https://ui-avatars.com/api/?name={{ urlencode(auth()->user()->name) }}&background=002147&color=fff"
+                                <img class="w-8 h-8 rounded-full border-2 object-cover border-primary/20 group-hover:border-primary/40 transition-colors"
+                                    src="{{ auth()->user()->photo ? asset('storage/' . auth()->user()->photo) : 'https://ui-avatars.com/api/?name=' . urlencode(auth()->user()->name) . '&background=002147&color=fff' }}"
                                     alt="{{ auth()->user()->name }}">
                             </button>
                         </div>
@@ -200,8 +201,8 @@
 
     <!-- Toast Notifications -->
     <x-toast />
-    <x-confirm-modal />
-    <x-feedback-modal />
+    {{-- <x-confirm-modal />
+    <x-feedback-modal /> --}}
 
     <!-- Scripts -->
     <script src="https://unpkg.com/lucide@latest"></script>

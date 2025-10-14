@@ -38,11 +38,14 @@
                 <div class="lg:col-span-3 space-y-6 md:space-y-8">
                     <!-- Event Header -->
                     <div class="space-y-3 md:space-y-4">
-                        <h1
-                            class="text-xl md:text-3xl lg:text-4xl font-bold text-primary leading-tight font-montserrat">
-                            {{ $event->title }}
-                        </h1>
-
+                        <div class="space-y-1">
+                            <h1
+                                class="text-xl md:text-3xl lg:text-4xl font-extrabold text-primary leading-tight font-montserrat">
+                                {{ $event->title }}
+                            </h1>
+                            <h3 class="text-lg md:text-xl lg:text-xl text-accent font-montserrat font-bold">
+                                {{ $event->theme }}</h3>
+                        </div>
                         <!-- Event Status Badge -->
                         <div class="flex flex-wrap items-center gap-3">
                             @php
@@ -95,8 +98,8 @@
                             <div class="w-1 h-6 md:h-8 bg-secondary rounded-full"></div>
                             Event Description
                         </h2>
-                        <div class="prose max-w-none text-gray-700 leading-relaxed font-lato">
-                            <p class="text-base md:text-lg">{{ $event->description }}</p>
+                        <div class="prose max-w-none text-gray-700 leading-relaxed font-lato event-description">
+                            {!! $event->description !!}
                         </div>
                     </div>
 
@@ -151,7 +154,8 @@
                     @auth
                         @if ($event->isRegistered() && $event->resources && count($event->resources))
                             <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 md:p-8">
-                                <h2 class="text-xl md:text-2xl font-bold text-primary mb-4 md:mb-6 flex items-center gap-3 font-montserrat">
+                                <h2
+                                    class="text-xl md:text-2xl font-bold text-primary mb-4 md:mb-6 flex items-center gap-3 font-montserrat">
                                     <div class="w-1 h-6 md:h-8 bg-secondary rounded-full"></div>
                                     Event Resources
                                 </h2>
@@ -275,7 +279,7 @@
                                             <p class="font-semibold text-primary text-sm font-montserrat">
                                                 @if ($event->mode == 'offline')
                                                     Venue Address
-                                                @else
+                                                @elseif($event->mode == 'online')
                                                     Meeting Link
                                                 @endif
                                             </p>
@@ -289,11 +293,29 @@
                                                     target="_blank">
                                                     Click to Join Meeting
                                                 </a>
+                                            @elseif($event->mode == 'hybrid')
+                                                <p class="text-gray-700 text-sm break-words font-lato">
+                                                    {{ $event->physical_address }}
+                                                </p>
+                                                <a href="{{ $event->location }}"
+                                                    class="text-secondary font-semibold hover:underline break-all text-sm font-lato"
+                                                    target="_blank">
+                                                    Click to Join Meeting
+                                                </a>
                                             @endif
                                         </div>
                                     </div>
                                 @endif
                             @endauth
+                            <div class="flex items-start gap-3">
+                                <div
+                                    class="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                                    <i data-lucide="globe" class="w-4 h-4 text-primary"></i>
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <span class="pill font-light">{{ $event->mode }}</span>
+                                </div>
+                            </div>
                         </div>
                     </div>
 

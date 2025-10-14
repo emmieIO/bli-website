@@ -25,40 +25,51 @@
 
                 <!-- Section: Basic Event Info -->
                 <div>
-                    <h3 class="text-lg font-semibold text-gray-900 mb-4 pb-2 border-b border-gray-200">📅 Event Basics</h3>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4 pb-2 border-b border-gray-200">📅 Event Basics
+                    </h3>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
                         <x-input name="title" label="Event Title" required icon="type" :value="old('title', $event->title)" />
                         <x-select name="mode" label="Event Mode" required :options="[
                             'online' => 'Online',
                             'offline' => 'Offline',
-                            'hybrid' => 'Hybrid'
-                        ]" :selected="old('mode', $event->mode)" icon="activity" />
+                            'hybrid' => 'Hybrid',
+                        ]" :selected="old('mode', $event->mode)"
+                            icon="activity" />
+                        <div class="col-span-2">
+                            <x-input name="theme" class="font-bold" label="Event Theme" icon="type"
+                                :value="old('theme', $event->theme)" />
+                        </div>
                     </div>
                 </div>
 
                 <!-- Section: Date & Location -->
                 <div>
-                    <h3 class="text-lg font-semibold text-gray-900 mb-4 pb-2 border-b border-gray-200">Date & Location</h3>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4 pb-2 border-b border-gray-200">Date & Location
+                    </h3>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                        <x-input name="start_date" label="Start Date & Time" type="datetime-local" required icon="calendar"
-                            :value="old('start_date', \Carbon\Carbon::parse($event->start_date)->format('Y-m-d\TH:i'))" />
-                        <x-input name="end_date" label="End Date & Time" type="datetime-local" required icon="calendar-check"
-                            :value="old('end_date', \Carbon\Carbon::parse($event->end_date)->format('Y-m-d\TH:i'))" />
+                        <x-input name="start_date" label="Start Date & Time" type="datetime-local" required
+                            icon="calendar" :value="old(
+                                'start_date',
+                                \Carbon\Carbon::parse($event->start_date)->format('Y-m-d\TH:i'),
+                            )" />
+                        <x-input name="end_date" label="End Date & Time" type="datetime-local" required
+                            icon="calendar-check" :value="old('end_date', \Carbon\Carbon::parse($event->end_date)->format('Y-m-d\TH:i'))" />
                         <x-input name="location" label="Location (URL or Venue Name)" required icon="map-pin"
                             :value="old('location', $event->location)" placeholder="e.g. Zoom Link or Conference Hall" />
-                        <x-input name="physical_address" label="Full Physical Address (if offline/hybrid)" icon="map"
-                            :value="old('physical_address', $event->physical_address)" placeholder="Street, City, State, Country" />
+                        <x-input name="physical_address" label="Full Physical Address (if offline/hybrid)"
+                            icon="map" :value="old('physical_address', $event->physical_address)" placeholder="Street, City, State, Country" />
                     </div>
                 </div>
 
                 <!-- Section: Contact & Pricing -->
                 <div>
-                    <h3 class="text-lg font-semibold text-gray-900 mb-4 pb-2 border-b border-gray-200">Contact & Pricing</h3>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4 pb-2 border-b border-gray-200">Contact & Pricing
+                    </h3>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
                         <x-input name="contact_email" label="Contact Email" type="email" icon="mail"
                             :value="old('contact_email', $event->contact_email)" placeholder="organizer@event.com" />
-                        <x-input name="entry_fee" label="Entry Fee (₦)" type="number" min="0" step="0.01" icon="credit-card"
-                            :value="old('entry_fee', $event->entry_fee)" placeholder="0.00" />
+                        <x-input name="entry_fee" label="Entry Fee (₦)" type="number" min="0" step="0.01"
+                            icon="credit-card" :value="old('entry_fee', $event->entry_fee)" placeholder="0.00" />
                     </div>
                 </div>
 
@@ -66,14 +77,15 @@
                 <div>
                     <h3 class="text-lg font-semibold text-gray-900 mb-4 pb-2 border-b border-gray-200">Cover Image</h3>
                     <div>
-                        <label for="program_cover" class="block text-sm font-medium text-gray-700 mb-2">Upload New Cover Image (JPG/PNG)</label>
+                        <label for="program_cover" class="block text-sm font-medium text-gray-700 mb-2">Upload New Cover
+                            Image (JPG/PNG)</label>
                         <input type="file" name="program_cover" id="program_cover" accept=".jpg,.jpeg,.png,.JPG,.PNG"
                             class="block w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-2 focus:ring-orange-600 focus:border-orange-600
                             file:mr-4 file:py-2 file:rounded-md file:border-0 file:text-sm file:font-medium
                             file:bg-orange-600 file:text-white hover:file:bg-orange-700 transition" />
                         <p class="mt-2 text-xs text-gray-500">Recommended size: 1200x600px. Max file size: 5MB.</p>
 
-                        @if($event->program_cover)
+                        @if ($event->program_cover)
                             <div class="mt-4 p-3 bg-gray-50 rounded-lg border border-dashed border-gray-300">
                                 <p class="text-sm font-medium text-gray-700 mb-2">Current Cover Image:</p>
                                 <div class="flex items-center gap-3">
@@ -92,39 +104,47 @@
 
                 <!-- Section: Description -->
                 <div>
-                    <h3 class="text-lg font-semibold text-gray-900 mb-4 pb-2 border-b border-gray-200">Event Description</h3>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4 pb-2 border-b border-gray-200">Event Description
+                    </h3>
                     <div>
-                        <label for="description" class="block text-sm font-medium text-gray-700 mb-2">Description</label>
-                        <textarea name="description" id="description" rows="6"
+                        <label for="description"
+                            class="block text-sm font-medium text-gray-700 mb-2">Description</label>
+                        <textarea hidden name="description" id="description" rows="6"
                             class="block w-full p-3 text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-2 focus:ring-orange-600 focus:border-orange-600 resize-none"
                             placeholder="Describe your event, audience, highlights, and what attendees can expect...">{{ old('description', $event->description) }}</textarea>
                         <x-input-error :messages="$errors->get('description')" class="mt-1" />
+                        <trix-editor input="description" class="trix-content"></trix-editor>
                     </div>
                 </div>
 
                 <!-- Section: Options -->
                 <div>
-                    <h3 class="text-lg font-semibold text-gray-900 mb-4 pb-2 border-b border-gray-200">Event Options</h3>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4 pb-2 border-b border-gray-200">Event Options
+                    </h3>
                     <div class="flex flex-wrap items-center gap-6 p-4 bg-gray-50 rounded-lg">
                         <label class="inline-flex items-center">
-                            <input type="checkbox" name="is_active" class="rounded border-gray-300 text-orange-600 focus:ring-orange-600"
+                            <input type="checkbox" name="is_active"
+                                class="rounded border-gray-300 text-orange-600 focus:ring-orange-600"
                                 {{ old('is_active', $event->is_active) ? 'checked' : '' }}>
                             <span class="ml-2 text-sm font-medium text-gray-700">Active</span>
                         </label>
 
                         <label class="inline-flex items-center">
-                            <input type="checkbox" name="is_published" class="rounded border-gray-300 text-orange-600 focus:ring-orange-600"
+                            <input type="checkbox" name="is_published"
+                                class="rounded border-gray-300 text-orange-600 focus:ring-orange-600"
                                 {{ old('is_published', $event->is_published) ? 'checked' : '' }}>
                             <span class="ml-2 text-sm font-medium text-gray-700">Published</span>
                         </label>
 
                         <label class="inline-flex items-center">
-                            <input type="checkbox" name="is_allowing_application" class="rounded border-gray-300 text-orange-600 focus:ring-orange-600"
+                            <input type="checkbox" name="is_allowing_application"
+                                class="rounded border-gray-300 text-orange-600 focus:ring-orange-600"
                                 {{ old('is_allowing_application', $event->is_allowing_application) ? 'checked' : '' }}>
                             <span class="ml-2 text-sm font-medium text-gray-700">Allow Speaker Applications</span>
                         </label>
                     </div>
-                    <p class="mt-2 text-xs text-gray-500">Active = visible internally. Published = visible to public. Speaker applications can be managed separately.</p>
+                    <p class="mt-2 text-xs text-gray-500">Active = visible internally. Published = visible to public.
+                        Speaker applications can be managed separately.</p>
                 </div>
 
                 <!-- Hidden Fields -->

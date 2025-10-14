@@ -42,7 +42,9 @@ class EventController extends Controller
     }
     public function store(CreateEventRequest $request)
     {
-        $event = $this->eventService->createEvent($request);
+        $program_cover = $request->file('program_cover');
+        $validated = $request->validated();
+        $event = $this->eventService->createEvent($validated, $program_cover);
         if ($event) {
             return redirect()->back()->with([
                 'type' => 'success',
@@ -63,7 +65,9 @@ class EventController extends Controller
 
     public function update(UpdateEventRequest $request, Event $event)
     {
-        $event = $this->eventService->updateEvent($request, $event);
+        $program_cover = $request->file('program_cover');
+        $validated = $request->validated();
+        $event = $this->eventService->updateEvent($validated, $event, $program_cover);
 
         if ($event) {
             return redirect()->back()->with([

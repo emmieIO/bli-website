@@ -23,7 +23,7 @@ class CreateSpeakerRequest extends FormRequest
     {
         return [
             "name" => ['required', "string"],
-            "title" => ['sometimes'],
+            "headline" => ['nullable', 'string'],
             "organization" => ["sometimes"],
             "email" => ["required", 'email', "unique:users,email"],
             "photo" => "required|image|mimes:jpeg,png,jpg,gif,svg|max:2048",
@@ -35,7 +35,8 @@ class CreateSpeakerRequest extends FormRequest
         ];
     }
 
-    public function messages(){
+    public function messages()
+    {
         return [
             'name.required' => 'Name is required.',
             'name.string' => 'Name must be a string.',
@@ -64,17 +65,17 @@ class CreateSpeakerRequest extends FormRequest
         return [
             'userInfo' => [
                 'name' => $data['name'],
+                'headline' => $data['headline'],
+                'bio' => $data['bio'],
+                'linkedin' => $data['linkedin'] ?? null,
+                'website' => $data['website'] ?? null,
                 'email' => $data['email'],
                 'phone' => $data['phone'],
+                'photo' => $data['photo'],
                 'password' => $data['password']
             ],
             'speakerInfo' => [
-                'title' => $data['title'],
                 'organization' => $data['organization'],
-                'bio' => $data['bio'],
-                'photo' => $data['photo'],
-                'linkedin' => $data['linkedin'] ?? null,
-                'website' => $data['website'] ?? null,
             ]
         ];
     }

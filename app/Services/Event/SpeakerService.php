@@ -51,18 +51,23 @@ class SpeakerService
         $photoPath = null;
         try {
             $speaker = DB::transaction(function () use ($validated, $photo) {
-                // we register the user :which definitely would need to be verified
-                $user = User::create($validated['userInfo']);
-                if ($this->miscService->isAdmin()) {
-                    $user->forceFill(['email_verified_at' => now()])->save();
-                }
                 // we  save the speaker info
                 $photoPath = $this->uploadFile($photo, "speakers_dp");
                 if (!$photoPath) {
                     throw new \Exception('Photo upload failed.');
                 }
-                $speakerData = array_merge($validated['speakerInfo'], [
+
+                // we register the user :which definitely would need to be verified
+                $user = User::updateOrCreate(array_merge($validated['userInfo'], [
                     'photo' => $photoPath,
+                ]));
+
+                if ($this->miscService->isAdmin()) {
+                    $user->forceFill(['email_verified_at' => now()])->save();
+                }
+
+                $speakerData = array_merge($validated['speakerInfo'], [
+
                     'user_id' => $user->id,
                     'status' => $this->miscService->isAdmin() ? 'active' : 'pending',
                 ]);
@@ -80,8 +85,6 @@ class SpeakerService
                 });
                 return $speaker;
             });
-            // then we trigger the  notifications for account confirmation and speaker account creation notification
-            // how can i send a  password reset, 
 
             return $speaker;
         } catch (\Exception $e) {
