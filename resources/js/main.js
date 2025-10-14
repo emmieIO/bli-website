@@ -144,7 +144,7 @@ window.startCountdown = function (targetStartDateTime, targetId, targetEndDateTi
 const expertiseContainer = document.getElementById('expertise-container')
 const expertiseInput = document.getElementById('expertise-input')
 
-expertiseInput.addEventListener('keypress', function (e) {
+expertiseInput?.addEventListener('keypress', function (e) {
     if (e.key === ',') {
         e.preventDefault();
         if (e.target.value.trim() !== "") {
@@ -152,7 +152,7 @@ expertiseInput.addEventListener('keypress', function (e) {
             pill.className = 'pill';
             pill.textContent = e.target.value.trim();
             expertiseContainer.appendChild(pill);
-            e.target.value = '';
+            e.target.value = ''; 
         }
     }
 })

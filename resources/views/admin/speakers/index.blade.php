@@ -63,7 +63,7 @@
                                     <div class="flex items-center gap-3">
                                         <div class="flex-shrink-0 h-10 w-10 relative">
                                             <img class="h-10 w-10 rounded-full object-cover border border-primary-100"
-                                                src="{{ $speaker->photo ? asset('storage/' . $speaker->photo) : 'https://i.pravatar.cc/40?u=' . $speaker->email }}"
+                                                src="{{ asset('storage/' . $speaker->user->photo)}}"
                                                 alt="{{ $speaker->name }}">
                                             @if($speaker->is_featured)
                                                 <span class="absolute -top-1 -right-1 bg-accent text-white rounded-full p-0.5">
@@ -90,7 +90,7 @@
                                 <!-- Title & Organization Column -->
                                 <td class="px-6 py-4">
                                     @if($speaker->title || $speaker->organization)
-                                        <div class="text-sm font-medium text-primary font-montserrat">{{ $speaker->title ?? '—' }}</div>
+                                        <div class="text-sm font-medium text-primary font-montserrat">{{ $speaker->user->headline ?? '—' }}</div>
                                         <div class="text-sm text-gray-500 font-lato">{{ $speaker->organization ?? '—' }}</div>
                                     @else
                                         <span class="text-sm text-gray-400 font-lato">Not specified</span>

@@ -55,7 +55,7 @@
 
                             <!-- Event description -->
                             <div class="prose max-w-none text-gray-600 mb-6">
-                                <p>{{ $event->description }}</p>
+                                <p>{!! $event->description !!}</p>
                             </div>
 
                             <!-- Details grid -->

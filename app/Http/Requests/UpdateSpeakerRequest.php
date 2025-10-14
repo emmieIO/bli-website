@@ -24,14 +24,14 @@ class UpdateSpeakerRequest extends FormRequest
 
         return [
             "name" => ['required', "string"],
-            "title" => ['sometimes'],
-            "organization" => ["sometimes"],
+            "headline" => ['nullable', 'string'],
+            "organization" => ["nullable"],
             "email" => ["required", 'email', "unique:users,email," . $this->route('speaker')->user->id],
-            "phone" => ["sometimes", "phone:NG"],
+            "phone" => ["nullable", "phone:NG"],
             "photo" => "nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048",
             'linkedin' => ['nullable', 'regex:/^https?:\/\/(www\.)?linkedin\.com\/in\/[a-zA-Z0-9_-]+\/?$/'],
             'website' => ['nullable', 'url'],
-            "bio" => ['sometimes']
+            "bio" => ['nullable']
         ];
     }
 
@@ -60,14 +60,14 @@ class UpdateSpeakerRequest extends FormRequest
                 'name' => $data['name'],
                 'email' => $data['email'],
                 'phone' => $data['phone'] ?? null,
+                'headline' => $data['headline'] ?? null,
+                'linkedin' => $data['linkedin'] ?? null,
+                'website' => $data['website'] ?? null,
+                'photo' => $data['photo'] ?? null,
             ],
 
             'speakerProfile' => [
-                'title' => $data['title'] ?? null,
                 'organization' => $data['organization'] ?? null,
-                'photo' => $data['photo'] ?? null,
-                'linkedin' => $data['linkedin'] ?? null,
-                'website' => $data['website'] ?? null,
                 'bio' => $data['bio'] ?? null,
             ]
         ];

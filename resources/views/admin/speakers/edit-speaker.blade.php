@@ -35,15 +35,15 @@
                         Contact Info</h3>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
                         <x-input label="Full Name" name="name" required icon="user" :value="old('name', $speaker->user->name ?? '')" />
-                        <x-input label="Professional Title" name="title" icon="briefcase" :value="old('title', $speaker->title ?? '')" />
+                        <x-input label="Professional Title" name="headline" icon="briefcase" :value="old('headline', $speaker->user->headline ?? '')" />
                         <x-input label="Organization" name="organization" icon="building-2" :value="old('organization', $speaker->organization ?? '')" />
                         <x-input label="Email Address" name="email" type="email" required icon="mail"
                             :value="old('email', $speaker->user->email ?? '')" />
                         <x-input label="Phone Number" name="phone" icon="phone" :value="old('phone', $speaker->user->phone ?? '')" />
                         <x-input label="LinkedIn Profile" name="linkedin" type="url" icon="linkedin"
-                            placeholder="https://linkedin.com/in/..." :value="old('linkedin', $speaker->linkedin ?? '')" />
+                            placeholder="https://linkedin.com/in/..." :value="old('linkedin', $speaker->user->linkedin ?? '')" />
                         <x-input label="Personal Website" name="website" type="url" icon="globe"
-                            placeholder="https://yoursite.com" :value="old('website', $speaker->website ?? '')" />
+                            placeholder="https://yoursite.com" :value="old('website', $speaker->user->website ?? '')" />
                     </div>
                 </div>
 

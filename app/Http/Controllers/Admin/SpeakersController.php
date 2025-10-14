@@ -55,7 +55,7 @@ class SpeakersController extends Controller
     {
         $this->authorize('create', Speaker::class);
         $validated = $request->validated();
-        $photo = $validated['speakerInfo']['photo'];
+        $photo = $validated['userInfo']['photo'];
         $speaker = $this->speakerService->createSpeaker($validated, $photo);
         if ($speaker) {
             return back()->with([

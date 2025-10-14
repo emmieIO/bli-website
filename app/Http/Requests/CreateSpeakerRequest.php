@@ -66,7 +66,6 @@ class CreateSpeakerRequest extends FormRequest
             'userInfo' => [
                 'name' => $data['name'],
                 'headline' => $data['headline'],
-                'bio' => $data['bio'],
                 'linkedin' => $data['linkedin'] ?? null,
                 'website' => $data['website'] ?? null,
                 'email' => $data['email'],
@@ -75,6 +74,7 @@ class CreateSpeakerRequest extends FormRequest
                 'password' => $data['password']
             ],
             'speakerInfo' => [
+                'bio' => $data['bio'],
                 'organization' => $data['organization'],
             ]
         ];

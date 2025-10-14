@@ -76,8 +76,8 @@ class SpeakerService
 
                 DB::afterCommit(function () use ($user) {
                     if ($this->miscService->isAdmin()) {
-                        Password::sendResetLink(['email' => $user->email]);
-                        $user->notify(new SpeakerAccountCreatedNotification(true));
+                        // Password::sendResetLink(['email' => $user->email]);
+                        // $user->notify(new SpeakerAccountCreatedNotification(true));
                     } else {
                         // $user->sendEmailVerificationNotification();
                         $user->notify(new SpeakerAccountCreatedNotification(false));
@@ -92,23 +92,23 @@ class SpeakerService
                 $this->deleteFile($photoPath);
             }
             Log::error('Speaker creation failed: ' . $e->getMessage());
-            return null;
+            throw $e;
         }
 
     }
     public function updateSpeaker(array $validated, Speaker $speaker, ?UploadedFile $photo)
     {
         try {
-            $existing_photo = $speaker->photo;
-            $validated['speakerProfile']['photo'] = $existing_photo;
+            $existing_photo = $speaker->user->photo;
+            $validated['userInfo']['photo'] = $existing_photo;
             DB::transaction(function () use ($speaker, $validated, $photo, $existing_photo) {
                 $speaker->user->update($validated['userInfo']);
                 $speaker->update($validated['speakerProfile']);
 
                 if ($photo) {
                     $new_photo = $this->uploadfile($photo, 'speakers_dp');
-                    $speaker->photo = $new_photo;
-                    $updatedPhoto = $speaker->save();
+                    $speaker->user->photo = $new_photo;
+                    $updatedPhoto = $speaker->user->save();
                     if ($updatedPhoto) {
                         if ($existing_photo) {
                             $this->deleteFile($existing_photo);
