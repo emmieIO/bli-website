@@ -62,8 +62,8 @@
                                 data-icon='<i data-lucide="alert-triangle" class="h-8 w-8 text-secondary"></i>'
                                 @if ($event->status === 'Ended')
                                 disabled
-                @endif
-                @click="selectedEvent = {
+                                @endif
+                                @click="selectedEvent = {
                                     slug: '{{ $event->slug }}',
                                     title: '{{ $event->title }}',
                                     start_date: '{{ $event->start_date }}',
@@ -117,7 +117,6 @@
     </div>
 
     <script>
-        // Initialize Lucide icons
         lucide.createIcons();
     </script>
 </x-app-layout>
