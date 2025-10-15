@@ -15,8 +15,8 @@
                     icon="user" required="true" autofocus="true" />
             </div>
             <div class="relative">
-                <x-input label="Headline" type="text" name="name" value="{{ old('name', $user->headline) }}"
-                    icon="user" required="true" autofocus="true" placeholder="Your professional headline" />
+                <x-input label="Headline" type="text" name="headline" value="{{ old('headline', $user->headline) }}"
+                    icon="user"  placeholder="Your professional headline" />
             </div>
 
             <div class="relative">
