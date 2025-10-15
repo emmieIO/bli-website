@@ -7,11 +7,11 @@ $expertiseTags = is_array($expertiseRaw)
     : array_filter(array_map('trim', explode(',', $expertiseRaw)));
 @endphp
 <x-guest-layout>
-    <section class="py-12 md:py-16 bg-[#F8FAFC]">
-        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section class="py-12 md:py-16 bg-[#F8FAFC] font-lato">
+        <div class="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="bg-white p-8 md:p-10 rounded-xl shadow-sm">
                 <div class="mb-8 border-b border-gray-200 pb-6">
-                    <h1 class="text-3xl font-bold text-[#00275E]">Instructor Application</h1>
+                    <h1 class="text-3xl font-bold text-[#00275E] font-montserrat">Instructor Application</h1>
                     <p class="text-gray-600 mt-2">Complete all sections to submit your instructor profile</p>
                 </div>
                 <form method="POST"
@@ -37,6 +37,7 @@ $expertiseTags = is_array($expertiseRaw)
                                             <label for="first_name"
                                                 class="block text-sm font-medium text-gray-700 mb-1">Fullname*</label>
                                             <input type="text" id="name" name="name"
+                                            readonly
                                                 class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-[#00275E] focus:border-[#00275E]"
                                                 value="{{ old('first_name', $user->name) }}">
                                             @error('name')
@@ -63,7 +64,7 @@ $expertiseTags = is_array($expertiseRaw)
                                         <input type="text" id="headline" name="headline"
                                             class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-[#00275E] focus:border-[#00275E]"
                                             placeholder="e.g. Senior Web Developer, Education Specialist"
-                                            value="{{ old('headline', $profile->headline) }}">
+                                            value="{{ old('headline', $profile->user->headline) }}">
                                         @error('headline')
                                             <p class="mt-1 text-sm text-[#FF0000]">{{ $message }}</p>
                                         @enderror
@@ -229,7 +230,7 @@ $expertiseTags = is_array($expertiseRaw)
                                             <input type="url" id="linkedin" name="linkedin"
                                                 class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-[#00275E] focus:border-[#00275E]"
                                                 placeholder="https://linkedin.com/in/yourprofile"
-                                                value="{{ old('linkedin', $profile->linkedin_url) }}">
+                                                value="{{ old('linkedin', $profile->user->linkedin) }}">
                                         </div>
 
                                         <div>
@@ -239,7 +240,7 @@ $expertiseTags = is_array($expertiseRaw)
                                             <input type="url" id="website" name="website"
                                                 class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-[#00275E] focus:border-[#00275E]"
                                                 placeholder="https://yourwebsite.com"
-                                                value="{{ old('website', $profile->website) }}">
+                                                value="{{ old('website', $profile->user->website) }}">
                                             @error('website')
                                                 <p class="mt-1 text-sm text-[#FF0000]">{{ $message }}</p>
                                             @enderror

@@ -30,11 +30,12 @@ class InstructorsController extends Controller
         return view('instructors.become-an-instructor');
     }
 
-    public function resume(string $applicationId){
+    public function resume(string $applicationId)
+    {
         $profile = InstructorProfile::where("application_id", $applicationId)
-        ->with('user')->firstOrFail();
+            ->with('user')->firstOrFail();
         $user = $profile->user;
-        if(!$profile->is_approved){
+        if (!$profile->is_approved) {
             return view('instructors.application-form', compact('user', 'profile'));
         }
         return redirect(route('homepage'))->with([
@@ -45,30 +46,23 @@ class InstructorsController extends Controller
 
     public function startApplication(Request $request)
     {
-        $request->validate([
-            'email' => ['required', 'email']
+        $validated = $request->validate([
+            'email' => ['required', 'email'],
+            'name' => ['required', 'string', 'max:150']
         ]);
         $email = strtolower(trim($request->email));
-        try {
-            $user = $this->instructorApplicationService->start($request->email);
-            // We silently succeed even if they're already onboarded
-            if ($user) {
-                Mail::to($user->email)->send(new InstructorsApplication($user));
-            }
-
+        $user = $this->instructorApplicationService->start($validated);
+        if ($user) {
             return back()->with([
                 'type' => 'success',
                 'message' => 'Application started successfully. Please check your email for further instructions.'
             ]);
-        } catch (\Exception $e) {
-            // Log::error('Instructor application error', ['error' => $e->getMessage()]);
-            throw $e;
 
-            // return back()->with([
-            //     'type' => 'error',
-            //     'message' => 'There was a problem starting your application. Please try again.'
-            // ]);
         }
+        return back()->with([
+            'type' => 'error',
+            'message' => 'An error occurred while starting your application. Please try again.'
+        ]);
     }
 
     public function showApplicationForm(Request $request)
@@ -95,7 +89,7 @@ class InstructorsController extends Controller
             'phone' => ['required', 'phone:NG,GB,US', Rule::unique('users', 'phone')->ignore($user->id)],
             'headline' => 'required|string|max:100',
             'bio' => 'required|string|max:1000',
-        ],[
+        ], [
             "bio.required" => "Please tell us about yourself.",
             "phone.phone" => "Please enter a valid uk,us or ng phone number."
         ]);
@@ -151,7 +145,9 @@ class InstructorsController extends Controller
             "video_url" => ['required', 'url']
         ]);
 
-        if ($this->instructorApplicationService->saveInstructorDocs($request, $user)) {
+        $resume = $request->file('resume') ?? null;
+
+        if ($this->instructorApplicationService->saveInstructorDocs($request, $user, $resume)) {
             return redirect()->back()->with([
                 'type' => "success",
                 'message' => "Resume uploaded and video link saved successfully.",

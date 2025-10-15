@@ -10,17 +10,13 @@ use App\Models\User;
 use App\Notifications\InstructorApplicationApproved;
 use App\Notifications\InstructorApplicationRejection;
 use App\Notifications\InstructorApplicationSubmitted;
+use App\Notifications\SendInstructorApplicationLink;
 use App\Traits\GeneratesApplicationId;
 use App\Traits\HasFileUpload;
 use Illuminate\Http\Request;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\{Auth, Hash, Log, Password, URL, DB};
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\FacadesLog;
-use Illuminate\Support\Facades\Password;
-use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Str;
 
 class InstructorApplicationService
@@ -34,13 +30,14 @@ class InstructorApplicationService
         //
     }
 
-    public function start(string $email): ?User
+    public function start(array $validated): ?User
     {
-        $email = strtolower(trim($email));
+        $email = Str::lower(trim($validated['email']));
+        $name = trim($validated['name']);
 
-        return DB::transaction(function () use ($email) {
+        return DB::transaction(function () use ($email, $name) {
             $user = User::firstOrCreate(['email' => $email], [
-                'name' => 'Please add your name',
+                'name' => $name,
                 'password' => Hash::make(Str::random(16)),
             ]);
             $profile = InstructorProfile::where('user_id', $user->id)->first();
@@ -59,6 +56,7 @@ class InstructorApplicationService
                 $profile->application_id = $this->formatApplicationId($profile->id);
                 $profile->save();
             }
+            $user->notify(new SendInstructorApplicationLink($user));
             return $user;
         });
     }
@@ -70,13 +68,12 @@ class InstructorApplicationService
                 // Update user name
                 $user->update([
                     'name' => $personalInfo['name'],
-                    'phone' => $personalInfo['phone']
+                    'phone' => $personalInfo['phone'],
+                    'headline' => $personalInfo['headline'],
                 ]);
 
                 // Update instructor profile
                 $user->instructorProfile()->update([
-                    'headline' => $personalInfo['headline'],
-
                     'bio' => $personalInfo['bio'],
                 ]);
             });
@@ -97,12 +94,14 @@ class InstructorApplicationService
 
         try {
             DB::transaction(function () use ($experienceData, $user) {
+                $user->update([
+                    'website' => $experienceData['website'] ?? null,
+                    'linkedin' => $experienceData['linkedin'] ?? null,
+                ]);
                 $user->instructorProfile()->update([
                     "teaching_history" => $experienceData["experience"],
                     "area_of_expertise" => $experienceData['expertise'],
                     "experience_years" => $experienceData["experience_years"],
-                    "linkedin_url" => $experienceData['linkedin'],
-                    "website" => $experienceData['website']
                 ]);
             });
             return true;
@@ -116,19 +115,18 @@ class InstructorApplicationService
 
     }
 
-    public function saveInstructorDocs(Request $request, User $user)
+    public function saveInstructorDocs(Request $request, User $user, UploadedFile $file = null): bool
     {
         $profile = $user->instructorProfile;
         $oldResumePath = $profile->resume_path;
         try {
-            DB::transaction(function () use ($request, $profile, $oldResumePath) {
+            DB::transaction(function () use ($request, $profile, $oldResumePath, $file) {
                 $docsToUpdate = [];
 
                 if ($request->hasFile('resume')) {
 
                     $docsToUpdate['resume_path'] = $this->uploadFile(
-                        $request,
-                        "resume",
+                        $file,
                         'instructors/resumes'
                     );
                 }

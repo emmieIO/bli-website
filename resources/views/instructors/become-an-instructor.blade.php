@@ -7,11 +7,11 @@
         <div class="container mx-auto px-4 relative">
             <div class="max-w-7xl mx-auto text-center md:text-left">
                 <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 text-white">Become an Instructor</h1>
-                <p class="text-xl md:text-2xl mb-8 text-gray-200 leading-relaxed">
-                    Share your passion, inspire learners worldwide, and earn income doing what you love.
+                <p class="text-xl md:text-2xl mb-8 text-gray-200 leading-relaxed font-lato">
+                    Share your passion, inspire learners worldwide, and empower the next generation of leaders.
                 </p>
                 <a href="#apply-now"
-                    class="inline-block bg-secondary hover:bg-secondary-600 text-white font-semibold px-8 py-4 rounded-lg transition-all duration-300 transform hover:scale-105 mb-4">
+                    class="inline-block bg-secondary hover:bg-secondary-600 text-white font-semibold px-5 py-4 rounded-md transition-all duration-300 transform hover:scale-105 mb-4">
                     Begin process
                 </a>
                 <p class="text-gray-300 text-sm">We'll review your proposal within 5–7 business days.</p>
@@ -33,7 +33,7 @@
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 @foreach ([['step' => 1, 'title' => 'Create Your Account', 'desc' => 'No account needed to start—just enter your email below. Already have an account? Scroll to the application section and send your link!'], ['step' => 2, 'title' => 'Start Instructor Application', 'desc' => 'Click "Become an Instructor" or scroll down to the application form to begin.'], ['step' => 3, 'title' => 'Check Your Email', 'desc' => 'We\'ll send a secure link to finish your profile.'], ['step' => 4, 'title' => 'Complete Your Profile', 'desc' => 'Add your bio, expertise, and intro video.'], ['step' => 5, 'title' => 'Submit & Get Confirmation', 'desc' => 'You\'ll get an email confirming receipt.'], ['step' => 6, 'title' => 'Wait for Review', 'desc' => 'Our team reviews in 5–7 business days.']] as $stepData)
                     <div
-                        class="step-card bg-primary-50 p-6 rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+                        class="step-card bg-primary-50 p-6 rounded-lg shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
                         <div class="flex items-center mb-4">
                             <div
                                 class="flex-shrink-0 w-10 h-10 bg-secondary text-white rounded-full flex items-center justify-center font-bold mr-4">
@@ -67,7 +67,7 @@
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
                 <div
-                    class="benefit-card bg-white p-8 rounded-2xl text-center shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+                    class="benefit-card bg-white p-8 rounded-lg text-center shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
                     <div class="w-16 h-16 bg-accent-100 rounded-full flex items-center justify-center mx-auto mb-6">
                         <i data-lucide="dollar-sign" class="w-8 h-8 text-accent"></i>
                     </div>
@@ -76,7 +76,7 @@
                 </div>
 
                 <div
-                    class="benefit-card bg-white p-8 rounded-2xl text-center shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+                    class="benefit-card bg-white p-8 rounded-lg text-center shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
                     <div class="w-16 h-16 bg-accent-100 rounded-full flex items-center justify-center mx-auto mb-6">
                         <i data-lucide="globe" class="w-8 h-8 text-accent"></i>
                     </div>
@@ -85,7 +85,7 @@
                 </div>
 
                 <div
-                    class="benefit-card bg-white p-8 rounded-2xl text-center shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+                    class="benefit-card bg-white p-8 rounded-lg text-center shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
                     <div class="w-16 h-16 bg-accent-100 rounded-full flex items-center justify-center mx-auto mb-6">
                         <i data-lucide="life-buoy" class="w-8 h-8 text-accent"></i>
                     </div>
@@ -100,10 +100,10 @@
     <section id="apply-now" class="py-12 md:py-16 bg-white">
         <div class="container mx-auto px-4">
             <div class="max-w-4xl mx-auto">
-                <div class="bg-white rounded-2xl shadow-lg p-8 md:p-12 text-center border-t-4 border-secondary">
+                <div class="bg-white rounded-lg shadow-lg p-8 md:p-12 text-center border-t-4 border-secondary">
                     <h2 class="text-2xl md:text-3xl font-bold text-primary mb-4">Ready to Inspire Learners?</h2>
                     <p class="text-gray-600 text-lg mb-8">
-                        Enter your email and we'll send a secure link to start your instructor application.
+                        Enter your fullname & email below to get a secure link and begin your instructor application.
                     </p>
 
                     <form method="POST" action="{{ route('instructors.start-application') }}" class="max-w-md mx-auto">
@@ -116,9 +116,15 @@
 
                         @guest
                             <div class="mb-6">
-                                <input type="email" name="email" required
-                                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
-                                    placeholder="Your email address">
+                                <x-input type="text" name="name" required icon="user"
+                                    placeholder="Enter Fullname" />
+                                @error('name')
+                                    <div class="text-red-600 text-sm mt-2">{{ $message }}</div>
+                                @enderror
+                            </div>
+                            <div class="mb-6">
+                                <x-input type="email" name="email" required icon="mail"
+                                    placeholder="Your email address" />
                                 @error('email')
                                     <div class="text-red-600 text-sm mt-2">{{ $message }}</div>
                                 @enderror
@@ -126,7 +132,7 @@
                         @endguest
 
                         <button type="submit"
-                            class="w-full bg-secondary hover:bg-secondary-600 text-white font-bold py-4 px-8 rounded-full transition-all duration-300 transform hover:scale-105">
+                            class="w-full bg-secondary hover:bg-secondary-600 text-white font-bold py-4 px-8 rounded-lg transition-all duration-300 transform hover:scale-105">
                             Send My Application Link
                         </button>
 
@@ -149,7 +155,7 @@
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-                <div class="bg-white p-6 rounded-2xl shadow-sm h-full">
+                <div class="bg-white p-6 rounded-lg shadow-sm h-full">
                     <div class="flex items-center mb-4">
                         <img src="https://randomuser.me/api/portraits/women/42.jpg" alt="Sarah Johnson"
                             class="w-14 h-14 rounded-full object-cover mr-4">
@@ -163,7 +169,7 @@
                         full-time job."
                     </p>
                 </div>
-                <div class="bg-white p-6 rounded-2xl shadow-sm h-full">
+                <div class="bg-white p-6 rounded-lg shadow-sm h-full">
                     <div class="flex items-center mb-4">
                         <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="Michael Chen"
                             class="w-14 h-14 rounded-full object-cover mr-4">
@@ -191,7 +197,7 @@
 
             <div class="space-y-4">
                 @foreach ([['title' => 'What qualifications do I need?', 'body' => 'We look for real-world expertise—whether from work, teaching, or projects. Degrees help but aren\'t required.'], ['title' => 'How much can I earn?', 'body' => 'Top instructors earn $10K+/month. Earnings depend on course quality, demand, and your marketing. We offer 70% revenue share.'], ['title' => 'How long is the review process?', 'body' => 'We review applications in 5–7 business days. You\'ll get email updates at every stage.'], ['title' => 'What if I\'m not approved?', 'body' => 'We provide personalized feedback. You can reapply in 30 days with improvements—many successful instructors weren\'t accepted the first time!']] as $index => $faq)
-                    <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+                    <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
                         <button
                             class="faq-question w-full px-6 py-4 text-left font-semibold text-primary hover:bg-gray-50 transition-colors flex justify-between items-center"
                             onclick="toggleFAQ({{ $index }})">

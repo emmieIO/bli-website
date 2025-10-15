@@ -76,12 +76,13 @@ class SpeakerService
 
                 DB::afterCommit(function () use ($user) {
                     if ($this->miscService->isAdmin()) {
-                        // Password::sendResetLink(['email' => $user->email]);
-                        // $user->notify(new SpeakerAccountCreatedNotification(true));
-                    } else {
                         // $user->sendEmailVerificationNotification();
                         $user->notify(new SpeakerAccountCreatedNotification(false));
                     }
+                    // else {
+                    //     Password::sendResetLink(['email' => $user->email]);
+                    //     $user->notify(new SpeakerAccountCreatedNotification(true));
+                    // }
                 });
                 return $speaker;
             });

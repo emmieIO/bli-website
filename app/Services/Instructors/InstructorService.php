@@ -6,16 +6,11 @@ use App\Enums\ApplicationStatus;
 use App\Enums\RoleEnum;
 use App\Models\ApplicationLog;
 use App\Models\InstructorProfile;
-use App\Models\User;
 use App\Traits\HasFileUpload;
-use GuzzleHttp\Psr7\StreamDecoratorTrait;
 use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
 
 class InstructorService
 {
