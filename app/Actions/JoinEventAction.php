@@ -13,11 +13,7 @@ class JoinEventAction
      */
     public function __construct(
         protected EventService $eventService
-    )
-    {
-        //
-    }
-
+    ){}
     /**
      * Invoke the class instance.
      */
@@ -40,6 +36,17 @@ class JoinEventAction
                 "type" => "error",
                 "message" => "Registration failed. The event has already started."
             ]);
+        }
+
+        if($event->attendee_slots !== null){
+            // Check for available slots
+            $slotsRemaining = $event->slotsRemaining();
+            if ($slotsRemaining <= 0) {
+                return back()->with([
+                    "type" => "error",
+                    "message" => "Registration failed. No available slots remaining for this event."
+                ]);
+            }
         }
 
         // Check for maximum registrations

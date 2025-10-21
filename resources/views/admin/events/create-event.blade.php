@@ -34,9 +34,11 @@
                             'hybrid' => 'Hybrid',
                         ]" :selected="old('mode')"
                             icon="activity" />
+                        <x-input label="Attendee Slot" type="number" name="attendee_slots" min="1" icon="users" placeholder="Enter no. of available slots" />
 
                         <div class="col-span-2">
-                            <x-input name="theme" class="font-bold" label="Event Theme" icon="type" :value="old('theme')" />
+                            <x-input name="theme" class="font-bold" label="Event Theme" icon="type"
+                                :value="old('theme')" />
                         </div>
                     </div>
 

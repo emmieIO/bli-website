@@ -35,6 +35,9 @@
                             'hybrid' => 'Hybrid',
                         ]" :selected="old('mode', $event->mode)"
                             icon="activity" />
+                        <x-input label="Attendee Slots" type="number" name="attendee_slots" min="1"
+                            icon="users" placeholder="Enter no. of available slots" value="{{ $event->attendee_slots }}" />
+
                         <div class="col-span-2">
                             <x-input name="theme" class="font-bold" label="Event Theme" icon="type"
                                 :value="old('theme', $event->theme)" />

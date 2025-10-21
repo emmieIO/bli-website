@@ -80,6 +80,13 @@ class Event extends Model
         return $this->attendees()->count();
     }
 
+    public function slotsRemaining()
+    {
+        if($this->attendee_slots == null) return 'Unlimited';
+        if($this->attendee_slots == 0) return 'Full';
+        return $this->attendee_slots - $this->attendees()->count();
+    }
+
     public function resources()
     {
         return $this->hasMany(EventResource::class);

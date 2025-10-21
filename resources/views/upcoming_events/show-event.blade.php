@@ -88,7 +88,7 @@
                     <!-- Event Cover Image -->
                     <div class="rounded-2xl overflow-hidden shadow-xl border border-gray-200">
                         <img src="{{ asset('storage/' . $event->program_cover) }}" alt="{{ $event->title }}"
-                            class="w-full h-48 sm:h-80 lg:h-96 object-cover">
+                            class="w-full h-48 sm:h-80 lg:h-150 object-cover">
                     </div>
 
                     <!-- Event Description -->
@@ -192,9 +192,9 @@
 
                         <div class="space-y-4 mb-6">
                             <div class="flex justify-between items-center py-3 border-b border-white/30">
-                                <span class="text-white/90 font-medium text-sm font-lato">Attendees</span>
+                                <span class="text-white/90 font-medium text-sm font-lato">Slots Remainng</span>
                                 <span
-                                    class="font-bold text-lg text-white font-montserrat">{{ count($event->attendees) }}</span>
+                                    class="font-bold text-lg text-white font-montserrat">{{ $event->slotsRemaining() }}</span>
                             </div>
                             <div class="flex justify-between items-center py-3 border-b border-white/30">
                                 <span class="text-white/90 font-medium text-sm font-lato">Cost</span>

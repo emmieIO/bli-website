@@ -4,29 +4,35 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class UpdateEventRequest extends FormRequest {
+class UpdateEventRequest extends FormRequest
+{
     /**
-    * Determine if the user is authorized to make this request.
-    */
+     * Determine if the user is authorized to make this request.
+     */
 
-    public function authorize(): bool {
-        return auth()->user()->hasPermissionTo( 'manage events' );
+    public function authorize(): bool
+    {
+        return auth()->user()->hasPermissionTo('manage events');
     }
 
     /**
-    * Get the validation rules that apply to the request.
-    *
-    * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
-    */
+     * Get the validation rules that apply to the request.
+     *
+     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
+     */
 
-    public function rules(): array {
+    public function rules(): array
+    {
         return [
-            'title' => 'sometimes|required|string|max:255|unique:events,title,' . ( $this->event->id ?? 'NULL' ),
+            'title' => 'sometimes|required|string|max:255|unique:events,title,' . ($this->event->id ?? 'NULL'),
             'theme' => 'sometimes|string|max:100',
             'description' => 'sometimes|required|string',
             'location' => 'sometimes|required|string|required_if:mode,online,hybrid',
+            'attendee_slots.integer' => 'The attendee slots must be an integer.',
+            'attendee_slots.min' => 'The attendee slots must be at least 1.',
+            'attendee_slots' => 'nullable|integer|min:1',
             'program_cover' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-            'mode' => 'sometimes|required|string|in:' . implode( ',', array_column( \App\Enums\EventModeEnum::cases(), 'value' ) ),
+            'mode' => 'sometimes|required|string|in:' . implode(',', array_column(\App\Enums\EventModeEnum::cases(), 'value')),
             'start_date' => 'sometimes|required|date|after_or_equal:today',
             'end_date' => 'sometimes|required|date|after_or_equal:start_date',
             'physical_address' => 'nullable|string|max:255|required_if:mode,offline,hybrid',
@@ -80,11 +86,12 @@ class UpdateEventRequest extends FormRequest {
         ];
     }
 
-    protected function prepareForValidation(): void {
-        $this->merge( [
-            'is_active' => $this->has( 'is_active' ),
-            'is_published' => $this->has( 'is_published' ),
+    protected function prepareForValidation(): void
+    {
+        $this->merge([
+            'is_active' => $this->has('is_active'),
+            'is_published' => $this->has('is_published'),
             'is_allowing_application' => $this->has('is_allowing_application')
-        ] );
+        ]);
     }
 }
