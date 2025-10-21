@@ -35,6 +35,7 @@ class SendEventReminders extends Command
     {
         $events = Event::with('attendees')
             ->where('start_date','>', now())
+            ->where('start_date','<=', Carbon::now()->addDay())
             ->chunkById(20, function ($events) {
                 foreach ($events as $event) {
                     $attendees = $event->attendees;
