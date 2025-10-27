@@ -35,7 +35,8 @@
             <ul class="hidden lg:flex gap-x-6 items-center font-bold text-sm">
                 <li><a href="{{ route('homepage') }}" class="text-gray-700 hover:text-secondary transition">Home</a>
                 </li>
-                <li><a href="{{ route('events.index') }}" class="text-gray-700 hover:text-secondary transition">Events</a>
+                <li><a href="{{ route('events.index') }}"
+                        class="text-gray-700 hover:text-secondary transition">Events</a>
                 </li>
                 <li><a href="{{ route('courses.index') }}"
                         class="text-gray-700 hover:text-secondary transition">Courses</a></li>
@@ -76,13 +77,18 @@
                     <a href="{{ route('user_dashboard') }}"
                         class="bg-primary text-white flex items-center text-sm justify-center px-4 py-2 rounded-lg hover:bg-secondary/90 transition shadow">
                         <span>
-                            <i data-lucide="user" class="text-white size-5 p-0.5"></i>
+                            <i data-lucide="user-circle" class="text-white size-5 p-0.5"></i>
                         </span>
                         <span>
                             My Account
                         </span>
-
                     </a>
+                    <form title="logout" class="bg-secondary text-white flex items-center text-sm justify-center px-4 py-2 rounded-lg hover:bg-secondary/90 transition shadow" method="POST" action="{{ route('logout') }}">
+                        @csrf
+                        <button type="submit" class=" text-xs transition">
+                            <i data-lucide="power" class="size-5 p-0.5" ></i>
+                        </button>
+                    </form>
                 @else
                     <a href="{{ route('login.store') }}" class="text-gray-700 hover:text-primary transition">Login</a>
                 @endauth

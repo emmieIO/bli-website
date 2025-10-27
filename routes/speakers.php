@@ -28,6 +28,7 @@ Route::prefix("")->group(function () {
         ->name('become-a-speaker')->middleware('guest');
     Route::post('/become-a-speaker', [SpeakerUserController::class, 'store'])
         ->name('become-a-speaker.store');
+    Route::get('/speakers/{speaker}/profile', [SpeakersController::class, 'viewSpeakerProfile'])->name("speakers.profile");
 });
 
 

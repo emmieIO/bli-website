@@ -24,7 +24,7 @@
                 <div class="grid grid-cols-1 lg:grid-cols-3">
                     <!-- Left Side - Form -->
                     <div class="lg:col-span-2 p-8">
-                        <form method="POST" action="{{ route('become-a-speaker.store') }}"
+                        <form method="POST" id="speaker-form" data-action="{{ route('become-a-speaker.store') }}"
                             enctype="multipart/form-data" class="space-y-6">
                             @csrf
 
@@ -35,21 +35,34 @@
                                     Personal Information</h3>
 
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <x-input label="Full Name" name="name" icon="user"
-                                        :value="old('name')" />
-                                    <x-input label="Email Address" name="email" type="email" icon="mail"
-                                        :value="old('email')" />
+                                    <div>
+                                        <x-input label="Full Name" name="name" icon="user" :value="old('name')" />
+                                        <small data-error="name" class="text-xs text-secondary"></small>
+                                    </div>
+                                    <div>
+                                        <x-input label="Email Address" name="email" type="email" icon="mail"
+                                            :value="old('email')" />
+                                        <small data-error="email" class="text-xs text-secondary"></small>
+                                    </div>
                                 </div>
 
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <x-input label="Phone Number" name="phone" type="tel" icon="phone"
-                                        :value="old('phone')" />
-                                    <x-input label="Professional Title" name="title" icon="briefcase"
-                                        :value="old('title')" placeholder="e.g. Senior Developer, CEO, Consultant" />
+                                    <div>
+                                        <x-input label="Phone Number" name="phone" type="tel" icon="phone"
+                                            :value="old('phone')" />
+                                        <small data-error="phone" class="text-xs text-secondary"></small>
+                                    </div>
+                                    <div>
+                                        <x-input label="Professional Title" name="headline" icon="briefcase"
+                                            :value="old('headline')" placeholder="e.g. Senior Developer, CEO, Consultant" />
+                                        <small data-error="title" class="text-xs text-secondary"></small>
+                                    </div>
                                 </div>
-
-                                <x-input label="Organization" name="organization" icon="building" :value="old('organization')"
-                                    placeholder="Your company or organization (optional)" />
+                                <div>
+                                    <x-input label="Organization" name="organization" icon="building" :value="old('organization')"
+                                        placeholder="Your company or organization (optional)" />
+                                    <small data-error="organization" class="text-xs text-secondary"></small>
+                                </div>
                             </div>
 
                             <!-- Account Security -->
@@ -59,9 +72,14 @@
                                     Account Security</h3>
 
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <x-input label="Password" name="password" type="password" icon="lock" />
-                                    <x-input label="Confirm Password" name="password_confirmation" type="password"
-                                        icon="lock" />
+                                    <div>
+                                        <x-input label="Password" name="password" type="password" icon="lock" />
+                                        <small data-error="password" class="text-xs text-secondary"></small>
+                                    </div>
+                                    <div>
+                                        <x-input label="Confirm Password" name="password_confirmation" type="password"
+                                            icon="lock" />
+                                    </div>
                                 </div>
                             </div>
 
@@ -70,7 +88,6 @@
                                 <h3
                                     class="text-lg font-semibold text-primary font-montserrat border-b border-primary-100 pb-2">
                                     Professional Profile</h3>
-
                                 <div>
                                     <label for="bio"
                                         class="block text-sm font-medium text-gray-700 mb-2 font-lato">Professional
@@ -78,24 +95,31 @@
                                     <textarea id="bio" name="bio" rows="4"
                                         class="block w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-200 font-lato placeholder-gray-400"
                                         placeholder="Tell us about your expertise, experience, and speaking background...">{{ old('bio') }}</textarea>
-                                    <x-input-error :messages="$errors->get('bio')" class="mt-1" />
+                                    <small data-error="bio" class="text-xs text-secondary"></small>
                                 </div>
 
                                 <!-- Profile Photo -->
                                 <div class="space-y-3">
-                                    <label for="photo" class="block text-sm font-medium text-gray-700 font-lato">Profile Photo</label>
+                                    <label for="photo"
+                                        class="block text-sm font-medium text-gray-700 font-lato">Profile Photo</label>
                                     <input id="photo" name="photo" type="file" accept="image/*"
                                         class="block w-full px-4 border border-gray-300 rounded-xl file:bg-primary focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-200 font-lato placeholder-gray-400" />
                                     <p class="text-xs text-gray-500 mt-1">JPG, PNG up to 2MB</p>
-                                    <x-input-error :messages="$errors->get('photo')" class="mt-1" />
+                                    <small data-error="photo" class="text-xs text-secondary"></small>
                                 </div>
 
                                 <!-- Social Links -->
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <x-input label="LinkedIn Profile" name="linkedin" type="url" icon="linkedin"
-                                        :value="old('linkedin')" placeholder="https://linkedin.com/in/yourprofile" />
-                                    <x-input label="Website" name="website" type="url" icon="globe"
-                                        :value="old('website')" placeholder="https://yourwebsite.com" />
+                                    <div>
+                                        <x-input label="LinkedIn Profile" name="linkedin" type="url" icon="linkedin"
+                                            :value="old('linkedin')" placeholder="https://linkedin.com/in/yourprofile" />
+                                        <small data-error="linkedin" class="text-xs text-secondary"></small>
+                                    </div>
+                                    <div>
+                                        <x-input label="Website" name="website" type="url" icon="globe"
+                                            :value="old('website')" placeholder="https://yourwebsite.com" />
+                                        <small data-error="website" class="text-xs text-secondary"></small>
+                                    </div>
                                 </div>
                             </div>
 
@@ -116,8 +140,11 @@
                                 </div>
                                 <x-input-error :messages="$errors->get('agree_terms')" class="mt-1" />
 
-                                <button type="submit"
-                                    class="w-full bg-primary hover:bg-primary-600 text-white font-semibold py-4 px-6 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl font-montserrat flex items-center justify-center gap-3">
+                                <button type="submit" id="submit-btn"
+                                    class="w-full bg-primary hover:bg-primary-600 disabled:bg-primary-400 text-white font-semibold py-4 px-6 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl font-montserrat flex items-center justify-center gap-3">
+                                    <span id="submit-loader" class="hidden">
+                                        <i data-lucide="loader" class="size-7 animate-spin"></i>
+                                    </span>
                                     <i data-lucide="user-plus" class="w-5 h-5"></i>
                                     Register as Speaker
                                 </button>
@@ -214,4 +241,61 @@
             </div>
         </div>
     </section>
+
+    <script>
+        const speakerForm = document.querySelector('#speaker-form')
+        const loader = document.getElementById('submit-loader');
+        const submitBtn = document.getElementById('submit-btn');
+
+
+        let isLoading = false;
+        speakerForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            if (isLoading) return;
+            isLoading = true
+            loader.classList.remove('hidden');
+            submitBtn.disabled = true;
+
+            const actionUrl = speakerForm.getAttribute('data-action');
+            const formData = new FormData(speakerForm);
+            // Clear old validation errors
+            speakerForm.querySelectorAll('[data-error]').forEach(el => el.textContent = '');
+            try {
+                const res = await axios.post(actionUrl, formData, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data'
+                    }
+                });
+                const {
+                    data,
+                    status
+                } = res;
+                window.notyf.success(data.message || "Form submitted successfully!");
+                speakerForm.reset();
+                isLoading = false;
+                loader.classList.add('hidden');
+                submitBtn.disabled = false;
+            } catch (error) {
+                // Handle Laravel validation errors (422)
+                const errorResponse = error.response?.data || error.message;
+                if (error.response?.status === 422) {
+                    window.notyf.error("There were validation errors. Please check the form.");
+                    // Loop through each field error
+                    Object.keys(errorResponse.errors).forEach((field) => {
+                        const errorDiv = document.querySelector(`[data-error="${field}"]`);
+                        if (errorDiv) {
+                            errorDiv.textContent = errorResponse.errors[field][0];
+                        }
+                    });
+                } else {
+                    // Generic error (server, network, etc.)
+                    alert('Something went wrong. Please try again.');
+                    console.error(error.response?.data || error.message);
+                }
+                isLoading = false
+                loader.classList.add('hidden');
+                submitBtn.disabled = false;
+            }
+        });
+    </script>
 </x-guest-layout>

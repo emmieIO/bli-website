@@ -1,5 +1,8 @@
 @php
     use Carbon\Carbon;
+
+    $start = $event->start_date;
+    $end = $event->end_date;
 @endphp
 <x-guest-layout>
     <!-- Breadcrumb Navigation -->
@@ -61,7 +64,7 @@
                                 <span
                                     class="bg-secondary/20 text-secondary px-3 py-2 rounded-full text-sm font-semibold flex items-center gap-2 font-montserrat shadow-sm">
                                     <span class="w-2 h-2 bg-secondary rounded-full animate-pulse"></span>
-                                    🔴 Live Now
+                                    Live Now
                                 </span>
                             @elseif($isUpcoming)
                                 <span
@@ -114,33 +117,39 @@
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                                 @foreach ($event->speakers as $speaker)
                                     <div
-                                        class="flex items-start gap-4 p-4 bg-gray-50 rounded-xl border border-gray-200 hover:shadow-md transition-all duration-300 group">
+                                        class="flex items-start gap-4 p-4 bg-gray-50 rounded-xl border border-gray-200 hover:shadow-md transition-all duration-300 group hover:bg-white">
                                         <div class="flex-shrink-0">
-                                            @if (!empty($speaker->photo) && file_exists(public_path('storage/' . $speaker->photo)))
-                                                <img src="{{ asset('storage/' . $speaker->photo) }}"
+                                            @if (!empty($speaker->user->photo) && file_exists(public_path('storage/' . $speaker->user->photo)))
+                                                <img src="{{ asset('storage/' . $speaker->user->photo) }}"
                                                     alt="{{ $speaker->user->name }}"
-                                                    class="w-12 h-12 md:w-16 md:h-16 rounded-full object-cover border-2 border-white shadow-sm group-hover:scale-105 transition-transform duration-300">
+                                                    class="w-12 h-12 md:w-16 md:h-16 rounded-full object-cover border-2 border-white shadow-sm group-hover:scale-105 transition-transform duration-300 group-hover:border-secondary/20">
                                             @else
-                                                <img src="https://ui-avatars.com/api/?name={{ urlencode($speaker->user->name) }}&background=00275E&color=fff"
+                                                <img src="https://ui-avatars.com/api/?name={{ urlencode($speaker->user->name) }}&background=00275E&color=fff&size=128&font-size=0.35&bold=true"
                                                     alt="{{ $speaker->user->name }}"
-                                                    class="w-12 h-12 md:w-16 md:h-16 rounded-full object-cover border-2 border-white shadow-sm group-hover:scale-105 transition-transform duration-300">
+                                                    class="w-12 h-12 md:w-16 md:h-16 rounded-full object-cover border-2 border-white shadow-sm group-hover:scale-105 transition-transform duration-300 group-hover:border-secondary/20">
                                             @endif
                                         </div>
                                         <div class="flex-1 min-w-0">
-                                            <h3
-                                                class="font-bold text-primary text-base md:text-lg mb-1 font-montserrat">
+                                            <a href="{{ route("speakers.profile", $speaker) }}"
+                                                class="font-bold text-primary text-base md:text-lg mb-1 font-montserrat group-hover:text-secondary transition-colors duration-300">
                                                 {{ $speaker->user->name }}
-                                            </h3>
-                                            @if ($speaker->title)
+                                            </a>
+
+                                            @if ($speaker->user->headline)
                                                 <p
-                                                    class="text-secondary font-semibold text-xs md:text-sm mb-2 font-montserrat">
-                                                    {{ $speaker->title }}
+                                                    class="text-secondary font-semibold text-xs md:text-sm mb-2 font-montserrat line-clamp-1">
+                                                    {{ $speaker->user->headline }}
                                                 </p>
                                             @endif
+
                                             @if ($speaker->bio)
                                                 <p
-                                                    class="text-gray-600 text-xs md:text-sm leading-relaxed line-clamp-2 font-lato">
+                                                    class="text-gray-600 text-xs md:text-sm leading-relaxed line-clamp-3 font-lato group-hover:text-gray-700 transition-colors duration-300">
                                                     {{ $speaker->bio }}
+                                                </p>
+                                            @elseif(!$speaker->user->headline)
+                                                <p class="text-gray-400 text-xs italic font-lato">
+                                                    No bio available
                                                 </p>
                                             @endif
                                         </div>
@@ -224,9 +233,10 @@
                                 Apply as Speaker
                             </a>
                         @endif
-
-                        <p class="text-white/80 text-sm text-center mt-4 font-lato">You must be logged in to register
-                            for this event</p>
+                        @guest()
+                            <p class="text-white/80 text-sm text-center mt-4 font-lato">You must be logged in to register
+                                for this event</p>
+                        @endguest
                     </div>
 
                     <!-- Event Info Card -->
@@ -288,20 +298,38 @@
                                                     {{ $event->physical_address }}
                                                 </p>
                                             @elseif($event->mode == 'online')
-                                                <a href="{{ $event->location }}"
-                                                    class="text-secondary font-semibold hover:underline break-all text-sm font-lato"
-                                                    target="_blank">
-                                                    Click to Join Meeting
-                                                </a>
+                                                @if ($end->isPast())
+                                                    <span class="text-red-600 font-semibold text-sm font-lato">Meeting link
+                                                        has expired.</span>
+                                                @elseif ($start->isToday())
+                                                    <a href="{{ $event->location }}"
+                                                        class="text-secondary font-semibold hover:underline break-all text-sm font-lato"
+                                                        target="_blank">
+                                                        Click to Join Meeting
+                                                    </a>
+                                                @elseif ($start->isFuture())
+                                                    <span class="text-gray-600 text-sm font-lato">
+                                                        Meeting link will be available on
+                                                        {{ $start->format('F j, Y \a\t g:i A') }}.
+                                                    </span>
+                                                @else
+                                                    <a href="{{ $event->location }}"
+                                                        class="text-secondary font-semibold hover:underline break-all text-sm font-lato"
+                                                        target="_blank">
+                                                        Click to Join Meeting
+                                                    </a>
+                                                @endif
                                             @elseif($event->mode == 'hybrid')
                                                 <p class="text-gray-700 text-sm break-words font-lato">
                                                     {{ $event->physical_address }}
                                                 </p>
-                                                <a href="{{ $event->location }}"
-                                                    class="text-secondary font-semibold hover:underline break-all text-sm font-lato"
-                                                    target="_blank">
-                                                    Click to Join Meeting
-                                                </a>
+                                                @if (Carbon::parse($event->start_date)->isNowOrPast())
+                                                    <a href="{{ $event->location }}"
+                                                        class="text-secondary font-semibold hover:underline break-all text-sm font-lato"
+                                                        target="_blank">
+                                                        Click to Join Meeting
+                                                    </a>
+                                                @endif
                                             @endif
                                         </div>
                                     </div>

@@ -1,4 +1,5 @@
 <x-app-layout>
+    <x-slot name="title">Edit Speaker Profile</x-slot>
     <div class="py-10 px-4 sm:px-6 mx-auto">
         <!-- Page Header -->
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
@@ -75,9 +76,9 @@
                             file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium
                             file:bg-[#00275E] file:text-white hover:file:bg-[#FF0000] transition" />
 
-                        @if ($speaker->photo)
+                        @if ($speaker->user->photo)
                             <div class="mt-3 flex items-center gap-2">
-                                <img src="{{ asset('storage/' . $speaker->photo) }}" alt="Current speaker photo"
+                                <img src="{{ asset('storage/' . $speaker->user->photo) }}" alt="Current speaker photo"
                                     class="w-16 h-16 object-cover rounded-lg border">
                                 <span class="text-sm text-gray-600">Current photo uploaded on
                                     {{ $speaker->updated_at->format('M d, Y') }}</span>

@@ -17,14 +17,15 @@ class ProgrammeController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-
-        $events = $this->eventService->getPublishedEvents();
+        $searchQuery = $request->input('q', null);
+        $events = $this->eventService->getPublishedEvents($searchQuery);
         return view("upcoming_events.index", [
-            'upcomingEvents' => Event::upcoming()->get(),
-            'ongoingEvents' => Event::ongoing()->get(),
-            'expiredEvents'=> Event::ended()->get(),
+            'upcomingEvents' => Event::upcoming()->count(),
+            'ongoingEvents' => Event::ongoing()->count(),
+            'expiredEvents'=> Event::ended()->count(),
+            'events' => $events,
         ]);
     }
 

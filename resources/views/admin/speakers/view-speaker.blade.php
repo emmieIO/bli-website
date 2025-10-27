@@ -42,22 +42,23 @@
                     <div class="p-6 flex flex-col sm:flex-row items-start sm:items-center gap-6">
                         <div class="flex-shrink-0">
                             <img src="{{ $speaker->photo ? asset('storage/' . $speaker->photo) : 'https://ui-avatars.com/api/?name=' . urlencode($speaker->name) . '&background=00275E&color=fff' }}"
-                                class="w-24 h-24 rounded-full object-cover border-2 border-gray-200 shadow-sm" alt="{{ $speaker->name }}">
+                                class="w-24 h-24 rounded-full object-cover border-2 border-gray-200 shadow-sm"
+                                alt="{{ $speaker->name }}">
                         </div>
                         <div class="flex-1 min-w-0">
                             <h2 class="text-xl font-bold text-gray-900">{{ $speaker->user->name }}</h2>
-                            @if($speaker->title || $speaker->organization)
+                            @if ($speaker->title || $speaker->organization)
                                 <p class="text-sm text-gray-600 mt-1">
-                                    {{ $speaker->title ?? '—' }} @ {{ $speaker->organization ?? '—' }}
+                                    {{ $speaker->user->headline ?? '—' }} @ {{ $speaker->organization ?? '—' }}
                                 </p>
                             @endif
-                            @if($speaker->email)
+                            @if ($speaker->user->email)
                                 <p class="mt-2 flex items-center gap-1.5 text-sm text-[#00275E] font-medium">
                                     <i data-lucide="mail" class="w-4 h-4"></i>
                                     {{ $speaker->user->email }}
                                 </p>
                             @endif
-                            @if($speaker->phone)
+                            @if ($speaker->phone)
                                 <p class="mt-1 flex items-center gap-1.5 text-sm text-gray-600">
                                     <i data-lucide="phone" class="w-4 h-4"></i>
                                     {{ $speaker->user->phone }}
@@ -72,7 +73,7 @@
                             Speaker Bio
                         </h3>
                         <div class="prose prose-sm max-w-none text-gray-700 leading-relaxed">
-                            {!! nl2br(e($speaker->bio ?? '<span class="text-gray-400 italic">No bio available.</span>')) !!}
+                            {!! nl2br(e($speaker->bio ?? 'No bio available.')) !!}
                         </div>
                     </div>
                 </div>
@@ -84,7 +85,7 @@
                         Contact & Social Profiles
                     </h3>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        @if($speaker->phone)
+                        @if ($speaker->phone)
                             <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition">
                                 <div class="p-2 bg-[#00275E]/10 rounded-lg">
                                     <i data-lucide="phone" class="w-4 h-4 text-[#00275E]"></i>
@@ -96,7 +97,7 @@
                             </div>
                         @endif
 
-                        @if($speaker->linkedin)
+                        @if ($speaker->linkedin)
                             <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition">
                                 <div class="p-2 bg-blue-50 rounded-lg">
                                     <i data-lucide="linkedin" class="w-4 h-4 text-blue-600"></i>
@@ -109,7 +110,7 @@
                             </div>
                         @endif
 
-                        @if($speaker->website)
+                        @if ($speaker->website)
                             <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition">
                                 <div class="p-2 bg-gray-100 rounded-lg">
                                     <i data-lucide="globe" class="w-4 h-4 text-gray-600"></i>
@@ -122,7 +123,7 @@
                             </div>
                         @endif
 
-                        @if(!$speaker->phone && !$speaker->linkedin && !$speaker->website)
+                        @if (!$speaker->phone && !$speaker->linkedin && !$speaker->website)
                             <div class="col-span-full text-center py-6 text-gray-400">
                                 <i data-lucide="link-off" class="w-8 h-8 mx-auto mb-2"></i>
                                 <p>No contact or social links added yet.</p>
@@ -140,28 +141,33 @@
                     <div class="space-y-4">
                         <div class="flex justify-between items-center">
                             <span class="text-sm text-gray-600">Status</span>
-                            @if($speaker->status == 'active')
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                            @if ($speaker->status == 'active')
+                                <span
+                                    class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
                                     Active
                                 </span>
                             @else
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                                <span
+                                    class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
                                     Inactive
                                 </span>
                             @endif
                         </div>
                         <div class="flex justify-between items-center">
                             <span class="text-sm text-gray-600">Created</span>
-                            <span class="text-sm font-medium text-gray-900">{{ $speaker->created_at->format('M d, Y') }}</span>
+                            <span
+                                class="text-sm font-medium text-gray-900">{{ $speaker->created_at->format('M d, Y') }}</span>
                         </div>
                         <div class="flex justify-between items-center">
                             <span class="text-sm text-gray-600">Last Updated</span>
-                            <span class="text-sm font-medium text-gray-900">{{ $speaker->updated_at->format('M d, Y') }}</span>
+                            <span
+                                class="text-sm font-medium text-gray-900">{{ $speaker->updated_at->format('M d, Y') }}</span>
                         </div>
-                        @if($speaker->is_featured)
+                        @if ($speaker->is_featured)
                             <div class="flex justify-between items-center">
                                 <span class="text-sm text-gray-600">Featured</span>
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800">
+                                <span
+                                    class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800">
                                     <i data-lucide="star" class="w-3 h-3 mr-1"></i>
                                     Yes
                                 </span>

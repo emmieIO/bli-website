@@ -57,5 +57,5 @@
     </div>
 
     <!-- Error Message -->
-    <x-input-error :messages="$errors->get($name)" class="mt-1 text-secondary text-xs font-lato" />
+    <x-input-error :messages="$errors->get($name)"  class="mt-1 text-secondary text-xs font-lato" />
 </div>

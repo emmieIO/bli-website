@@ -37,13 +37,19 @@ class EventService
         protected SpeakerApplicationService $speakerApplicationService
         ){}
 
-    public function getPublishedEvents()
+    public function getPublishedEvents(null|string $q=null)
     {
         $events = Event::where('is_published', true)
+            ->whereAny([
+                'title',
+                'mode',
+                'theme',
+                'physical_address'
+            ],'Like', "%$q%")
             ->orderBy('created_at', 'asc')
             ->paginate()
             ->withQueryString();
-
+            // dd($events);
         return $events;
     }
 
@@ -51,7 +57,7 @@ class EventService
         return Event::where('is_featured', true)
         ->where('start_date', '>', Carbon::now())
             ->latest()
-            ->take(5)
+            ->take(3)
             ->get();
     }
 
@@ -84,10 +90,10 @@ class EventService
         $event = Event::findOrFail($eventId);
         $existing = $event->attendees()->where('user_id', $userId)->first();
 
-        if (now()->greaterThan($event->start_date)) {
-            Log::info("User {$userId} attempted to register for event {$eventId} after the event start date.");
-            return false;
-        }
+        // if (now()->greaterThan($event->start_date)) {
+        //     Log::info("User {$userId} attempted to register for event {$eventId} after the event start date.");
+        //     return false;
+        // }
 
         // this conditions runs if a user is not registered
         if ($existing && $event->isRegistered()) {
@@ -151,7 +157,7 @@ class EventService
         return true;
     }
 
-    public function createEvent(array $validated, UploadedFile $program_cover = null)
+    public function createEvent(array $validated, UploadedFile|null $program_cover = null)
     {
 
         try {
@@ -188,7 +194,7 @@ class EventService
         return $count ? "{$slug}-{$count}" : $slug;
     }
 
-    public function updateEvent(array $validated, Event $event, UploadedFile $program_cover = null)
+    public function updateEvent(array $validated, Event $event, UploadedFile|null $program_cover = null)
     {
         DB::beginTransaction();
         try {

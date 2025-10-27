@@ -1,3 +1,6 @@
+@php
+    use Carbon\Carbon;
+@endphp
 <x-guest-layout>
     <!-- Banner Section -->
     <section class="flex relative items-center justify-center h-[80vh] mb-20 bg-cover bg-center rounded-lg"
@@ -218,7 +221,7 @@
             <div class="flex flex-wrap items-center justify-between mb-12">
                 <div class="mb-5 md:mb-0">
                     <h2 class="font-bold text-4xl font-montserrat text-primary">
-                        Upcoming Events
+                        Featured Events
                     </h2>
                     <p class="text-gray-600 mt-2 font-lato">
                         Join our transformative events and leadership gatherings
@@ -233,58 +236,88 @@
 
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 @foreach ($events as $event)
-                    <article
-                        class="bg-white rounded-xl shadow-sm overflow-hidden transition-all duration-300 hover:shadow-lg border border-gray-100 group"
-                        data-aos="fade-up" data-aos-delay="{{ $loop->index * 150 }}">
-                        <div class="relative overflow-hidden">
-                            <a href="{{ route('events.show', $event->slug) }}" class="block">
-                                <img alt="{{ $event->title }}" src="{{ asset('storage/' . $event->program_cover) }}"
-                                    class="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-500">
-                                <div
-                                    class="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                                </div>
-                                <figcaption
-                                    class="absolute top-4 left-4 bg-secondary text-white text-sm px-3 py-2 rounded-lg font-semibold font-montserrat shadow-md">
-                                    {{ sweet_date($event->start_date) }}
-                                </figcaption>
-                            </a>
+                    <div
+                        class="bg-white rounded-xl shadow-sm overflow-hidden transition-all duration-300 hover:shadow-md border border-gray-200 hover:border-primary/20 group">
+                        <div class="relative">
+                            <img src="{{ asset('storage/' . $event->program_cover) }}" alt="{{ $event->title }}"
+                                class="w-full h-40 object-cover group-hover:scale-105 transition-transform duration-500">
                         </div>
 
-                        <div class="p-6">
-                            <h6
-                                class="font-bold text-xl mb-4 font-montserrat text-primary line-clamp-2 group-hover:text-secondary transition-colors duration-300">
-                                <a href="{{ route('events.show', $event->slug) }}">
-                                    {{ $event->title }}
-                                </a>
-                            </h6>
+                        <div class="p-4">
+                            <h3
+                                class="text-base font-bold text-primary mb-2 line-clamp-2 font-montserrat group-hover:text-secondary transition-colors">
+                                <a href="{{ route('events.show', $event->slug) }}">{{ $event->title }}</a>
+                            </h3>
 
-                            <p class="line-clamp-2 mb-4 text-gray-600 font-lato leading-relaxed">
-                                {{ $event->description }}
-                            </p>
+                            <p class="font-bold text-accent mb-3 line-clamp-2 text-xs leading-relaxed font-montserrat">
+                                {{ $event->theme }}</p>
 
-                            <div class="flex items-center justify-between pt-4 border-t border-gray-100">
-                                <div class="flex items-center gap-2 text-gray-500 font-lato">
-                                    <div class="flex items-center gap-2">
-                                        @if ($event->mode === 'Online')
-                                            <i class="fas fa-laptop text-secondary text-lg"></i>
-                                        @elseif($event->mode === 'In-person')
-                                            <i class="fas fa-map-marker-alt text-accent text-lg"></i>
-                                        @else
-                                            <i class="fas fa-sun text-secondary text-lg"></i>
-                                        @endif
-                                        <span class="text-sm font-medium">{{ $event->mode }}</span>
-                                    </div>
+                            <div class="space-y-2 mb-3">
+                                <div class="flex items-center gap-2 text-gray-600 text-xs font-lato">
+                                    <span class="font-bold text-secondary text-xs">Start Date:</span>
+                                    <span>{{ Carbon::parse($event->start_date)->format('F j M Y') }}</span>
+                                </div>
+                                <div class="flex items-center gap-2 text-gray-600 text-xs font-lato">
+                                    <span class="font-bold text-secondary text-xs">End Date:</span>
+                                    <span>{{ Carbon::parse($event->end_date)->format('F j M Y') }}</span>
+                                </div>
+                                <div class="flex items-center gap-2 text-gray-600 text-xs font-lato">
+                                    <span class=" text-secondary text-xs font-bold">Mode:</span>
+                                    <span class="capitalize">{{ $event->mode ?? 'TBA' }}</span>
+                                </div>
+                                <div class="flex items-center gap-2 text-gray-600 text-xs font-lato">
+                                    <span class=" text-secondary text-xs font-bold">Slots Remaining:</span>
+                                    <span class="capitalize">{{ $event->slotsRemaining() }}</span>
                                 </div>
 
+                                @if (method_exists($event, 'isRegistered') && $event->isRegistered())
+                                    @if ($event->mode == 'hybrid')
+                                        <div class="flex items-center gap-2 text-gray-600 text-xs font-lato">
+                                            @if (Carbon::parse($event->start_date)->isNowOrPast())
+                                                <i class="fas fa-link text-secondary text-xs"></i>
+                                                <span class="capitalize">
+                                                    <a href="{{ $event->location }}" target="_blank"
+                                                        class="hover:underline">{{ $event->location }}</a>
+                                                </span>
+                                            @endif
+                                        </div>
+                                        <div class="flex items-center gap-2 text-gray-600 text-xs font-lato">
+                                            <i class="fas fa-location-arrow text-secondary text-xs"></i>
+                                            <span class="capitalize">{{ $event->physical_address }}</span>
+                                        </div>
+                                    @elseif($event->mode == 'offline')
+                                        <div class="flex items-center gap-2 text-gray-600 text-xs font-lato">
+                                            <i class="fas fa-location-arrow text-secondary text-xs"></i>
+                                            <span class="capitalize">{{ $event->physical_address }}</span>
+                                        </div>
+                                    @elseif($event->mode == 'online')
+                                        <div class="flex items-center gap-2 text-gray-600 text-xs font-lato">
+                                            @if (Carbon::parse($event->start_date)->isNowOrPast())
+                                                <i class="fas fa-link text-secondary text-xs"></i>
+                                                <span class="capitalize">
+                                                    <a href="{{ $event->location }}" target="_blank"
+                                                        class="hover:underline">{{ $event->location }}</a>
+                                                </span>
+                                            @endif
+                                        </div>
+                                    @endif
+                                @endif
+                            </div>
+
+                            <div class="flex  items-center justify-between pt-3 border-t border-gray-100">
+                                @if ($event->entry_fee > 0)
+                                    <span
+                                        class="text-base font-bold text-accent font-montserrat">₦{{ number_format($event->entry_fee, 2) }}</span>
+                                @else
+                                    <span class="text-base font-bold text-secondary font-montserrat">Free</span>
+                                @endif
                                 <a href="{{ route('events.show', $event->slug) }}"
-                                    class="font-semibold text-secondary hover:text-primary transition-colors duration-300 font-montserrat text-sm flex items-center gap-1 group/link">
-                                    Read More
-                                    <i
-                                        class="fas fa-arrow-right text-xs group-hover/link:translate-x-1 transition-transform duration-300"></i>
+                                    class="bg-primary hover:bg-secondary text-white px-3 py-1.5 rounded text-xs font-semibold transition-colors font-montserrat">
+                                    View Details
                                 </a>
                             </div>
                         </div>
-                    </article>
+                    </div>
                 @endforeach
 
                 @if ($events->count() === 0)
@@ -313,18 +346,18 @@
                 </p>
             </div>
 
-            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-8 justify-items-center items-center">
+            {{-- <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-8 justify-items-center items-center">
                 @foreach (range(1, 6) as $i)
                     <div class="group" data-aos="fade-in" data-aos-delay="{{ $i * 100 }}">
                         <div
-                            class="bg-white rounded-xl p-6 shadow-sm transition-all duration-300 hover:shadow-md hover:transform hover:-translate-y-1 border border-gray-100 h-32 flex items-center justify-center">
-                            <img src="{{ asset('images/partner/demo-partner-0' . $i . '.png') }}"
+                            class="bg-white rounded-xl p-6 shadow-sm transition-all duration-300 hover:shadow-md hover:transform hover:-translate-y-1 border border-gray-100 h-auto flex items-center justify-center">
+                            <img src="{{ asset('images/logo.jpg') }}"
                                 alt="Partner organization {{ $i }}"
-                                class="mx-auto opacity-70 group-hover:opacity-100 transition-opacity duration-300 grayscale group-hover:grayscale-0 max-h-12 object-contain">
+                                class="mx-auto opacity-70 group-hover:opacity-100 transition-opacity duration-300 grayscale group-hover:grayscale-0 h-auto object-contain">
                         </div>
                     </div>
                 @endforeach
-            </div>
+            </div> --}}
 
             <!-- Stats Section -->
             <div class="mt-16 pt-12 border-t border-gray-200" data-aos="fade-up" data-aos-delay="300">
@@ -459,106 +492,118 @@
     </section>
 
     <!-- Learning Section -->
-<section class="bg-gradient-to-br from-white to-gray-50 py-20" data-aos="fade-up" data-aos-once="true">
-    <div class="container mx-auto px-4">
-        <div class="flex flex-col lg:flex-row items-center gap-12">
-            <!-- Content Section -->
-            <div class="lg:w-1/2" data-aos="fade-right" data-aos-delay="200">
-                <div class="max-w-lg">
-                    <h2 class="font-bold text-4xl lg:text-5xl mb-6 font-montserrat text-primary leading-tight">
-                        Transformational Learning<br>
-                        <span class="text-secondary">At Your Fingertips</span>
-                    </h2>
-                    <p class="text-lg text-gray-600 mb-8 font-lato leading-relaxed">
-                        Access world-class leadership training anytime, anywhere. BLI's hybrid learning platform combines spiritual depth with practical leadership skills to equip you for impact in every sphere of society.
-                    </p>
-                    
-                    <!-- Features List -->
-                    <div class="space-y-4 mb-8">
-                        <div class="flex items-center gap-3">
-                            <div class="w-6 h-6 bg-accent rounded-full flex items-center justify-center flex-shrink-0">
-                                <i class="fas fa-check text-white text-xs"></i>
+    <section class="bg-gradient-to-br from-white to-gray-50 py-20" data-aos="fade-up" data-aos-once="true">
+        <div class="container mx-auto px-4">
+            <div class="flex flex-col lg:flex-row items-center gap-12">
+                <!-- Content Section -->
+                <div class="lg:w-1/2" data-aos="fade-right" data-aos-delay="200">
+                    <div class="max-w-lg">
+                        <h2 class="font-bold text-4xl lg:text-5xl mb-6 font-montserrat text-primary leading-tight">
+                            Transformational Learning<br>
+                            <span class="text-secondary">At Your Fingertips</span>
+                        </h2>
+                        <p class="text-lg text-gray-600 mb-8 font-lato leading-relaxed">
+                            Access world-class leadership training anytime, anywhere. BLI's hybrid learning platform
+                            combines spiritual depth with practical leadership skills to equip you for impact in every
+                            sphere of society.
+                        </p>
+
+                        <!-- Features List -->
+                        <div class="space-y-4 mb-8">
+                            <div class="flex items-center gap-3">
+                                <div
+                                    class="w-6 h-6 bg-accent rounded-full flex items-center justify-center flex-shrink-0">
+                                    <i class="fas fa-check text-white text-xs"></i>
+                                </div>
+                                <span class="text-gray-700 font-lato">Flexible online courses with in-person
+                                    intensives</span>
                             </div>
-                            <span class="text-gray-700 font-lato">Flexible online courses with in-person intensives</span>
+                            <div class="flex items-center gap-3">
+                                <div
+                                    class="w-6 h-6 bg-accent rounded-full flex items-center justify-center flex-shrink-0">
+                                    <i class="fas fa-check text-white text-xs"></i>
+                                </div>
+                                <span class="text-gray-700 font-lato">Prophetic insight integrated with leadership
+                                    training</span>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <div
+                                    class="w-6 h-6 bg-accent rounded-full flex items-center justify-center flex-shrink-0">
+                                    <i class="fas fa-check text-white text-xs"></i>
+                                </div>
+                                <span class="text-gray-700 font-lato">Global community of kingdom-minded leaders</span>
+                            </div>
                         </div>
-                        <div class="flex items-center gap-3">
-                            <div class="w-6 h-6 bg-accent rounded-full flex items-center justify-center flex-shrink-0">
-                                <i class="fas fa-check text-white text-xs"></i>
-                            </div>
-                            <span class="text-gray-700 font-lato">Prophetic insight integrated with leadership training</span>
-                        </div>
-                        <div class="flex items-center gap-3">
-                            <div class="w-6 h-6 bg-accent rounded-full flex items-center justify-center flex-shrink-0">
-                                <i class="fas fa-check text-white text-xs"></i>
-                            </div>
-                            <span class="text-gray-700 font-lato">Global community of kingdom-minded leaders</span>
+
+                        <!-- CTA Buttons -->
+                        <div class="flex flex-col sm:flex-row gap-4">
+                            <a href="#"
+                                class="bg-secondary hover:bg-primary text-white font-bold py-4 px-8 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1 text-center font-montserrat">
+                                Start Learning Today
+                            </a>
+                            <a href="#"
+                                class="border-2 border-primary text-primary hover:bg-primary hover:text-white font-bold py-4 px-8 rounded-lg transition-all duration-300 text-center font-montserrat">
+                                Explore Courses
+                            </a>
                         </div>
                     </div>
+                </div>
 
-                    <!-- CTA Buttons -->
-                    <div class="flex flex-col sm:flex-row gap-4">
-                        <a href="#" class="bg-secondary hover:bg-primary text-white font-bold py-4 px-8 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1 text-center font-montserrat">
-                            Start Learning Today
-                        </a>
-                        <a href="#" class="border-2 border-primary text-primary hover:bg-primary hover:text-white font-bold py-4 px-8 rounded-lg transition-all duration-300 text-center font-montserrat">
-                            Explore Courses
-                        </a>
+                <!-- Image/Visual Section -->
+                <div class="lg:w-1/2" data-aos="fade-left" data-aos-delay="300">
+                    <div class="relative">
+                        <!-- Main Image -->
+                        <div
+                            class="bg-white rounded-2xl shadow-xl p-6 transform rotate-2 hover:rotate-0 transition-transform duration-500">
+                            <img src="{{ asset('images/logo.jpg') }}" alt="BLI Learning Platform"
+                                class="rounded-xl w-full h-auto shadow-md">
+                        </div>
+
+                        <!-- Floating Elements -->
+                        <div class="absolute -top-4 -left-4 bg-accent text-white p-4 rounded-xl shadow-lg"
+                            data-aos="zoom-in" data-aos-delay="500">
+                            <div class="text-center">
+                                <div class="font-bold text-2xl font-montserrat">2K+</div>
+                                <div class="text-sm font-lato">Leaders Trained</div>
+                            </div>
+                        </div>
+
+                        <div class="absolute -bottom-4 -right-4 bg-primary text-white p-4 rounded-xl shadow-lg"
+                            data-aos="zoom-in" data-aos-delay="700">
+                            <div class="text-center">
+                                <div class="font-bold text-2xl font-montserrat">98%</div>
+                                <div class="text-sm font-lato">Success Rate</div>
+                            </div>
+                        </div>
+
+                        <!-- Background Decoration -->
+                        <div
+                            class="absolute -z-10 top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-secondary/10 rounded-full blur-3xl">
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Image/Visual Section -->
-            <div class="lg:w-1/2" data-aos="fade-left" data-aos-delay="300">
-                <div class="relative">
-                    <!-- Main Image -->
-                    <div class="bg-white rounded-2xl shadow-xl p-6 transform rotate-2 hover:rotate-0 transition-transform duration-500">
-                        <img 
-                            src="{{ asset('images/logo.jpg') }}" 
-                            alt="BLI Learning Platform" 
-                            class="rounded-xl w-full h-auto shadow-md"
-                        >
-                    </div>
-                    
-                    <!-- Floating Elements -->
-                    <div class="absolute -top-4 -left-4 bg-accent text-white p-4 rounded-xl shadow-lg" data-aos="zoom-in" data-aos-delay="500">
-                        <div class="text-center">
-                            <div class="font-bold text-2xl font-montserrat">2K+</div>
-                            <div class="text-sm font-lato">Leaders Trained</div>
-                        </div>
-                    </div>
-                    
-                    <div class="absolute -bottom-4 -right-4 bg-primary text-white p-4 rounded-xl shadow-lg" data-aos="zoom-in" data-aos-delay="700">
-                        <div class="text-center">
-                            <div class="font-bold text-2xl font-montserrat">98%</div>
-                            <div class="text-sm font-lato">Success Rate</div>
-                        </div>
-                    </div>
-
-                    <!-- Background Decoration -->
-                    <div class="absolute -z-10 top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-secondary/10 rounded-full blur-3xl"></div>
+            <!-- Bottom Stats -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-6 mt-20 pt-12 border-t border-gray-200" data-aos="fade-up"
+                data-aos-delay="400">
+                <div class="text-center">
+                    <div class="text-3xl font-bold text-primary mb-2 font-montserrat">24/7</div>
+                    <div class="text-gray-600 font-lato">Course Access</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-3xl font-bold text-secondary mb-2 font-montserrat">50+</div>
+                    <div class="text-gray-600 font-lato">Countries</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-3xl font-bold text-accent mb-2 font-montserrat">15+</div>
+                    <div class="text-gray-600 font-lato">Years Experience</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-3xl font-bold text-primary mb-2 font-montserrat">100%</div>
+                    <div class="text-gray-600 font-lato">Kingdom Focused</div>
                 </div>
             </div>
         </div>
-
-        <!-- Bottom Stats -->
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-6 mt-20 pt-12 border-t border-gray-200" data-aos="fade-up" data-aos-delay="400">
-            <div class="text-center">
-                <div class="text-3xl font-bold text-primary mb-2 font-montserrat">24/7</div>
-                <div class="text-gray-600 font-lato">Course Access</div>
-            </div>
-            <div class="text-center">
-                <div class="text-3xl font-bold text-secondary mb-2 font-montserrat">50+</div>
-                <div class="text-gray-600 font-lato">Countries</div>
-            </div>
-            <div class="text-center">
-                <div class="text-3xl font-bold text-accent mb-2 font-montserrat">15+</div>
-                <div class="text-gray-600 font-lato">Years Experience</div>
-            </div>
-            <div class="text-center">
-                <div class="text-3xl font-bold text-primary mb-2 font-montserrat">100%</div>
-                <div class="text-gray-600 font-lato">Kingdom Focused</div>
-            </div>
-        </div>
-    </div>
-</section>
+    </section>
 </x-guest-layout>

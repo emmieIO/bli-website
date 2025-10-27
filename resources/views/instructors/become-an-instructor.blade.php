@@ -1,20 +1,23 @@
 <x-guest-layout>
     <!-- Hero Section -->
-    <section class="relative py-12 md:py-16 text-white overflow-hidden">
-        <div class="absolute inset-0 bg-gradient-to-r from-black/40 to-black/60 bg-cover bg-center bg-no-repeat"
-            style="background-image: url('{{ asset('images/banner-become-instructors.png') }}')">
-        </div>
+    <section class="relative py-12 md:py-16 text-white overflow-hidden rounded-lg bg-primary bg-cover bg-center bg-no-repeat"
+        style="
+            background-image: url('{{ asset('images/pattern-bg.jpg') }}');
+            /* background-color: rgb(0,30, 255); */
+            background-blend-mode:multiply;
+            ">
         <div class="container mx-auto px-4 relative">
             <div class="max-w-7xl mx-auto text-center md:text-left">
-                <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 text-white">Become an Instructor</h1>
+                <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 text-white font-montserrat">Become an Instructor</h1>
                 <p class="text-xl md:text-2xl mb-8 text-gray-200 leading-relaxed font-lato">
                     Share your passion, inspire learners worldwide, and empower the next generation of leaders.
                 </p>
                 <a href="#apply-now"
-                    class="inline-block bg-secondary hover:bg-secondary-600 text-white font-semibold px-5 py-4 rounded-md transition-all duration-300 transform hover:scale-105 mb-4">
-                    Begin process
+                    class="inline-flex items-center bg-secondary hover:bg-secondary-600 text-white rounded-md transition-all duration-300 transform hover:scale-105 my-2 p-2">
+                    <i data-lucide="arrow-right-circle" class="p-0.5 size-5"></i>
+                    <span>Begin Process</span>
                 </a>
-                <p class="text-gray-300 text-sm">We'll review your proposal within 5–7 business days.</p>
+                <p class="text-gray-300 text-sm font-lato font-bold">We'll review your proposal within 5–7 business days.</p>
             </div>
         </div>
     </section>
@@ -23,9 +26,9 @@
     <section id="how-it-works" class="py-12 md:py-16 bg-white">
         <div class="container mx-auto px-4">
             <div class="text-center mb-12">
-                <h2 class="text-3xl md:text-4xl lg:text-5xl font-bold text-primary mb-4">How to Become an Instructor
+                <h2 class="text-3xl md:text-4xl lg:text-5xl font-bold text-primary mb-4 font-montserrat">How to Become an Instructor
                 </h2>
-                <p class="text-gray-600 text-lg max-w-2xl mx-auto">
+                <p class="text-secondary-600 text-md max-w-2xl mx-auto font-lato">
                     Just 6 simple steps. No tech skills needed — we'll guide you every step of the way.
                 </p>
             </div>
@@ -36,10 +39,10 @@
                         class="step-card bg-primary-50 p-6 rounded-lg shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
                         <div class="flex items-center mb-4">
                             <div
-                                class="flex-shrink-0 w-10 h-10 bg-secondary text-white rounded-full flex items-center justify-center font-bold mr-4">
+                                class="flex-shrink-0 w-10 h-10 bg-accent text-white rounded-full flex items-center justify-center font-bold mr-4">
                                 {{ $stepData['step'] }}
                             </div>
-                            <h3 class="text-lg font-bold text-primary">{{ $stepData['title'] }}</h3>
+                            <h3 class="text-lg font-bold text-primary font-montserrat">{{ $stepData['title'] }}</h3>
                         </div>
                         <p class="text-gray-600 text-sm leading-relaxed">{{ $stepData['desc'] }}</p>
                     </div>
@@ -72,7 +75,7 @@
                         <i data-lucide="dollar-sign" class="w-8 h-8 text-accent"></i>
                     </div>
                     <h3 class="text-xl font-bold text-primary mb-4">Earn Meaningful Income</h3>
-                    <p class="text-gray-600">Get paid monthly with one of the industry's best revenue shares.</p>
+                    <p class="text-gray-600">Inspire learners, advance careers, and earn meaningful income by sharing your expertise with a global audience.</p>
                 </div>
 
                 <div
@@ -101,7 +104,7 @@
         <div class="container mx-auto px-4">
             <div class="max-w-4xl mx-auto">
                 <div class="bg-white rounded-lg shadow-lg p-8 md:p-12 text-center border-t-4 border-secondary">
-                    <h2 class="text-2xl md:text-3xl font-bold text-primary mb-4">Ready to Inspire Learners?</h2>
+                    <h2 class="text-2xl md:text-3xl font-bold text-primary mb-4 font-montserrat">Ready to Inspire Learners?</h2>
                     <p class="text-gray-600 text-lg mb-8">
                         Enter your fullname & email below to get a secure link and begin your instructor application.
                     </p>
@@ -151,7 +154,7 @@
     <section class="py-12 md:py-16 bg-gray-50">
         <div class="container mx-auto px-4">
             <div class="text-center mb-12">
-                <h2 class="text-3xl md:text-4xl lg:text-5xl font-bold text-primary mb-4">Instructor Success Stories</h2>
+                <h2 class="text-3xl md:text-4xl lg:text-5xl font-bold text-primary mb-4 font-montserrat">Instructor Success Stories</h2>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
@@ -191,7 +194,7 @@
     <section id="faq" class="py-12 md:py-16 bg-white">
         <div class="container mx-auto px-4 max-w-4xl">
             <div class="text-center mb-12">
-                <h2 class="text-3xl md:text-4xl lg:text-5xl font-bold text-primary mb-4">Frequently Asked Questions
+                <h2 class="text-3xl md:text-4xl lg:text-5xl font-bold text-primary mb-4 font-montserrat">Frequently Asked Questions
                 </h2>
             </div>
 

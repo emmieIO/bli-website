@@ -13,7 +13,8 @@ class JoinEventAction
      */
     public function __construct(
         protected EventService $eventService
-    ){}
+    ) {
+    }
     /**
      * Invoke the class instance.
      */
@@ -31,14 +32,15 @@ class JoinEventAction
         }
 
         // Check if event has started
-        if (isset($event->start_date) && now()->greaterThanOrEqualTo($event->start_date)) {
-            return back()->with([
-                "type" => "error",
-                "message" => "Registration failed. The event has already started."
-            ]);
-        }
+        // if (isset($event->start_date) && now()->greaterThanOrEqualTo($event->start_date)) {
+        //     return back()->with([
+        //         "type" => "error",
+        //         "message" => "Registration failed. The event has already started."
+        //     ]);
+        // }
 
-        if($event->attendee_slots !== null){
+
+        if ($event->attendee_slots !== null) {
             // Check for available slots
             $slotsRemaining = $event->slotsRemaining();
             if ($slotsRemaining <= 0) {
@@ -58,7 +60,7 @@ class JoinEventAction
             ]);
         }
 
-        if($this->eventService->registerForEvent($event->id)){
+        if ($this->eventService->registerForEvent($event->id)) {
             return back()->with([
                 "type" => "success",
                 "message" => "You have successfully registered for the event."

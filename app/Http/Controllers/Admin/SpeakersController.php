@@ -74,6 +74,11 @@ class SpeakersController extends Controller
         return view("admin.speakers.view-speaker", compact("speaker"));
     }
 
+    public function viewSpeakerProfile(Speaker $speaker)
+    {
+        return view("speakers.speaker-profile", compact("speaker"));
+    }
+
     public function edit(Speaker $speaker)
     {
         return view("admin.speakers.edit-speaker", compact("speaker"));

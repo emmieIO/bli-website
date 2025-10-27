@@ -36,7 +36,7 @@ class SpeakerApplicationService
         }
     }
 
-    public function apply(array $data, Event $event, UploadedFile $file = null)
+    public function apply(array $data, Event $event, UploadedFile|null $file = null)
     {
         $existing = $this->getExistingApplication($event);
 
@@ -170,7 +170,7 @@ class SpeakerApplicationService
         }
     }
 
-    public function rejectSpeakerApplication(SpeakerApplication $application, string $feedback, string $status = null)
+    public function rejectSpeakerApplication(SpeakerApplication $application, string $feedback, string|null $status = null)
     {
         try {
             DB::beginTransaction();

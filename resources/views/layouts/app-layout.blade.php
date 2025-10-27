@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>BLI Dashboard</title>
+    <title>{{ $title ?? 'BLI' }}</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="icon" type="image/png" href="{{ asset('images/logo.jpg') }}">
@@ -17,29 +17,7 @@
     <script src="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.js"></script>
     <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
-    <style>
-        [x-cloak] {
-            display: none !important;
-        }
 
-        /* Custom scrollbar */
-        .sidebar-scroll::-webkit-scrollbar {
-            width: 4px;
-        }
-
-        .sidebar-scroll::-webkit-scrollbar-track {
-            background: transparent;
-        }
-
-        .sidebar-scroll::-webkit-scrollbar-thumb {
-            background: rgba(0, 33, 71, 0.2);
-            border-radius: 10px;
-        }
-
-        .sidebar-scroll::-webkit-scrollbar-thumb:hover {
-            background: rgba(0, 33, 71, 0.4);
-        }
-    </style>
 </head>
 
 <body class="bg-gray-50 text-gray-800 font-lato relative min-h-screen">
@@ -50,7 +28,7 @@
         <div class="px-6 py-2">
             <div class="flex items-center justify-between">
                 <!-- Mobile Menu Button -->
-                <div class="flex items-center justify-start">
+                <div class="flex items-center justify-start gap-3">
                     <button data-drawer-target="logo-sidebar" data-drawer-toggle="logo-sidebar"
                         aria-controls="logo-sidebar" type="button"
                         class="inline-flex items-center p-2 text-sm rounded-lg sm:hidden hover:bg-primary hover:text-white focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all duration-200">
@@ -62,6 +40,7 @@
                             </path>
                         </svg>
                     </button>
+                    <a class="font-bold text-primary bg-primary-200 p-3 rounded-lg hover:text-secondary" href="{{ route('homepage') }}">Go back Home</a>
                 </div>
 
                 <!-- User Profile Dropdown -->

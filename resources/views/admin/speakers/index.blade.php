@@ -63,7 +63,7 @@
                                     <div class="flex items-center gap-3">
                                         <div class="flex-shrink-0 h-10 w-10 relative">
                                             <img class="h-10 w-10 rounded-full object-cover border border-primary-100"
-                                                src="{{ asset('storage/' . $speaker->user->photo)}}"
+                                                src="{{$speaker->user->photo ? asset('storage/' . $speaker->user->photo) : asset('storage/' . $speaker->photo) }}"
                                                 alt="{{ $speaker->name }}">
                                             @if($speaker->is_featured)
                                                 <span class="absolute -top-1 -right-1 bg-accent text-white rounded-full p-0.5">

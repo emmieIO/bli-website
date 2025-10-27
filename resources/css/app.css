@@ -140,16 +140,16 @@
 }
 
 ::-webkit-scrollbar {
-    width: 0; /* vertical scrollbar */
-    height: 0; /* horizontal scrollbar */
+    width: .5rem; /* vertical scrollbar */
+    height: .5rem; /* horizontal scrollbar */
 }
 
 ::-webkit-scrollbar-track {
-    background: orange;
+    @apply bg-secondary-400
 }
 
 ::-webkit-scrollbar-thumb {
-    @apply bg-orange-600 w-1 h-1;
+    @apply bg-primary w-1 h-1;
 
     border-radius: 4px;
 }
@@ -302,13 +302,13 @@ html {
 }
 
 .auth-layout {
-    background-image: url(../images/students.png);
-    @apply bg-gradient-to-br from-primary-100 to-secondary-100;
+    background-image: url(../images/pattern-bg1.jpg);
+    background-color: rgba(14, 4, 40, 0.734);
     background-size: cover;
     background-position: center;
-    background-blend-mode: multiply;
+    background-blend-mode:multiply;
     background-repeat: no-repeat;
-    /* background-attachment: fixed; */
+    background-attachment: fixed;
 }
 
 @keyframes scale {

@@ -87,6 +87,7 @@ class Event extends Model
         return $this->attendee_slots - $this->attendees()->count();
     }
 
+
     public function resources()
     {
         return $this->hasMany(EventResource::class);

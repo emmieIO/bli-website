@@ -32,7 +32,7 @@ class SpeakerAccountCreatedNotification extends Notification
         $appName = config('app.name');
 
         $mail = (new MailMessage)
-            ->subject("Welcome to {$appName} — Your Speaker Account Is Ready")
+            ->subject("Welcome to {$appName} — Your Speaker Account Creation Successful")
             ->greeting("Dear {$notifiable->name},")
             ->line("We’re delighted to welcome you to the {$appName} community of speakers and thought leaders.");
 

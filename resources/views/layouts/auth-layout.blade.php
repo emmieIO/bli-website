@@ -25,12 +25,12 @@
                 <div class="mb-8 text-center"
                      data-aos="fade-down"
                      data-aos-duration="800">
-                    <h1 class="text-3xl font-bold text-primary font-montserrat">{{ $title ?? 'Welcome' }}</h1>
-                    <p class="text-sm text-gray-600 mt-2 font-lato">{{ $description ?? '' }}</p>
+                    <h1 class="text-3xl font-bold text-white font-montserrat">{{ $title ?? 'Welcome' }}</h1>
+                    <p class="text-sm text-white mt-2 font-lato">{{ $description ?? '' }}</p>
                 </div>
 
                 <!-- Dynamic Form Content -->
-                <div class="space-y-6 bg-white rounded-2xl shadow-lg p-8"
+                <div class="space-y-6 bg-white shadow-inner shadow-primary rounded-2xl p-8"
                      data-aos="fade-up"
                      data-aos-duration="800"
                      data-aos-delay="200">
@@ -38,23 +38,14 @@
                 </div>
 
                 <!-- Footer Links -->
-                <div class="mt-8 text-center space-y-4"
-                     data-aos="fade"
-                     data-aos-duration="800"
-                     data-aos-delay="400">
+                <div class="mt-8 text-center space-y-4">
                     <a href="{{ route('homepage') }}"
-                        class="text-xs text-secondary underline hover:text-secondary-600 transition font-lato"
-                        data-aos="zoom-in"
-                        data-aos-duration="400"
-                        data-aos-delay="500">
+                        class="text-sm font-medium text-secondary underline hover:text-secondary-600 transition font-lato">
                         Go back home
                     </a>
-                    {{-- <p class="text-xs text-gray-500 font-lato"
-                       data-aos="fade-up"
-                       data-aos-duration="600"
-                       data-aos-delay="600">
+                    <p class="text-xs text-gray-500 font-lato">
                         &copy; 2025 Beacon Leadership Institute. All rights reserved.
-                    </p> --}}
+                    </p>
                 </div>
             </div>
         </div>
