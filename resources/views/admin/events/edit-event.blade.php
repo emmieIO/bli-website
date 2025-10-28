@@ -145,9 +145,14 @@
                                 {{ old('is_allowing_application', $event->is_allowing_application) ? 'checked' : '' }}>
                             <span class="ml-2 text-sm font-medium text-gray-700">Allow Speaker Applications</span>
                         </label>
+                        <label class="inline-flex items-center">
+                            <input type="checkbox" name="is_featured"
+                                class="rounded border-gray-300 text-orange-600 focus:ring-orange-600"
+                                {{ old('is_featured', $event->is_featured) ? 'checked' : '' }}>
+                            <span class="ml-2 text-sm font-medium text-gray-700">Is featured</span>
+                        </label>
                     </div>
-                    <p class="mt-2 text-xs text-gray-500">Active = visible internally. Published = visible to public.
-                        Speaker applications can be managed separately.</p>
+                    <p class="mt-2 text-xs text-gray-500">Active — event is enabled in the admin dashboard. Published — event is visible to the public. Enable speaker applications to accept submissions; manage them from the Applications section. Is featured — highlights this event in featured lists and homepage sections to increase visibility.</p>
                 </div>
 
                 <!-- Hidden Fields -->

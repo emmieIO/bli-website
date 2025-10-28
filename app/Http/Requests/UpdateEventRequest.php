@@ -40,8 +40,9 @@ class UpdateEventRequest extends FormRequest
             'is_active' => 'sometimes|boolean',
             'metadata' => 'nullable|array',
             'contact_email' => 'nullable|email|max:255',
-            'is_published' => 'sometimes|boolean',
+            'is_published' => 'nullable|boolean',
             'is_allowing_application' => 'sometimes|boolean',
+            'is_featured' => 'nullable|boolean',
             'entry_fee' => 'nullable|numeric|min:0|max:999999.99',
         ];
     }
@@ -80,6 +81,7 @@ class UpdateEventRequest extends FormRequest
             'contact_email.max' => 'The contact email may not be greater than 255 characters.',
             'is_published.boolean' => 'The published status must be true or false.',
             'is_allowing_application.boolean' => 'The application status must be true or false.',
+            'is_featured.boolean' => 'The featured status must be true or false.',
             'entry_fee.numeric' => 'The entry fee must be a number.',
             'entry_fee.min' => 'The entry fee must be at least 0.',
             'entry_fee.max' => 'The entry fee may not be greater than 999999.99.',
@@ -91,7 +93,8 @@ class UpdateEventRequest extends FormRequest
         $this->merge([
             'is_active' => $this->has('is_active'),
             'is_published' => $this->has('is_published'),
-            'is_allowing_application' => $this->has('is_allowing_application')
+            'is_allowing_application' => $this->has('is_allowing_application'),
+            'is_featured' => $this->has('is_featured')
         ]);
     }
 }

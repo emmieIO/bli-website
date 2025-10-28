@@ -108,41 +108,40 @@
                                             <span class="capitalize">{{ $event->slotsRemaining() }}</span>
                                         </div>
 
-                                        @if (method_exists($event, 'isRegistered') && $event->isRegistered())
-                                            @if ($event->mode == 'hybrid')
-                                                <div class="flex items-center gap-2 text-gray-600 text-xs font-lato">
-                                                    @if (Carbon::parse($event->start_date)->isNowOrPast())
-                                                        <i class="fas fa-link text-secondary text-xs"></i>
-                                                        <span class="capitalize">
-                                                            <a href="{{ $event->location }}" target="_blank"
-                                                                class="hover:underline">{{ $event->location }}</a>
-                                                        </span>
-                                                    @endif
-                                                </div>
-                                                <div class="flex items-center gap-2 text-gray-600 text-xs font-lato">
-                                                    <i class="fas fa-location-arrow text-secondary text-xs"></i>
-                                                    <span class="capitalize">{{ $event->physical_address }}</span>
-                                                </div>
-                                            @elseif($event->mode == 'offline')
-                                                <div class="flex items-center gap-2 text-gray-600 text-xs font-lato">
-                                                    <i class="fas fa-location-arrow text-secondary text-xs"></i>
-                                                    <span class="capitalize">{{ $event->physical_address }}</span>
-                                                </div>
-                                            @elseif($event->mode == 'online')
-                                                <div class="flex items-center gap-2 text-gray-600 text-xs font-lato">
-                                                    @if (Carbon::parse($event->start_date)->isNowOrPast())
-                                                        <i class="fas fa-link text-secondary text-xs"></i>
-                                                        <span class="capitalize">
-                                                            <a href="{{ $event->location }}" target="_blank"
-                                                                class="hover:underline">{{ $event->location }}</a>
-                                                        </span>
-                                                    @endif
-                                                </div>
-                                            @endif
+
+                                        @if ($event->mode == 'hybrid')
+                                            <div class="flex items-center gap-2 text-gray-600 text-xs font-lato">
+                                                @if ($event->isRegistered() && Carbon::parse($event->start_date)->isNowOrPast())
+                                                    <i class="fas fa-link text-secondary text-xs"></i>
+                                                    <span class="capitalize">
+                                                        <a href="{{ $event->location }}" target="_blank"
+                                                            class="hover:underline">{{ $event->location }}</a>
+                                                    </span>
+                                                @endif
+                                            </div>
+                                            <div class="flex items-center gap-2 text-gray-600 text-xs font-lato">
+                                                <i class="fas fa-location-arrow text-secondary text-xs"></i>
+                                                <span class="capitalize">{{ $event->physical_address }}</span>
+                                            </div>
+                                        @elseif($event->mode == 'offline')
+                                            <div class="flex items-center gap-2 text-gray-600 text-xs font-lato">
+                                                <i class="fas fa-location-arrow text-secondary text-xs"></i>
+                                                <span class="capitalize">{{ $event->physical_address }}</span>
+                                            </div>
+                                        @elseif($event->mode == 'online')
+                                            <div class="flex items-center gap-2 text-gray-600 text-xs font-lato">
+                                                @if ($event->isRegistered() && Carbon::parse($event->start_date)->isNowOrPast())
+                                                    <i class="fas fa-link text-secondary text-xs"></i>
+                                                    <span class="capitalize">
+                                                        <a href="{{ $event->location }}" target="_blank"
+                                                            class="hover:underline">{{ $event->location }}</a>
+                                                    </span>
+                                                @endif
+                                            </div>
                                         @endif
                                     </div>
 
-                                    <div class="flex items-center justify-between pt-3 border-t border-gray-100">
+                                    <div class="flex  items-center justify-between pt-3 border-t border-gray-100">
                                         @if ($event->entry_fee > 0)
                                             <span
                                                 class="text-base font-bold text-accent font-montserrat">₦{{ number_format($event->entry_fee, 2) }}</span>

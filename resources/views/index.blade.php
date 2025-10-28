@@ -270,10 +270,10 @@
                                     <span class="capitalize">{{ $event->slotsRemaining() }}</span>
                                 </div>
 
-                                @if (method_exists($event, 'isRegistered') && $event->isRegistered())
+                               
                                     @if ($event->mode == 'hybrid')
                                         <div class="flex items-center gap-2 text-gray-600 text-xs font-lato">
-                                            @if (Carbon::parse($event->start_date)->isNowOrPast())
+                                            @if ($event->isRegistered() && Carbon::parse($event->start_date)->isNowOrPast())
                                                 <i class="fas fa-link text-secondary text-xs"></i>
                                                 <span class="capitalize">
                                                     <a href="{{ $event->location }}" target="_blank"
@@ -292,7 +292,7 @@
                                         </div>
                                     @elseif($event->mode == 'online')
                                         <div class="flex items-center gap-2 text-gray-600 text-xs font-lato">
-                                            @if (Carbon::parse($event->start_date)->isNowOrPast())
+                                            @if ($event->isRegistered() && Carbon::parse($event->start_date)->isNowOrPast())
                                                 <i class="fas fa-link text-secondary text-xs"></i>
                                                 <span class="capitalize">
                                                     <a href="{{ $event->location }}" target="_blank"
@@ -301,7 +301,6 @@
                                             @endif
                                         </div>
                                     @endif
-                                @endif
                             </div>
 
                             <div class="flex  items-center justify-between pt-3 border-t border-gray-100">
