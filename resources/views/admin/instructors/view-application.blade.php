@@ -96,7 +96,7 @@
                     </div>
                     <div>
                         <p class="text-sm text-gray-500 font-medium">Professional Headline</p>
-                        <p class="font-medium text-gray-800">{{ $application->headline }}</p>
+                        <p class="font-medium text-gray-800">{{ $application->user->headline }}</p>
                     </div>
                     <div>
                         <p class="text-sm text-gray-500 font-medium">Years of Experience</p>

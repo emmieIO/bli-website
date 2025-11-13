@@ -40,7 +40,7 @@
             <div id="video_field">
                 <label for="video" class="block mb-2 text-sm font-medium text-gray-900">Video
                     Resource</label>
-                <input type="file" name="video_field" id="video_lesson"
+                <input type="file" accept=".mp4,.mov,.mkv" name="video_field" id="video_lesson"
                     class="bg-gray-50 border border-gray-300 file:bg-orange-600 text-gray-900 text-sm rounded-lg block w-full">
                 <div class="flex items-center mt-3 px-1">
                     <input id="is_preview" type="checkbox" name="is_preview"
@@ -48,7 +48,6 @@
                     <label for="is_preview" class="ml-2 text-sm font-medium text-gray-900 ">Is
                         Preview?</label>
                 </div>
-                <mux-uploader endpoint="https://httpbin.org/put"></mux-uploader>
             </div>
 
             <div id="pdf_field">

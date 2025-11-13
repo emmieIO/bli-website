@@ -18,7 +18,7 @@
         <!-- Resend Button -->
         <div data-aos="fade-up" data-aos-duration="600" data-aos-delay="200">
             <button type="submit"
-                class="w-full flex items-center justify-center gap-2 py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-accent hover:bg-accent-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-accent-500 transition-all duration-200 transform hover:scale-105 font-montserrat">
+                class="w-full flex items-center justify-center gap-2 py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-secondary hover:bg-secondary-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-secondary-500 transition-all duration-200 transform hover:scale-105 font-montserrat">
                 <i data-lucide="refresh-ccw" class="w-4 h-4"></i>
                 Resend Verification Email
             </button>

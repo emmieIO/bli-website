@@ -7,14 +7,12 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\CreateLessonRequest;
 use App\Models\CourseModule;
 use App\Services\Course\CourseModuleService;
-use App\Services\MuxVideoService;
 use Illuminate\Http\Request;
 
 class LessonController extends Controller
 {
     public function __construct(
         public CourseModuleService $courseModuleService,
-        public MuxVideoService $muxVideoService
     ) {
     }
     /**

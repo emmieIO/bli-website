@@ -169,7 +169,7 @@ class InstructorApplicationService
             $missing[] = 'name';
         }
 
-        if (!filled($profile->headline))
+        if (!filled($profile->user->headline))
             $missing[] = 'headline';
         if (!filled($profile->bio))
             $missing[] = 'bio';
@@ -228,6 +228,7 @@ class InstructorApplicationService
                 // assign instructor role
                 $user->syncRoles([UserRoles::INSTRUCTOR->value]);
                 $user->email_verified_at = Carbon::now();
+                $user->save();
                 // update application status to approved
                 $application->update([
                     'status' => ApplicationStatus::APPROVED->value,

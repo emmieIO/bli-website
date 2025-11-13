@@ -40,7 +40,11 @@
                             </path>
                         </svg>
                     </button>
-                    <a class="font-bold text-primary bg-primary-200 p-3 rounded-lg hover:text-secondary" href="{{ route('homepage') }}">Go back Home</a>
+                    <a class="inline-flex items-center gap-2 font-bold text-sm text-primary bg-primary-200 px-2 py-3 rounded-lg hover:text-secondary"
+                        href="{{ route('homepage') }}">
+                        <i data-lucide="home" class="size-5"></i>
+                        Go back Home
+                    </a>
                 </div>
 
                 <!-- User Profile Dropdown -->
@@ -107,26 +111,27 @@
 
     <!-- Sidebar -->
     <aside id="logo-sidebar"
-        class="fixed top-0 left-0 z-40 w-[280px] h-screen transition-transform -translate-x-full border-r border-primary-100 sm:translate-x-0 bg-white shadow-lg"
+        class="fixed top-0 left-0 z-40 w-64 h-screen transition-transform -translate-x-full sm:translate-x-0 bg-gradient-to-b from-slate-900 to-slate-800 shadow-2xl"
         aria-label="Sidebar">
-        <div class="h-full overflow-y-auto sidebar-scroll">
+        <div class="h-full px-4 py-6 overflow-y-auto">
             <!-- Logo Section -->
-            <div
-                class="flex items-center justify-between p-6 border-b border-primary-100 bg-gradient-to-r from-primary to-primary-700">
-                <a href="{{ route('user_dashboard') }}" class="flex items-center gap-3 group">
-                    <div
-                        class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm border border-white/30">
-                        <i data-lucide="sparkles" class="w-5 h-5 text-white"></i>
+            <div class="flex items-center justify-between mb-8 pb-6 border-b border-slate-700/50">
+                <a href="{{ route('user_dashboard') }}" class="flex items-center space-x-3 group">
+                    <div class="relative">
+                        <img src="{{ asset('images/logo.jpg') }}"
+                            class="h-10 w-10 rounded-xl shadow-lg ring-2 ring-white/10 group-hover:ring-white/20 transition-all duration-300"
+                            alt="BLI Logo" />
+                        <div
+                            class="absolute inset-0 rounded-xl bg-gradient-to-tr from-transparent to-white/5 group-hover:to-white/10 transition-all duration-300">
+                        </div>
                     </div>
-                    <div>
-                        <span
-                            class="self-center text-xl font-bold text-white font-montserrat whitespace-nowrap">BLI</span>
-                        <p class="text-xs text-white/80 font-lato">Dashboard</p>
-                    </div>
+                    <span
+                        class="text-white font-bold text-lg tracking-tight group-hover:text-blue-300 transition-colors duration-300">BLI</span>
                 </a>
+                <!-- Mobile close button -->
                 <button data-drawer-target="logo-sidebar" data-drawer-toggle="logo-sidebar" aria-controls="logo-sidebar"
                     type="button"
-                    class="inline-flex items-center p-2 text-sm text-white/80 rounded-lg sm:hidden hover:bg-white/20 focus:outline-none focus:ring-2 focus:ring-white/50 transition-all duration-200">
+                    class="inline-flex items-center p-2 text-sm text-slate-400 rounded-lg sm:hidden hover:bg-slate-700/50 hover:text-white focus:outline-none focus:ring-2 focus:ring-slate-600 transition-all duration-200">
                     <span class="sr-only">Close sidebar</span>
                     <svg class="w-5 h-5" aria-hidden="true" fill="currentColor" viewBox="0 0 20 20"
                         xmlns="http://www.w3.org/2000/svg">
@@ -136,19 +141,18 @@
                 </button>
             </div>
 
-            <!-- Sidebar Content -->
-            <div class="p-4">
+            <!-- Navigation -->
+            <div class="space-y-1">
                 <x-sidebar />
             </div>
         </div>
     </aside>
 
     <!-- Main Content -->
-    <div class="p-6 sm:ml-[280px] min-h-screen bg-gradient-to-br from-gray-50 to-primary-50/30">
+    <div class="p-4 sm:ml-64">
         <!-- Error Messages -->
         @if ($errors->any())
-            <div class="mb-6 p-6 bg-secondary-50 border border-secondary-200 rounded-2xl shadow-sm"
-                data-aos="fade-down">
+            <div class="mb-6 p-6 bg-secondary-50 border border-secondary-200 rounded-2xl shadow-sm" data-aos="fade-down">
                 <div class="flex items-start gap-4">
                     <div class="flex-shrink-0">
                         <div class="w-10 h-10 bg-secondary/20 rounded-xl flex items-center justify-center">
@@ -190,12 +194,12 @@
         lucide.createIcons();
 
         // Save scroll position before unload
-        window.addEventListener("beforeunload", function() {
+        window.addEventListener("beforeunload", function () {
             localStorage.setItem("scrollPosition", window.scrollY);
         });
 
         // Restore on load
-        window.addEventListener("load", function() {
+        window.addEventListener("load", function () {
             const scroll = localStorage.getItem("scrollPosition");
             if (scroll !== null) {
                 window.scrollTo(0, parseInt(scroll));
@@ -211,6 +215,37 @@
                 offset: 100
             });
         }
+
+        // Mobile sidebar toggle functionality
+        document.addEventListener('DOMContentLoaded', function () {
+            const sidebar = document.getElementById('logo-sidebar');
+            const toggleButtons = document.querySelectorAll('[data-drawer-toggle="logo-sidebar"]');
+
+            toggleButtons.forEach(button => {
+                button.addEventListener('click', function () {
+                    sidebar.classList.toggle('-translate-x-full');
+                });
+            });
+
+            // Close sidebar when clicking outside on mobile
+            document.addEventListener('click', function (event) {
+                const isClickInsideSidebar = sidebar.contains(event.target);
+                const isClickOnToggle = Array.from(toggleButtons).some(btn => btn.contains(event.target));
+
+                if (!isClickInsideSidebar && !isClickOnToggle && window.innerWidth < 640) {
+                    sidebar.classList.add('-translate-x-full');
+                }
+            });
+
+            // Handle window resize
+            window.addEventListener('resize', function () {
+                if (window.innerWidth >= 640) {
+                    sidebar.classList.remove('-translate-x-full');
+                } else {
+                    sidebar.classList.add('-translate-x-full');
+                }
+            });
+        });
     </script>
 </body>
 

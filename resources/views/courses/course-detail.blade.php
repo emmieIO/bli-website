@@ -1,574 +1,357 @@
 <x-guest-layout>
-    <!-- Breadcrumb Navigation -->
-    <section class="py-5 border-b border-gray-200">
-        <div class="container mx-auto px-4">
-            <nav class="breadcrumb">
-                <ul class="flex items-center space-x-2 text-sm text-gray-600">
-                    <li class="inline-flex items-center">
-                        <a href="{{ route('homepage') }}" class="text-blue-600 hover:text-blue-800 transition-colors">Home</a>
-                    </li>
-                    <li class="inline-flex items-center">
-                        <i data-lucide="chevron-right" class="w-4 h-4 mx-1 text-gray-400"></i>
-                    </li>
-                    <li class="inline-flex items-center">
-                        <a href="{{ route('courses.index') }}" class="text-blue-600 hover:text-blue-800 transition-colors">Courses</a>
-                    </li>
-                    <li class="inline-flex items-center">
-                        <i data-lucide="chevron-right" class="w-4 h-4 mx-1 text-gray-400"></i>
-                    </li>
-                    <li class="inline-flex items-center">
-                        <span class="text-gray-600 truncate max-w-xs">{{ $course->title }}</span>
-                    </li>
-                </ul>
-            </nav>
-        </div>
-    </section>
+    <div class="container mx-auto px-4 sm:px-6 lg:px-8 ">
+        <div class="grid grid-cols-1 lg:grid-cols-3 lg:gap-x-12">
 
-    <!-- Course Details Section -->
-    <section class="py-12">
-        <div class="container mx-auto px-4">
-            <!-- Course Title -->
-            <h1 class="text-3xl md:text-4xl font-bold text-gray-900 mb-8 line-clamp-2 leading-tight">
-                {{ $course->title }}
-            </h1>
+            <div class="lg:col-span-2 mb-8 lg:mb-0">
+                <nav class="text-sm text-gray-500 mb-4">
+                    <a href="{{ route('homepage') }}" class="hover:underline">Home</a> &gt;
+                    <a href="{{ route('courses.index') }}" class="hover:underline">Courses</a> &gt;
+                    <span class="text-gray-700">{{ $course->title }}</span>
+                </nav>
 
-            <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
-                <!-- Sidebar -->
-                <div class="lg:col-span-1 space-y-6">
-                    <!-- Video Player -->
-                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-                        <div class="courses-details__video">
-                            <iframe
-                                src="https://player.mux.com/rR8P8mSaKDzz02TsftugTUdI00cQPJX00oy?metadata-video-title=Test+Video&video-title=Test+Video"
-                                class="w-full border-none aspect-video"
-                                allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture;"
-                                allowfullscreen>
-                            </iframe>
+                <h1 class="text-3xl md:text-4xl font-extrabold text-gray-900 tracking-tight mb-3">{{ $course->title }}
+                </h1>
+
+                <p class="text-lg text-gray-600 mb-6">3 in 1 Course: Learn to design websites with Figma, build with
+                    Webflow, and make a living freelancing.</p>
+
+                <div class="flex flex-wrap items-center gap-x-6 gap-y-4">
+                    <div class="flex items-center">
+                        <div>
+                            <span class="text-sm text-gray-600">Created by:</span>
+                            <p class="font-semibold text-gray-800">{{ $course->instructor->name }}</p>
                         </div>
                     </div>
-
-                    <!-- Course Info Card -->
-                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-                        <h5 class="text-2xl font-semibold text-gray-900 mb-6">
-                            &#8358;{{ number_format($course->price, 2) }}
-                        </h5>
-
-                        <div class="space-y-4">
-                            <!-- Reviews -->
-                            <div class="flex items-center gap-3 text-gray-600">
-                                <i data-lucide="thumbs-up" class="w-5 h-5 text-green-500"></i>
-                                <span class="text-sm">100% positive reviews</span>
-                            </div>
-
-                            <!-- Students -->
-                            <div class="flex items-center gap-3 text-gray-600">
-                                <i data-lucide="users" class="w-5 h-5 text-blue-500"></i>
-                                <span class="text-sm">391 students</span>
-                            </div>
-
-                            <!-- Lessons -->
-                            <div class="flex items-center gap-3 text-gray-600">
-                                <i data-lucide="file-text" class="w-5 h-5 text-purple-500"></i>
-                                <span class="text-sm">15 lessons</span>
-                            </div>
-
-                            <!-- Language -->
-                            <div class="flex items-center gap-3 text-gray-600">
-                                <i data-lucide="globe" class="w-5 h-5 text-orange-500"></i>
-                                <span class="text-sm">Language: English</span>
-                            </div>
-
-                            <!-- Quizzes -->
-                            <div class="flex items-center gap-3 text-gray-600">
-                                <i data-lucide="help-circle" class="w-5 h-5 text-red-500"></i>
-                                <span class="text-sm">1 quiz</span>
-                            </div>
-
-                            <!-- Assessments -->
-                            <div class="flex items-center gap-3 text-gray-600">
-                                <i data-lucide="clipboard-check" class="w-5 h-5 text-green-600"></i>
-                                <span class="text-sm">Assessments: Yes</span>
-                            </div>
-
-                            <!-- Mobile App -->
-                            <div class="flex items-center gap-3 text-gray-600">
-                                <i data-lucide="smartphone" class="w-5 h-5 text-indigo-500"></i>
-                                <span class="text-sm">Available on the app</span>
-                            </div>
-
-                            <!-- Access -->
-                            <div class="flex items-center gap-3 text-gray-600">
-                                <i data-lucide="infinity" class="w-5 h-5 text-purple-600"></i>
-                                <span class="text-sm">Unlimited access forever</span>
-                            </div>
-
-                            <!-- Skill Level -->
-                            <div class="flex items-center gap-3 text-gray-600">
-                                <i data-lucide="trending-up" class="w-5 h-5 text-blue-600"></i>
-                                <span class="text-sm">Skill level: </span>
-                                <span class="text-blue-600 font-medium">All levels</span>
-                            </div>
-                        </div>
-
-                        <!-- Start Button -->
-                        <a href=""
-                            class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors flex items-center justify-center gap-2 mt-6">
-                            <i data-lucide="play" class="w-5 h-5"></i>
-                            <span>Start Now</span>
-                        </a>
+                    <div class="flex items-center gap-1.5 self-end">
+                        <i data-lucide="star" class="fill-yellow-400 stroke-0"></i>
+                        <span class="font-bold text-gray-800">4.8</span>
+                        <span class="text-sm text-gray-500">(401,444 rating)</span>
+                    </div>
+                </div>
+                <div>
+                    <!-- replace VIDEO_ID with your Vimeo video id -->
+                    <div class="">
+                        <iframe
+                            src="https://player.vimeo.com/video/{{ $course->preview_video_id }}?h=0&autoplay=0&title=0&byline=0&portrait=0"
+                            class="" frameborder="0" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen
+                            loading="lazy" width="1280" height="720"
+                            style="width:100%;max-width:1280px;height:auto;aspect-ratio:16/9;" title="Course preview">
+                        </iframe>
                     </div>
                 </div>
 
-                <!-- Main Content -->
-                <div class="lg:col-span-3 space-y-8">
-                    <!-- Course Description -->
-                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-                        <p class="text-gray-700 leading-relaxed text-lg">
-                            {{ $course->description }}
-                        </p>
-                    </div>
-
-                    <!-- Tabs Navigation -->
-                    <div class="border-b border-gray-200">
-                        <div class="flex flex-wrap gap-8 -mb-px">
-                            <button class="tab-btn active text-blue-600 font-semibold py-3 border-b-2 border-blue-600 transition-colors" data-tab="description">
+                <div class="my-8">
+                    <nav class="tabs tabs-bordered " aria-label="Tabs" role="tablist" aria-orientation="horizontal">
+                        <button type="button" class="tab active-tab:tab-active active text-primary" id="overview-item"
+                            data-tab="#overview" aria-controls="overview" role="tab" aria-selected="true">
+                            Overview
+                        </button>
+                        <button type="button" class="tab active-tab:tab-active text-primary" id="curriculum-item"
+                            data-tab="#curriculum" aria-controls="curriculum" role="tab" aria-selected="false">
+                            Course Curriculum
+                        </button>
+                        <button type="button" class="tab active-tab:tab-active text-primary" id="tabs-basic-item-3"
+                            data-tab="#instructor" aria-controls="instructor" role="tab" aria-selected="false">
+                            Instructor
+                        </button>
+                    </nav>
+                </div>
+                {{-- tab section --}}
+                <div class="mt-3">
+                    {{-- overview section --}}
+                    <div id="overview" role="tabpanel" aria-labelledby="overview-item">
+                        <div class="mb-10">
+                            <h2 class="text-2xl font-semibold font-montserrat my-3">
                                 Description
-                            </button>
-                            <button class="tab-btn text-gray-600 hover:text-blue-600 font-semibold py-3 border-b-2 border-transparent transition-colors" data-tab="curriculum">
-                                Curriculum
-                            </button>
-                            <button class="tab-btn text-gray-600 hover:text-blue-600 font-semibold py-3 border-b-2 border-transparent transition-colors" data-tab="instructor">
-                                Instructor
-                            </button>
+                            </h2>
+                            <p>{{ $course->description }}</p>
+                        </div>
+                        <div>
+                            <h2 class="text-2xl font-semibold font-montserrat my-3">
+                                Course Requirements
+                            </h2>
+                            @if($course->requirements->count())
+                            <ul class="mt-2 list-disc list-inside space-y-2 text-gray-700">
+                                @foreach ($course->requirements as $requirement )
+                                <li>{{ $requirement->requirement }}</li>
+                                @endforeach
+                            </ul>
+                            @else
+                            <div class="text-sm text-gray-600">
+                                <p class="mb-2">No course requirements listed.</p>
+                                <p class="text-xs text-gray-500">You don’t need any prior experience to start this
+                                    course.</p>
+                            </div>
+                            @endif
+                        </div>
+                        <div>
+                            <h2 class="text-2xl font-semibold font-montserrat my-3">
+                                Course Outcomes
+                            </h2>
+                            @if($course->outcomes->count())
+                            <ul class="mt-2 list-disc list-inside space-y-2 text-gray-700">
+                                @foreach ($course->outcomes as $outcome)
+                                <li class="text-sm leading-6">
+                                    {{ $outcome->outcome }}
+                                </li>
+                                @endforeach
+                            </ul>
+                            @else
+                            <div class="text-sm text-gray-600">
+                                <p class="mb-2">No course requirements listed.</p>
+                                <p class="text-xs text-gray-500">You don’t need any prior experience to start this
+                                    course.</p>
+                            </div>
+                            @endif
                         </div>
                     </div>
+                    {{-- Course curriculum --}}
+                    <div id="curriculum" class="hidden" role="tabpanel" aria-labelledby="curriculum-item">
+                        <div class="accordion divide-neutral/20 divide-y">
+                            @forelse($course->modules as $module)
+                            <div class="accordion-item {{ $loop->first ? 'active' : '' }}"
+                                id="module-{{ $module->id }}">
+                                <button class="accordion-toggle inline-flex items-center gap-x-4 text-start w-full"
+                                    aria-controls="module-{{ $module->id }}-collapse"
+                                    aria-expanded="{{ $loop->first ? 'true' : 'false' }}">
+                                    <span
+                                        class="icon-[tabler--plus] accordion-item-active:hidden text-base-content size-4.5 block shrink-0"></span>
+                                    <span
+                                        class="icon-[tabler--minus] accordion-item-active:block text-base-content size-4.5 hidden shrink-0"></span>
 
-                    <!-- Tab Contents -->
-                    <div class="space-y-8">
-                        <!-- Description Tab -->
-                        <div class="tab-content active" id="description">
-                            <!-- What You'll Learn -->
-                            <div class="bg-blue-50 rounded-xl p-6 border border-blue-100">
-                                <h5 class="text-xl font-semibold text-gray-900 mb-6">What You'll Learn</h5>
-                                <div class="space-y-4">
-                                    @if ($course->outcomes()->count())
-                                        @foreach ($course->outcomes as $outcome)
-                                            <div class="flex gap-4">
-                                                <i data-lucide="check-circle" class="w-5 h-5 text-green-500 mt-1 flex-shrink-0"></i>
-                                                <p class="text-gray-700 leading-relaxed">
-                                                    {{ $outcome->outcome }}
-                                                </p>
-                                            </div>
-                                        @endforeach
+                                    <span class="font-medium text-gray-800 font-montserrat">{{ $module->title }}</span>
+                                    <span class="ml-auto text-sm text-gray-500">{{ $module->lessons->count() }} {{
+                                        Str::plural('lesson', $module->lessons->count()) }}</span>
+                                </button>
+
+                                <div id="module-{{ $module->id }}-collapse"
+                                    class="accordion-content {{ $loop->first ? '' : 'hidden' }} w-full overflow-hidden transition-[height] duration-300"
+                                    aria-labelledby="module-{{ $module->id }}" role="region">
+                                    <div class="px-5 pb-4">
+                                        @if($module->lessons->count())
+                                        <ul class="space-y-2">
+                                            @foreach($module->lessons as $lesson)
+                                            <li class="flex items-center justify-between py-2">
+                                                <div class="flex items-center gap-3">
+                                                    <span
+                                                        class="w-8 h-8 flex items-center justify-center rounded-sm bg-gray-100 text-gray-600 text-sm font-semibold">{{
+                                                        $loop->iteration }}</span>
+
+                                                    {{-- lesson type icon --}}
+                                                    <span class="shrink-0"></span>
+                                                    @switch($lesson->type)
+                                                    @case('video')
+                                                    <span
+                                                        class="icon-[tabler--player-play] size-4.5 text-orange-500"></span>
+                                                    @break
+                                                    @case('pdf')
+                                                    <span
+                                                        class="icon-[tabler--file-text] size-4.5 text-blue-500"></span>
+                                                    @break
+                                                    @case('link')
+                                                    <span class="icon-[tabler--link] size-4.5 text-green-500"></span>
+                                                    @break
+                                                    @default
+                                                    <span class="icon-[tabler--file] size-4.5 text-gray-500"></span>
+                                                    @endswitch
+                                                    </span>
+
+                                                    <div>
+                                                        <div class="text-sm text-gray-800">{{ $lesson->title }}</div>
+                                                        @if(!empty($lesson->subtitle))
+                                                        <div class="text-xs text-gray-500">{{ $lesson->subtitle }}</div>
+                                                        @endif
+                                                    </div>
+                                                </div>
+                                                @if(!empty($lesson->duration))
+                                                <div class="text-xs text-gray-500">{{ $lesson->duration }}</div>
+                                                @endif
+                                            </li>
+                                            @endforeach
+                                        </ul>
+                                        @else
+                                        <p class="text-sm text-gray-600">This module has no lessons yet.</p>
+                                        @endif
+                                    </div>
+                                </div>
+                            </div>
+                            @empty
+                            <div class="px-5 py-4 text-sm text-gray-600">
+                                No curriculum available for this course.
+                            </div>
+                            @endforelse
+                        </div>
+                    </div>
+                    <div id="instructor" class="hidden" role="tabpanel" aria-labelledby="tabs-basic-item-3">
+                        <div class="flex items-start gap-6">
+                            <img src="{{ $course->instructor->avatar_url ?? 'https://ui-avatars.com/api/?name='.urlencode($course->instructor->name).'&background=fff&color=4a5568&size=128' }}"
+                                alt="{{ $course->instructor->name }}"
+                                class="w-20 h-20 rounded-full object-cover shadow-sm">
+
+                            <div class="flex-1">
+                                <h3 class="text-xl font-semibold text-gray-900">{{ $course->instructor->name }}</h3>
+
+                                @if(!empty($course->instructor->title))
+                                <div class="text-sm text-gray-500 mb-2">{{ $course->instructor->title }}</div>
+                                @endif
+
+                                <p class="text-sm text-gray-700">
+                                    {{ $course->instructor->bio ?? 'No bio available for this instructor.' }}
+                                </p>
+
+                                <div class="mt-4 flex flex-wrap items-center gap-3">
+                                    @if(!empty($course->instructor->email))
+                                    <a href="mailto:{{ $course->instructor->email }}"
+                                        class="inline-block px-3 py-2 bg-orange-500 text-white rounded-md text-sm font-semibold hover:bg-orange-600">
+                                        Contact
+                                    </a>
+                                    @endif
+
+                                    @if(!empty($course->instructor->website))
+                                    <a href="{{ $course->instructor->website }}" target="_blank" rel="noopener"
+                                        class="text-sm text-gray-700 hover:underline">Website</a>
+                                    @endif
+
+                                    @if(!empty($course->instructor->twitter))
+                                    <a href="https://twitter.com/{{ ltrim($course->instructor->twitter, '@') }}"
+                                        target="_blank" rel="noopener"
+                                        class="text-sm text-gray-700 hover:underline">Twitter</a>
                                     @endif
                                 </div>
                             </div>
-
-                            <!-- Detailed Description -->
-                            <div class="bg-white rounded-xl p-6 space-y-6">
-                                <p class="text-gray-700 leading-relaxed">
-                                    A series of Videos from ThimPress, give you a detailed
-                                    tutorial to create an LMS Website with LearnPress – LMS &
-                                    Education WordPress Plugin.
-                                </p>
-                                <p class="text-gray-700 leading-relaxed">
-                                    This course is a detailed and easy tutorial to get you all
-                                    setup and going with the use of LearnPress LMS Plugin. It is
-                                    a free and simple plugin to help you create an Online
-                                    Courses Website step by step. The tutorial guides you
-                                    through the configuration of the plugin, creation of
-                                    Courses, Lessons, Quizzes, and finally guides you on how to
-                                    boost up your Website with Premium LearnPress Add-ons
-                                    brought to you by ThimPress (creator of LearnPress). It also
-                                    shows how you could configure additional items like the
-                                    course layouts and featured images …
-                                </p>
-                                <img src="{{ asset('images/courses/courses-desc-img-01.png') }}" 
-                                     alt="Course description" 
-                                     class="w-full rounded-lg shadow-sm">
-                                <p class="text-gray-700 leading-relaxed">
-                                    A series of Videos from ThimPress, give you a detailed
-                                    tutorial to create an LMS Website with LearnPress – LMS &
-                                    Education WordPress Plugin.
-                                </p>
-                            </div>
                         </div>
+                    </div>
+                </div>
+            </div>
 
-                        <!-- Curriculum Tab -->
-                        <div class="tab-content hidden" id="curriculum">
-                            <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-                                <!-- Curriculum Sections -->
-                                <div class="space-y-2">
-                                    <!-- Section 1 -->
-                                    <div class="curriculum-section border-b border-gray-200 last:border-b-0">
-                                        <div class="flex items-center justify-between p-6 cursor-pointer hover:bg-gray-50 transition-colors">
-                                            <div class="flex items-center gap-4">
-                                                <i data-lucide="chevron-down" class="w-5 h-5 text-gray-400 transition-transform"></i>
-                                                <h6 class="font-semibold text-gray-900">LearnPress Getting Started</h6>
-                                            </div>
-                                            <span class="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm font-semibold">3</span>
-                                        </div>
-                                        
-                                        <!-- Section Content -->
-                                        <div class="curriculum-content hidden px-6 pb-6 space-y-4">
-                                            <!-- Lesson 1 -->
-                                            <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                                                <div class="flex items-center gap-4">
-                                                    <i data-lucide="file-text" class="w-5 h-5 text-blue-500"></i>
-                                                    <p class="text-gray-700 font-medium">What is LearnPress?</p>
-                                                </div>
-                                                <div class="flex items-center gap-4">
-                                                    <span class="text-gray-500 text-sm">20 minutes</span>
-                                                    <a href="#" class="text-blue-600 hover:text-blue-700">
-                                                        <i data-lucide="eye" class="w-5 h-5"></i>
-                                                    </a>
-                                                </div>
-                                            </div>
+            <div class="lg:col-span-1">
+                <div class="border border-gray-200 rounded-lg shadow-md p-6 sticky top-8">
+                    <div class="flex items-baseline justify-between mb-1">
+                        <span class="text-3xl font-extrabold text-gray-900">₦{{ number_format($course->price, 2)
+                            }}</span>
+                        {{-- <span class="text-lg text-gray-500 line-through">$26.00</span> --}}
+                        <span class="text-sm font-bold bg-orange-100 text-orange-600 px-2 py-1 rounded-md">56%
+                            OFF</span>
+                    </div>
+                    <p class="text-sm text-red-600 font-medium mb-5">2 days left at this price!</p>
 
-                                            <!-- Lesson 2 -->
-                                            <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                                                <div class="flex items-center gap-4">
-                                                    <i data-lucide="file-text" class="w-5 h-5 text-blue-500"></i>
-                                                    <p class="text-gray-700 font-medium">How to use LearnPress?</p>
-                                                </div>
-                                                <div class="flex items-center gap-4">
-                                                    <span class="text-gray-500 text-sm">60 minutes</span>
-                                                    <a href="#" class="text-blue-600 hover:text-blue-700">
-                                                        <i data-lucide="eye" class="w-5 h-5"></i>
-                                                    </a>
-                                                </div>
-                                            </div>
-
-                                            <!-- Quiz -->
-                                            <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                                                <div class="flex items-center gap-4">
-                                                    <i data-lucide="help-circle" class="w-5 h-5 text-purple-500"></i>
-                                                    <p class="text-gray-700 font-medium">Demo the Quiz of LearnPress</p>
-                                                </div>
-                                                <div class="flex items-center gap-4">
-                                                    <span class="text-gray-500 text-sm">4 questions</span>
-                                                    <span class="text-gray-500 text-sm">10 minutes</span>
-                                                    <a href="#" class="text-gray-400 cursor-not-allowed">
-                                                        <i data-lucide="lock" class="w-5 h-5"></i>
-                                                    </a>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <!-- Add more sections as needed -->
-                                </div>
-                            </div>
+                    <div class="space-y-3 text-sm text-gray-600 mb-6">
+                        <div class="flex justify-between items-center">
+                            <span class="font-medium text-gray-800">Course Level</span><span>{{ $course->level }}</span>
                         </div>
-
-                        <!-- Instructor Tab -->
-                        <div class="tab-content hidden" id="instructor">
-                            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-8">
-                                <div class="flex flex-col md:flex-row gap-8">
-                                    <img src="{{ asset('images/avatar/user.png') }}" 
-                                         alt="Instructor" 
-                                         class="w-24 h-24 rounded-full object-cover flex-shrink-0">
-                                    <div class="flex-1">
-                                        <a href="#">
-                                            <h5 class="text-xl font-semibold text-gray-900 mb-2">Keny White</h5>
-                                        </a>
-                                        <span class="text-gray-500 text-sm block mb-6">Professor</span>
-                                        <p class="text-gray-700 leading-relaxed">
-                                            Lorem ipsum dolor sit amet. Qui incidunt dolores non
-                                            similique ducimus et debitis molestiae. Et autem quia
-                                            eum reprehenderit voluptates est reprehenderit illo est
-                                            enim perferendis est neque sunt. Nam amet sunt aut vero
-                                            mollitia ut ipsum corporis vel facere eius et quia
-                                            aspernatur qui fugiat repudiandae. Et officiis inventore
-                                            et quis enim ut quaerat corporis sed reprehenderit odit
-                                            sit saepe distinctio et accusantium repellendus ea enim
-                                            harum.
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
+                        <div class="flex justify-between items-center">
+                            <span class="font-medium text-gray-800">Students Enrolled</span><span>69,419,618</span>
                         </div>
                     </div>
 
-                    <!-- Reviews Section -->
-                    {{-- <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-8">
-                        <h5 class="text-xl font-semibold text-gray-900 mb-8">Reviews</h5>
-                        
-                        <!-- Overall Rating -->
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-                            <div class="text-center">
-                                <h4 class="text-5xl font-medium text-gray-900 mb-2">5</h4>
-                                <div class="flex justify-center gap-1 mb-2">
-                                    @for($i = 0; $i < 5; $i++)
-                                        <i data-lucide="star" class="w-5 h-5 text-yellow-400 fill-current"></i>
-                                    @endfor
-                                </div>
-                                <p class="text-gray-600">1 rating</p>
-                            </div>
+                    <div class="space-y-3 mb-4">
+                        <a href="#"
+                            class="block w-full text-center text-white bg-orange-500 hover:bg-orange-600 font-bold py-3 rounded-lg transition-colors">Add
+                            To Cart</a>
+                        <a href="#"
+                            class="block w-full text-center text-gray-800 bg-white border border-gray-400 hover:bg-gray-100 font-bold py-3 rounded-lg transition-colors">Buy
+                            Now</a>
+                    </div>
 
-                            <!-- Rating Breakdown -->
-                            <div class="space-y-3">
-                                @foreach([5,4,3,2,1] as $rating)
-                                <div class="flex items-center gap-4">
-                                    <span class="text-sm font-semibold text-gray-700 w-4">{{ $rating }}</span>
-                                    <div class="flex-1 bg-gray-200 rounded-full h-2">
-                                        <div class="bg-yellow-400 h-2 rounded-full {{ $rating === 5 ? 'w-full' : 'w-0' }}"></div>
-                                    </div>
-                                    <span class="text-sm text-gray-600 w-12">{{ $rating === 5 ? '100%' : '0%' }}</span>
-                                </div>
-                                @endforeach
-                            </div>
-                        </div>
+                    <div class="flex justify-center space-x-6 mb-4">
+                        <a href="#" class="text-sm font-semibold text-gray-800 hover:underline">Add To
+                            Wishlist</a>
+                        <a href="#" class="text-sm font-semibold text-gray-800 hover:underline">Gift Course</a>
+                    </div>
 
-                        <!-- Write Review Button -->
-                        <button class="write-review-btn bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors mb-8">
-                            Write A Review
-                        </button>
+                    <p class="text-xs text-gray-500 text-center mb-6">Note: all course have 30-days money-back guarantee
+                    </p>
 
-                        <!-- Review Form (Hidden by default) -->
-                        <div class="write-review-form hidden bg-gray-50 rounded-xl p-6 border border-gray-200 mb-8">
-                            <div class="flex justify-between items-center mb-6">
-                                <h6 class="text-lg font-semibold text-gray-900">Write A Review</h6>
-                                <button class="close-review-form text-gray-400 hover:text-gray-600">
-                                    <i data-lucide="x" class="w-6 h-6"></i>
-                                </button>
-                            </div>
-                            <form class="space-y-4">
-                                <div>
-                                    <label for="review-title" class="block text-sm font-semibold text-gray-700 mb-2">
-                                        Title <span class="text-red-500">*</span>
-                                    </label>
-                                    <input type="text" id="review-title" required 
-                                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                                </div>
-                                <div>
-                                    <label for="review-content" class="block text-sm font-semibold text-gray-700 mb-2">
-                                        Content <span class="text-red-500">*</span>
-                                    </label>
-                                    <textarea id="review-content" rows="3" required
-                                              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"></textarea>
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-semibold text-gray-700 mb-2">
-                                        Rating <span class="text-red-500">*</span>
-                                    </label>
-                                    <div class="flex gap-1" id="star-rating">
-                                        @for($i = 1; $i <= 5; $i++)
-                                            <i data-lucide="star" class="star-rating w-6 h-6 text-gray-300 cursor-pointer hover:text-yellow-400" data-rating="{{ $i }}"></i>
-                                        @endfor
-                                    </div>
-                                </div>
-                                <div class="flex gap-4">
-                                    <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded-lg transition-colors">
-                                        Add Review
-                                    </button>
-                                    <button type="button" class="cancel-review-form text-gray-600 hover:text-gray-800 font-semibold py-2 px-6 rounded-lg transition-colors">
-                                        Cancel
-                                    </button>
-                                </div>
-                            </form>
-                        </div>
-
-                        <!-- Sample Review -->
-                        <div class="border-t border-gray-200 pt-8">
-                            <div class="flex flex-col md:flex-row gap-6 mb-4">
-                                <img src="{{ asset('images/avatar/user.png') }}" 
-                                     alt="Reviewer" 
-                                     class="w-12 h-12 rounded-full object-cover">
-                                <div>
-                                    <p class="font-semibold text-gray-900">Keith Son</p>
-                                    <div class="flex gap-1 mb-2">
-                                        @for($i = 0; $i < 5; $i++)
-                                            <i data-lucide="star" class="w-4 h-4 text-yellow-400 fill-current"></i>
-                                        @endfor
-                                    </div>
-                                </div>
-                            </div>
-                            <div>
-                                <h6 class="text-lg font-semibold text-gray-900 mb-3">Courses Review</h6>
-                                <p class="text-gray-700 leading-relaxed">
-                                    is simply dummy text of the printing and typesetting
-                                    industry. Lorem Ipsum has been the industry's standard
-                                    dummy text ever since the 1500s, when an unknown printer
-                                    took a galley of type and scrambled it to make a type
-                                    specimen book. It has survived not only five centuries,
-                                </p>
-                            </div>
-                        </div>
-                    </div> --}}
+                    <h3 class="font-bold text-gray-900 mb-3">This course includes:</h3>
+                    <ul class="space-y-2.5 text-sm text-gray-700">
+                        <li class="flex items-center"><svg class="w-5 h-5 mr-2 text-gray-500" fill="none"
+                                stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z">
+                                </path>
+                            </svg>Lifetime access</li>
+                        <li class="flex items-center"><svg class="w-5 h-5 mr-2 text-gray-500" fill="none"
+                                stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>30-days money-back guarantee</li>
+                        <li class="flex items-center"><svg class="w-5 h-5 mr-2 text-gray-500" fill="none"
+                                stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                            </svg>Free exercises file & downloadable resources</li>
+                        <li class="flex items-center"><svg class="w-5 h-5 mr-2 text-gray-500" fill="none"
+                                stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z">
+                                </path>
+                            </svg>Shareable certificate of completion</li>
+                        <li class="flex items-center"><svg class="w-5 h-5 mr-2 text-gray-500" fill="none"
+                                stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z">
+                                </path>
+                            </svg>Access on mobile, tablet and TV</li>
+                        <li class="flex items-center"><svg class="w-5 h-5 mr-2 text-gray-500" fill="none"
+                                stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M3 5h12M9 3v2m4 0V3m4 4l-2 2-2-2m5.5 5.5h-13a1.5 1.5 0 000 3h13a1.5 1.5 0 000-3z">
+                                </path>
+                            </svg>English subtitles</li>
+                        <li class="flex items-center"><svg class="w-5 h-5 mr-2 text-gray-500" fill="none"
+                                stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M12 2v10m0 0l-3-3m3 3l3-3"></path>
+                            </svg>100% online course</li>
+                    </ul>
                 </div>
             </div>
         </div>
-    </section>
-
-    <!-- Related Courses -->
-    <section class="py-16 bg-gray-50">
-        <div class="container mx-auto px-4">
-            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-12 gap-4">
-                <h5 class="text-2xl md:text-3xl font-bold text-gray-900">
-                    Courses You Might Be Interested In
-                </h5>
-                <a href="{{ route('courses.index') }}"
-                   class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors flex items-center gap-2">
-                    <span>View All Courses</span>
-                    <i data-lucide="arrow-right" class="w-4 h-4"></i>
-                </a>
-            </div>
-
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                <!-- Sample Related Course Cards -->
-                @for($i = 0; $i < 4; $i++)
-                <article class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-lg transition-all duration-300">
-                    <div class="relative">
-                        <a href="#">
-                            <img src="{{ asset('images/courses/courses-large-0' . ($i+1) . '.png') }}" 
-                                 alt="Related Course" 
-                                 class="w-full h-48 object-cover">
-                        </a>
-                        <div class="absolute top-3 left-3">
-                            <span class="bg-blue-600 text-white text-xs px-2 py-1 rounded">
-                                {{ ['Language Learning', 'Coaching', 'Online Business', '3D & Animation'][$i] }}
-                            </span>
-                        </div>
-                    </div>
-                    <div class="p-4">
-                        <h6 class="font-semibold text-gray-900 mb-2 line-clamp-2 leading-tight">
-                            <a href="#" class="hover:text-blue-600 transition-colors">
-                                {{ ['Introduction LearnPress – LMS plugin', 'Create an LMS Website with LearnPress', 'How To Create An Online Course', 'The Complete Online Teaching Masterclass'][$i] }}
-                            </a>
-                        </h6>
-                        <div class="flex items-center gap-4 mb-3 text-sm text-gray-600">
-                            <span class="flex items-center gap-1">
-                                <i data-lucide="users" class="w-4 h-4"></i>
-                                <span>365 Students</span>
-                            </span>
-                            <span class="flex items-center gap-1">
-                                <i data-lucide="clock" class="w-4 h-4"></i>
-                                <span>10 Weeks</span>
-                            </span>
-                        </div>
-                        <p class="text-gray-600 text-sm mb-4 line-clamp-2 leading-relaxed">
-                            {{ ['A WordPress LMS Plugin to create WordPress Learning Management System...', 'Lorem ipsum dolor sit amet. Qui incidunt dolores non similique ducimus...', 'The jQuery team knows all about cross-browser issues, and they have written...', 'In this course, We\'ll learn how to create websites by structuring and styling...'][$i] }}
-                        </p>
-                        <div class="flex items-center justify-between">
-                            <div class="flex items-center gap-2">
-                                <span class="text-gray-400 text-sm line-through">$39.00</span>
-                                <span class="font-semibold text-gray-900">$69.00</span>
-                            </div>
-                            <a href="#" class="bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold px-4 py-2 rounded-lg transition-colors">
-                                Start Learning
-                            </a>
-                        </div>
-                    </div>
-                </article>
-                @endfor
-            </div>
-        </div>
-    </section>
-
+    </div>
     <script>
-        // Initialize Lucide icons
-        document.addEventListener('DOMContentLoaded', function() {
-            if (typeof lucide !== 'undefined') {
-                lucide.createIcons();
+        document.addEventListener('DOMContentLoaded', function () {
+            const tabs = document.querySelectorAll('button[role=tab]');
+            const tabPanels = document.querySelectorAll('div[role="tabpanel"]');
+            const storageKey = 'activeTabId'
+
+            // function to activate tab
+            function activateTab(tabId) {
+                tabs.forEach(tab => {
+                    const isSelected = tab.getAttribute('data-tab') == tabId
+                    tab.classList.toggle('active', isSelected);
+                    tab.setAttribute('aria-selected', isSelected);
+                })
+                tabPanels.forEach(panel => {
+                    const isSelected = '#' + panel.id === tabId;
+                    panel.classList.toggle('hidden', !isSelected);
+                });
+
+                // Save the active tab ID to localStorage
+                localStorage.setItem(storageKey, tabId);
             }
 
-            // Tab functionality
-            const tabButtons = document.querySelectorAll('.tab-btn');
-            const tabContents = document.querySelectorAll('.tab-content');
-
-            tabButtons.forEach(button => {
-                button.addEventListener('click', function() {
-                    const targetTab = this.getAttribute('data-tab');
-                    
-                    // Update active tab button
-                    tabButtons.forEach(btn => {
-                        btn.classList.remove('active', 'text-blue-600', 'border-blue-600');
-                        btn.classList.add('text-gray-600', 'border-transparent');
-                    });
-                    this.classList.add('active', 'text-blue-600', 'border-blue-600');
-                    this.classList.remove('text-gray-600', 'border-transparent');
-                    
-                    // Show target tab content
-                    tabContents.forEach(content => {
-                        content.classList.add('hidden');
-                        content.classList.remove('active');
-                    });
-                    document.getElementById(targetTab).classList.remove('hidden');
-                    document.getElementById(targetTab).classList.add('active');
+            // Event listener for tab clicks
+            tabs.forEach(tab => {
+                tab.addEventListener('click', (event) => {
+                    event.preventDefault(); // Prevent default button behavior
+                    const targetTabId = tab.getAttribute('data-tab');
+                    activateTab(targetTabId);
                 });
             });
 
-            // Curriculum section toggle
-            const curriculumSections = document.querySelectorAll('.curriculum-section');
-            curriculumSections.forEach(section => {
-                const header = section.querySelector('.flex.items-center.justify-between');
-                const content = section.querySelector('.curriculum-content');
-                const icon = section.querySelector('[data-lucide="chevron-down"]');
-                
-                header.addEventListener('click', function() {
-                    content.classList.toggle('hidden');
-                    icon.style.transform = content.classList.contains('hidden') ? 'rotate(0deg)' : 'rotate(180deg)';
-                });
-            });
+            // On page load, check for a saved tab in localStorage
+            const savedTabId = localStorage.getItem(storageKey);
 
-            // Review functionality
-            const writeReviewBtn = document.querySelector('.write-review-btn');
-            const reviewForm = document.querySelector('.write-review-form');
-            const closeReviewBtn = document.querySelector('.close-review-form');
-            const cancelReviewBtn = document.querySelector('.cancel-review-form');
-            const starRatings = document.querySelectorAll('.star-rating');
+            // Determine which tab to activate
+            // If a saved tab exists and corresponds to a real tab, use it.
+            // Otherwise, default to the first tab.
+            const tabToActivate = savedTabId && document.querySelector(`button[data-tab="${savedTabId}"]`)
+                ? savedTabId
+                : tabs[0].getAttribute('data-tab');
 
-            writeReviewBtn?.addEventListener('click', function() {
-                reviewForm.classList.remove('hidden');
-            });
-
-            closeReviewBtn?.addEventListener('click', function() {
-                reviewForm.classList.add('hidden');
-            });
-
-            cancelReviewBtn?.addEventListener('click', function() {
-                reviewForm.classList.add('hidden');
-            });
-
-            // Star rating functionality
-            starRatings.forEach(star => {
-                star.addEventListener('click', function() {
-                    const rating = parseInt(this.getAttribute('data-rating'));
-                    
-                    // Update all stars
-                    starRatings.forEach(s => {
-                        const starRating = parseInt(s.getAttribute('data-rating'));
-                        if (starRating <= rating) {
-                            s.classList.remove('text-gray-300');
-                            s.classList.add('text-yellow-400', 'fill-current');
-                        } else {
-                            s.classList.remove('text-yellow-400', 'fill-current');
-                            s.classList.add('text-gray-300');
-                        }
-                    });
-                });
-            });
+            activateTab(tabToActivate);
         });
-
-        // Add custom styles
-        const style = document.createElement('style');
-        style.textContent = `
-            .line-clamp-2 {
-                display: -webkit-box;
-                -webkit-line-clamp: 2;
-                -webkit-box-orient: vertical;
-                overflow: hidden;
-            }
-            
-            .transition-all {
-                transition: all 0.3s ease;
-            }
-            
-            .curriculum-content {
-                transition: all 0.3s ease;
-            }
-        `;
-        document.head.appendChild(style);
     </script>
 </x-guest-layout>

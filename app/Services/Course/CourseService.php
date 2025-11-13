@@ -54,6 +54,11 @@ class CourseService
         return Course::with(['category', 'instructor'])->latest()->paginate(10);
     }
 
+    public function fetchInstructorCourses(int $instructorId)
+    {
+        return Course::where('instructor_id', $instructorId)->with(['category', 'students'])->latest()->paginate(10);
+    }
+
     public function addRequirement(Course $course, string $requirement)
     {
         $order = $course->requirements()->max('order') + 1;

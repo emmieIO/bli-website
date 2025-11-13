@@ -187,7 +187,7 @@
                                             <li class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                                                 <span class="text-sm text-gray-700 font-bold">🎥 Video:
                                                     {{ $lesson->title }}</span>
-                                                <span class="text-gray-400 text-sm">View (disabled)</span>
+                                                <a href="{{ asset('storage/'.$lesson->content_path) }}" class="text-green-500 hover:text-secondary text-sm">View</a>
                                             </li>
                                         @elseif ($lesson->type == 'pdf')
                                             <li class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">

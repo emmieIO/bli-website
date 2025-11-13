@@ -4,6 +4,7 @@ namespace App\Services\Course;
 
 use App\Models\Course;
 use App\Models\CourseModule;
+use App\Services\VimeoService;
 use App\Traits\HasFileUpload;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
@@ -15,7 +16,7 @@ class CourseModuleService
     /**
      * Create a new class instance.
      */
-    public function __construct()
+    public function __construct(public VimeoService $vimeoService)
     {
         //
     }
@@ -82,11 +83,22 @@ class CourseModuleService
 
     public function saveVideo(CourseModule $module, array $data, UploadedFile $file)
     {
+        $vimeo = $this->vimeoService->getClient();
+        // Upload the video to Vimeo
+        $uri = $vimeo->upload($file->getRealPath(), [
+            'name' => $data['title'],
+            'description' => $data['description'] ?? '',
+
+        ]);
+
+        $videoId = last(explode('/', $uri));
+
         $module->lessons()->create([
             'title' => $data['title'],
             'type' => 'video',
             'description' => $data['description'] ?? null,
-            'content_path' => $this->uploadFile($file, 'course_lessons/videos'),
+            'vimeo_id' => $videoId,
+            'content_path' => $uri,
             'order' => $module->lessons()->max('order') + 1,
         ]);
     }

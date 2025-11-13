@@ -44,6 +44,7 @@ class RoleAndPermissionsSeeder extends Seeder
 
                 // Courses
                 'course-view',
+                'course-view-any',
                 'course-create',
                 'course-update',
                 'course-update-any',
@@ -82,7 +83,13 @@ class RoleAndPermissionsSeeder extends Seeder
                 'review-reject-course',
 
             ],
-            "instructor" => ['track-applications'],
+            "instructor" => [
+                'track-applications',
+                'course-view',
+                'course-create',
+                'course-update',
+                'course-delete'
+            ],
             'student' => ['track-applications']
         ];
 

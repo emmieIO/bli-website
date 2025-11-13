@@ -1,0 +1,40 @@
+<?php
+
+use App\Actions\JoinEventAction;
+use App\Http\Controllers\Events\EventCalenderController;
+use App\Http\Controllers\SpeakerApplicationController;
+use App\Http\Controllers\SpeakerInvitationController;
+use App\Http\Controllers\UserDashBoard\RevokeRsvpAction;
+use App\Http\Controllers\UserDashBoard\ShowMyEventsController;
+use Illuminate\Support\Facades\Route;
+
+Route::middleware(['auth', 'verified'])->group(function () {
+    // Main dashboard
+    Route::get('/dashboard', fn () => view('user_dashboard.index'))->name('user_dashboard');
+
+    // User's events management
+    Route::get('/user/events', ShowMyEventsController::class)->name('user.events');
+    Route::post('/events/{slug}/join', JoinEventAction::class)->name('events.join');
+    Route::delete('/events/user/{slug}/revoke-rsvp', RevokeRsvpAction::class)->name('user.revoke.event');
+
+    // Event utilities
+    Route::get('/events/{event}/calendar', [EventCalenderController::class, 'download'])->name('events.calendar');
+
+    // Speaker invitations and applications
+    Route::get('/events/invitations', [SpeakerInvitationController::class, 'index'])->name('invitations.index');
+    Route::get('/events/invitations/{invite}/show', [SpeakerInvitationController::class, 'show'])
+        ->name('invitations.show')
+        ->middleware('signed');
+});
+
+// Signed route group for speaker applications (auth not required for some)
+Route::middleware('signed')->group(function () {
+    Route::get('/events/{event}/apply-to-speak', [SpeakerApplicationController::class, 'apply'])
+        ->name('event.speakers.apply');
+    Route::post('/events/{event}/apply-to-speak', [SpeakerApplicationController::class, 'store'])
+        ->name('event.speakers.store');
+    Route::get('/events/{event}/invitations/{invite}/respond', [SpeakerApplicationController::class, 'inviteRespondView'])
+        ->name('invitations.respond');
+    Route::post('/events/{event}/invitations/{invite}/respond', [SpeakerInvitationController::class, 'acceptInvitation'])
+        ->name('invitations.accept');
+});

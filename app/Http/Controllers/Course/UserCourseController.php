@@ -14,7 +14,7 @@ class UserCourseController extends Controller
     public function index()
     {
         $courses = Course::paginate(10);
-        return view("legal.coming-soon", compact("courses"));
+        return view("courses.index", compact("courses"));
     }
 
     /**

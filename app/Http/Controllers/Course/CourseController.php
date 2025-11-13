@@ -8,10 +8,12 @@ use App\Http\Requests\CreateCourseRequest;
 use App\Models\Category;
 use App\Models\Course;
 use App\Services\Course\CourseService;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
 
 class CourseController extends Controller
 {
+    use AuthorizesRequests;
     public function __construct(
         public CourseService $courseService
     ) {
@@ -21,6 +23,7 @@ class CourseController extends Controller
      */
     public function index()
     {
+        $this->authorize('viewAny', Course::class);
         $categories = Category::all();
         $courses = $this->courseService->fetchCourses();
         return view("admin.courses.index", compact("categories", "courses"));
@@ -45,6 +48,7 @@ class CourseController extends Controller
      */
     public function store(CreateCourseRequest $request)
     {
+        $this->authorize('create', Course::class);
         $course = $this->courseService->createCourse($request->all(), $request->file('thumbnail_path'));
         if ($course) {
             return redirect()->back()->with([

@@ -1,0 +1,37 @@
+[
+    {
+        "title": "Dashboard",
+        "icon": "chart-area",
+        "route": "user_dashboard",
+        "variant": "accent"
+    },
+    { "title": "My Events", "icon": "calendar-heart", "route": "user.events" },
+    { "title": "My Invitations", "icon": "send", "route": "invitations.index" },
+    {
+        "title": "Event Manager",
+        "icon": "calendar",
+        "route": "admin.events.index",
+        "permission": "manage events"
+    },
+    {
+        "title": "Speaker Manager",
+        "icon": "mic",
+        "route": "admin.speakers.index",
+        "permission": ["create-speaker", "view-speaker"]
+    },
+    {
+        "title": "Course Manager",
+        "icon": "graduation-cap",
+        "permission": ["category-view", "category-delete", "category-update"],
+        "children": [
+            { "title": "Course Categories", "route": "admin.category.index" },
+            { "title": "Course Management", "route": "admin.courses.index" }
+        ]
+    },
+    {
+        "title": "Instructor Manager",
+        "icon": "users",
+        "route": "admin.instructors.index",
+        "permission": "manage-instructor-applications"
+    }
+]

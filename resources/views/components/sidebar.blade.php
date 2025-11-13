@@ -1,54 +1,40 @@
-<nav class="text-gray-700 my-2 ">
-    <ul class="transition-all space-y-1">
-        <x-side-nav-link title="Dashoard" icon="chart-area" :to="route('user_dashboard')" variant='accent' />
-        {{-- <x-side-nav-link title="My Courses" icon="library-big" /> --}}
-        <x-side-nav-link title="My Events" icon="calendar-heart" :to="route('user.events')" />
-        {{-- @can(['track-applications'])
-        <x-side-nav-link title="My Applications" icon="file-text" :to="route('user.events')" />
-        @endcan --}}
-        <x-side-nav-link title="My Invitations" icon="send" :to="route('invitations.index')" />
-        @can('manage events')
-        <x-side-nav-link title="Event Manager " icon="calendar" :to="route('admin.events.index')" />
-        @endcan
-        @can(['create-speaker', 'view-speaker'])
-        <x-side-nav-link title="Speaker Manager" icon="mic" :to="route('admin.speakers.index')" />
-        @endcan
-
-        {{-- @can(['category-view', 'category-delete', 'category-update'])
-        <li class="flex items-center flex-col gap-3 hover:text-[#FFF] rounded-md px-3 transition duration-300 whitespace-nowrap">
-            <button id="dropdownDefaultButton" data-collapse-toggle="course-management-dropdown"
-                class="text-gray-700  hover:bg-orange-500 flex items-center w-full px-2 py-2 rounded-md text-md gap-2 font-medium hover:text-white transition duration-300 whitespace-nowrap"
-                type="button">
-                <i data-lucide="graduation-cap" class="size-5"></i>
-                Course Manager
-                <svg class="w-2.5 h-2.5 ms-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none"
-                    viewBox="0 0 10 6">
-                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="m1 1 4 4 4-4" />
-                </svg>
-            </button>
-            <div id="course-management-dropdown"
-                class="hidden divide-orange-300 w-full">
-                <ul class="text-sm text-gray-700" aria-labelledby="dropdownDefaultButton">
-                    <li>
-                        <a href="{{ route('admin.category.index') }}"
-                            class="block px-4 py-2 hover:bg-gray-100">Course Categories</a>
-                    </li>
-                    <li>
-                        <a href="{{ route('admin.courses.index') }}"
-                            class="block px-4 py-2 hover:bg-gray-100">Course Management</a>
-                    </li>
+<nav class="text-slate-300">
+    <ul class="space-y-1">
+        @foreach ($sideLinks as $link)
+        @if (isset($link['children']))
+        @canAny($link['permission'] ?? null)
+            <li>
+                <button type="button"
+                    class="flex items-center w-full p-3 text-sm font-medium text-slate-300 transition-all duration-200 rounded-xl group hover:bg-slate-700/50 hover:text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                    aria-controls="dropdown-{{ Str::slug($link['title']) }}"
+                    data-collapse-toggle="dropdown-{{ Str::slug($link['title']) }}">
+                    <i data-lucide="{{ $link['icon'] }}"
+                        class="flex-shrink-0 w-5 h-5 text-slate-400 transition-colors duration-200 group-hover:text-blue-400"></i>
+                    <span class="flex-1 ms-3 text-left rtl:text-right whitespace-nowrap">{{ $link['title'] }}</span>
+                    <i data-lucide="chevron-down"
+                        class="w-4 h-4 text-slate-400 transition-all duration-200 group-hover:text-white transform group-hover:rotate-180"></i>
+                </button>
+                <ul id="dropdown-{{ Str::slug($link['title']) }}" class="hidden mt-2 space-y-1 ml-4">
+                    @foreach ($link['children'] as $childLink)
+                        @can($childLink['permission'] ?? null)
+                            <li>
+                                <a href="{{ route($childLink['route'] ?? '#') }}"
+                                    class="flex items-center w-full p-2.5 text-sm text-slate-400 transition-all duration-200 rounded-lg hover:bg-slate-700/30 hover:text-white hover:translate-x-1 border-l-2 border-slate-600 hover:border-blue-400 pl-4">
+                                    <span
+                                        class="w-2 h-2 bg-slate-500 rounded-full mr-3 group-hover:bg-blue-400 transition-colors duration-200"></span>
+                                    {{ $childLink['title'] }}
+                                </a>
+                            </li>
+                        @endcan
+                    @endforeach
                 </ul>
-            </div>
-        </li>
-        @endcan --}}
-
-
-        @can(['manage-instructor-applications'])
-        <x-side-nav-link title="Instructor Manager" icon="users" :to="route('admin.instructors.index')" />
+            </li>
+            @endcanAny
+        @else
+        @can($link['permission'] ?? null)
+            <x-side-nav-link title="{{ $link['title'] }}" icon="{{ $link['icon'] }}" :to="route($link['route'])" />
         @endcan
-
-        {{-- <x-side-nav-link title="Transaction History" icon="arrow-right-left" /> --}}
-        {{-- <x-side-nav-link title="Activity Logs" icon="list" /> --}}
+        @endif
+        @endforeach
     </ul>
 </nav>

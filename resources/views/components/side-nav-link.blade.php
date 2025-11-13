@@ -4,20 +4,11 @@
     "to" => "#"
 ])
 
-<li {{ $attributes->merge([
-    'class' => "flex items-center gap-3 hover:text-[#FFF] rounded-md px-3 transition duration-300 whitespace-nowrap"
-]) }}>
-    <!-- Icon -->
-    
-    <!-- Title -->
+<li>
     <a href="{{ $to }}"
-
-    class="text-gray-700 hover:bg-primary-500 flex items-center w-full px-2 py-2 rounded-md text-md gap-2 font-medium hover:text-white transition duration-300 whitespace-nowrap {{ request()->url() == url($to) ? 'bg-primary-500 text-white' : '' }}">
-        <span>
-            <i data-lucide="{{ $icon }}" class="size-5 rounded-md hover:text-white"></i>
-        </span>
-        <span>
-        {{ $title }}
-        </span>
+        class="flex items-center p-3 text-sm font-medium text-slate-300 rounded-xl transition-all duration-200 group hover:bg-slate-700/50 hover:text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 {{ request()->url() == url($to) ? 'bg-blue-600/20 text-blue-300 ring-2 ring-blue-500/50' : '' }}">
+        <i data-lucide="{{ $icon }}"
+            class="flex-shrink-0 w-5 h-5 text-slate-400 transition-colors duration-200 group-hover:text-blue-400 {{ request()->url() == url($to) ? 'text-blue-400' : '' }}"></i>
+        <span class="ms-3 font-medium">{{ $title }}</span>
     </a>
 </li>
