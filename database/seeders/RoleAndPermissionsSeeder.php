@@ -22,9 +22,10 @@ class RoleAndPermissionsSeeder extends Seeder
 
         $rolesPermissions = [
             'admin' => [
-                // event management
+                // Event management
                 'manage events',
-                // speaker management
+                
+                // Speaker management
                 "create-speaker",
                 'view-speaker',
                 "edit-speaker",
@@ -35,62 +36,94 @@ class RoleAndPermissionsSeeder extends Seeder
                 'track-applications',
                 'manage-activity-log',
 
-                // Categories
+                // User Management
+                'create-user',
+                'view-user',
+                'edit-user',
+                'delete-user',
+                'view-user-list',
+
+                // Role Management
+                'assign-role',
+                'remove-role',
+                'create-role',
+                'edit-role',
+                'delete-role',
+                'view-role-list',
+
+                // Permission Management
+                'assign-permission',
+                'remove-permission',
+                'view-permission-list',
+
+                // Categories (Admin only)
                 'category-view',
                 'category-create',
                 'category-update',
                 'category-delete',
                 'category-approve',
 
-                // Courses
-                'course-view',
-                'course-view-any',
-                'course-create',
-                'course-update',
-                'course-update-any',
-                'course-submit-for-review',
-                'course-publish',
-                'course-unpublish',
-                'course-delete',
-                'course-delete-any',
-                'course-assign-instructor',
+                // Course Management (Admin powers)
+                'course-view-any',           // View all courses system-wide
+                'course-update-any',         // Edit any course (override instructor)
+                'course-delete-any',         // Delete any course
+                'course-approve',            // Approve submitted courses
+                'course-reject',             // Reject submitted courses
+                'course-publish',            // Publish approved courses
+                'course-unpublish',          // Unpublish courses
+                'course-assign-instructor',  // Reassign course to different instructor
 
-                // Modules
-                'module-view',
-                'module-create',
-                'module-update',
-                'module-delete',
-                'module-reorder',
-                'module-manage-any',
+                // Module Management (Admin override)
+                'module-manage-any',         // Manage modules in any course
 
-                // Lessons
-                'lesson-view',
-                'lesson-create',
-                'lesson-update',
-                'lesson-delete',
-                'lesson-publish',
-                'lesson-manage-any',
+                // Lesson Management (Admin override)  
+                'lesson-manage-any',         // Manage lessons in any course
 
-                // Enrollments
-                'enrollment-enroll',
-                'enrollment-unenroll',
-                'enrollment-view-progress',
-                'enrollment-manage-any',
+                // Enrollment Management
+                'enrollment-manage-any',     // Manage all enrollments
+                'enrollment-view-progress',  // View all student progress
 
-                // Review / Quality Control
-                'review-comment-on-course',
-                'review-approve-course',
-                'review-reject-course',
-
+                // System Analytics
+                'analytics-view-system',     // System-wide course analytics
             ],
+            
             "instructor" => [
+                // Application tracking
                 'track-applications',
-                'course-view',
-                'course-create',
-                'course-update',
-                'course-delete'
+                
+                // Course Creation & Management (Own courses only)
+                'course-create',             // Create new courses (draft state)
+                'course-view-own',           // View own courses
+                'course-update-own',         // Edit own courses (draft/rejected only)
+                'course-submit-review',      // Submit course for admin approval
+                'course-delete-own',         // Delete own courses (draft only)
+                
+                // Course Building (Own courses only)
+                'module-create',             // Create modules in own courses
+                'module-update',             // Update modules in own courses
+                'module-delete',             // Delete modules in own courses
+                'module-reorder',            // Reorder modules in own courses
+                
+                'lesson-create',             // Create lessons in own courses
+                'lesson-update',             // Update lessons in own courses
+                'lesson-delete',             // Delete lessons in own courses
+                'lesson-reorder',            // Reorder lessons in own courses
+                
+                // Student Management (Own courses only)
+                'enrollment-view-own',       // View enrollments in own courses
+                'student-progress-view',     // View student progress in own courses
+                
+                // Analytics (Own courses only)
+                'analytics-view-own',        // View analytics for own courses
             ],
-            'student' => ['track-applications']
+            
+            'student' => [
+                'track-applications',
+                'course-enroll',             // Enroll in courses
+                'course-view-enrolled',      // View enrolled courses
+                'lesson-view-enrolled',      // View lessons in enrolled courses
+                'progress-track-own',        // Track own learning progress
+            ]
         ];
 
         // Create permissions

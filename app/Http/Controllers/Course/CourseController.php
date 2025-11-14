@@ -81,9 +81,43 @@ class CourseController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(Request $request, Course $course)
     {
-        //
+        $this->authorize('update', $course);
+        
+        $validated = $request->validate([
+            'title' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'level' => 'required|string',
+            'category_id' => 'required|exists:categories,id',
+            'price' => 'required|numeric|min:0',
+            'thumbnail_path' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048'
+        ]);
+
+        try {
+            $updatedCourse = $this->courseService->updateCourse(
+                $course, 
+                $validated, 
+                $request->file('thumbnail_path')
+            );
+            
+            if ($updatedCourse) {
+                return redirect()->back()->with([
+                    "message" => "Course updated successfully",
+                    "type" => "success"
+                ]);
+            }
+        } catch (\Exception $e) {
+            return redirect()->back()->with([
+                "message" => "Error updating course: " . $e->getMessage(),
+                "type" => "error"
+            ]);
+        }
+
+        return redirect()->back()->with([
+            "message" => "Error updating course",
+            "type" => "error"
+        ]);
     }
 
     /**

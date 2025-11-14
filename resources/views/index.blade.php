@@ -2,214 +2,440 @@
     use Carbon\Carbon;
 @endphp
 <x-guest-layout>
-    <!-- Banner Section -->
-    <section class="flex relative items-center justify-center h-[80vh] mb-20 bg-cover bg-center rounded-lg"
-        style="background-image: url({{ asset('images/learning-platform/banner.png') }}); 
-        background-position: center 10px;
-        background-repeat:no-repeat;"
-        data-aos="fade-down" data-aos-duration="900" data-aos-once="true">
-        <div class="absolute rounded-lg inset-0 bg-gradient-to-r from-primary/70 via-primary/60 to-primary/40"></div>
-        <div class="relative z-10 w-full max-w-3xl px-6 text-center rounded-lg" data-aos="fade-up" data-aos-delay="200">
-            <h6 class="text-md text-primary font-[800] font-montserrat mb-6 tracking-wide uppercase">
-                Empowering Leaders for Influence & Impact
-            </h6>
-            <h1
-                class="font-extrabold font-montserrat text-white text-3xl md:text-4xl mb-8 leading-tight drop-shadow-lg">
-                Developing visionary leaders to drive positive change in organizations and communities.
-            </h1>
-            <form class="flex flex-col md:flex-row items-center gap-4 md:gap-6 justify-center w-full mt-6"
-                data-aos="fade-up" data-aos-delay="400">
-                <div class="relative w-full md:w-56">
-                    <button type="button" id="categoriesBtn"
-                        class="flex items-center gap-2 w-full bg-white/90 px-4 py-3 rounded-lg shadow hover:bg-orange-50 transition font-medium text-gray-800 justify-center">
-                        <i class="fas fa-bars text-xl"></i>
-                        <span>Categories</span>
-                        <i class="fas fa-chevron-down ml-2 text-sm"></i>
-                    </button>
-                    <div id="categoriesPopup"
-                        class="absolute left-0 top-full mt-2 w-68 bg-white shadow-xl rounded-lg z-50 overflow-hidden hidden">
-                        <div class="p-4 border-b">
-                            <h6 class="text-base font-semibold mb-1">Course Categories</h6>
-                            <p class="text-xs text-gray-500">Pick a subject and start learning</p>
-                        </div>
-                        <ul class="p-2 space-y-2">
-                            @if ($categories->count())
-                                @foreach ($categories as $category)
-                                    <li data-aos="fade-up" data-aos-delay="{{ $loop->index * 100 }}">
-                                        <a href="courses-list.html"
-                                            class="flex items-center gap-3 p-3 rounded-lg hover:bg-blue-100 transition">
-                                            <img alt="{{ $category->name }} icon"
-                                                src="{{ asset('storage/' . $category->image) }}" class="w-8 h-8">
-                                            <span class="font-medium">{{ Str::ucfirst($category->name) }}</span>
-                                            <span
-                                                class="ml-auto text-xs text-gray-800 whitespace-nowrap">{{ $category->courses->count() }}
-                                                Courses</span>
-                                        </a>
-                                    </li>
-                                @endforeach
-                            @endif
-                        </ul>
+    <!-- Hero Section -->
+    <section class="py-16 md:py-20 lg:py-24 bg-white" data-aos="fade-down" data-aos-duration="900" data-aos-once="true">
+
+        <div class="container mx-auto px-6">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+
+                <!-- Text Content - Left Side -->
+                <div class="order-2 lg:order-1" data-aos="fade-right" data-aos-delay="200">
+                    <!-- Badge -->
+                    <div class="inline-flex items-center gap-2 border rounded-full px-6 py-3 mb-8"
+                        style="background-color: rgba(0, 166, 81, 0.1); border-color: #00a651;">
+                        <div class="w-2 h-2 rounded-full animate-pulse" style="background-color: #00a651;"></div>
+                        <span class="font-medium font-montserrat text-sm tracking-wide" style="color: #002147;">
+                            Empowering Leaders for Kingdom Impact
+                        </span>
+                    </div>
+
+                    <!-- Main Heading -->
+                    <h1 class="font-bold font-montserrat text-3xl md:text-4xl lg:text-5xl mb-6 leading-tight"
+                        style="color: #002147;">
+                        Transform Your
+                        <span style="color: #00a651;">
+                            Leadership Journey
+                        </span>
+                    </h1>
+
+                    <p class="text-lg md:text-xl text-gray-600 mb-8 leading-relaxed font-lato">
+                        Developing visionary leaders to drive positive change in organizations and communities through
+                        kingdom-based principles.
+                    </p>
+
+                    <!-- CTA Buttons -->
+                    <div class="flex flex-col sm:flex-row gap-4">
+                        <a href="{{ route('register') }}"
+                            class="group font-semibold py-3 px-6 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 font-montserrat flex items-center justify-center gap-2 text-sm text-white"
+                            style="background-color: #00a651;" onmouseover="this.style.backgroundColor='#15803d'"
+                            onmouseout="this.style.backgroundColor='#00a651'">
+                            <span>Start Your Journey</span>
+                            <i class="fas fa-arrow-right group-hover:translate-x-1 transition-transform text-sm"></i>
+                        </a>
+                        <a href="{{ route('events.index') }}"
+                            class="group border-2 font-semibold py-3 px-6 rounded-lg transition-all duration-300 font-montserrat flex items-center justify-center gap-2 text-sm hover:bg-gray-50"
+                            style="color: #002147; border-color: #002147;">
+                            <span>Explore Events</span>
+                            <i class="fas fa-calendar group-hover:scale-110 transition-transform text-sm"></i>
+                        </a>
                     </div>
                 </div>
-                <div class="relative flex-grow w-full max-w-md">
-                    <input type="text" placeholder="What do you want to learn?" aria-label="Search courses"
-                        class="w-full px-5 py-3 pl-12 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-500 transition-all duration-300 bg-white/90 text-gray-800 shadow">
+
+                <!-- Image - Right Side -->
+                <div class="order-1 lg:order-2" data-aos="fade-left" data-aos-delay="400">
+                    <div class="relative">
+                        <img src="{{ asset('images/learning-platform/banner.png') }}" alt="BLI Leadership Training"
+                            class="w-full h-auto rounded-2xl shadow-2xl">
+
+                        <!-- Optional decorative elements -->
+                        <div class="absolute -top-4 -left-4 w-20 h-20 rounded-full opacity-20"
+                            style="background-color: #00a651;"></div>
+                        <div class="absolute -bottom-4 -right-4 w-16 h-16 rounded-full opacity-20"
+                            style="background-color: #ed1c24;"></div>
+                    </div>
                 </div>
-                <button type="submit"
-                    class="bg-primary hover:bg-secondary/90 text-white font-semibold px-6 py-3 rounded-lg shadow transition-all duration-300 w-full md:w-auto">
-                    Search
-                </button>
-            </form>
+
+            </div>
         </div>
     </section>
 
-    <!-- CTA: View All Categories Section -->
-    <section class="mb-20" data-aos="fade-up" data-aos-duration="900" data-aos-once="true">
-        <div class="container mx-auto px-4 flex flex-col items-center justify-center">
-            <h2 class="font-bold text-4xl text-center mb-6 font-montserrat text-gray-800" data-aos="fade-up">
-                Explore All Course Categories
-            </h2>
-            <p class="text-lg text-gray-600 text-center mb-12 max-w-2xl leading-relaxed" data-aos="fade-up"
-                data-aos-delay="150">
-                Discover a wide range of categories to find the perfect course for your learning journey and
-                professional development.
-            </p>
+    <!-- Trust Indicators -->
+    <section class="py-12 bg-white border-b border-gray-100">
+        <div class="container mx-auto px-4">
+            <div class="flex flex-col md:flex-row items-center justify-center gap-8 md:gap-16 text-center">
+                <div class="flex items-center gap-3">
+                    <div class="text-2xl font-bold font-montserrat" style="color: #002147;">1,300+</div>
+                    <div class="text-gray-600 font-lato">Organizations Trust BLI</div>
+                </div>
+                <div class="flex items-center gap-3">
+                    <div class="text-2xl font-bold font-montserrat" style="color: #ed1c24;">50+</div>
+                    <div class="text-gray-600 font-lato">Countries Worldwide</div>
+                </div>
+                <div class="flex items-center gap-3">
+                    <div class="text-2xl font-bold font-montserrat" style="color: #00a651;">15+</div>
+                    <div class="text-gray-600 font-lato">Years of Excellence</div>
+                </div>
+            </div>
+        </div>
+        </div>
+    </section>
 
-            <div class="w-full">
-                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 mb-12">
-                    @if ($categories->count())
-                        @foreach ($categories as $category)
-                            <a href="courses-list.html"
-                                class="group bg-white rounded-xl shadow-sm p-6 text-center transition-all duration-300 hover:shadow-lg hover:transform hover:-translate-y-2 border border-gray-100"
-                                data-aos="zoom-in" data-aos-delay="{{ $loop->index * 100 }}">
+    <!-- Course Categories Section -->
+    <section class="py-20 bg-gradient-to-b from-white to-gray-50" data-aos="fade-up" data-aos-duration="900"
+        data-aos-once="true">
+        <div class="container mx-auto px-4">
+            <!-- Section Header -->
+            <div class="text-center mb-16" data-aos="fade-up">
+                <div class="inline-flex items-center gap-2 rounded-full px-6 py-3 mb-6"
+                    style="background-color: rgba(0, 33, 71, 0.1);">
+                    <i class="fas fa-graduation-cap" style="color: #002147;"></i>
+                    <span class="font-medium font-montserrat text-sm" style="color: #002147;">Leadership
+                        Development</span>
+                </div>
+                <h2 class="font-bold text-4xl lg:text-5xl text-center mb-6 font-montserrat text-gray-900">
+                    Explore Course Categories
+                </h2>
+                <p class="text-xl text-gray-600 text-center mb-8 max-w-3xl mx-auto leading-relaxed font-lato">
+                    Discover specialized leadership tracks designed to equip you for impact in every sphere of society.
+                </p>
+            </div>
+
+            <!-- Categories Grid -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-8 mb-16">
+                @if ($categories->count())
+                    @foreach ($categories as $category)
+                        <a href="courses-list.html"
+                            class="group bg-white rounded-2xl shadow-sm hover:shadow-xl p-8 text-center transition-all duration-500 hover:transform hover:-translate-y-4 border border-gray-100 hover:border-primary/20 relative overflow-hidden"
+                            data-aos="zoom-in" data-aos-delay="{{ $loop->index * 150 }}">
+
+                            <!-- Background Gradient -->
+                            <div
+                                class="absolute inset-0 bg-gradient-to-br from-primary/5 to-secondary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+                            </div>
+
+                            <!-- Content -->
+                            <div class="relative z-10">
+                                <!-- Icon Container -->
                                 <div
-                                    class="mb-4 p-3 bg-gray-50 rounded-lg inline-block group-hover:bg-primary/5 transition-colors duration-300">
-                                    <img src="{{ asset('storage/' . $category->image) }}"
-                                        alt="{{ $category->name }} icon" class="mx-auto w-14 h-14 object-contain">
+                                    class="mb-6 p-4 bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl inline-block group-hover:bg-gradient-to-br group-hover:from-primary/10 group-hover:to-secondary/10 transition-all duration-500 group-hover:scale-110">
+                                    <img src="{{ asset('storage/' . $category->image) }}" alt="{{ $category->name }} icon"
+                                        class="mx-auto w-16 h-16 object-contain group-hover:scale-110 transition-transform duration-500">
                                 </div>
+
+                                <!-- Category Name -->
                                 <h5
-                                    class="font-bold text-lg mb-3 text-gray-800 group-hover:text-primary transition-colors duration-300">
+                                    class="font-bold text-xl mb-4 text-gray-800 group-hover:text-primary transition-colors duration-500 font-montserrat">
                                     {{ Str::ucfirst($category->name) }}
                                 </h5>
-                                <p class="font-medium text-gray-500 text-sm">
-                                    {{ $category->courses->count() }}
-                                    Course{{ $category->courses->count() !== 1 ? 's' : '' }}
-                                </p>
-                            </a>
-                        @endforeach
-                    @else
-                        <!-- Fallback content if no categories -->
-                        <div class="col-span-full text-center py-12">
-                            <p class="text-gray-500 text-lg">No categories available at the moment.</p>
-                        </div>
-                    @endif
-                </div>
 
-                <!-- Centered CTA Button -->
-                <div class="flex justify-center" data-aos="fade-up" data-aos-delay="300">
-                    <a href="#"
-                        class="bg-primary hover:bg-primary-dark text-white font-bold py-4 px-12 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1 text-base">
-                        View All Categories
-                    </a>
-                </div>
+                                <!-- Course Count -->
+                                <div
+                                    class="inline-flex items-center gap-2 bg-gray-100 group-hover:bg-primary/10 rounded-full px-4 py-2 transition-colors duration-500">
+                                    <span class="font-semibold text-gray-600 group-hover:text-primary text-sm font-montserrat">
+                                        {{ $category->courses->count() }}
+                                    </span>
+                                    <span class="text-gray-500 group-hover:text-primary/80 text-sm font-lato">
+                                        course{{ $category->courses->count() !== 1 ? 's' : '' }}
+                                    </span>
+                                </div>
+
+                                <!-- Hover Arrow -->
+                                <div class="mt-4 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+                                    <i class="fas fa-arrow-right text-primary"></i>
+                                </div>
+                            </div>
+                        </a>
+                    @endforeach
+                @else
+                    <!-- Fallback content -->
+                    <div class="col-span-full text-center py-16">
+                        <div class="max-w-md mx-auto">
+                            <i class="fas fa-book-open text-6xl text-gray-300 mb-6"></i>
+                            <h3 class="font-bold text-2xl text-gray-500 mb-4 font-montserrat">Categories Coming Soon</h3>
+                            <p class="text-gray-400 font-lato leading-relaxed">We're preparing amazing course categories for
+                                your leadership journey.</p>
+                        </div>
+                    </div>
+                @endif
+            </div>
+
+            <!-- CTA Section -->
+            <div class="text-center" data-aos="fade-up" data-aos-delay="400">
+                <a href="#"
+                    class="group inline-flex items-center gap-4 text-white font-bold py-5 px-10 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2 text-lg font-montserrat"
+                    style="background: linear-gradient(135deg, #002147 0%, #ed1c24 100%);"
+                    onmouseover="this.style.background='linear-gradient(135deg, #001a39 0%, #dc2626 100%)'"
+                    onmouseout="this.style.background='linear-gradient(135deg, #002147 0%, #ed1c24 100%)'">
+                    <span>Explore All Categories</span>
+                    <i class="fas fa-arrow-right group-hover:translate-x-2 transition-transform duration-300"></i>
+                </a>
             </div>
         </div>
     </section>
 
     <!-- What Makes BLI Stand Out Section -->
-    <section class="py-20 bg-gray-50" data-aos="fade-up" data-aos-once="true">
-        <div class=" mx-auto px-4">
-            <h2 class="font-bold text-4xl text-center mb-16 font-montserrat text-primary">
-                What Makes BLI Stand Out
-            </h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+    <section class="py-20 bg-gradient-to-b from-gray-50 to-white relative overflow-hidden" data-aos="fade-up"
+        data-aos-once="true">
+        <!-- Background Elements -->
+        <div class="absolute inset-0 overflow-hidden">
+            <div class="absolute -top-24 -right-24 w-96 h-96 bg-primary/5 rounded-full"></div>
+            <div class="absolute -bottom-24 -left-24 w-96 h-96 bg-secondary/5 rounded-full"></div>
+        </div>
+
+        <div class="container mx-auto px-4 relative z-10">
+            <!-- Section Header -->
+            <div class="text-center mb-20" data-aos="fade-up">
+                <div class="inline-flex items-center gap-2 rounded-full px-6 py-3 mb-6"
+                    style="background-color: rgba(0, 33, 71, 0.1);">
+                    <i class="fas fa-crown" style="color: #002147;"></i>
+                    <span class="font-medium font-montserrat text-sm" style="color: #002147;">Kingdom Excellence</span>
+                </div>
+                <h2 class="font-bold text-4xl lg:text-5xl text-center mb-6 font-montserrat text-gray-900">
+                    What Makes BLI
+                    <span style="color: #ed1c24;">Stand Out</span>
+                </h2>
+                <p class="text-xl text-gray-600 text-center max-w-3xl mx-auto leading-relaxed font-lato">
+                    Experience transformational leadership development that integrates spiritual depth with practical
+                    excellence.
+                </p>
+            </div>
+            <!-- Features Grid -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-8">
                 <!-- Kingdom-Based Leadership -->
-                <div class="text-center bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-300 p-6"
+                <div class="group bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 p-8 border border-gray-100 hover:border-primary/20 relative overflow-hidden"
                     data-aos="fade-up" data-aos-delay="100">
-                    <div class="mb-5 p-3 rounded-full bg-primary/10 inline-block">
-                        <i class="fas fa-chess-king text-4xl text-primary"></i>
+                    <!-- Background Gradient -->
+                    <div
+                        class="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500">
                     </div>
-                    <h5 class="font-bold text-xl mb-4 font-montserrat text-primary">
-                        Kingdom-Based Leadership
-                    </h5>
-                    <p class="text-gray-600 font-lato leading-relaxed">
-                        Spiritually grounded, marketplace relevant. Thrive like Daniel, Joseph, and Esther—integrating
-                        faith with bold, strategic leadership in business, politics, education, and ministry.
-                    </p>
+
+                    <!-- Content -->
+                    <div class="relative z-10">
+                        <div class="mb-6 p-4 rounded-2xl inline-block group-hover:scale-110 transition-transform duration-500"
+                            style="background: linear-gradient(135deg, rgba(0, 33, 71, 0.1) 0%, rgba(0, 33, 71, 0.05) 100%);">
+                            <i class="fas fa-crown text-4xl group-hover:scale-110 transition-transform duration-300"
+                                style="color: #002147;"></i>
+                        </div>
+                        <h5 class="font-bold text-2xl mb-4 font-montserrat text-gray-900 transition-colors duration-300"
+                            onmouseover="this.style.color='#002147'" onmouseout="this.style.color='#111827'">
+                            Kingdom-Based Leadership
+                        </h5>
+                        <p
+                            class="text-gray-600 font-lato leading-relaxed text-lg group-hover:text-gray-700 transition-colors duration-300">
+                            Spiritually grounded, marketplace relevant. Thrive like Daniel, Joseph, and
+                            Esther—integrating
+                            faith with bold, strategic leadership in business, politics, education, and ministry.
+                        </p>
+
+                        <!-- Learn More Link -->
+                        <div class="mt-6 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+                            <a href="#"
+                                class="inline-flex items-center gap-2 font-semibold font-montserrat hover:gap-4 transition-all duration-300"
+                                style="color: #002147;">
+                                <span>Learn More</span>
+                                <i class="fas fa-arrow-right"></i>
+                            </a>
+                        </div>
+                    </div>
                 </div>
                 <!-- Transformational Mentorship -->
-                <div class="text-center bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-300 p-6"
+                <div class="group bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 p-8 border border-gray-100 hover:border-secondary/20 relative overflow-hidden"
                     data-aos="fade-up" data-aos-delay="200">
-                    <div class="mb-5 p-3 rounded-full bg-secondary/10 inline-block">
-                        <i class="fas fa-user-friends text-4xl text-secondary"></i>
+                    <!-- Background Gradient -->
+                    <div
+                        class="absolute inset-0 bg-gradient-to-br from-secondary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500">
                     </div>
-                    <h5 class="font-bold text-xl mb-4 font-montserrat text-primary">
-                        Transformational Mentorship
-                    </h5>
-                    <p class="text-gray-600 font-lato leading-relaxed">
-                        Students matched with seasoned mentors for growth checkpoints, leadership challenges, and
-                        personal formation. Virtual coaching pods and check-ins ensure students flourish.
-                    </p>
+
+                    <!-- Content -->
+                    <div class="relative z-10">
+                        <div
+                            class="mb-6 p-4 rounded-2xl bg-gradient-to-br from-secondary/10 to-secondary/5 inline-block group-hover:scale-110 transition-transform duration-500">
+                            <i
+                                class="fas fa-hands-helping text-4xl text-secondary group-hover:scale-110 transition-transform duration-300"></i>
+                        </div>
+                        <h5
+                            class="font-bold text-2xl mb-4 font-montserrat text-gray-900 group-hover:text-secondary transition-colors duration-300">
+                            Transformational Mentorship
+                        </h5>
+                        <p
+                            class="text-gray-600 font-lato leading-relaxed text-lg group-hover:text-gray-700 transition-colors duration-300">
+                            Students matched with seasoned mentors for growth checkpoints, leadership challenges, and
+                            personal formation. Virtual coaching pods and check-ins ensure students flourish.
+                        </p>
+
+                        <!-- Learn More Link -->
+                        <div class="mt-6 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+                            <a href="#"
+                                class="inline-flex items-center gap-2 font-semibold font-montserrat hover:gap-4 transition-all duration-300"
+                                style="color: #ed1c24;">
+                                <span>Learn More</span>
+                                <i class="fas fa-arrow-right"></i>
+                            </a>
+                        </div>
+                    </div>
                 </div>
                 <!-- Problem-Solving Curriculum -->
-                <div class="text-center bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-300 p-6"
+                <div class="group bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 p-8 border border-gray-100 hover:border-accent/20 relative overflow-hidden lg:col-span-2 xl:col-span-1"
                     data-aos="fade-up" data-aos-delay="300">
-                    <div class="mb-5 p-3 rounded-full bg-accent/10 inline-block">
-                        <i class="fas fa-tools text-4xl text-accent"></i>
+                    <!-- Background Gradient -->
+                    <div
+                        class="absolute inset-0 bg-gradient-to-br from-accent/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500">
                     </div>
-                    <h5 class="font-bold text-xl mb-4 font-montserrat text-primary">
-                        Problem-Solving Curriculum
-                    </h5>
-                    <ul class="text-gray-600 font-lato text-left mx-auto max-w-xs list-none space-y-2">
-                        <li class="flex items-start">
-                            <span class="text-primary mr-2 mt-1">•</span>
-                            <span>Leading under pressure</span>
-                        </li>
-                        <li class="flex items-start">
-                            <span class="text-primary mr-2 mt-1">•</span>
-                            <span>Navigating toxic environments</span>
-                        </li>
-                        <li class="flex items-start">
-                            <span class="text-primary mr-2 mt-1">•</span>
-                            <span>Strategic planning with prophetic insight</span>
-                        </li>
-                        <li class="flex items-start">
-                            <span class="text-primary mr-2 mt-1">•</span>
-                            <span>Rebuilding broken systems</span>
-                        </li>
-                        <li class="flex items-start">
-                            <span class="text-primary mr-2 mt-1">•</span>
-                            <span>Sustaining influence with integrity</span>
-                        </li>
-                    </ul>
+
+                    <!-- Content -->
+                    <div class="relative z-10">
+                        <div
+                            class="mb-6 p-4 rounded-2xl bg-gradient-to-br from-accent/10 to-accent/5 inline-block group-hover:scale-110 transition-transform duration-500">
+                            <i
+                                class="fas fa-puzzle-piece text-4xl text-accent group-hover:scale-110 transition-transform duration-300"></i>
+                        </div>
+                        <h5
+                            class="font-bold text-2xl mb-6 font-montserrat text-gray-900 group-hover:text-accent transition-colors duration-300">
+                            Problem-Solving Curriculum
+                        </h5>
+
+                        <!-- Skills List -->
+                        <div class="space-y-3 mb-6">
+                            <div
+                                class="flex items-center gap-3 group/item hover:bg-accent/5 rounded-lg p-2 -m-2 transition-colors duration-300">
+                                <div
+                                    class="w-2 h-2 bg-accent rounded-full group-hover/item:scale-125 transition-transform duration-300">
+                                </div>
+                                <span
+                                    class="text-gray-600 font-lato group-hover/item:text-gray-800 transition-colors duration-300">Leading
+                                    under pressure</span>
+                            </div>
+                            <div
+                                class="flex items-center gap-3 group/item hover:bg-accent/5 rounded-lg p-2 -m-2 transition-colors duration-300">
+                                <div
+                                    class="w-2 h-2 bg-accent rounded-full group-hover/item:scale-125 transition-transform duration-300">
+                                </div>
+                                <span
+                                    class="text-gray-600 font-lato group-hover/item:text-gray-800 transition-colors duration-300">Navigating
+                                    toxic environments</span>
+                            </div>
+                            <div
+                                class="flex items-center gap-3 group/item hover:bg-accent/5 rounded-lg p-2 -m-2 transition-colors duration-300">
+                                <div
+                                    class="w-2 h-2 bg-accent rounded-full group-hover/item:scale-125 transition-transform duration-300">
+                                </div>
+                                <span
+                                    class="text-gray-600 font-lato group-hover/item:text-gray-800 transition-colors duration-300">Strategic
+                                    planning with prophetic insight</span>
+                            </div>
+                            <div
+                                class="flex items-center gap-3 group/item hover:bg-accent/5 rounded-lg p-2 -m-2 transition-colors duration-300">
+                                <div
+                                    class="w-2 h-2 bg-accent rounded-full group-hover/item:scale-125 transition-transform duration-300">
+                                </div>
+                                <span
+                                    class="text-gray-600 font-lato group-hover/item:text-gray-800 transition-colors duration-300">Rebuilding
+                                    broken systems</span>
+                            </div>
+                            <div
+                                class="flex items-center gap-3 group/item hover:bg-accent/5 rounded-lg p-2 -m-2 transition-colors duration-300">
+                                <div
+                                    class="w-2 h-2 bg-accent rounded-full group-hover/item:scale-125 transition-transform duration-300">
+                                </div>
+                                <span
+                                    class="text-gray-600 font-lato group-hover/item:text-gray-800 transition-colors duration-300">Sustaining
+                                    influence with integrity</span>
+                            </div>
+                        </div>
+
+                        <!-- Learn More Link -->
+                        <div class="opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+                            <a href="#"
+                                class="inline-flex items-center gap-2 font-semibold font-montserrat hover:gap-4 transition-all duration-300"
+                                style="color: #00a651;">
+                                <span>View Curriculum</span>
+                                <i class="fas fa-arrow-right"></i>
+                            </a>
+                        </div>
+                    </div>
                 </div>
                 <!-- Prophetic Leadership Integration -->
-                <div class="text-center bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-300 p-6"
+                <div class="group bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 p-8 border border-gray-100 hover:border-primary/20 relative overflow-hidden"
                     data-aos="fade-up" data-aos-delay="400">
-                    <div class="mb-5 p-3 rounded-full bg-primary/10 inline-block">
-                        <i class="fas fa-eye text-4xl text-primary"></i>
+                    <!-- Background Gradient -->
+                    <div
+                        class="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500">
                     </div>
-                    <h5 class="font-bold text-xl mb-4 font-montserrat text-primary">
-                        Prophetic Leadership
-                    </h5>
-                    <p class="text-gray-600 font-lato leading-relaxed">
-                        Integrates prophetic insight with leadership training—sharpening discernment, interpreting
-                        divine seasons, and leading with Spirit-led accuracy.
-                    </p>
+
+                    <!-- Content -->
+                    <div class="relative z-10">
+                        <div
+                            class="mb-6 p-4 rounded-2xl bg-gradient-to-br from-primary/10 to-primary/5 inline-block group-hover:scale-110 transition-transform duration-500">
+                            <i
+                                class="fas fa-eye text-4xl text-primary group-hover:scale-110 transition-transform duration-300"></i>
+                        </div>
+                        <h5
+                            class="font-bold text-2xl mb-4 font-montserrat text-gray-900 group-hover:text-primary transition-colors duration-300">
+                            Prophetic Leadership
+                        </h5>
+                        <p
+                            class="text-gray-600 font-lato leading-relaxed text-lg group-hover:text-gray-700 transition-colors duration-300">
+                            Integrates prophetic insight with leadership training—sharpening discernment, interpreting
+                            divine seasons, and leading with Spirit-led accuracy.
+                        </p>
+
+                        <!-- Learn More Link -->
+                        <div class="mt-6 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+                            <a href="#"
+                                class="inline-flex items-center gap-2 font-semibold font-montserrat hover:gap-4 transition-all duration-300"
+                                style="color: #002147;">
+                                <span>Learn More</span>
+                                <i class="fas fa-arrow-right"></i>
+                            </a>
+                        </div>
+                    </div>
                 </div>
+
                 <!-- Global Vision, Local Expression -->
-                <div class="text-center bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-300 p-6"
+                <div class="group bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 p-8 border border-gray-100 hover:border-secondary/20 relative overflow-hidden"
                     data-aos="fade-up" data-aos-delay="500">
-                    <div class="mb-5 p-3 rounded-full bg-secondary/10 inline-block">
-                        <i class="fas fa-globe text-4xl text-secondary"></i>
+                    <!-- Background Gradient -->
+                    <div
+                        class="absolute inset-0 bg-gradient-to-br from-secondary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500">
                     </div>
-                    <h5 class="font-bold text-xl mb-4 font-montserrat text-primary">
-                        Global Vision, Local Expression
-                    </h5>
-                    <p class="text-gray-600 font-lato leading-relaxed">
-                        Hybrid learning (virtual + in-person), summits, bootcamps, and global collaborations amplify
-                        graduates' influence worldwide.
-                    </p>
+
+                    <!-- Content -->
+                    <div class="relative z-10">
+                        <div
+                            class="mb-6 p-4 rounded-2xl bg-gradient-to-br from-secondary/10 to-secondary/5 inline-block group-hover:scale-110 transition-transform duration-500">
+                            <i
+                                class="fas fa-globe-americas text-4xl text-secondary group-hover:scale-110 transition-transform duration-300"></i>
+                        </div>
+                        <h5
+                            class="font-bold text-2xl mb-4 font-montserrat text-gray-900 group-hover:text-secondary transition-colors duration-300">
+                            Global Vision, Local Expression
+                        </h5>
+                        <p
+                            class="text-gray-600 font-lato leading-relaxed text-lg group-hover:text-gray-700 transition-colors duration-300">
+                            Hybrid learning (virtual + in-person), summits, bootcamps, and global collaborations amplify
+                            graduates' influence worldwide.
+                        </p>
+
+                        <!-- Learn More Link -->
+                        <div class="mt-6 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+                            <a href="#"
+                                class="inline-flex items-center gap-2 font-semibold font-montserrat hover:gap-4 transition-all duration-300"
+                                style="color: #ed1c24;">
+                                <span>Learn More</span>
+                                <i class="fas fa-arrow-right"></i>
+                            </a>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -250,7 +476,8 @@
                             </h3>
 
                             <p class="font-bold text-accent mb-3 line-clamp-2 text-xs leading-relaxed font-montserrat">
-                                {{ $event->theme }}</p>
+                                {{ $event->theme }}
+                            </p>
 
                             <div class="space-y-2 mb-3">
                                 <div class="flex items-center gap-2 text-gray-600 text-xs font-lato">
@@ -270,37 +497,37 @@
                                     <span class="capitalize">{{ $event->slotsRemaining() }}</span>
                                 </div>
 
-                               
-                                    @if ($event->mode == 'hybrid')
-                                        <div class="flex items-center gap-2 text-gray-600 text-xs font-lato">
-                                            @if ($event->isRegistered() && Carbon::parse($event->start_date)->isNowOrPast())
-                                                <i class="fas fa-link text-secondary text-xs"></i>
-                                                <span class="capitalize">
-                                                    <a href="{{ $event->location }}" target="_blank"
-                                                        class="hover:underline">{{ $event->location }}</a>
-                                                </span>
-                                            @endif
-                                        </div>
-                                        <div class="flex items-center gap-2 text-gray-600 text-xs font-lato">
-                                            <i class="fas fa-location-arrow text-secondary text-xs"></i>
-                                            <span class="capitalize">{{ $event->physical_address }}</span>
-                                        </div>
-                                    @elseif($event->mode == 'offline')
-                                        <div class="flex items-center gap-2 text-gray-600 text-xs font-lato">
-                                            <i class="fas fa-location-arrow text-secondary text-xs"></i>
-                                            <span class="capitalize">{{ $event->physical_address }}</span>
-                                        </div>
-                                    @elseif($event->mode == 'online')
-                                        <div class="flex items-center gap-2 text-gray-600 text-xs font-lato">
-                                            @if ($event->isRegistered() && Carbon::parse($event->start_date)->isNowOrPast())
-                                                <i class="fas fa-link text-secondary text-xs"></i>
-                                                <span class="capitalize">
-                                                    <a href="{{ $event->location }}" target="_blank"
-                                                        class="hover:underline">{{ $event->location }}</a>
-                                                </span>
-                                            @endif
-                                        </div>
-                                    @endif
+
+                                @if ($event->mode == 'hybrid')
+                                    <div class="flex items-center gap-2 text-gray-600 text-xs font-lato">
+                                        @if ($event->isRegistered() && Carbon::parse($event->start_date)->isNowOrPast())
+                                            <i class="fas fa-link text-secondary text-xs"></i>
+                                            <span class="capitalize">
+                                                <a href="{{ $event->location }}" target="_blank"
+                                                    class="hover:underline">{{ $event->location }}</a>
+                                            </span>
+                                        @endif
+                                    </div>
+                                    <div class="flex items-center gap-2 text-gray-600 text-xs font-lato">
+                                        <i class="fas fa-location-arrow text-secondary text-xs"></i>
+                                        <span class="capitalize">{{ $event->physical_address }}</span>
+                                    </div>
+                                @elseif($event->mode == 'offline')
+                                    <div class="flex items-center gap-2 text-gray-600 text-xs font-lato">
+                                        <i class="fas fa-location-arrow text-secondary text-xs"></i>
+                                        <span class="capitalize">{{ $event->physical_address }}</span>
+                                    </div>
+                                @elseif($event->mode == 'online')
+                                    <div class="flex items-center gap-2 text-gray-600 text-xs font-lato">
+                                        @if ($event->isRegistered() && Carbon::parse($event->start_date)->isNowOrPast())
+                                            <i class="fas fa-link text-secondary text-xs"></i>
+                                            <span class="capitalize">
+                                                <a href="{{ $event->location }}" target="_blank"
+                                                    class="hover:underline">{{ $event->location }}</a>
+                                            </span>
+                                        @endif
+                                    </div>
+                                @endif
                             </div>
 
                             <div class="flex  items-center justify-between pt-3 border-t border-gray-100">
@@ -347,14 +574,13 @@
 
             {{-- <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-8 justify-items-center items-center">
                 @foreach (range(1, 6) as $i)
-                    <div class="group" data-aos="fade-in" data-aos-delay="{{ $i * 100 }}">
-                        <div
-                            class="bg-white rounded-xl p-6 shadow-sm transition-all duration-300 hover:shadow-md hover:transform hover:-translate-y-1 border border-gray-100 h-auto flex items-center justify-center">
-                            <img src="{{ asset('images/logo.jpg') }}"
-                                alt="Partner organization {{ $i }}"
-                                class="mx-auto opacity-70 group-hover:opacity-100 transition-opacity duration-300 grayscale group-hover:grayscale-0 h-auto object-contain">
-                        </div>
+                <div class="group" data-aos="fade-in" data-aos-delay="{{ $i * 100 }}">
+                    <div
+                        class="bg-white rounded-xl p-6 shadow-sm transition-all duration-300 hover:shadow-md hover:transform hover:-translate-y-1 border border-gray-100 h-auto flex items-center justify-center">
+                        <img src="{{ asset('images/logo.jpg') }}" alt="Partner organization {{ $i }}"
+                            class="mx-auto opacity-70 group-hover:opacity-100 transition-opacity duration-300 grayscale group-hover:grayscale-0 h-auto object-contain">
                     </div>
+                </div>
                 @endforeach
             </div> --}}
 
@@ -453,8 +679,8 @@
                     </div>
 
                     <!-- CTA Card -->
-                    <div class="bg-gradient-to-r from-primary to-secondary rounded-xl p-6 text-white"
-                        data-aos="fade-up" data-aos-delay="500">
+                    <div class="bg-gradient-to-r from-primary to-secondary rounded-xl p-6 text-white" data-aos="fade-up"
+                        data-aos-delay="500">
                         <h6 class="font-bold text-lg mb-2 font-montserrat">Ready to Transform Your Leadership?</h6>
                         <p class="text-white/90 text-sm mb-4 font-lato">Join thousands of leaders experiencing
                             transformation</p>

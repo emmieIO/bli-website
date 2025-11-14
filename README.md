@@ -1,61 +1,464 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# 🎓 BLI Website - Beacon Leadership Institute
 
 <p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
+  <img src="https://img.shields.io/badge/Laravel-12.x-FF2D20?style=for-the-badge&logo=laravel&logoColor=white" alt="Laravel">
+  <img src="https://img.shields.io/badge/PHP-8.2%2B-777BB4?style=for-the-badge&logo=php&logoColor=white" alt="PHP">
+  <img src="https://img.shields.io/badge/Tailwind_CSS-4.0-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white" alt="Tailwind CSS">
+  <img src="https://img.shields.io/badge/Alpine.js-3.x-8BC34A?style=for-the-badge&logo=alpine.js&logoColor=white" alt="Alpine.js">
 </p>
 
-## About Laravel
+<p align="center">
+  A modern, feature-rich platform for the Business Learning Institute, designed to connect learners with industry experts through events, courses, and professional development opportunities.
+</p>
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+---
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## 📋 Table of Contents
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+- [About](#about)
+- [Features](#features)
+- [Technology Stack](#technology-stack)
+- [Prerequisites](#prerequisites)
+- [Installation](#installation)
+- [Configuration](#configuration)
+- [Usage](#usage)
+- [Project Structure](#project-structure)
+- [Development](#development)
+- [Testing](#testing)
+- [Deployment](#deployment)
+- [Contributing](#contributing)
+- [License](#license)
 
-## Learning Laravel
+---
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+## 🎯 About
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+The BLI Website is a comprehensive learning management platform that facilitates professional development through:
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+- **Event Management**: Create, manage, and promote educational events
+- **Speaker Directory**: Connect with industry experts and thought leaders
+- **Course Catalog**: Browse and enroll in professional development courses
+- **Instructor Portal**: Manage teaching opportunities and applications
+- **User Management**: Role-based access control for different user types
+- **Video Integration**: Seamless integration with Mux and Vimeo for video content
 
-## Laravel Sponsors
+---
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+## ✨ Features
 
-### Premium Partners
+### 🎪 **Event Management**
+- Event creation and management
+- Speaker applications and approval workflow
+- Attendee registration and management
+- Event calendar and scheduling
+- iCalendar integration for calendar exports
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+### 👥 **User Management**
+- Multi-role authentication (Students, Instructors, Speakers, Admins)
+- User profiles and professional information
+- Permission-based access control
+- Speaker and instructor application workflows
 
-## Contributing
+### 📚 **Course System**
+- Course catalog with categorization
+- Enrollment management
+- Progress tracking
+- Multi-media content support
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+### 🎬 **Media Integration**
+- Vimeo video management
+- Optimized video delivery
+- Video analytics and insights
 
-## Code of Conduct
+### 🎨 **Modern UI/UX**
+- Responsive design with Tailwind CSS 4.0
+- Interactive components with Alpine.js
+- Smooth animations with AOS (Animate On Scroll)
+- Modern component library with FlyonUI
+- Professional iconography with Lucide icons
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+---
 
-## Security Vulnerabilities
+## 🛠 Technology Stack
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+### **Backend**
+- **Framework**: Laravel 12.x
+- **Language**: PHP 8.2+
+- **Database**: SQLite (development) / MySQL (production)
+- **Authentication**: Laravel Sanctum
+- **Permissions**: Spatie Laravel Permission
+- **Video**: Vimeo API
 
-## License
+### **Frontend**
+- **CSS Framework**: Tailwind CSS 4.0
+- **JavaScript**: Alpine.js 3.x
+- **UI Components**: FlyonUI 2.4
+- **Animations**: AOS (Animate On Scroll)
+- **Icons**: Lucide Icons, Tabler Icons
+- **Build Tool**: Vite 6.x
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+### **Development Tools**
+- **Testing**: Pest PHP
+- **Code Quality**: Laravel Pint
+- **Development**: Laravel Sail
+- **Monitoring**: Laravel Pail
+- **Performance**: Laravel Boost
+
+---
+
+## 📋 Prerequisites
+
+Ensure you have the following installed on your development machine:
+
+- **PHP** >= 8.2
+- **Composer** >= 2.0
+- **Node.js** >= 18.x
+- **npm** >= 8.x
+- **SQLite** (for development)
+- **Git**
+
+### Optional but Recommended:
+- **Docker** (for Laravel Sail)
+- **MySQL** (for production-like development)
+- **Redis** (for caching and queues)
+
+---
+
+## 🚀 Installation
+
+### 1. **Clone the Repository**
+```bash
+git clone https://github.com/emmieIO/bli-website.git
+cd bli-website
+```
+
+### 2. **Install PHP Dependencies**
+```bash
+composer install
+```
+
+### 3. **Install Node Dependencies**
+```bash
+npm install
+```
+
+### 4. **Environment Setup**
+```bash
+# Copy the example environment file
+cp .env.example .env
+
+# Generate application key
+php artisan key:generate
+```
+
+### 5. **Database Setup**
+```bash
+# Create and run migrations
+php artisan migrate
+
+# Seed the database (optional)
+php artisan db:seed
+```
+
+### 6. **Build Frontend Assets**
+```bash
+# For development
+npm run dev
+
+# For production
+npm run build
+```
+
+### 7. **Start the Development Server**
+```bash
+php artisan serve
+```
+
+Visit `http://localhost:8000` to access the application.
+
+---
+
+## ⚙️ Configuration
+
+### **Environment Variables**
+
+Key environment variables to configure:
+
+```bash
+# Application
+APP_NAME="BLI Website"
+APP_ENV=local
+APP_DEBUG=true
+APP_URL=http://localhost:8000
+
+# Database
+DB_CONNECTION=sqlite
+# DB_DATABASE=/absolute/path/to/database.sqlite
+
+# Mail
+MAIL_MAILER=smtp
+MAIL_HOST=your-smtp-host
+MAIL_PORT=587
+MAIL_USERNAME=your-email@domain.com
+MAIL_PASSWORD=your-password
+
+# Video Services
+
+VIMEO_CLIENT=your-vimeo-client-id
+VIMEO_SECRET=your-vimeo-secret
+
+# Support
+SUPPORT_MAIL=info@wizbizhubltd.com
+```
+
+### **Permissions Setup**
+```bash
+# Create storage link
+php artisan storage:link
+
+# Set proper permissions
+chmod -R 775 storage bootstrap/cache
+```
+
+---
+
+## 🎮 Usage
+
+### **Quick Start Commands**
+
+```bash
+# Start all services (development)
+composer run start
+
+# Clear application cache
+php artisan optimize:clear
+
+# Run database migrations
+php artisan migrate
+
+# Seed sample data
+php artisan db:seed
+
+# Create a new admin user
+php artisan make:admin-user
+```
+
+### **Common Tasks**
+
+- **Access Admin Panel**: `/admin`
+- **Speaker Registration**: `/become-a-speaker`
+- **Instructor Applications**: `/become-an-instructor`
+- **Event Listings**: `/events`
+- **Course Catalog**: `/courses`
+
+---
+
+## 📁 Project Structure
+
+```
+bli-website/
+├── app/
+│   ├── Actions/           # Application actions
+│   ├── Console/          # Artisan commands
+│   ├── Enums/            # Application enums
+│   ├── Events/           # Laravel events
+│   ├── Http/             # Controllers, middleware, requests
+│   ├── Models/           # Eloquent models
+│   ├── Policies/         # Authorization policies
+│   └── Services/         # Business logic services
+├── database/
+│   ├── factories/        # Model factories
+│   ├── migrations/       # Database migrations
+│   └── seeders/          # Database seeders
+├── resources/
+│   ├── css/              # Stylesheets
+│   ├── js/               # JavaScript files
+│   └── views/            # Blade templates
+├── routes/
+│   ├── web.php           # Web routes
+│   ├── admin.php         # Admin routes
+│   ├── courses.php       # Course routes
+│   └── speakers.php      # Speaker routes
+├── tests/                # Test files
+└── public/               # Public assets
+```
+
+---
+
+## 💻 Development
+
+### **Development Workflow**
+
+1. **Create Feature Branch**
+   ```bash
+   git checkout -b feature/your-feature-name
+   ```
+
+2. **Make Changes**
+   - Follow PSR-12 coding standards
+   - Write tests for new features
+   - Update documentation as needed
+
+3. **Run Tests**
+   ```bash
+   php artisan test
+   ```
+
+4. **Code Quality Check**
+   ```bash
+   ./vendor/bin/pint
+   ```
+
+5. **Commit Changes**
+   ```bash
+   git add .
+   git commit -m "Add: your feature description"
+   ```
+
+### **Available Scripts**
+
+```bash
+# Development server with hot reload
+npm run dev
+
+# Build for production
+npm run build
+
+# Run PHP tests
+php artisan test
+
+# Run specific test
+php artisan test --filter=TestName
+
+# Format code
+./vendor/bin/pint
+
+# Clear all caches
+php artisan optimize:clear
+```
+
+---
+
+## 🧪 Testing
+
+### **Running Tests**
+
+```bash
+# Run all tests
+php artisan test
+
+# Run tests with coverage
+php artisan test --coverage
+
+# Run specific test suite
+php artisan test tests/Feature/EventTest.php
+
+# Run tests in parallel
+php artisan test --parallel
+```
+
+### **Test Structure**
+- **Unit Tests**: `/tests/Unit/` - Test individual classes and methods
+- **Feature Tests**: `/tests/Feature/` - Test application workflows
+- **Browser Tests**: `/tests/Browser/` - End-to-end testing with Laravel Dusk
+
+---
+
+## 🚢 Deployment
+
+### **Production Deployment**
+
+1. **Server Requirements**
+   - PHP 8.2+
+   - MySQL 8.0+
+   - Redis (recommended)
+   - SSL Certificate
+
+2. **Deploy Steps**
+   ```bash
+   # Pull latest changes
+   git pull origin main
+   
+   # Install dependencies
+   composer install --optimize-autoloader --no-dev
+   npm ci && npm run build
+   
+   # Run migrations
+   php artisan migrate --force
+   
+   # Optimize application
+   php artisan optimize
+   ```
+
+3. **Environment Setup**
+   ```bash
+   # Production environment
+   APP_ENV=production
+   APP_DEBUG=false
+   
+   # Configure database, mail, and other services
+   ```
+
+### **Performance Optimization**
+
+```bash
+# Cache configuration
+php artisan config:cache
+
+# Cache routes
+php artisan route:cache
+
+# Cache views
+php artisan view:cache
+
+# Optimize autoloader
+composer dump-autoload --optimize
+```
+
+---
+
+## 🤝 Contributing
+
+We welcome contributions from the community! Here's how you can help:
+
+### **Getting Started**
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Write/update tests
+5. Submit a pull request
+
+### **Contribution Guidelines**
+- Follow PSR-12 coding standards
+- Write comprehensive tests
+- Update documentation
+- Use conventional commit messages
+- Ensure all tests pass
+
+### **Code Style**
+- Use Laravel Pint for code formatting
+- Follow Laravel best practices
+- Write descriptive variable and method names
+- Add type hints where appropriate
+
+---
+
+## 📄 License
+
+This project is licensed under the [MIT License](https://opensource.org/licenses/MIT).
+
+---
+
+## 📞 Support
+
+For support, please contact:
+
+- **Email**: info@wizbizhubltd.com
+- **Issues**: [GitHub Issues](https://github.com/emmieIO/bli-website/issues)
+- **Documentation**: [Project Wiki](https://github.com/emmieIO/bli-website/wiki)
+
+---
+
+<p align="center">
+  <strong>Built with ❤️ for the Business Learning Institute</strong>
+</p>

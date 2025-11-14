@@ -1,0 +1,284 @@
+/* Enhanced Auth Styles */
+
+/* Custom animations for auth pages */
+@keyframes float {
+    0%, 100% { transform: translateY(0px) rotate(0deg); }
+    50% { transform: translateY(-10px) rotate(1deg); }
+}
+
+@keyframes slideInFromLeft {
+    0% {
+        transform: translateX(-100%);
+        opacity: 0;
+    }
+    100% {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideInFromRight {
+    0% {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    100% {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes fadeInUp {
+    0% {
+        transform: translateY(30px);
+        opacity: 0;
+    }
+    100% {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+@keyframes pulse-glow {
+    0%, 100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0.8;
+        transform: scale(1.05);
+    }
+}
+
+/* Floating animation for background elements */
+.float-animation {
+    animation: float 6s ease-in-out infinite;
+}
+
+.float-animation:nth-child(2) {
+    animation-delay: 2s;
+}
+
+.float-animation:nth-child(3) {
+    animation-delay: 4s;
+}
+
+/* Glassmorphism enhancements */
+.glass-morphism {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 25px 45px rgba(0, 0, 0, 0.1);
+}
+
+.glass-morphism-strong {
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(25px);
+    -webkit-backdrop-filter: blur(25px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 35px 60px rgba(0, 0, 0, 0.15);
+}
+
+/* Improved form inputs */
+.auth-input {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    transition: all 0.3s ease;
+}
+
+.auth-input:focus {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.4);
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+    transform: translateY(-1px);
+}
+
+.auth-input::placeholder {
+    color: rgba(255, 255, 255, 0.6);
+}
+
+/* Button enhancements */
+.auth-button {
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.auth-button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s;
+}
+
+.auth-button:hover::before {
+    left: 100%;
+}
+
+.auth-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+}
+
+/* Social login buttons */
+.social-button {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    transition: all 0.3s ease;
+}
+
+.social-button:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: translateY(-1px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+/* Progress indicators */
+.progress-step {
+    transition: all 0.3s ease;
+}
+
+.progress-step.active {
+    transform: scale(1.1);
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
+}
+
+.progress-step.completed {
+    background: linear-gradient(135deg, #00a651, #16a34a);
+    box-shadow: 0 0 20px rgba(0, 166, 81, 0.4);
+}
+
+/* Password strength indicator */
+.strength-indicator {
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.strength-indicator::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    transform: translateX(-100%);
+    animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+}
+
+/* Enhanced loading states */
+.loading-dots {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.loading-dots::after {
+    content: '';
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: currentColor;
+    animation: loading-bounce 1.4s ease-in-out infinite both;
+}
+
+.loading-dots::before {
+    content: '';
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: currentColor;
+    animation: loading-bounce 1.4s ease-in-out -0.32s infinite both;
+}
+
+@keyframes loading-bounce {
+    0%, 80%, 100% {
+        transform: scale(0);
+        opacity: 0.5;
+    }
+    40% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+/* Notification enhancements */
+.auth-notification {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    animation: slideInFromRight 0.5s ease-out;
+}
+
+.auth-notification.success {
+    border-color: rgba(0, 166, 81, 0.4);
+    box-shadow: 0 0 20px rgba(0, 166, 81, 0.2);
+}
+
+.auth-notification.error {
+    border-color: rgba(237, 28, 36, 0.4);
+    box-shadow: 0 0 20px rgba(237, 28, 36, 0.2);
+}
+
+/* Mobile optimizations */
+@media (max-width: 768px) {
+    .auth-layout::before {
+        background-attachment: scroll;
+    }
+    
+    .glass-morphism,
+    .glass-morphism-strong {
+        backdrop-filter: blur(15px);
+        -webkit-backdrop-filter: blur(15px);
+    }
+    
+    .auth-button:hover {
+        transform: none;
+    }
+}
+
+/* Accessibility improvements */
+@media (prefers-reduced-motion: reduce) {
+    .float-animation,
+    .strength-indicator::after,
+    .loading-dots::before,
+    .loading-dots::after {
+        animation: none;
+    }
+    
+    .auth-layout {
+        background: linear-gradient(135deg, #002147 0%, #001a39 25%, #ed1c24 100%);
+        animation: none;
+    }
+}
+
+/* Focus indicators for better accessibility */
+.auth-input:focus,
+.auth-button:focus,
+.social-button:focus {
+    outline: 2px solid rgba(255, 255, 255, 0.5);
+    outline-offset: 2px;
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+    .auth-layout {
+        background: linear-gradient(135deg, #001122 0%, #000d1a 25%, #cc1520 100%);
+    }
+}

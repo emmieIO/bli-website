@@ -1,93 +1,201 @@
 <x-guest-layout>
-    <section class="min-h-screen bg-gradient-to-br from-primary-50 to-white py-12">
-        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+    <!-- Enhanced Become a Speaker Page -->
+    <section class="min-h-screen py-12 bg-gradient-to-br from-gray-50 via-white to-gray-100">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <!-- Header Section -->
-            <div class="text-center mb-12" data-aos="fade-down">
+            <div class="text-center mb-16" data-aos="fade-up">
+                <div class="inline-flex items-center px-4 py-2 rounded-full mb-6"
+                    style="background: rgba(237, 28, 36, 0.1);">
+                    <i class="fas fa-microphone mr-2" style="color: #ed1c24;"></i>
+                    <span class="text-sm font-semibold font-montserrat" style="color: #ed1c24;">Speaker Community</span>
+                </div>
+
+                <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 font-montserrat" style="color: #002147;">
+                    Become a
+                    <span class="relative">
+                        <span class="relative z-10" style="color: #ed1c24;">Speaker</span>
+                        <div class="absolute -bottom-2 left-0 w-full h-4 opacity-30"
+                            style="background: #ed1c24; transform: skew(-12deg);"></div>
+                    </span>
+                </h1>
+
+                <p class="text-xl md:text-2xl mb-8 text-gray-600 leading-relaxed font-lato max-w-3xl mx-auto">
+                    Join our prestigious speaker community and share your expertise with industry leaders,
+                    <strong style="color: #00a651;">inspiring the next generation</strong> of professionals.
+                </p>
+
+                <!-- Trust Indicators -->
                 <div
-                    class="inline-flex items-center gap-3 bg-primary/10 rounded-2xl px-6 py-4 border border-primary/20 mb-6">
-                    <div class="w-12 h-12 bg-primary rounded-xl flex items-center justify-center">
-                        <i data-lucide="mic" class="w-6 h-6 text-white"></i>
+                    class="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-8 mb-8">
+                    <div class="flex items-center">
+                        <i class="fas fa-users mr-2" style="color: #00a651;"></i>
+                        <span class="text-sm font-medium text-gray-600 font-lato">Join 200+ Expert Speakers</span>
                     </div>
-                    <div class="text-left">
-                        <h1 class="text-2xl font-bold text-primary font-montserrat">Join Our Speaker Community</h1>
-                        <p class="text-sm text-primary/70 font-lato">Share your expertise and inspire others</p>
+                    <div class="flex items-center">
+                        <i class="fas fa-globe mr-2" style="color: #ed1c24;"></i>
+                        <span class="text-sm font-medium text-gray-600 font-lato">Global Audience Reach</span>
+                    </div>
+                    <div class="flex items-center">
+                        <i class="fas fa-award mr-2" style="color: #002147;"></i>
+                        <span class="text-sm font-medium text-gray-600 font-lato">Premium Events Platform</span>
                     </div>
                 </div>
-                <p class="text-lg text-gray-600 max-w-2xl mx-auto font-lato leading-relaxed">
-                    Become a valued speaker at Beacon Leadership Institute and share your knowledge with our community
-                    of leaders and learners.
-                </p>
             </div>
 
-            <!-- Registration Form -->
-            <div class="bg-white rounded-2xl shadow-xl border border-primary-100 overflow-hidden" data-aos="fade-up">
+            <!-- Enhanced Registration Form -->
+            <div class="bg-white rounded-3xl shadow-2xl border border-gray-100 overflow-hidden" data-aos="fade-up"
+                data-aos-delay="200">
                 <div class="grid grid-cols-1 lg:grid-cols-3">
                     <!-- Left Side - Form -->
-                    <div class="lg:col-span-2 p-8">
+                    <div class="lg:col-span-2 p-10 md:p-12">
                         <form method="POST" id="speaker-form" data-action="{{ route('become-a-speaker.store') }}"
                             enctype="multipart/form-data" class="space-y-6">
                             @csrf
 
                             <!-- Personal Information -->
-                            <div class="space-y-4">
-                                <h3
-                                    class="text-lg font-semibold text-primary font-montserrat border-b border-primary-100 pb-2">
-                                    Personal Information</h3>
-
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <div>
-                                        <x-input label="Full Name" name="name" icon="user" :value="old('name')" />
-                                        <small data-error="name" class="text-xs text-secondary"></small>
+                            <div class="space-y-6" data-aos="fade-up" data-aos-delay="100">
+                                <div class="flex items-center mb-6">
+                                    <div class="w-12 h-12 rounded-2xl flex items-center justify-center mr-4"
+                                        style="background: linear-gradient(135deg, #00a651 0%, #15803d 100%);">
+                                        <i class="fas fa-user text-white text-lg"></i>
                                     </div>
                                     <div>
-                                        <x-input label="Email Address" name="email" type="email" icon="mail"
-                                            :value="old('email')" />
-                                        <small data-error="email" class="text-xs text-secondary"></small>
+                                        <h3 class="text-xl font-bold font-montserrat" style="color: #002147;">Personal
+                                            Information</h3>
+                                        <p class="text-sm text-gray-500 font-lato">Tell us about yourself</p>
                                     </div>
                                 </div>
 
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     <div>
-                                        <x-input label="Phone Number" name="phone" type="tel" icon="phone"
-                                            :value="old('phone')" />
-                                        <small data-error="phone" class="text-xs text-secondary"></small>
+                                        <label class="block text-sm font-semibold mb-2 font-montserrat"
+                                            style="color: #002147;">
+                                            <i class="fas fa-user mr-2" style="color: #00a651;"></i>Full Name
+                                        </label>
+                                        <input type="text" name="name" value="{{ old('name') }}"
+                                            class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none transition-all duration-300 font-lato"
+                                            placeholder="Enter your full name"
+                                            onfocus="this.style.borderColor='#00a651'"
+                                            onblur="this.style.borderColor='#e5e7eb'">
+                                        <small data-error="name" class="text-xs mt-1 block"
+                                            style="color: #ed1c24;"></small>
                                     </div>
                                     <div>
-                                        <x-input label="Professional Title" name="headline" icon="briefcase"
-                                            :value="old('headline')" placeholder="e.g. Senior Developer, CEO, Consultant" />
-                                        <small data-error="title" class="text-xs text-secondary"></small>
+                                        <label class="block text-sm font-semibold mb-2 font-montserrat"
+                                            style="color: #002147;">
+                                            <i class="fas fa-envelope mr-2" style="color: #ed1c24;"></i>Email Address
+                                        </label>
+                                        <input type="email" name="email" value="{{ old('email') }}"
+                                            class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none transition-all duration-300 font-lato"
+                                            placeholder="your.email@example.com"
+                                            onfocus="this.style.borderColor='#ed1c24'"
+                                            onblur="this.style.borderColor='#e5e7eb'">
+                                        <small data-error="email" class="text-xs mt-1 block"
+                                            style="color: #ed1c24;"></small>
                                     </div>
                                 </div>
+
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div>
+                                        <label class="block text-sm font-semibold mb-2 font-montserrat"
+                                            style="color: #002147;">
+                                            <i class="fas fa-phone mr-2" style="color: #002147;"></i>Phone Number
+                                        </label>
+                                        <input type="tel" name="phone" value="{{ old('phone') }}"
+                                            class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none transition-all duration-300 font-lato"
+                                            placeholder="+234 803 123 4567" onfocus="this.style.borderColor='#002147'"
+                                            onblur="this.style.borderColor='#e5e7eb'">
+                                        <small data-error="phone" class="text-xs mt-1 block"
+                                            style="color: #ed1c24;"></small>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-semibold mb-2 font-montserrat"
+                                            style="color: #002147;">
+                                            <i class="fas fa-briefcase mr-2" style="color: #00a651;"></i>Professional
+                                            Title
+                                        </label>
+                                        <input type="text" name="headline" value="{{ old('headline') }}"
+                                            class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none transition-all duration-300 font-lato"
+                                            placeholder="e.g. Senior Developer, CEO, Consultant"
+                                            onfocus="this.style.borderColor='#00a651'"
+                                            onblur="this.style.borderColor='#e5e7eb'">
+                                        <small data-error="title" class="text-xs mt-1 block"
+                                            style="color: #ed1c24;"></small>
+                                    </div>
+                                </div>
+
                                 <div>
-                                    <x-input label="Organization" name="organization" icon="building" :value="old('organization')"
-                                        placeholder="Your company or organization (optional)" />
-                                    <small data-error="organization" class="text-xs text-secondary"></small>
+                                    <label class="block text-sm font-semibold mb-2 font-montserrat"
+                                        style="color: #002147;">
+                                        <i class="fas fa-building mr-2" style="color: #ed1c24;"></i>Organization
+                                    </label>
+                                    <input type="text" name="organization" value="{{ old('organization') }}"
+                                        class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none transition-all duration-300 font-lato"
+                                        placeholder="Your company or organization (optional)"
+                                        onfocus="this.style.borderColor='#ed1c24'"
+                                        onblur="this.style.borderColor='#e5e7eb'">
+                                    <small data-error="organization" class="text-xs mt-1 block"
+                                        style="color: #ed1c24;"></small>
                                 </div>
                             </div>
 
                             <!-- Account Security -->
-                            <div class="space-y-4">
-                                <h3
-                                    class="text-lg font-semibold text-primary font-montserrat border-b border-primary-100 pb-2">
-                                    Account Security</h3>
-
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <div>
-                                        <x-input label="Password" name="password" type="password" icon="lock" />
-                                        <small data-error="password" class="text-xs text-secondary"></small>
+                            <div class="space-y-6" data-aos="fade-up" data-aos-delay="200">
+                                <div class="flex items-center mb-6">
+                                    <div class="w-12 h-12 rounded-2xl flex items-center justify-center mr-4"
+                                        style="background: linear-gradient(135deg, #ed1c24 0%, #dc2626 100%);">
+                                        <i class="fas fa-lock text-white text-lg"></i>
                                     </div>
                                     <div>
-                                        <x-input label="Confirm Password" name="password_confirmation" type="password"
-                                            icon="lock" />
+                                        <h3 class="text-xl font-bold font-montserrat" style="color: #002147;">Account
+                                            Security</h3>
+                                        <p class="text-sm text-gray-500 font-lato">Set up your account credentials</p>
+                                    </div>
+                                </div>
+
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div>
+                                        <label class="block text-sm font-semibold mb-2 font-montserrat"
+                                            style="color: #002147;">
+                                            <i class="fas fa-key mr-2" style="color: #ed1c24;"></i>Password
+                                        </label>
+                                        <input type="password" name="password"
+                                            class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none transition-all duration-300 font-lato"
+                                            placeholder="Create a strong password"
+                                            onfocus="this.style.borderColor='#ed1c24'"
+                                            onblur="this.style.borderColor='#e5e7eb'">
+                                        <small data-error="password" class="text-xs mt-1 block"
+                                            style="color: #ed1c24;"></small>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-semibold mb-2 font-montserrat"
+                                            style="color: #002147;">
+                                            <i class="fas fa-check-double mr-2" style="color: #00a651;"></i>Confirm
+                                            Password
+                                        </label>
+                                        <input type="password" name="password_confirmation"
+                                            class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none transition-all duration-300 font-lato"
+                                            placeholder="Confirm your password"
+                                            onfocus="this.style.borderColor='#00a651'"
+                                            onblur="this.style.borderColor='#e5e7eb'">
                                     </div>
                                 </div>
                             </div>
 
                             <!-- Professional Profile -->
-                            <div class="space-y-4">
-                                <h3
-                                    class="text-lg font-semibold text-primary font-montserrat border-b border-primary-100 pb-2">
-                                    Professional Profile</h3>
+                            <div class="space-y-4" data-aos="fade-up" data-aos-delay="300">
+                                <div class="flex items-center mb-6">
+                                    <div class="w-12 h-12 rounded-2xl flex items-center justify-center mr-4"
+                                        style="background: linear-gradient(135deg, #002147 0%, #003875 100%);">
+                                        <i class="fas fa-briefcase text-white text-lg"></i>
+                                    </div>
+                                    <div>
+                                        <h3 class="text-xl font-bold font-montserrat" style="color: #002147;">
+                                            Professional Profile</h3>
+                                        <p class="text-sm text-gray-500 font-lato">Share your expertise and background
+                                        </p>
+                                    </div>
+                                </div>
                                 <div>
                                     <label for="bio"
                                         class="block text-sm font-medium text-gray-700 mb-2 font-lato">Professional
@@ -100,8 +208,8 @@
 
                                 <!-- Profile Photo -->
                                 <div class="space-y-3">
-                                    <label for="photo"
-                                        class="block text-sm font-medium text-gray-700 font-lato">Profile Photo</label>
+                                    <label for="photo" class="block text-sm font-medium text-gray-700 font-lato">Profile
+                                        Photo</label>
                                     <input id="photo" name="photo" type="file" accept="image/*"
                                         class="block w-full px-4 border border-gray-300 rounded-xl file:bg-primary focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-200 font-lato placeholder-gray-400" />
                                     <p class="text-xs text-gray-500 mt-1">JPG, PNG up to 2MB</p>
@@ -112,7 +220,8 @@
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div>
                                         <x-input label="LinkedIn Profile" name="linkedin" type="url" icon="linkedin"
-                                            :value="old('linkedin')" placeholder="https://linkedin.com/in/yourprofile" />
+                                            :value="old('linkedin')"
+                                            placeholder="https://linkedin.com/in/yourprofile" />
                                         <small data-error="linkedin" class="text-xs text-secondary"></small>
                                     </div>
                                     <div>
@@ -124,117 +233,160 @@
                             </div>
 
                             <!-- Terms and Submit -->
-                            <div class="space-y-4 pt-4 border-t border-primary-100">
-                                <div class="flex items-start gap-3">
+                            <div class="space-y-4 pt-6 border-t border-gray-200" data-aos="fade-up"
+                                data-aos-delay="400">
+                                <div class="flex items-start gap-3 p-4 rounded-xl"
+                                    style="background: rgba(0, 33, 71, 0.05);">
                                     <input id="agree_terms" name="agree_terms" type="checkbox"
-                                        class="h-4 w-4 text-primary border-gray-300 rounded focus:ring-primary mt-1">
+                                        class="h-4 w-4 border-gray-300 rounded focus:ring-2 transition-all duration-300 mt-1"
+                                        style="color: #002147; --tw-ring-color: #002147;">
                                     <label for="agree_terms" class="text-sm text-gray-700 font-lato leading-relaxed">
                                         I agree to the <a href="#"
-                                            class="text-primary hover:text-primary-600 font-medium">Terms of
-                                            Service</a>
+                                            class="font-medium hover:underline transition-colors duration-300"
+                                            style="color: #002147;">Terms of Service</a>
                                         and <a href="#"
-                                            class="text-primary hover:text-primary-600 font-medium">Privacy Policy</a>.
+                                            class="font-medium hover:underline transition-colors duration-300"
+                                            style="color: #002147;">Privacy Policy</a>.
                                         I understand that my profile will be reviewed before being added to the speaker
                                         directory.
                                     </label>
                                 </div>
-                                <x-input-error :messages="$errors->get('agree_terms')" class="mt-1" />
 
                                 <button type="submit" id="submit-btn"
-                                    class="w-full bg-primary hover:bg-primary-600 disabled:bg-primary-400 text-white font-semibold py-4 px-6 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl font-montserrat flex items-center justify-center gap-3">
+                                    class="w-full text-white font-semibold py-4 px-6 rounded-xl transition-all duration-300 transform hover:scale-[1.02] shadow-lg hover:shadow-xl font-montserrat flex items-center justify-center gap-3"
+                                    style="background: linear-gradient(135deg, #002147 0%, #ed1c24 100%); 
+                                           border: none;">
                                     <span id="submit-loader" class="hidden">
-                                        <i data-lucide="loader" class="size-7 animate-spin"></i>
+                                        <i class="fas fa-spinner animate-spin text-lg"></i>
                                     </span>
-                                    <i data-lucide="user-plus" class="w-5 h-5"></i>
+                                    <i class="fas fa-paper-plane"></i>
                                     Register as Speaker
                                 </button>
                             </div>
                         </form>
                     </div>
 
-                    <!-- Right Side - Benefits -->
-                    <div class="bg-primary-50 border-l border-primary-100 p-8">
-                        <div class="space-y-6">
-                            <h3 class="text-xl font-bold text-primary font-montserrat">Speaker Benefits</h3>
+                    <!-- Enhanced Right Side - Benefits -->
+                    <div class="p-10 md:p-12" style="background: linear-gradient(135deg, #002147 0%, #003875 100%);">
+                        <div class="space-y-8">
+                            <div class="text-center">
+                                <div class="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6"
+                                    style="background: rgba(0, 166, 81, 0.2); backdrop-filter: blur(10px);">
+                                    <i class="fas fa-star text-2xl" style="color: #00a651;"></i>
+                                </div>
+                                <h3 class="text-2xl font-bold text-white mb-4 font-montserrat">Speaker Benefits</h3>
+                                <p class="text-gray-200 font-lato">Join our exclusive community of thought leaders</p>
+                            </div>
 
-                            <div class="space-y-4">
-                                <div class="flex items-start gap-3">
-                                    <div
-                                        class="w-8 h-8 bg-accent rounded-lg flex items-center justify-center flex-shrink-0">
-                                        <i data-lucide="users" class="w-4 h-4 text-white"></i>
-                                    </div>
-                                    <div>
-                                        <h4 class="font-semibold text-primary font-montserrat">Reach Engaged Audience
-                                        </h4>
-                                        <p class="text-sm text-gray-600 font-lato">Share your expertise with our
-                                            community of passionate learners and leaders.</p>
+                            <div class="space-y-6">
+                                <div class="group p-4 rounded-2xl transition-all duration-300 hover:bg-white/10">
+                                    <div class="flex items-start gap-4">
+                                        <div class="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 transition-all duration-300 group-hover:scale-110"
+                                            style="background: rgba(0, 166, 81, 0.2);">
+                                            <i class="fas fa-users text-lg" style="color: #00a651;"></i>
+                                        </div>
+                                        <div>
+                                            <h4 class="font-bold text-white mb-2 font-montserrat">Global Audience Reach
+                                            </h4>
+                                            <p class="text-sm text-gray-200 font-lato leading-relaxed">Share your
+                                                expertise with thousands of passionate learners and industry leaders
+                                                worldwide.</p>
+                                        </div>
                                     </div>
                                 </div>
 
-                                <div class="flex items-start gap-3">
-                                    <div
-                                        class="w-8 h-8 bg-accent rounded-lg flex items-center justify-center flex-shrink-0">
-                                        <i data-lucide="award" class="w-4 h-4 text-white"></i>
-                                    </div>
-                                    <div>
-                                        <h4 class="font-semibold text-primary font-montserrat">Build Your Brand</h4>
-                                        <p class="text-sm text-gray-600 font-lato">Enhance your professional reputation
-                                            and visibility in your industry.</p>
-                                    </div>
-                                </div>
-
-                                <div class="flex items-start gap-3">
-                                    <div
-                                        class="w-8 h-8 bg-accent rounded-lg flex items-center justify-center flex-shrink-0">
-                                        <i data-lucide="network" class="w-4 h-4 text-white"></i>
-                                    </div>
-                                    <div>
-                                        <h4 class="font-semibold text-primary font-montserrat">Network with Peers</h4>
-                                        <p class="text-sm text-gray-600 font-lato">Connect with other experts and
-                                            thought leaders in your field.</p>
+                                <div class="group p-4 rounded-2xl transition-all duration-300 hover:bg-white/10">
+                                    <div class="flex items-start gap-4">
+                                        <div class="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 transition-all duration-300 group-hover:scale-110"
+                                            style="background: rgba(237, 28, 36, 0.2);">
+                                            <i class="fas fa-award text-lg" style="color: #ed1c24;"></i>
+                                        </div>
+                                        <div>
+                                            <h4 class="font-bold text-white mb-2 font-montserrat">Build Your Brand</h4>
+                                            <p class="text-sm text-gray-200 font-lato leading-relaxed">Enhance your
+                                                professional reputation and establish yourself as a thought leader in
+                                                your industry.</p>
+                                        </div>
                                     </div>
                                 </div>
 
-                                <div class="flex items-start gap-3">
-                                    <div
-                                        class="w-8 h-8 bg-accent rounded-lg flex items-center justify-center flex-shrink-0">
-                                        <i data-lucide="mic" class="w-4 h-4 text-white"></i>
+                                <div class="group p-4 rounded-2xl transition-all duration-300 hover:bg-white/10">
+                                    <div class="flex items-start gap-4">
+                                        <div class="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 transition-all duration-300 group-hover:scale-110"
+                                            style="background: rgba(0, 166, 81, 0.2);">
+                                            <i class="fas fa-handshake text-lg" style="color: #00a651;"></i>
+                                        </div>
+                                        <div>
+                                            <h4 class="font-bold text-white mb-2 font-montserrat">Premium Networking
+                                            </h4>
+                                            <p class="text-sm text-gray-200 font-lato leading-relaxed">Connect with
+                                                other experts, C-level executives, and thought leaders in exclusive
+                                                events.</p>
+                                        </div>
                                     </div>
-                                    <div>
-                                        <h4 class="font-semibold text-primary font-montserrat">Exclusive Opportunities
-                                        </h4>
-                                        <p class="text-sm text-gray-600 font-lato">Get first access to speaking
-                                            opportunities at our premium events.</p>
+                                </div>
+
+                                <div class="group p-4 rounded-2xl transition-all duration-300 hover:bg-white/10">
+                                    <div class="flex items-start gap-4">
+                                        <div class="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 transition-all duration-300 group-hover:scale-110"
+                                            style="background: rgba(237, 28, 36, 0.2);">
+                                            <i class="fas fa-microphone-alt text-lg" style="color: #ed1c24;"></i>
+                                        </div>
+                                        <div>
+                                            <h4 class="font-bold text-white mb-2 font-montserrat">Exclusive
+                                                Opportunities</h4>
+                                            <p class="text-sm text-gray-200 font-lato leading-relaxed">Get priority
+                                                access to high-profile speaking engagements and premium corporate
+                                                events.</p>
+                                        </div>
                                     </div>
+                                </div>
+                            </div>
+
+                            <!-- Stats -->
+                            <div class="grid grid-cols-2 gap-4 pt-6 border-t border-white/20">
+                                <div class="text-center">
+                                    <div class="text-2xl font-bold text-white mb-1 font-montserrat"
+                                        style="color: #00a651;">200+</div>
+                                    <div class="text-xs text-gray-300 font-lato">Expert Speakers</div>
+                                </div>
+                                <div class="text-center">
+                                    <div class="text-2xl font-bold text-white mb-1 font-montserrat"
+                                        style="color: #ed1c24;">50K+</div>
+                                    <div class="text-xs text-gray-300 font-lato">Audience Reached</div>
                                 </div>
                             </div>
 
                             <!-- Already have account -->
-                            <div class="pt-6 border-t border-primary-100">
-                                <p class="text-sm text-gray-600 font-lato text-center">
+                            <div class="pt-6 border-t border-white/20">
+                                <p class="text-sm text-gray-200 font-lato text-center mb-4">
                                     Already have an account?
-                                    <a href="{{ route('login') }}"
-                                        class="text-primary hover:text-primary-600 font-semibold font-montserrat">
-                                        Sign in here
-                                    </a>
                                 </p>
+                                <a href="{{ route('login') }}"
+                                    class="w-full inline-flex items-center justify-center px-6 py-3 rounded-xl font-semibold transition-all duration-300 hover:shadow-lg font-montserrat border-2 border-white/30 text-white hover:bg-white/10">
+                                    <i class="fas fa-sign-in-alt mr-2"></i>
+                                    Sign In Here
+                                </a>
                             </div>
 
                             <!-- Support Info -->
-                            {{-- <div class="bg-white rounded-xl p-4 border border-primary-100">
-                                <div class="flex items-center gap-3">
-                                    <div class="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
-                                        <i data-lucide="help-circle" class="w-5 h-5 text-primary"></i>
+                            <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20">
+                                <div class="flex items-center gap-4">
+                                    <div class="w-12 h-12 rounded-xl flex items-center justify-center"
+                                        style="background: rgba(0, 166, 81, 0.2);">
+                                        <i class="fas fa-headset text-lg" style="color: #00a651;"></i>
                                     </div>
                                     <div>
-                                        <h4 class="font-semibold text-primary text-sm font-montserrat">Need Help?</h4>
-                                        <p class="text-xs text-gray-600 font-lato">Contact our speaker team for assistance.</p>
-                                        <a href="mailto:speakers@beaconleadership.org" class="text-xs text-primary hover:text-primary-600 font-medium">
+                                        <h4 class="font-bold text-white text-sm font-montserrat">Need Help?</h4>
+                                        <p class="text-xs text-gray-200 font-lato">Contact our speaker success team</p>
+                                        <a href="mailto:speakers@beaconleadership.org"
+                                            class="text-xs font-medium hover:underline font-montserrat"
+                                            style="color: #00a651;">
                                             speakers@beaconleadership.org
                                         </a>
                                     </div>
                                 </div>
-                            </div> --}}
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -242,15 +394,30 @@
         </div>
     </section>
 
+    <!-- AOS Animation Library -->
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+
     <script>
-        const speakerForm = document.querySelector('#speaker-form')
-        const loader = document.getElementById('submit-loader');
-        const submitBtn = document.getElementById('submit-btn');
+        // Initialize AOS
+        document.addEventListener('DOMContentLoaded', function () {
+            AOS.init({
+                duration: 800,
+                easing: 'ease-out-cubic',
+                once: true,
+                offset: 100
+            });
+        });
+
+        <script>
+            const speakerForm = document.querySelector('#speaker-form')
+            const loader = document.getElementById('submit-loader');
+            const submitBtn = document.getElementById('submit-btn');
 
 
-        let isLoading = false;
-        speakerForm.addEventListener('submit', async function(e) {
-            e.preventDefault();
+            let isLoading = false;
+            speakerForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
             if (isLoading) return;
             isLoading = true
             loader.classList.remove('hidden');
@@ -262,39 +429,39 @@
             speakerForm.querySelectorAll('[data-error]').forEach(el => el.textContent = '');
             try {
                 const res = await axios.post(actionUrl, formData, {
-                    headers: {
-                        'Content-Type': 'multipart/form-data'
+                headers: {
+                'Content-Type': 'multipart/form-data'
                     }
                 });
-                const {
-                    data,
-                    status
-                } = res;
-                window.notyf.success(data.message || "Form submitted successfully!");
-                speakerForm.reset();
-                isLoading = false;
-                loader.classList.add('hidden');
-                submitBtn.disabled = false;
+            const {
+                data,
+                status
+            } = res;
+            window.notyf.success(data.message || "Form submitted successfully!");
+            speakerForm.reset();
+            isLoading = false;
+            loader.classList.add('hidden');
+            submitBtn.disabled = false;
             } catch (error) {
                 // Handle Laravel validation errors (422)
                 const errorResponse = error.response?.data || error.message;
-                if (error.response?.status === 422) {
-                    window.notyf.error("There were validation errors. Please check the form.");
+            if (error.response?.status === 422) {
+                window.notyf.error("There were validation errors. Please check the form.");
                     // Loop through each field error
                     Object.keys(errorResponse.errors).forEach((field) => {
                         const errorDiv = document.querySelector(`[data-error="${field}"]`);
-                        if (errorDiv) {
-                            errorDiv.textContent = errorResponse.errors[field][0];
+            if (errorDiv) {
+                errorDiv.textContent = errorResponse.errors[field][0];
                         }
                     });
                 } else {
-                    // Generic error (server, network, etc.)
-                    alert('Something went wrong. Please try again.');
-                    console.error(error.response?.data || error.message);
+                // Generic error (server, network, etc.)
+                alert('Something went wrong. Please try again.');
+            console.error(error.response?.data || error.message);
                 }
-                isLoading = false
-                loader.classList.add('hidden');
-                submitBtn.disabled = false;
+            isLoading = false
+            loader.classList.add('hidden');
+            submitBtn.disabled = false;
             }
         });
     </script>

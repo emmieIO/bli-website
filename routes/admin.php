@@ -58,22 +58,34 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
     Route::patch('/speakers/applications/{application}/reject', [SpeakerApplicationController::class, 'rejectApplication'])->name('speakers.application.reject');
     Route::patch('/speakers/applications/{application}/revoke', [SpeakerApplicationController::class, 'revokeApproval'])->name('speakers.application.revoke');
 
-    // Instructors Management (custom methods - NOT pure resource)
+        // Instructors Management (custom methods - NOT pure resource)
     Route::middleware(['permission:manage-instructor-applications'])->group(function () {
         Route::get('/instructors', [InstructorsManagementController::class, 'index'])->name('instructors.index');
-        Route::get('/instructors/{instructorProfile}/view', [InstructorsManagementController::class, 'showInstructor'])->name('instructors.view');
-        Route::get('/instructors/{instructor}/update', [InstructorsManagementController::class, 'editInstructor'])->name('instructors.edit');
-        Route::put('/instructors/{instructor}/update', [InstructorsManagementController::class, 'updateInstructor'])->name('instructors.update');
-        Route::delete('/instructors/{instructorProfile}/destroy', [InstructorsManagementController::class, 'destroyInstructor'])->name('instructors.destroy');
-        Route::put('/instructors/{instructorProfile}/restore', [InstructorsManagementController::class, 'restoreInstructor'])->name('instructors.restore');
-
-        // Instructor Applications
+        Route::get('/instructors/{instructor}/view', [InstructorsManagementController::class, 'view'])->name('instructors.view');
+        Route::get('/instructors/{instructor}/edit', [InstructorsManagementController::class, 'edit'])->name('instructors.edit');
+        Route::post('/instructors/{instructor}/update', [InstructorsManagementController::class, 'update'])->name('instructors.update');
+        Route::delete('/instructors/{instructor}/destroy', [InstructorsManagementController::class, 'destroyInstructor'])->name('instructors.destroy');
+        Route::post('/instructors/{instructor}/restore', [InstructorsManagementController::class, 'restoreInstructor'])->name('instructors.restore');
         Route::get('/instructors/applications', [InstructorApplicationController::class, 'showApplications'])->name('instructors.applications');
         Route::get('/instructors/application-logs', [InstructorsManagementController::class, 'fetchApplicationLogs'])->name('instructors.application-logs');
         Route::get('/instructors/applications/{application}', [InstructorApplicationController::class, 'view'])->name('instructors.applications.view');
         Route::patch('/instructors/applications/{application}/approve', [InstructorApplicationController::class, 'approve'])->name('instructors.applications.approve');
         Route::post('/instructors/applications/{application}/deny', [InstructorApplicationController::class, 'deny'])->name('instructors.applications.deny');
         Route::delete('/instructors/application-logs/{log}', [InstructorsManagementController::class, 'deleteApplicationLog'])->name('instructors.application-logs.delete');
+    });
+
+    // User & Role Management (Admin only)
+    Route::middleware(['role:admin'])->group(function () {
+        // User Management
+        Route::get('/users', [\App\Http\Controllers\Admin\UserManagementController::class, 'index'])->name('users.index');
+        Route::post('/users/{user}/assign-role', [\App\Http\Controllers\Admin\UserManagementController::class, 'assignRole'])->name('users.assign-role');
+        Route::delete('/users/{user}/remove-role/{role}', [\App\Http\Controllers\Admin\UserManagementController::class, 'removeRole'])->name('users.remove-role');
+        Route::get('/users/statistics', [\App\Http\Controllers\Admin\UserManagementController::class, 'statistics'])->name('users.statistics');
+        
+        // Role & Permission Management
+        Route::get('/roles', [\App\Http\Controllers\Admin\UserManagementController::class, 'roles'])->name('roles.index');
+        Route::post('/roles/update-permissions/{role}', [\App\Http\Controllers\Admin\UserManagementController::class, 'updateRolePermissions'])->name('roles.update-permissions');
+        Route::post('/roles/toggle-permission', [\App\Http\Controllers\Admin\UserManagementController::class, 'togglePermission'])->name('roles.toggle-permission');
     });
 
     // Course Categories (appears to be pure CRUD - can use resource)

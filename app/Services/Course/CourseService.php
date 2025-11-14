@@ -97,5 +97,38 @@ class CourseService
         return $course->outcomes()->where('id', $outcome->id)->delete();
     }
 
+    public function updateCourse(Course $course, array $data, UploadedFile $file = null)
+    {
+        try {
+            return DB::transaction(function () use ($course, $data, $file) {
+                $updateData = [
+                    "title" => $data['title'],
+                    'description' => $data['description'] ?? null,
+                    "level" => $data['level'],
+                    "category_id" => $data['category_id'],
+                    "price" => $data['price'],
+                ];
+
+                // Handle file upload if new file is provided
+                if ($file) {
+                    // Delete old thumbnail if exists
+                    if ($course->thumbnail_path) {
+                        $this->deleteFile($course->thumbnail_path);
+                    }
+                    
+                    // Upload new thumbnail
+                    $thumbnailPath = $this->uploadFile($file, 'courses');
+                    $updateData['thumbnail_path'] = $thumbnailPath;
+                }
+
+                $course->update($updateData);
+                return $course->fresh();
+            });
+        } catch (\Throwable $th) {
+            Log::error("Error updating course", ['error' => $th->getMessage(), 'course_id' => $course->id]);
+            throw $th;
+        }
+    }
+
 
 }

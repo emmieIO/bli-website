@@ -1,4 +1,5 @@
 <?php
+
 return [
     /*
     |--------------------------------------------------------------------------
@@ -24,7 +25,7 @@ return [
             'title' => 'My Courses',
             'icon' => 'book-open',
             'route' => 'instructor.courses.index',
-            'permission' => ['course-view']
+            'permission' => ['course-view'],
         ],
         [
             'title' => 'My Events',
@@ -71,6 +72,23 @@ return [
             'route' => 'admin.instructors.index',
             'permission' => 'manage-instructor-applications',
         ],
+        [
+            'title' => 'System Management',
+            'icon' => 'settings',
+            'permission' => ['view-user-list'],
+            'children' => [
+                [
+                    'title' => 'User Management',
+                    'route' => 'admin.users.index',
+                    'permission' => ['view-user-list'],
+                ],
+                [
+                    'title' => 'Roles & Permissions',
+                    'route' => 'admin.roles.index',
+                    'permission' => ['view-permission-list'],
+                ],
+            ],
+        ],
 
-    ]
+    ],
 ];

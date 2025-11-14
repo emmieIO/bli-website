@@ -24,79 +24,165 @@
 
     <!-- Navigation Bar -->
     <nav
-        class="w-full sticky z-40 top-0 md:w-[inherit] md:ml-[280px] bg-white border-b border-primary-200 shadow-sm py-3 transition-all duration-300">
-        <div class="px-6 py-2">
+        class="w-full sticky z-40 top-0 md:w-[inherit] md:ml-64 bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-lg transition-all duration-300">
+        <div class="px-4 lg:px-6 py-3">
             <div class="flex items-center justify-between">
-                <!-- Mobile Menu Button -->
-                <div class="flex items-center justify-start gap-3">
+                <!-- Left Section: Mobile Menu + Breadcrumbs -->
+                <div class="flex items-center justify-start gap-4">
+                    <!-- Mobile Menu Button -->
                     <button data-drawer-target="logo-sidebar" data-drawer-toggle="logo-sidebar"
                         aria-controls="logo-sidebar" type="button"
-                        class="inline-flex items-center p-2 text-sm rounded-lg sm:hidden hover:bg-primary hover:text-white focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all duration-200">
+                        class="inline-flex items-center p-2 text-slate-600 rounded-xl sm:hidden hover:bg-primary-600 hover:text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50 transition-all duration-200 shadow-sm">
                         <span class="sr-only">Open sidebar</span>
-                        <svg class="w-6 h-6" aria-hidden="true" fill="currentColor" viewBox="0 0 20 20"
+                        <svg class="w-5 h-5" aria-hidden="true" fill="currentColor" viewBox="0 0 20 20"
                             xmlns="http://www.w3.org/2000/svg">
                             <path clip-rule="evenodd" fill-rule="evenodd"
                                 d="M2 4.75A.75.75 0 012.75 4h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 4.75zm0 10.5a.75.75 0 01.75-.75h7.5a.75.75 0 010 1.5h-7.5a.75.75 0 01-.75-.75zM2 10a.75.75 0 01.75-.75h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 10z">
                             </path>
                         </svg>
                     </button>
-                    <a class="inline-flex items-center gap-2 font-bold text-sm text-primary bg-primary-200 px-2 py-3 rounded-lg hover:text-secondary"
-                        href="{{ route('homepage') }}">
-                        <i data-lucide="home" class="size-5"></i>
-                        Go back Home
-                    </a>
+
+                    <!-- Breadcrumb Navigation -->
+                    <nav class="hidden sm:flex items-center space-x-2 text-sm" aria-label="Breadcrumb">
+                        <ol class="flex items-center space-x-2">
+                            <li>
+                                <a href="{{ route('user_dashboard') }}"
+                                    class="flex items-center text-slate-500 hover:text-primary-600 transition-colors duration-200">
+                                    <i data-lucide="home" class="w-4 h-4 mr-1"></i>
+                                    <span class="font-medium">Dashboard</span>
+                                </a>
+                            </li>
+                            @if(request()->routeIs('admin.*'))
+                                <li>
+                                    <i data-lucide="chevron-right" class="w-4 h-4 text-slate-400"></i>
+                                </li>
+                                <li>
+                                    <span class="text-slate-700 font-medium">Admin</span>
+                                </li>
+                            @endif
+                            @if(request()->routeIs('instructor.*'))
+                                <li>
+                                    <i data-lucide="chevron-right" class="w-4 h-4 text-slate-400"></i>
+                                </li>
+                                <li>
+                                    <span class="text-slate-700 font-medium">Instructor</span>
+                                </li>
+                            @endif
+                        </ol>
+                    </nav>
                 </div>
 
-                <!-- User Profile Dropdown -->
-                <div class="flex items-center relative">
-                    <div class="flex items-center ms-3">
-                        <div>
-                            <button type="button"
-                                class="flex text-sm bg-primary/10 rounded-full focus:ring-2 focus:ring-primary/50 hover:bg-primary/20 transition-all duration-200 group"
-                                aria-expanded="false" data-dropdown-toggle="dropdown-user">
-                                <span class="sr-only">Open user menu</span>
-                                <img class="w-8 h-8 rounded-full border-2 object-cover border-primary/20 group-hover:border-primary/40 transition-colors"
-                                    src="{{ auth()->user()->photo ? asset('storage/' . auth()->user()->photo) : 'https://ui-avatars.com/api/?name=' . urlencode(auth()->user()->name) . '&background=002147&color=fff' }}"
-                                    alt="{{ auth()->user()->name }}">
-                            </button>
+                <!-- Center Section: Search Bar (Desktop) -->
+                <div class="hidden lg:flex flex-1 max-w-lg mx-8">
+                    <div class="relative w-full">
+                        <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                            <i data-lucide="search" class="w-4 h-4 text-slate-400"></i>
                         </div>
-                        <div class="z-50 absolute hidden my-4 text-base list-none divide-y divide-primary/20 rounded-xl shadow-2xl bg-white border border-primary-100 top-full right-0 min-w-[200px] overflow-hidden"
+                        <input type="search"
+                            class="block w-full pl-10 pr-4 py-2.5 text-sm text-slate-900 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all duration-200 placeholder:text-slate-400"
+                            placeholder="Search events, courses, speakers..." />
+                        <div class="absolute inset-y-0 right-0 flex items-center pr-3">
+                            <kbd
+                                class="px-2 py-1 text-xs font-medium text-slate-400 bg-slate-100 border border-slate-200 rounded-md">
+                                ⌘K
+                            </kbd>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Section: Actions + Profile -->
+                <div class="flex items-center gap-3">
+                    <!-- Quick Actions -->
+                    <div class="hidden md:flex items-center gap-2">
+                        <a href="{{ route('homepage') }}"
+                            class="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium text-slate-600 bg-slate-100 rounded-lg hover:bg-primary-600 hover:text-white transition-all duration-200 shadow-sm"
+                            title="Visit Website">
+                            <i data-lucide="external-link" class="w-4 h-4"></i>
+                            <span class="hidden lg:inline">Website</span>
+                        </a>
+
+                        <!-- Notifications -->
+                        <button
+                            class="relative p-2 text-slate-600 rounded-lg hover:bg-slate-100 transition-colors duration-200"
+                            title="Notifications">
+                            <i data-lucide="bell" class="w-5 h-5"></i>
+                            <span class="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full animate-pulse"></span>
+                        </button>
+                    </div>
+
+                    <!-- Mobile Search Toggle -->
+                    <button
+                        class="p-2 text-slate-600 rounded-lg hover:bg-slate-100 transition-colors duration-200 lg:hidden"
+                        onclick="toggleMobileSearch()" title="Search">
+                        <i data-lucide="search" class="w-5 h-5"></i>
+                    </button>
+
+                    <!-- User Profile Dropdown -->
+                    <div class="relative">
+                        <button type="button"
+                            class="flex items-center gap-2 p-1.5 text-sm bg-slate-50 rounded-xl focus:ring-2 focus:ring-primary-500/50 hover:bg-slate-100 transition-all duration-200 group"
+                            aria-expanded="false" data-dropdown-toggle="dropdown-user">
+                            <img class="w-8 h-8 rounded-lg object-cover border border-slate-200 group-hover:border-primary-300 transition-colors"
+                                src="{{ auth()->user()->photo ? asset('storage/' . auth()->user()->photo) : 'https://ui-avatars.com/api/?name=' . urlencode(auth()->user()->name) . '&background=1e293b&color=fff' }}"
+                                alt="{{ auth()->user()->name }}">
+                            <div class="hidden md:block text-left">
+                                <p class="text-sm font-semibold text-slate-700 leading-tight">
+                                    {{ Str::limit(auth()->user()->name, 12) }}
+                                </p>
+                                <p class="text-xs text-slate-500 leading-tight">
+                                    {{ Str::limit(auth()->user()->email, 20) }}
+                                </p>
+                            </div>
+                            <i data-lucide="chevron-down"
+                                class="w-4 h-4 text-slate-400 group-hover:text-slate-600 transition-colors"></i>
+                        </button>
+
+                        <!-- Dropdown Menu -->
+                        <div class="z-50 absolute hidden mt-2 text-base list-none bg-white divide-y divide-slate-100 rounded-xl shadow-xl border border-slate-200 top-full right-0 min-w-[220px] overflow-hidden"
                             id="dropdown-user">
-                            <div class="px-4 py-3 bg-primary/5" role="none">
-                                <p class="text-sm font-semibold text-primary font-montserrat" role="none">
+                            <div class="px-4 py-3 bg-gradient-to-r from-primary-50 to-slate-50" role="none">
+                                <p class="text-sm font-semibold text-slate-800" role="none">
                                     {{ auth()->user()->name }}
                                 </p>
-                                <p class="text-sm text-primary/70 truncate font-lato" role="none">
+                                <p class="text-sm text-slate-600 truncate" role="none">
                                     {{ auth()->user()->email }}
                                 </p>
                             </div>
-                            <ul class="py-1" role="none">
+                            <ul class="py-2" role="none">
                                 <li>
                                     <a href="{{ route('homepage') }}"
-                                        class="flex items-center gap-2 px-4 py-3 text-sm text-gray-700 hover:bg-primary/5 hover:text-primary transition-colors font-lato group"
+                                        class="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 hover:text-primary-600 transition-colors group"
                                         role="menuitem">
-                                        <i data-lucide="home"
-                                            class="w-4 h-4 text-primary/60 group-hover:text-primary"></i>
-                                        Go back home
+                                        <i data-lucide="external-link"
+                                            class="w-4 h-4 text-slate-400 group-hover:text-primary-600"></i>
+                                        Visit Website
                                     </a>
                                 </li>
                                 <li>
                                     <a href="{{ route('profile') }}"
-                                        class="flex items-center gap-2 px-4 py-3 text-sm text-gray-700 hover:bg-primary/5 hover:text-primary transition-colors font-lato group"
+                                        class="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 hover:text-primary-600 transition-colors group"
                                         role="menuitem">
                                         <i data-lucide="user"
-                                            class="w-4 h-4 text-primary/60 group-hover:text-primary"></i>
+                                            class="w-4 h-4 text-slate-400 group-hover:text-primary-600"></i>
                                         Profile Settings
                                     </a>
                                 </li>
                                 <li>
+                                    <a href="#"
+                                        class="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 hover:text-primary-600 transition-colors group"
+                                        role="menuitem">
+                                        <i data-lucide="bell"
+                                            class="w-4 h-4 text-slate-400 group-hover:text-primary-600"></i>
+                                        Notifications
+                                    </a>
+                                </li>
+                                <li class="border-t border-slate-100 mt-1 pt-1">
                                     <form action="{{ route('logout') }}" method="post">
                                         @csrf
                                         <button type="submit"
-                                            class="flex items-center gap-2 w-full px-4 py-3 text-sm text-secondary hover:bg-secondary/5 hover:text-secondary transition-colors font-lato group cursor-pointer"
+                                            class="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors group"
                                             role="menuitem">
-                                            <i data-lucide="log-out"
-                                                class="w-4 h-4 text-secondary/60 group-hover:text-secondary"></i>
+                                            <i data-lucide="log-out" class="w-4 h-4 text-red-500"></i>
                                             Sign out
                                         </button>
                                     </form>
@@ -104,6 +190,18 @@
                             </ul>
                         </div>
                     </div>
+                </div>
+            </div>
+
+            <!-- Mobile Search Bar (Hidden by default) -->
+            <div id="mobile-search" class="lg:hidden mt-4 pt-4 border-t border-slate-200 hidden">
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                        <i data-lucide="search" class="w-4 h-4 text-slate-400"></i>
+                    </div>
+                    <input type="search"
+                        class="block w-full pl-10 pr-4 py-2.5 text-sm text-slate-900 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all duration-200 placeholder:text-slate-400"
+                        placeholder="Search events, courses, speakers..." />
                 </div>
             </div>
         </div>
@@ -191,7 +289,12 @@
     <script src="https://unpkg.com/lucide@latest"></script>
     @stack('scripts')
     <script>
-        lucide.createIcons();
+        // Wait for DOM to be ready and Lucide to load
+        document.addEventListener('DOMContentLoaded', function () {
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+            }
+        });
 
         // Save scroll position before unload
         window.addEventListener("beforeunload", function () {
@@ -215,6 +318,29 @@
                 offset: 100
             });
         }
+
+        // Mobile search toggle function
+        function toggleMobileSearch() {
+            const mobileSearch = document.getElementById('mobile-search');
+            mobileSearch.classList.toggle('hidden');
+
+            if (!mobileSearch.classList.contains('hidden')) {
+                // Focus on search input when opened
+                const searchInput = mobileSearch.querySelector('input[type="search"]');
+                setTimeout(() => searchInput.focus(), 100);
+            }
+        }
+
+        // Keyboard shortcut for search (⌘K or Ctrl+K)
+        document.addEventListener('keydown', function (e) {
+            if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+                e.preventDefault();
+                const searchInput = document.querySelector('input[type="search"]');
+                if (searchInput) {
+                    searchInput.focus();
+                }
+            }
+        });
 
         // Mobile sidebar toggle functionality
         document.addEventListener('DOMContentLoaded', function () {
@@ -245,6 +371,24 @@
                     sidebar.classList.add('-translate-x-full');
                 }
             });
+
+            // Enhanced dropdown functionality
+            const userDropdown = document.getElementById('dropdown-user');
+            const dropdownToggle = document.querySelector('[data-dropdown-toggle="dropdown-user"]');
+
+            if (dropdownToggle && userDropdown) {
+                dropdownToggle.addEventListener('click', function (e) {
+                    e.stopPropagation();
+                    userDropdown.classList.toggle('hidden');
+                });
+
+                // Close dropdown when clicking outside
+                document.addEventListener('click', function (e) {
+                    if (!userDropdown.contains(e.target) && !dropdownToggle.contains(e.target)) {
+                        userDropdown.classList.add('hidden');
+                    }
+                });
+            }
         });
     </script>
 </body>

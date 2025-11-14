@@ -7,6 +7,7 @@
 @import "tailwindcss";
 @import "./dashboard.css";
 @import "./home-nav.css";
+@import "./auth-enhancements.css";
 @plugin "flyonui" {
     themes: light --default, dark --prefersdark, gourmet, claude, slack, soft,
         mintlify;
@@ -302,13 +303,31 @@ html {
 }
 
 .auth-layout {
+    background: linear-gradient(135deg, #002147 0%, #001a39 25%, #ed1c24 100%);
+    background-size: 400% 400%;
+    animation: gradientShift 15s ease infinite;
+    position: relative;
+}
+
+.auth-layout::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
     background-image: url(../images/pattern-bg1.jpg);
-    background-color: rgba(14, 4, 40, 0.734);
     background-size: cover;
     background-position: center;
-    background-blend-mode:multiply;
     background-repeat: no-repeat;
-    background-attachment: fixed;
+    opacity: 0.3;
+    z-index: 0;
+}
+
+@keyframes gradientShift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
 }
 
 @keyframes scale {
