@@ -22,7 +22,7 @@ class CourseService
         //
     }
 
-    public function createCourse(array $data, UploadedFile $thumbnail = null, UploadedFile $previewVideo = null)
+    public function createCourse(array $data, ?UploadedFile $thumbnail = null, ?UploadedFile $previewVideo = null)
     {
         try {
             return DB::transaction(function () use ($data, $thumbnail, $previewVideo) {
@@ -119,7 +119,7 @@ class CourseService
         return $course->outcomes()->where('id', $outcome->id)->delete();
     }
 
-    public function updateCourse(Course $course, array $data, UploadedFile $file = null)
+    public function updateCourse(Course $course, array $data, ?UploadedFile $file = null)
     {
         try {
             return DB::transaction(function () use ($course, $data, $file) {

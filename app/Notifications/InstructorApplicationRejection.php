@@ -17,7 +17,7 @@ class InstructorApplicationRejection extends Notification
     /**
      * Create a new notification instance.
      */
-    public function __construct(public ?string $reason=null, protected InstructorProfile $application)
+    public function __construct(protected InstructorProfile $application, public ?string $reason = null)
     {
         //
     }

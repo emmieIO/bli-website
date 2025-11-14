@@ -87,8 +87,8 @@
                             <li class="flex items-center justify-between p-2 bg-gray-50 rounded">
                                 <span class="text-gray-700 text-sm">{{ $outcome->outcome }}</span>
                                 <div class="flex items-center space-x-2">
-                                    <form action="{{ route('admin.outcomes.destroy', [$course, $outcome]) }}"
-                                        method="post" x-data="{ loading: false }">
+                                    <form action="{{ route('admin.outcomes.destroy', [$course, $outcome]) }}" method="post"
+                                        x-data="{ loading: false }">
                                         @csrf
                                         @method('DELETE')
                                         <button x-bind:disabled="loading"
@@ -127,7 +127,7 @@
                 class="flex flex-col sm:flex-row sm:items-center sm:space-x-3 space-y-3 sm:space-y-0">
                 @csrf
                 <input type="text" name="title" placeholder="New Module Title"
-                    class="block w-full sm:w-auto flex-1 rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-orange-600 focus:ring-orange-600">
+                    class="w-full sm:w-auto flex-1 rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-orange-600 focus:ring-orange-600">
                 <button type="submit" x-bind:disabled="loading"
                     class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-white bg-orange-600 rounded-lg cursor-pointer disabled:cursor-not-allowed">
                     <span x-show="!loading">+ Add Module</span>
@@ -150,15 +150,14 @@
                             <h2 class="text-lg font-semibold text-gray-800">{{ $module->title }}</h2>
                             <div class="flex items-center space-x-2">
                                 <!-- Toggle Icon -->
-                                <svg x-show="!open" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500"
-                                    fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <svg x-show="!open" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500" fill="none"
+                                    viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                                 </svg>
-                                <svg x-show="open" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500"
-                                    fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M18 12H6" />
+                                <svg x-show="open" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500" fill="none"
+                                    viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 12H6" />
                                 </svg>
 
                                 <!-- Action Buttons (always visible) -->
@@ -167,10 +166,8 @@
                                         class="inline-flex cursor-pointer items-center px-3 py-1.5 text-sm font-medium text-gray-500 hover:text-orange-600 rounded-lg">
                                         + Add Lesson
                                     </a>
-                                    <button
-                                        class="px-3 py-1.5 text-sm text-white bg-green-700 rounded-lg">Edit</button>
-                                    <button
-                                        class="px-3 py-1.5 text-sm text-white bg-red-700 rounded-lg cursor-not-allowed"
+                                    <button class="px-3 py-1.5 text-sm text-white bg-green-700 rounded-lg">Edit</button>
+                                    <button class="px-3 py-1.5 text-sm text-white bg-red-700 rounded-lg cursor-not-allowed"
                                         disabled>
                                         Delete
                                     </button>
@@ -187,30 +184,27 @@
                                             <li class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                                                 <span class="text-sm text-gray-700 font-bold">🎥 Video:
                                                     {{ $lesson->title }}</span>
-                                                <a href="{{ asset('storage/'.$lesson->content_path) }}" class="text-green-500 hover:text-secondary text-sm">View</a>
+                                                <a href="{{ asset('storage/' . $lesson->content_path) }}"
+                                                    class="text-green-500 hover:text-secondary text-sm">View</a>
                                             </li>
                                         @elseif ($lesson->type == 'pdf')
                                             <li class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                                                 <span class="text-sm text-gray-700 font-bold">📄 PDF:
                                                     {{ $lesson->title }}</span>
                                                 <div class="flex items-center gap-1">
-                                                    <a href="{{ asset('storage/' . $lesson->content_path) }}"
-                                                        target="_blank" rel="noopener noreferrer"
+                                                    <a href="{{ asset('storage/' . $lesson->content_path) }}" target="_blank"
+                                                        rel="noopener noreferrer"
                                                         class="inline-flex items-center text-orange-600 hover:underline text-sm transition-colors duration-150"
                                                         title="View PDF">
                                                         <i data-lucide="file-text" class="w-4 h-4 mr-1"></i>
                                                     </a>
-                                                    <form
-                                                        action="{{ route('admin.lessons.destroy', [$module, $lesson]) }}"
-                                                        method="POST"
+                                                    <form action="{{ route('admin.lessons.destroy', [$module, $lesson]) }}" method="POST"
                                                         onsubmit="return confirm('Are you sure you want to delete this lesson?');"
                                                         class="inline">
                                                         @csrf
                                                         @method('DELETE')
-                                                        <button type="submit" class="inline-flex items-center"
-                                                            title="Delete Lesson">
-                                                            <i data-lucide="trash"
-                                                                class="w-4 h-4 mr-1 text-red-600"></i>
+                                                        <button type="submit" class="inline-flex items-center" title="Delete Lesson">
+                                                            <i data-lucide="trash" class="w-4 h-4 mr-1 text-red-600"></i>
                                                         </button>
                                                     </form>
                                                 </div>
@@ -220,22 +214,17 @@
                                                 <span class="text-sm text-gray-700 font-bold">🔗 Link:
                                                     {{ $lesson->title }}</span>
                                                 <div class="flex items-center gap-1">
-                                                    <a href="{{ $lesson->content_path }}" target="_blank"
-                                                        rel="noopener noreferrer"
+                                                    <a href="{{ $lesson->content_path }}" target="_blank" rel="noopener noreferrer"
                                                         class="inline-flex items-center text-orange-600 hover:underline text-sm transition-colors duration-150">
                                                         <i data-lucide="external-link" class="w-4 h-4 mr-1"></i>
                                                     </a>
-                                                    <form
-                                                        action="{{ route('admin.lessons.destroy', [$module, $lesson]) }}"
-                                                        method="POST"
+                                                    <form action="{{ route('admin.lessons.destroy', [$module, $lesson]) }}" method="POST"
                                                         onsubmit="return confirm('Are you sure you want to delete this lesson?');"
                                                         class="inline">
                                                         @csrf
                                                         @method('DELETE')
-                                                        <button type="submit" class="inline-flex items-center"
-                                                            title="Delete Lesson">
-                                                            <i data-lucide="trash"
-                                                                class="w-4 h-4 mr-1 text-red-600"></i>
+                                                        <button type="submit" class="inline-flex items-center" title="Delete Lesson">
+                                                            <i data-lucide="trash" class="w-4 h-4 mr-1 text-red-600"></i>
                                                         </button>
                                                     </form>
                                                 </div>

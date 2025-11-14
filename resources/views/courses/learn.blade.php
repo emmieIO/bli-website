@@ -44,27 +44,96 @@
             <!-- Main Content Area -->
             <div class="flex-1 flex flex-col">
                 <!-- Video Player -->
-                <div class="bg-black relative flex-shrink-0" style="height: 60vh;">
-                    @if($currentLesson && $currentLesson->video_url)
-                        <iframe 
-                            src="{{ $currentLesson->video_url }}"
+                            <!-- Video Player Area -->
+            <div class="bg-gray-900 rounded-lg overflow-hidden">
+                @if($currentLesson && $currentLesson->video_url)
+                    <div class="aspect-video relative" id="video-container">
+                        <video 
+                            id="lesson-video"
                             class="w-full h-full"
-                            frameborder="0"
-                            allowfullscreen
-                            allow="autoplay; fullscreen; picture-in-picture">
-                        </iframe>
-                    @else
-                        <div class="w-full h-full flex items-center justify-center text-white">
-                            <div class="text-center">
-                                <svg class="w-20 h-20 mx-auto mb-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"/>
-                                </svg>
-                                <h3 class="text-xl font-semibold mb-2">{{ $currentLesson ? $currentLesson->title : 'Select a lesson to start learning' }}</h3>
-                                <p class="text-gray-300">{{ $currentLesson ? 'Video content will be displayed here' : 'Choose a lesson from the curriculum on the right' }}</p>
+                            controls
+                            preload="metadata"
+                            data-lesson-id="{{ $currentLesson->id }}"
+                            poster="/images/video-placeholder.jpg">
+                            <source src="{{ $currentLesson->video_url }}" type="video/mp4">
+                            Your browser does not support the video tag.
+                        </video>
+                        
+                        <!-- Custom Video Controls Overlay -->
+                        <div id="video-controls-overlay" class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity pointer-events-none">
+                            <div class="flex items-center space-x-4 pointer-events-auto">
+                                <!-- Playback Speed -->
+                                <div class="relative group">
+                                    <button id="speed-button" class="text-white bg-black bg-opacity-50 px-3 py-2 rounded-lg text-sm">
+                                        1x
+                                    </button>
+                                    <div id="speed-menu" class="absolute bottom-full left-0 mb-2 bg-black rounded-lg overflow-hidden opacity-0 group-hover:opacity-100 transition-opacity">
+                                        <button class="speed-option block w-full text-left px-4 py-2 text-white hover:bg-gray-700 text-sm" data-speed="0.5">0.5x</button>
+                                        <button class="speed-option block w-full text-left px-4 py-2 text-white hover:bg-gray-700 text-sm" data-speed="0.75">0.75x</button>
+                                        <button class="speed-option block w-full text-left px-4 py-2 text-white hover:bg-gray-700 text-sm" data-speed="1" selected>1x</button>
+                                        <button class="speed-option block w-full text-left px-4 py-2 text-white hover:bg-gray-700 text-sm" data-speed="1.25">1.25x</button>
+                                        <button class="speed-option block w-full text-left px-4 py-2 text-white hover:bg-gray-700 text-sm" data-speed="1.5">1.5x</button>
+                                        <button class="speed-option block w-full text-left px-4 py-2 text-white hover:bg-gray-700 text-sm" data-speed="2">2x</button>
+                                    </div>
+                                </div>
+                                
+                                <!-- Quality Selector -->
+                                <div class="relative group">
+                                    <button id="quality-button" class="text-white bg-black bg-opacity-50 px-3 py-2 rounded-lg text-sm">
+                                        Auto
+                                    </button>
+                                </div>
                             </div>
                         </div>
-                    @endif
+                        
+                        <!-- Progress Bar -->
+                        <div class="absolute bottom-0 left-0 right-0 h-1 bg-gray-600">
+                            <div id="watch-progress" class="h-full bg-blue-500 transition-all duration-300" style="width: 0%"></div>
+                        </div>
+                    </div>
+                @else
+                    <div class="aspect-video flex items-center justify-center text-gray-400">
+                        <div class="text-center">
+                            <svg class="w-16 h-16 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h1m4 0h1m-6 4h8m2 4H7a2 2 0 01-2-2V8a2 2 0 012 2v8a2 2 0 01-2 2z"></path>
+                            </svg>
+                            <p>No video available for this lesson</p>
+                        </div>
+                    </div>
+                @endif
+            </div>
+
+            <!-- Lesson Actions -->
+            @if($currentLesson)
+            <div class="flex items-center justify-between mt-4 px-6 py-4 bg-gray-50 rounded-lg">
+                <div class="flex items-center space-x-4">
+                    <!-- Mark Complete Button -->
+                    <button id="mark-complete-btn" 
+                            class="flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            data-lesson-id="{{ $currentLesson->id }}">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                        <span id="complete-btn-text">Mark as Complete</span>
+                    </button>
+                    
+                    <!-- Bookmark Button -->
+                    <button id="bookmark-btn" class="flex items-center px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition-colors">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"></path>
+                        </svg>
+                        Bookmark
+                    </button>
                 </div>
+                
+                <!-- Lesson Duration -->
+                @if($currentLesson->duration)
+                    <div class="text-sm text-gray-500">
+                        Duration: {{ gmdate('H:i:s', $currentLesson->duration) }}
+                    </div>
+                @endif
+            </div>
+            @endif
 
                 <!-- Lesson Content -->
                 <div class="flex-1 bg-white overflow-hidden">
@@ -381,6 +450,210 @@
                 });
             });
 
+            // Video player functionality
+            const video = document.getElementById('lesson-video');
+            const markCompleteBtn = document.getElementById('mark-complete-btn');
+            const bookmarkBtn = document.getElementById('bookmark-btn');
+            const watchProgress = document.getElementById('watch-progress');
+            const speedButton = document.getElementById('speed-button');
+            const speedOptions = document.querySelectorAll('.speed-option');
+
+            if (video) {
+                let progressUpdateInterval;
+                const lessonId = video.dataset.lessonId;
+
+                // Load saved progress
+                loadLessonProgress(lessonId);
+
+                // Video event listeners
+                video.addEventListener('timeupdate', function() {
+                    updateWatchProgress();
+                    
+                    // Auto-save progress every 10 seconds
+                    clearTimeout(progressUpdateInterval);
+                    progressUpdateInterval = setTimeout(() => {
+                        saveProgress(false);
+                    }, 10000);
+                });
+
+                video.addEventListener('ended', function() {
+                    saveProgress(true);
+                    if (markCompleteBtn && !markCompleteBtn.disabled) {
+                        markAsComplete();
+                    }
+                });
+
+                // Playback speed controls
+                speedOptions.forEach(option => {
+                    option.addEventListener('click', function() {
+                        const speed = parseFloat(this.dataset.speed);
+                        video.playbackRate = speed;
+                        speedButton.textContent = speed + 'x';
+                        
+                        // Update selected state
+                        speedOptions.forEach(opt => opt.removeAttribute('selected'));
+                        this.setAttribute('selected', 'true');
+                    });
+                });
+
+                // Keyboard shortcuts
+                document.addEventListener('keydown', function(e) {
+                    if (e.target.tagName.toLowerCase() !== 'input' && e.target.tagName.toLowerCase() !== 'textarea') {
+                        switch(e.code) {
+                            case 'Space':
+                                e.preventDefault();
+                                video.paused ? video.play() : video.pause();
+                                break;
+                            case 'ArrowLeft':
+                                e.preventDefault();
+                                video.currentTime = Math.max(0, video.currentTime - 10);
+                                break;
+                            case 'ArrowRight':
+                                e.preventDefault();
+                                video.currentTime = Math.min(video.duration, video.currentTime + 10);
+                                break;
+                            case 'KeyM':
+                                e.preventDefault();
+                                video.muted = !video.muted;
+                                break;
+                        }
+                    }
+                });
+
+                function updateWatchProgress() {
+                    if (video.duration) {
+                        const progress = (video.currentTime / video.duration) * 100;
+                        if (watchProgress) {
+                            watchProgress.style.width = progress + '%';
+                        }
+                    }
+                }
+
+                function saveProgress(isCompleted = false) {
+                    if (!lessonId) return;
+
+                    fetch(`/api/lessons/${lessonId}/progress`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                        },
+                        body: JSON.stringify({
+                            current_time: video.currentTime,
+                            duration: video.duration,
+                            is_completed: isCompleted
+                        })
+                    }).catch(console.error);
+                }
+
+                function loadLessonProgress(lessonId) {
+                    if (!lessonId) return;
+
+                    fetch(`/api/lessons/${lessonId}/progress`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.progress) {
+                            if (data.progress.is_completed && markCompleteBtn) {
+                                updateCompleteButton();
+                            }
+                            
+                            if (data.progress.last_position && video.duration) {
+                                video.currentTime = data.progress.last_position;
+                            }
+                        }
+                    })
+                    .catch(console.error);
+                }
+
+                function markAsComplete() {
+                    if (!lessonId || !markCompleteBtn || markCompleteBtn.disabled) return;
+
+                    fetch(`/api/lessons/${lessonId}/complete`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            updateCompleteButton();
+                            
+                            // Auto-advance to next lesson
+                            const nextBtn = document.getElementById('next-lesson-btn');
+                            if (nextBtn) {
+                                setTimeout(() => {
+                                    if (confirm('Lesson completed! Would you like to proceed to the next lesson?')) {
+                                        nextBtn.click();
+                                    }
+                                }, 2000);
+                            } else {
+                                // Last lesson - check for course completion
+                                setTimeout(() => {
+                                    checkCourseCompletion();
+                                }, 1000);
+                            }
+                        }
+                    })
+                    .catch(console.error);
+                }
+
+                function updateCompleteButton() {
+                    if (!markCompleteBtn) return;
+                    
+                    markCompleteBtn.innerHTML = `
+                        <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        Completed
+                    `;
+                    markCompleteBtn.classList.add('bg-gray-500');
+                    markCompleteBtn.classList.remove('bg-green-600', 'hover:bg-green-700');
+                    markCompleteBtn.disabled = true;
+                }
+            }
+
+            // Mark complete button
+            if (markCompleteBtn) {
+                markCompleteBtn.addEventListener('click', function() {
+                    const lessonId = this.dataset.lessonId;
+                    if (lessonId && !this.disabled) {
+                        if (video) {
+                            saveProgress(true);
+                        }
+                        markAsComplete();
+                    }
+                });
+            }
+
+            // Bookmark functionality
+            if (bookmarkBtn) {
+                bookmarkBtn.addEventListener('click', function() {
+                    const isBookmarked = this.classList.contains('bookmarked');
+                    
+                    if (isBookmarked) {
+                        this.classList.remove('bookmarked', 'bg-yellow-700');
+                        this.classList.add('bg-yellow-600');
+                        this.innerHTML = `
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"></path>
+                            </svg>
+                            Bookmark
+                        `;
+                    } else {
+                        this.classList.add('bookmarked', 'bg-yellow-700');
+                        this.classList.remove('bg-yellow-600');
+                        this.innerHTML = `
+                            <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"/>
+                            </svg>
+                            Bookmarked
+                        `;
+                    }
+                });
+            }
+
             // Module toggle
             document.querySelectorAll('.module-toggle').forEach(toggle => {
                 toggle.addEventListener('click', () => {
@@ -414,6 +687,56 @@
             if (activeTab) {
                 activeTab.classList.add('border-primary', 'text-primary');
                 activeTab.classList.remove('border-transparent', 'text-gray-500');
+            }
+
+            // Course completion functionality
+            function checkCourseCompletion() {
+                const courseId = {{ $course->id }};
+                
+                fetch(`/api/courses/${courseId}/completion-status`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.isCompleted) {
+                        showCourseCompletionModal();
+                    } else {
+                        alert('Congratulations! You have completed all available lessons!');
+                    }
+                })
+                .catch(() => {
+                    alert('Congratulations! You have completed this course!');
+                });
+            }
+
+            function showCourseCompletionModal() {
+                const modal = document.createElement('div');
+                modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+                modal.innerHTML = `
+                    <div class="bg-white rounded-lg p-8 max-w-md mx-4 text-center">
+                        <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <svg class="w-8 h-8 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                            </svg>
+                        </div>
+                        <h3 class="text-2xl font-bold text-gray-900 mb-2">🎉 Congratulations!</h3>
+                        <p class="text-gray-600 mb-6">You have successfully completed the entire course!</p>
+                        <div class="space-y-3">
+                            <button onclick="generateCertificate()" class="w-full bg-[#002147] text-white px-6 py-3 rounded-lg hover:bg-blue-900 transition-colors font-semibold">
+                                Download Certificate
+                            </button>
+                            <button onclick="closeModal()" class="w-full bg-gray-200 text-gray-700 px-6 py-3 rounded-lg hover:bg-gray-300 transition-colors">
+                                Continue Learning
+                            </button>
+                        </div>
+                    </div>
+                `;
+                document.body.appendChild(modal);
+                
+                window.closeModal = () => modal.remove();
+                
+                window.generateCertificate = () => {
+                    window.open('/certificates/generate/{{ $course->id }}', '_blank');
+                    modal.remove();
+                };
             }
         });
     </script>

@@ -47,7 +47,8 @@
                         </div>
                         <h3 class="font-semibold text-white mb-1 font-montserrat">Event Date</h3>
                         <p class="text-gray-300 text-sm font-lato">
-                            {{ $event->start_date ? $event->start_date->format('M d, Y') : 'TBD' }}</p>
+                            {{ $event->start_date ? $event->start_date->format('M d, Y') : 'TBD' }}
+                        </p>
                     </div>
 
                     <div class="p-4 rounded-2xl backdrop-filter backdrop-blur-lg"
@@ -69,7 +70,8 @@
                         </div>
                         <h3 class="font-semibold text-white mb-1 font-montserrat">Application Deadline</h3>
                         <p class="text-gray-300 text-sm font-lato">
-                            {{ $event->speaker_deadline ? $event->speaker_deadline->format('M d, Y') : 'Rolling' }}</p>
+                            {{ $event->speaker_deadline ? $event->speaker_deadline->format('M d, Y') : 'Rolling' }}
+                        </p>
                     </div>
                 </div>
             </div>
@@ -157,7 +159,7 @@
 
                             <!-- Photo -->
                             <div class="md:col-span-2">
-                                <label for="photo" class="block text-gray-700 font-medium mb-3 flex items-center">
+                                <label for="photo" class="flex items-center text-gray-700 font-medium mb-3">
                                     <i data-lucide="image" class="w-5 h-5 mr-2 text-primary"></i>
                                     Profile Photo
                                 </label>
@@ -207,7 +209,7 @@
 
                         <!-- Bio -->
                         <div class="mb-8">
-                            <label for="bio" class="block text-gray-700 font-medium mb-3 flex items-center">
+                            <label for="bio" class="flex items-center text-gray-700 font-medium mb-3">
                                 <i data-lucide="file-text" class="w-5 h-5 mr-2 text-primary"></i>
                                 Professional Bio
                             </label>
@@ -224,7 +226,7 @@
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <!-- LinkedIn -->
                             <div>
-                                <label for="linkedin" class="block text-gray-700 font-medium mb-2 flex items-center">
+                                <label for="linkedin" class="flex items-center text-gray-700 font-medium mb-2">
                                     <i data-lucide="linkedin" class="w-5 h-5 mr-2 text-primary"></i>
                                     LinkedIn Profile
                                 </label>
@@ -236,7 +238,7 @@
 
                             <!-- Website -->
                             <div>
-                                <label for="website" class="block text-gray-700 font-medium mb-2 flex items-center">
+                                <label for="website" class="flex items-center text-gray-700 font-medium mb-2">
                                     <i data-lucide="globe" class="w-5 h-5 mr-2 text-primary"></i>
                                     Website/Blog
                                 </label>
@@ -275,8 +277,7 @@
 
                         <!-- Topic Description -->
                         <div class="mb-8">
-                            <label for="topic_description"
-                                class="block text-gray-700 font-medium mb-3 flex items-center">
+                            <label for="topic_description" class="flex items-center text-gray-700 font-medium mb-3">
                                 <i data-lucide="align-left" class="w-5 h-5 mr-2 text-primary"></i>
                                 Session Description
                             </label>
@@ -292,7 +293,7 @@
 
                         <!-- Session Format -->
                         <div class="mb-8">
-                            <label class="block text-gray-700 font-medium mb-3 flex items-center">
+                            <label class="flex items-center text-gray-700 font-medium mb-3">
                                 <i data-lucide="grid" class="w-5 h-5 mr-2 text-primary"></i>
                                 Preferred Session Format
                             </label>
@@ -316,7 +317,7 @@
 
                         <!-- Additional Notes -->
                         <div>
-                            <label for="notes" class="block text-gray-700 font-medium mb-3 flex items-center">
+                            <label for="notes" class="flex items-center text-gray-700 font-medium mb-3">
                                 <i data-lucide="sticky-note" class="w-5 h-5 mr-2 text-primary"></i>
                                 Additional Notes
                             </label>

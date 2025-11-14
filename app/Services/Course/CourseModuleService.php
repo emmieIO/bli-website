@@ -39,7 +39,7 @@ class CourseModuleService
         }
     }
 
-    public function createModuleLesson(CourseModule $module, array $data, UploadedFile $file = null, UploadedFile $videoFile = null)
+    public function createModuleLesson(CourseModule $module, array $data, ?UploadedFile $file = null, ?UploadedFile $videoFile = null)
     {
         try {
             $order = $module->lessons()->max('order') + 1;

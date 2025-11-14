@@ -28,4 +28,5 @@ require __DIR__ . '/admin.php';
 require __DIR__ . '/instructor.php';
 require __DIR__ . '/speakers.php';
 require __DIR__ . '/courses.php';
+require __DIR__ . '/certificates.php';
 

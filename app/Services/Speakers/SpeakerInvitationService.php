@@ -15,7 +15,7 @@ class SpeakerInvitationService
     public function __construct()
     {
     }
-    public function respondInvitation(SpeakerInvite $invite, SpeakerInviteStatus $response, string $feedback = null)
+    public function respondInvitation(SpeakerInvite $invite, SpeakerInviteStatus $response, ?string $feedback = null)
     {
         $speaker = auth()->user()->speaker->id;
 

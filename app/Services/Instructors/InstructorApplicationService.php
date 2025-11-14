@@ -115,7 +115,7 @@ class InstructorApplicationService
 
     }
 
-    public function saveInstructorDocs(Request $request, User $user, UploadedFile $file = null): bool
+    public function saveInstructorDocs(Request $request, User $user, ?UploadedFile $file = null): bool
     {
         $profile = $user->instructorProfile;
         $oldResumePath = $profile->resume_path;
