@@ -63,8 +63,8 @@ class CoursePolicy
         if ($user->hasPermissionTo(CoursePermissionsEnum::UPDATE_OWN->value) 
             && $course->instructor_id === $user->id) {
             return in_array($course->status, [
-                ApplicationStatus::DRAFT->value, 
-                ApplicationStatus::REJECTED->value
+                ApplicationStatus::DRAFT, 
+                ApplicationStatus::REJECTED
             ]);
         }
         
@@ -84,7 +84,7 @@ class CoursePolicy
         // Instructor can delete their own courses, but only if draft
         if ($user->hasPermissionTo(CoursePermissionsEnum::DELETE_OWN->value) 
             && $course->instructor_id === $user->id) {
-            return $course->status === ApplicationStatus::DRAFT->value;
+            return $course->status === ApplicationStatus::DRAFT;
         }
         
         return false;
@@ -97,7 +97,7 @@ class CoursePolicy
     {
         return $user->hasPermissionTo(CoursePermissionsEnum::SUBMIT_REVIEW->value) 
             && $course->instructor_id === $user->id
-            && in_array($course->status, [ApplicationStatus::DRAFT->value, ApplicationStatus::REJECTED->value]);
+            && in_array($course->status, [ApplicationStatus::DRAFT, ApplicationStatus::REJECTED]);
     }
 
     /**
@@ -106,7 +106,7 @@ class CoursePolicy
     public function approve(User $user, Course $course): bool
     {
         return $user->hasPermissionTo(CoursePermissionsEnum::APPROVE->value)
-            && $course->status === ApplicationStatus::UNDER_REVIEW->value;
+            && $course->status === ApplicationStatus::UNDER_REVIEW;
     }
 
     /**
@@ -115,7 +115,7 @@ class CoursePolicy
     public function reject(User $user, Course $course): bool
     {
         return $user->hasPermissionTo(CoursePermissionsEnum::REJECT->value)
-            && $course->status === ApplicationStatus::UNDER_REVIEW->value;
+            && $course->status === ApplicationStatus::UNDER_REVIEW;
     }
 
     /**
@@ -124,7 +124,7 @@ class CoursePolicy
     public function publish(User $user, Course $course): bool
     {
         return $user->hasPermissionTo(CoursePermissionsEnum::PUBLISH->value)
-            && $course->status === ApplicationStatus::APPROVED->value;
+            && $course->status === ApplicationStatus::APPROVED;
     }
 
     /**
@@ -133,7 +133,7 @@ class CoursePolicy
     public function unpublish(User $user, Course $course): bool
     {
         return $user->hasPermissionTo(CoursePermissionsEnum::UNPUBLISH->value)
-            && $course->status === ApplicationStatus::APPROVED->value; // Assuming published courses have approved status
+            && $course->status === ApplicationStatus::APPROVED; // Assuming published courses have approved status
     }
 
     /**
@@ -142,7 +142,7 @@ class CoursePolicy
     public function enroll(User $user, Course $course): bool
     {
         return $user->hasPermissionTo(CoursePermissionsEnum::ENROLL->value)
-            && $course->status === ApplicationStatus::APPROVED->value
+            && $course->status === ApplicationStatus::APPROVED
             && !$course->students()->where('user_id', $user->id)->exists();
     }
 

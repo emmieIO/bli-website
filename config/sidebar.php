@@ -22,10 +22,21 @@ return [
             'variant' => 'accent',
         ],
         [
-            'title' => 'My Courses',
+            'title' => 'Course Management',
             'icon' => 'book-open',
-            'route' => 'instructor.courses.index',
-            'permission' => ['course-view'],
+            'permission' => ['course-view-own', 'course-create'],
+            'children' => [
+                [
+                    'title' => 'My Courses',
+                    'route' => 'instructor.courses.index',
+                    'permission' => ['course-view-own'],
+                ],
+                [
+                    'title' => 'Create Course',
+                    'route' => 'instructor.courses.create',
+                    'permission' => ['course-create'],
+                ],
+            ],
         ],
         [
             'title' => 'My Events',

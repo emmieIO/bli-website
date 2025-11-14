@@ -1,122 +1,241 @@
 <x-app-layout>
+    <!-- Success/Error Messages -->
+    @if (session('message'))
+        <div class="mb-4 p-4 rounded-lg {{ session('type') === 'success' ? 'bg-green-50 text-green-800 border border-green-200' : 'bg-red-50 text-red-800 border border-red-200' }}">
+            <div class="flex items-center">
+                <i data-lucide="{{ session('type') === 'success' ? 'check-circle' : 'alert-circle' }}" class="w-5 h-5 mr-2"></i>
+                {{ session('message') }}
+            </div>
+        </div>
+    @endif
+
     <div>
-        <div class="flex justify-between items-center">
+        <div class="lg:flex justify-between items-center">
             <div>
                 <h2 class="text-3xl font-montserrat font-bold text-primary leading-tight">
                     Create New Course
                 </h2>
-                <p class="text-sm text-gray-600 mt-1">Build and publish your new course</p>
+                <p class="text-sm text-gray-600 mt-2">Build engaging course content and start teaching students worldwide</p>
             </div>
-            <div class="flex gap-3">
-                <button type="button"
-                    class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-md flex items-center gap-2 transition duration-200">
-                    <i class="fas fa-eye"></i>
-                    Preview
-                </button>
-                <button type="submit" form="courseForm"
-                    class="bg-primary-600 hover:bg-secondary-700 text-white px-4 py-2 rounded-md flex items-center gap-2 transition duration-200">
-                    <i class="fas fa-save"></i>
-                    Save Draft
-                </button>
+            <div class="flex gap-3 mt-4 lg:mt-0">
+                <a href="{{ route('instructor.courses.index') }}"
+                    class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg flex items-center gap-2 transition duration-200">
+                    <i data-lucide="arrow-left" class="w-4 h-4"></i>
+                    Back to Courses
+                </a>
             </div>
         </div>
     </div>
 
     <div class="py-6">
-        <div class="">
-            <form id="courseForm" action="" method="POST" enctype="multipart/form-data"
-                class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+        <div class="max-w-4xl mx-auto">
+            <form id="courseForm" action="{{ route('instructor.courses.store') }}" method="POST" enctype="multipart/form-data"
+                class="bg-white overflow-hidden shadow-lg sm:rounded-xl border border-gray-200">
                 @csrf
 
-                <div class="p-6 border-b border-gray-200">
-                    <h3 class="text-lg font-semibold text-gray-900 font-montserrat">Course Information</h3>
-                    <p class="text-sm text-gray-700 mt-1">Basic details about your course</p>
+                <div class="bg-primary px-6 py-8 text-white">
+                    <h3 class="text-xl font-bold font-montserrat">Course Information</h3>
+                    <p class="text-blue-100 mt-2">Let's start with the basics - tell us about your course</p>
                 </div>
 
-                <div class="p-6 space-y-8">
-                    <!-- Title -->
+                <div class="p-8 space-y-8">
+                    <!-- Course Title -->
                     <div>
-                        <label for="title" class="block text-sm font-medium text-gray-700 mb-2">Course Title
-                            *</label>
+                        <label for="title" class="block text-sm font-semibold text-gray-700 mb-3">Course Title *</label>
                         <input type="text" id="title" name="title" value="{{ old('title') }}"
-                            class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                            placeholder="Enter Course Title" required>
+                            class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors {{ $errors->has('title') ? 'border-red-300' : '' }}"
+                            placeholder="e.g., Complete Web Development with Laravel"
+                            maxlength="255" required>
+                        <p class="text-xs text-gray-500 mt-2">Create an engaging title that clearly describes what students will learn</p>
                         @error('title')
-                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            <p class="mt-2 text-sm text-red-600 flex items-center">
+                                <i data-lucide="alert-circle" class="w-4 h-4 mr-1"></i>
+                                {{ $message }}
+                            </p>
                         @enderror
                     </div>
 
-                    <!-- Description -->
+                    <!-- Course Subtitle -->
                     <div>
-                        <label for="description" class="block text-sm font-medium text-gray-700 mb-2">Course Description
-                            *</label>
-                        <textarea id="description" name="description" rows="6"
-                            class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                            placeholder="Describe what students will learn in this course..." required>{{ old('description') }}</textarea>
+                        <label for="subtitle" class="block text-sm font-semibold text-gray-700 mb-3">Course Subtitle</label>
+                        <input type="text" id="subtitle" name="subtitle" value="{{ old('subtitle') }}"
+                            class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors {{ $errors->has('subtitle') ? 'border-red-300' : '' }}"
+                            placeholder="e.g., Build modern web applications from scratch"
+                            maxlength="500">
+                        <p class="text-xs text-gray-500 mt-2">Optional tagline to give more context (max 500 characters)</p>
+                        @error('subtitle')
+                            <p class="mt-2 text-sm text-red-600 flex items-center">
+                                <i data-lucide="alert-circle" class="w-4 h-4 mr-1"></i>
+                                {{ $message }}
+                            </p>
+                        @enderror
+                    </div>
+
+                    <!-- Course Description -->
+                    <div>
+                        <label for="description" class="block text-sm font-semibold text-gray-700 mb-3">Course Description *</label>
+                        <textarea id="description" name="description" rows="8"
+                            class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors resize-none {{ $errors->has('description') ? 'border-red-300' : '' }}"
+                            placeholder="Provide a comprehensive description of what students will learn in this course. Include key topics, skills, outcomes, and target audience. Minimum 100 characters required."
+                            minlength="100" required>{{ old('description') }}</textarea>
+                        <div class="flex justify-between items-center mt-2">
+                            <p class="text-xs text-gray-500">Detailed description helps students understand the value of your course (min. 100 characters)</p>
+                            <span class="text-xs text-gray-400" id="description-count">0</span>
+                        </div>
                         @error('description')
-                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            <p class="mt-2 text-sm text-red-600 flex items-center">
+                                <i data-lucide="alert-circle" class="w-4 h-4 mr-1"></i>
+                                {{ $message }}
+                            </p>
                         @enderror
                     </div>
 
-                    <!-- Image Upload -->
+                    <!-- Course Language -->
                     <div>
-                        <label for="image" class="block text-sm font-medium text-gray-700 mb-2">Course Image</label>
-                        <div
-                            class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
-                            <div class="space-y-1 text-center">
-                                <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none"
-                                    viewBox="0 0 48 48" aria-hidden="true">
-                                    <path
-                                        d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02"
-                                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                                </svg>
-                                <div class="flex text-sm text-gray-600">
-                                    <label for="image"
-                                        class="relative cursor-pointer bg-white rounded-md font-medium text-indigo-600 hover:text-indigo-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-indigo-500">
-                                        <span>Upload a file</span>
-                                        <input id="image" name="image" type="file" class="sr-only"
-                                            accept="image/*">
-                                    </label>
-                                    <p class="pl-1">or drag and drop</p>
+                        <label for="language" class="block text-sm font-semibold text-gray-700 mb-3">Course Language *</label>
+                        <select id="language" name="language" 
+                            class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors {{ $errors->has('language') ? 'border-red-300' : '' }}"
+                            required>
+                            <option value="">Select Course Language</option>
+                            <option value="English" {{ old('language') == 'English' ? 'selected' : '' }}>English</option>
+                            <option value="Spanish" {{ old('language') == 'Spanish' ? 'selected' : '' }}>Spanish</option>
+                            <option value="French" {{ old('language') == 'French' ? 'selected' : '' }}>French</option>
+                            <option value="German" {{ old('language') == 'German' ? 'selected' : '' }}>German</option>
+                            <option value="Portuguese" {{ old('language') == 'Portuguese' ? 'selected' : '' }}>Portuguese</option>
+                            <option value="Italian" {{ old('language') == 'Italian' ? 'selected' : '' }}>Italian</option>
+                            <option value="Chinese" {{ old('language') == 'Chinese' ? 'selected' : '' }}>Chinese</option>
+                            <option value="Japanese" {{ old('language') == 'Japanese' ? 'selected' : '' }}>Japanese</option>
+                            <option value="Arabic" {{ old('language') == 'Arabic' ? 'selected' : '' }}>Arabic</option>
+                            <option value="Hindi" {{ old('language') == 'Hindi' ? 'selected' : '' }}>Hindi</option>
+                            <option value="Other" {{ old('language') == 'Other' ? 'selected' : '' }}>Other</option>
+                        </select>
+                        <p class="text-xs text-gray-500 mt-2">Select the primary language for course content and instruction</p>
+                        @error('language')
+                            <p class="mt-2 text-sm text-red-600 flex items-center">
+                                <i data-lucide="alert-circle" class="w-4 h-4 mr-1"></i>
+                                {{ $message }}
+                            </p>
+                        @enderror
+                    </div>
+
+                    <!-- Course Thumbnail -->
+                    <div>
+                        <label for="thumbnail" class="block text-sm font-semibold text-gray-700 mb-3">Course Thumbnail *</label>
+                        <div id="thumbnail-drop-area"
+                            class="relative border-2 border-dashed border-gray-300 rounded-xl p-8 text-center hover:border-primary transition-colors cursor-pointer {{ $errors->has('thumbnail') ? 'border-red-300 bg-red-50' : 'hover:bg-gray-50' }}">
+                            <div class="space-y-4">
+                                <div class="flex justify-center">
+                                    <div class="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center">
+                                        <i data-lucide="image" class="w-8 h-8 text-primary"></i>
+                                    </div>
                                 </div>
-                                <p class="text-xs text-gray-500">PNG, JPG, GIF up to 10MB</p>
+                                <div>
+                                    <p class="text-lg font-medium text-gray-700">Choose or drag a thumbnail image</p>
+                                    <p class="text-sm text-gray-500 mt-1">Upload a compelling course thumbnail to attract students</p>
+                                </div>
+                                <div class="flex justify-center">
+                                    <label for="thumbnail"
+                                        class="inline-flex items-center px-4 py-2 bg-primary text-white rounded-lg hover:bg-secondary transition-colors cursor-pointer">
+                                        <i data-lucide="upload" class="w-4 h-4 mr-2"></i>
+                                        Select Thumbnail
+                                    </label>
+                                    <input id="thumbnail" name="thumbnail" type="file" class="sr-only"
+                                        accept="image/jpeg,image/jpg,image/png,image/webp" required>
+                                </div>
+                                <p class="text-xs text-gray-500">JPG, PNG, WEBP up to 2MB • Recommended: 1200x675px (16:9 ratio)</p>
+                            </div>
+                            
+                            <!-- Preview -->
+                            <div id="thumbnail-preview" class="hidden mt-4">
+                                <img id="thumbnail-image" class="mx-auto max-h-32 rounded-lg shadow-md" alt="Thumbnail Preview">
+                                <p id="thumbnail-name" class="text-sm text-gray-600 mt-2"></p>
                             </div>
                         </div>
-                        @error('image')
-                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        @error('thumbnail')
+                            <p class="mt-2 text-sm text-red-600 flex items-center">
+                                <i data-lucide="alert-circle" class="w-4 h-4 mr-1"></i>
+                                {{ $message }}
+                            </p>
+                        @enderror
+                    </div>
+
+                    <!-- Preview Video -->
+                    <div>
+                        <label for="preview_video" class="block text-sm font-semibold text-gray-700 mb-3">Preview Video (Optional)</label>
+                        <div id="video-drop-area"
+                            class="relative border-2 border-dashed border-gray-300 rounded-xl p-8 text-center hover:border-primary transition-colors cursor-pointer {{ $errors->has('preview_video') ? 'border-red-300 bg-red-50' : 'hover:bg-gray-50' }}">
+                            <div class="space-y-4">
+                                <div class="flex justify-center">
+                                    <div class="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center">
+                                        <i data-lucide="video" class="w-8 h-8 text-blue-600"></i>
+                                    </div>
+                                </div>
+                                <div>
+                                    <p class="text-lg font-medium text-gray-700">Upload preview video</p>
+                                    <p class="text-sm text-gray-500 mt-1">Give students a taste of what they'll learn (optional but recommended)</p>
+                                </div>
+                                <div class="flex justify-center">
+                                    <label for="preview_video"
+                                        class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors cursor-pointer">
+                                        <i data-lucide="video" class="w-4 h-4 mr-2"></i>
+                                        Select Video
+                                    </label>
+                                    <input id="preview_video" name="preview_video" type="file" class="sr-only"
+                                        accept="video/mp4,video/mov,video/avi,video/wmv">
+                                </div>
+                                <p class="text-xs text-gray-500">MP4, MOV, AVI, WMV up to 50MB • Keep it short (2-3 minutes max)</p>
+                            </div>
+                            
+                            <!-- Preview -->
+                            <div id="video-preview" class="hidden mt-4">
+                                <video id="preview-video-element" class="mx-auto max-h-32 rounded-lg shadow-md" controls>
+                                    Your browser does not support the video tag.
+                                </video>
+                                <p id="video-name" class="text-sm text-gray-600 mt-2"></p>
+                            </div>
+                        </div>
+                        @error('preview_video')
+                            <p class="mt-2 text-sm text-red-600 flex items-center">
+                                <i data-lucide="alert-circle" class="w-4 h-4 mr-1"></i>
+                                {{ $message }}
+                            </p>
                         @enderror
                     </div>
 
                     <!-- Course Details Grid -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                         <!-- Level -->
                         <div>
-                            <label for="level" class="block text-sm font-medium text-gray-700 mb-2">Difficulty Level
-                                *</label>
+                            <label for="level" class="block text-sm font-semibold text-gray-700 mb-3">Difficulty Level *</label>
                             <select id="level" name="level"
-                                class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors {{ $errors->has('level') ? 'border-red-300' : '' }}"
                                 required>
-                                <option value="">Select Level</option>
-                                <option value="beginner" {{ old('level') == 'beginner' ? 'selected' : '' }}>Beginner
+                                <option value="">Choose difficulty level</option>
+                                <option value="beginner" {{ old('level') == 'beginner' ? 'selected' : '' }}>
+                                    🟢 Beginner
                                 </option>
                                 <option value="intermediate" {{ old('level') == 'intermediate' ? 'selected' : '' }}>
-                                    Intermediate</option>
-                                <option value="advanced" {{ old('level') == 'advanced' ? 'selected' : '' }}>Advanced
+                                    🟡 Intermediate
+                                </option>
+                                <option value="advanced" {{ old('level') == 'advanced' ? 'selected' : '' }}>
+                                    🔴 Advanced
                                 </option>
                             </select>
                             @error('level')
-                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                <p class="mt-2 text-sm text-red-600 flex items-center">
+                                    <i data-lucide="alert-circle" class="w-4 h-4 mr-1"></i>
+                                    {{ $message }}
+                                </p>
                             @enderror
                         </div>
 
                         <!-- Category -->
                         <div>
-                            <label for="category_id" class="block text-sm font-medium text-gray-700 mb-2">Category
-                                *</label>
+                            <label for="category_id" class="block text-sm font-semibold text-gray-700 mb-3">Category *</label>
                             <select id="category_id" name="category_id"
-                                class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors {{ $errors->has('category_id') ? 'border-red-300' : '' }}"
                                 required>
-                                <option value="">Select Category</option>
+                                <option value="">Select a category</option>
                                 @foreach ($categories as $category)
                                     <option value="{{ $category->id }}"
                                         {{ old('category_id') == $category->id ? 'selected' : '' }}>
@@ -125,116 +244,102 @@
                                 @endforeach
                             </select>
                             @error('category_id')
-                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                <p class="mt-2 text-sm text-red-600 flex items-center">
+                                    <i data-lucide="alert-circle" class="w-4 h-4 mr-1"></i>
+                                    {{ $message }}
+                                </p>
                             @enderror
                         </div>
 
-                        <!-- Price -->
+                        <!-- Course Pricing -->
                         <div>
-                            <label for="price" class="block text-sm font-medium text-gray-700 mb-2">Price ($)</label>
-                            <div class="mt-1 relative rounded-md shadow-sm">
-                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                    <span class="text-gray-500 sm:text-sm">$</span>
+                            <label class="block text-sm font-semibold text-gray-700 mb-4">Course Pricing *</label>
+                            
+                            <!-- Free/Paid Toggle -->
+                            <div class="space-y-4">
+                                <div class="flex items-center space-x-6">
+                                    <label class="inline-flex items-center">
+                                        <input type="radio" name="is_free" value="1" 
+                                            {{ old('is_free', '1') == '1' ? 'checked' : '' }}
+                                            class="text-primary focus:ring-primary border-gray-300" 
+                                            id="course-free">
+                                        <span class="ml-2 text-sm font-medium text-gray-700">Free Course</span>
+                                    </label>
+                                    <label class="inline-flex items-center">
+                                        <input type="radio" name="is_free" value="0" 
+                                            {{ old('is_free') == '0' ? 'checked' : '' }}
+                                            class="text-primary focus:ring-primary border-gray-300" 
+                                            id="course-paid">
+                                        <span class="ml-2 text-sm font-medium text-gray-700">Paid Course</span>
+                                    </label>
                                 </div>
-                                <input type="number" id="price" name="price" value="{{ old('price', 0) }}"
-                                    min="0" step="0.01"
-                                    class="pl-7 w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                                    placeholder="0.00">
+
+                                <!-- Price Input (shown when paid is selected) -->
+                                <div id="price-section" class="hidden">
+                                    <label for="price" class="block text-sm font-medium text-gray-700 mb-2">Course Price</label>
+                                    <div class="relative">
+                                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                            <span class="text-gray-500 text-lg font-semibold">$</span>
+                                        </div>
+                                        <input type="number" id="price" name="price" value="{{ old('price', '') }}"
+                                            step="0.01" min="0" max="9999.99"
+                                            class="w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors {{ $errors->has('price') ? 'border-red-300' : '' }}"
+                                            placeholder="29.99">
+                                    </div>
+                                    <p class="text-xs text-gray-500 mt-2">Set a competitive price for your course content</p>
+                                </div>
                             </div>
+
+                            @error('is_free')
+                                <p class="mt-2 text-sm text-red-600 flex items-center">
+                                    <i data-lucide="alert-circle" class="w-4 h-4 mr-1"></i>
+                                    {{ $message }}
+                                </p>
+                            @enderror
                             @error('price')
-                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                            @enderror
-                        </div>
-
-                        <!-- Duration -->
-                        <div>
-                            <label for="duration" class="block text-sm font-medium text-gray-700 mb-2">Estimated
-                                Duration (hours)</label>
-                            <input type="number" id="duration" name="duration" value="{{ old('duration', 0) }}"
-                                min="0"
-                                class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                                placeholder="e.g., 10">
-                            @error('duration')
-                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                <p class="mt-2 text-sm text-red-600 flex items-center">
+                                    <i data-lucide="alert-circle" class="w-4 h-4 mr-1"></i>
+                                    {{ $message }}
+                                </p>
                             @enderror
                         </div>
                     </div>
 
-                    <!-- Course Content -->
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Course Content</label>
-                        <div class="border border-gray-300 rounded-md p-4">
-                            <div class="flex justify-between items-center mb-4">
-                                <h4 class="text-md font-medium text-gray-900">Sections & Lessons</h4>
-                                <button type="button"
-                                    class="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1 rounded text-sm">
-                                    Add Section
-                                </button>
+                    <!-- Additional Course Info -->
+                    <div class="bg-gray-50 rounded-xl p-6 border border-gray-200">
+                        <h4 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                            <i data-lucide="info" class="w-5 h-5 mr-2 text-primary"></i>
+                            What's Next?
+                        </h4>
+                        <div class="space-y-3 text-sm text-gray-600">
+                            <div class="flex items-start">
+                                <i data-lucide="check-circle" class="w-4 h-4 mt-0.5 mr-3 text-green-500"></i>
+                                <span>After creating your course, you'll be able to add modules and lessons using our course builder</span>
                             </div>
-                            <div class="space-y-3">
-                                <div class="border border-gray-200 rounded-md p-3">
-                                    <div class="flex justify-between items-center">
-                                        <h5 class="font-medium">Introduction to Laravel</h5>
-                                        <div class="flex gap-2">
-                                            <button type="button" class="text-gray-400 hover:text-gray-600">
-                                                <i class="fas fa-edit"></i>
-                                            </button>
-                                            <button type="button" class="text-gray-400 hover:text-gray-600">
-                                                <i class="fas fa-trash"></i>
-                                            </button>
-                                        </div>
-                                    </div>
-                                    <div class="mt-2 space-y-2">
-                                        <div class="flex justify-between items-center text-sm text-gray-600">
-                                            <span>1. What is Laravel?</span>
-                                            <span>15 min</span>
-                                        </div>
-                                        <div class="flex justify-between items-center text-sm text-gray-600">
-                                            <span>2. Setting up your environment</span>
-                                            <span>25 min</span>
-                                        </div>
-                                    </div>
-                                </div>
+                            <div class="flex items-start">
+                                <i data-lucide="check-circle" class="w-4 h-4 mt-0.5 mr-3 text-green-500"></i>
+                                <span>Upload video content, create assignments, and structure your curriculum</span>
+                            </div>
+                            <div class="flex items-start">
+                                <i data-lucide="check-circle" class="w-4 h-4 mt-0.5 mr-3 text-green-500"></i>
+                                <span>Submit for review once your content is ready to publish</span>
                             </div>
                         </div>
-                    </div>
-
-                    <!-- Status -->
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Course Status</label>
-                        <div class="flex gap-4">
-                            <label class="inline-flex items-center">
-                                <input type="radio" name="status" value="draft"
-                                    {{ old('status', 'draft') == 'draft' ? 'checked' : '' }}
-                                    class="text-indigo-600 focus:ring-indigo-500">
-                                <span class="ml-2">Draft</span>
-                            </label>
-                            <label class="inline-flex items-center">
-                                <input type="radio" name="status" value="published"
-                                    {{ old('status') == 'published' ? 'checked' : '' }}
-                                    class="text-indigo-600 focus:ring-indigo-500">
-                                <span class="ml-2">Published</span>
-                            </label>
-                        </div>
-                        @error('status')
-                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                        @enderror
                     </div>
                 </div>
 
                 <!-- Form Actions -->
-                <div class="px-6 py-4 bg-gray-50 border-t border-gray-200 flex justify-end space-x-3">
-                    <button type="button"
-                        class="bg-white hover:bg-gray-50 text-gray-700 px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                <div class="bg-gray-50 px-8 py-6 border-t border-gray-200 flex flex-col sm:flex-row gap-3 sm:justify-between">
+                    <a href="{{ route('instructor.courses.index') }}"
+                        class="inline-flex items-center justify-center px-6 py-3 border border-gray-300 rounded-xl text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors">
+                        <i data-lucide="arrow-left" class="w-4 h-4 mr-2"></i>
                         Cancel
-                    </button>
-                    <button type="submit" name="action" value="draft"
-                        class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
-                        Save as Draft
-                    </button>
-                    <button type="submit" name="action" value="publish"
-                        class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                        Publish Course
+                    </a>
+                    
+                    <button type="submit"
+                        class="inline-flex items-center justify-center px-8 py-3 bg-primary hover:bg-secondary rounded-xl text-sm font-semibold text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors duration-200">
+                        <i data-lucide="save" class="w-4 h-4 mr-2"></i>
+                        Create Course Draft
                     </button>
                 </div>
             </form>
@@ -243,57 +348,190 @@
 
     <style>
         .drag-active {
-            border-color: #4f46e5;
-            background-color: #f8fafc;
+            border-color: #002147 !important;
+            background-color: rgba(0, 33, 71, 0.05) !important;
+        }
+        
+        .preview-image {
+            animation: fadeIn 0.3s ease-in-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
         }
     </style>
 
     <script>
-        // Image upload drag and drop
-        const dropArea = document.querySelector('.border-dashed');
-        const fileInput = document.getElementById('image');
+        document.addEventListener('DOMContentLoaded', function() {
+            // Thumbnail upload functionality
+            const thumbnailDropArea = document.getElementById('thumbnail-drop-area');
+            const thumbnailInput = document.getElementById('thumbnail');
+            const thumbnailPreviewDiv = document.getElementById('thumbnail-preview');
+            const thumbnailPreviewImage = document.getElementById('thumbnail-image');
+            const thumbnailNameEl = document.getElementById('thumbnail-name');
 
-        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-            dropArea.addEventListener(eventName, preventDefaults, false);
-        });
+            // Video upload functionality
+            const videoDropArea = document.getElementById('video-drop-area');
+            const videoInput = document.getElementById('preview_video');
+            const videoPreviewDiv = document.getElementById('video-preview');
+            const videoPreviewEl = document.getElementById('preview-video-element');
+            const videoNameEl = document.getElementById('video-name');
 
-        function preventDefaults(e) {
-            e.preventDefault();
-            e.stopPropagation();
-        }
+            // Handle thumbnail upload
+            thumbnailInput.addEventListener('change', function(e) {
+                if (e.target.files.length > 0) {
+                    previewThumbnail(e.target.files[0]);
+                }
+            });
 
-        ['dragenter', 'dragover'].forEach(eventName => {
-            dropArea.addEventListener(eventName, highlight, false);
-        });
+            // Handle video upload
+            videoInput.addEventListener('change', function(e) {
+                if (e.target.files.length > 0) {
+                    previewVideo(e.target.files[0]);
+                }
+            });
 
-        ['dragleave', 'drop'].forEach(eventName => {
-            dropArea.addEventListener(eventName, unhighlight, false);
-        });
+            function previewThumbnail(file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    thumbnailPreviewImage.src = e.target.result;
+                    thumbnailNameEl.textContent = file.name;
+                    thumbnailPreviewDiv.classList.remove('hidden');
+                    thumbnailPreviewImage.classList.add('preview-image');
+                }
+                reader.readAsDataURL(file);
+            }
 
-        function highlight() {
-            dropArea.classList.add('drag-active');
-        }
+            function previewVideo(file) {
+                const url = URL.createObjectURL(file);
+                videoPreviewEl.src = url;
+                videoNameEl.textContent = file.name;
+                videoPreviewDiv.classList.remove('hidden');
+            }
 
-        function unhighlight() {
-            dropArea.classList.remove('drag-active');
-        }
+            // Drag and drop functionality for thumbnail
+            setupDragAndDrop(thumbnailDropArea, thumbnailInput, previewThumbnail);
+            // Drag and drop functionality for video
+            setupDragAndDrop(videoDropArea, videoInput, previewVideo);
 
-        dropArea.addEventListener('drop', handleDrop, false);
+            function setupDragAndDrop(dropArea, fileInput, previewFunction) {
+                ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                    dropArea.addEventListener(eventName, preventDefaults, false);
+                });
 
-        function handleDrop(e) {
-            const dt = e.dataTransfer;
-            const files = dt.files;
-            fileInput.files = files;
-        }
+                function preventDefaults(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                }
 
-        // Form validation
-        document.getElementById('courseForm').addEventListener('submit', function(e) {
-            const title = document.getElementById('title').value;
-            const description = document.getElementById('description').value;
+                ['dragenter', 'dragover'].forEach(eventName => {
+                    dropArea.addEventListener(eventName, () => dropArea.classList.add('drag-active'), false);
+                });
 
-            if (!title || !description) {
-                e.preventDefault();
-                alert('Please fill in all required fields');
+                ['dragleave', 'drop'].forEach(eventName => {
+                    dropArea.addEventListener(eventName, () => dropArea.classList.remove('drag-active'), false);
+                });
+
+                dropArea.addEventListener('drop', function(e) {
+                    const files = e.dataTransfer.files;
+                    if (files.length > 0) {
+                        fileInput.files = files;
+                        previewFunction(files[0]);
+                    }
+                });
+            }
+
+            // Description character count
+            const descriptionTextarea = document.getElementById('description');
+            const descriptionCount = document.getElementById('description-count');
+            
+            function updateDescriptionCount() {
+                const count = descriptionTextarea.value.length;
+                descriptionCount.textContent = `${count} characters`;
+                
+                if (count < 100) {
+                    descriptionCount.classList.add('text-red-500');
+                    descriptionCount.classList.remove('text-green-500');
+                } else {
+                    descriptionCount.classList.add('text-green-500');
+                    descriptionCount.classList.remove('text-red-500');
+                }
+            }
+            
+            descriptionTextarea.addEventListener('input', updateDescriptionCount);
+            updateDescriptionCount(); // Initial count
+
+            // Free/Paid course functionality
+            const courseFreeRadio = document.getElementById('course-free');
+            const coursePaidRadio = document.getElementById('course-paid');
+            const priceSection = document.getElementById('price-section');
+            const priceInput = document.getElementById('price');
+            
+            function togglePriceSection() {
+                if (coursePaidRadio.checked) {
+                    priceSection.classList.remove('hidden');
+                    priceInput.required = true;
+                } else {
+                    priceSection.classList.add('hidden');
+                    priceInput.required = false;
+                    priceInput.value = '';
+                }
+            }
+            
+            courseFreeRadio.addEventListener('change', togglePriceSection);
+            coursePaidRadio.addEventListener('change', togglePriceSection);
+            togglePriceSection(); // Initial state
+
+            // Form validation
+            document.getElementById('courseForm').addEventListener('submit', function(e) {
+                const title = document.getElementById('title').value.trim();
+                const description = document.getElementById('description').value.trim();
+                const language = document.getElementById('language').value;
+                const level = document.getElementById('level').value;
+                const category = document.getElementById('category_id').value;
+                const thumbnail = document.getElementById('thumbnail').files;
+                const isFree = document.querySelector('input[name="is_free"]:checked')?.value;
+                const price = document.getElementById('price').value;
+
+                let errors = [];
+
+                // Validate required fields
+                if (!title) errors.push('Course title is required');
+                if (!description || description.length < 100) errors.push('Course description must be at least 100 characters');
+                if (!language) errors.push('Course language is required');
+                if (!level) errors.push('Difficulty level is required');
+                if (!category) errors.push('Category selection is required');
+                if (thumbnail.length === 0) errors.push('Course thumbnail is required');
+                if (!isFree) errors.push('Please specify if this is a free or paid course');
+                
+                // Validate paid course pricing
+                if (isFree === '0' && (!price || price <= 0)) {
+                    errors.push('Price is required for paid courses');
+                }
+
+                if (errors.length > 0) {
+                    e.preventDefault();
+                    alert('Please fix the following errors:\n\n' + errors.join('\n'));
+                    return false;
+                }
+
+                // Show loading state
+                const submitButton = e.target.querySelector('button[type="submit"]');
+                const originalText = submitButton.innerHTML;
+                submitButton.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 mr-2 animate-spin"></i>Creating Course...';
+                submitButton.disabled = true;
+
+                // Re-enable if there's an error (though form should submit)
+                setTimeout(() => {
+                    submitButton.innerHTML = originalText;
+                    submitButton.disabled = false;
+                }, 10000);
+            });
+
+            // Initialize Lucide icons
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
             }
         });
     </script>

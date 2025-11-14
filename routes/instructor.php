@@ -31,6 +31,11 @@ Route::get('/instructor/apply', [InstructorsController::class, 'showApplicationF
 Route::prefix('instructor')->name('instructor.')->middleware(['auth', 'role:instructor'])->group(function () {
     Route::get('/my-courses', [InstructorCourseController::class, 'index'])->name('courses.index');
     Route::get('/create-course', [InstructorCourseController::class, 'create'])->name('courses.create');
-    // Add other instructor course methods as they're implemented
+    Route::post('/create-course', [InstructorCourseController::class, 'store'])->name('courses.store');
+    Route::get('/courses/{course}', [InstructorCourseController::class, 'show'])->name('courses.show');
+    Route::get('/courses/{course}/edit', [InstructorCourseController::class, 'edit'])->name('courses.edit');
+    Route::put('/courses/{course}', [InstructorCourseController::class, 'update'])->name('courses.update');
+    Route::get('/courses/{course}/builder', [InstructorCourseController::class, 'builder'])->name('courses.builder');
+    Route::post('/courses/{course}/submit-for-review', [InstructorCourseController::class, 'submitForReview'])->name('courses.submit-for-review');
 });
 

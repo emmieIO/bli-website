@@ -22,29 +22,51 @@ class CourseService
         //
     }
 
-    public function createCourse(array $data, UploadedFile $file)
+    public function createCourse(array $data, UploadedFile $thumbnail = null, UploadedFile $previewVideo = null)
     {
         try {
-            return DB::transaction(function () use ($data, $file) {
-                $thumbnailPath = $this->uploadFile($file, 'courses');
+            return DB::transaction(function () use ($data, $thumbnail, $previewVideo) {
+                $thumbnailPath = null;
+                $previewVideoId = null;
+
+                // Upload thumbnail
+                if ($thumbnail) {
+                    $thumbnailPath = $this->uploadFile($thumbnail, 'courses/thumbnails');
+                }
+
+                // Upload preview video
+                if ($previewVideo) {
+                    $previewVideoId = $this->uploadFile($previewVideo, 'courses/videos');
+                }
 
                 $course = Course::create([
-                    "title" => $data['title'],
-                    'description' => $data['description'] ?? null,
-                    "thumbnail_path" => $thumbnailPath,
-                    "level" => $data['level'],
-                    "category_id" => $data['category_id'],
-                    "price" => $data['price'],
-                    "instructor_id" => auth()->id(),
-                    'status' => $data['status'] ?? ApplicationStatus::DRAFT->value,
+                    'title' => $data['title'],
+                    'subtitle' => $data['subtitle'] ?? null,
+                    'description' => $data['description'],
+                    'language' => $data['language'],
+                    'thumbnail_path' => $thumbnailPath,
+                    'preview_video_id' => $previewVideoId,
+                    'level' => $data['level'],
+                    'category_id' => $data['category_id'],
+                    'is_free' => (bool) $data['is_free'],
+                    'price' => $data['is_free'] ? 0 : $data['price'],
+                    'instructor_id' => auth()->id(),
+                    'status' => ApplicationStatus::DRAFT->value,
                 ]);
+                
                 return $course;
             });
         } catch (\Throwable $th) {
             Log::error("Error creating course", ['error' => $th->getMessage()]);
+            
+            // Clean up uploaded files on error
             if (!empty($thumbnailPath)) {
                 $this->deleteFile($thumbnailPath);
             }
+            if (!empty($previewVideoId)) {
+                $this->deleteFile($previewVideoId);
+            }
+            
             throw $th;
         }
     }
@@ -102,33 +124,29 @@ class CourseService
         try {
             return DB::transaction(function () use ($course, $data, $file) {
                 $updateData = [
-                    "title" => $data['title'],
+                    'title' => $data['title'],
                     'description' => $data['description'] ?? null,
-                    "level" => $data['level'],
-                    "category_id" => $data['category_id'],
-                    "price" => $data['price'],
+                    'level' => $data['level'],
+                    'category_id' => $data['category_id'],
+                    'price' => $data['price'],
+                    'status' => $data['status'] ?? $course->status,
                 ];
 
-                // Handle file upload if new file is provided
+                // Handle file upload if provided
                 if ($file) {
                     // Delete old thumbnail if exists
                     if ($course->thumbnail_path) {
                         $this->deleteFile($course->thumbnail_path);
                     }
-                    
-                    // Upload new thumbnail
-                    $thumbnailPath = $this->uploadFile($file, 'courses');
-                    $updateData['thumbnail_path'] = $thumbnailPath;
+                    $updateData['thumbnail_path'] = $this->uploadFile($file, 'courses');
                 }
 
                 $course->update($updateData);
-                return $course->fresh();
+                return $course;
             });
         } catch (\Throwable $th) {
-            Log::error("Error updating course", ['error' => $th->getMessage(), 'course_id' => $course->id]);
+            Log::error("Error updating course", ['error' => $th->getMessage()]);
             throw $th;
         }
     }
-
-
 }
