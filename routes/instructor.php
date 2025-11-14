@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin\InstructorApplicationController;
 use App\Http\Controllers\Course\InstructorCourseController;
 use App\Http\Controllers\Instructors\InstructorsController;
+use App\Models\Course;
 use Illuminate\Support\Facades\Route;
 
 // Instructor application workflow (keep existing signed route logic)
@@ -37,5 +38,17 @@ Route::prefix('instructor')->name('instructor.')->middleware(['auth', 'role:inst
     Route::put('/courses/{course}', [InstructorCourseController::class, 'update'])->name('courses.update');
     Route::get('/courses/{course}/builder', [InstructorCourseController::class, 'builder'])->name('courses.builder');
     Route::post('/courses/{course}/submit-for-review', [InstructorCourseController::class, 'submitForReview'])->name('courses.submit-for-review');
+    
+    // Course Module Management
+    Route::post('/courses/{course}/modules', [InstructorCourseController::class, 'storeModule'])->name('courses.modules.store');
+    Route::put('/courses/{course}/modules/{module}', [InstructorCourseController::class, 'updateModule'])->name('courses.modules.update');
+    Route::delete('/courses/{course}/modules/{module}', [InstructorCourseController::class, 'deleteModule'])->name('courses.modules.delete');
+    Route::post('/courses/{course}/modules/reorder', [InstructorCourseController::class, 'reorderModules'])->name('courses.modules.reorder');
+    
+    // Course Lesson Management
+    Route::post('/courses/{course}/modules/{module}/lessons', [InstructorCourseController::class, 'storeLesson'])->name('courses.lessons.store');
+    Route::put('/courses/{course}/modules/{module}/lessons/{lesson}', [InstructorCourseController::class, 'updateLesson'])->name('courses.lessons.update');
+    Route::delete('/courses/{course}/modules/{module}/lessons/{lesson}', [InstructorCourseController::class, 'deleteLesson'])->name('courses.lessons.delete');
+    Route::post('/courses/{course}/modules/{module}/lessons/reorder', [InstructorCourseController::class, 'reorderLessons'])->name('courses.lessons.reorder');
 });
 

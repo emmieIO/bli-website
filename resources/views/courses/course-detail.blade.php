@@ -1,222 +1,270 @@
 <x-guest-layout>
-    <div class="container mx-auto px-4 sm:px-6 lg:px-8 ">
-        <div class="grid grid-cols-1 lg:grid-cols-3 lg:gap-x-12">
-
-            <div class="lg:col-span-2 mb-8 lg:mb-0">
-                <nav class="text-sm text-gray-500 mb-4">
-                    <a href="{{ route('homepage') }}" class="hover:underline">Home</a> &gt;
-                    <a href="{{ route('courses.index') }}" class="hover:underline">Courses</a> &gt;
-                    <span class="text-gray-700">{{ $course->title }}</span>
-                </nav>
-
-                <h1 class="text-3xl md:text-4xl font-extrabold text-gray-900 tracking-tight mb-3">{{ $course->title }}
-                </h1>
-
-                <p class="text-lg text-gray-600 mb-6">3 in 1 Course: Learn to design websites with Figma, build with
-                    Webflow, and make a living freelancing.</p>
-
-                <div class="flex flex-wrap items-center gap-x-6 gap-y-4">
-                    <div class="flex items-center">
-                        <div>
-                            <span class="text-sm text-gray-600">Created by:</span>
-                            <p class="font-semibold text-gray-800">{{ $course->instructor->name }}</p>
-                        </div>
-                    </div>
-                    <div class="flex items-center gap-1.5 self-end">
-                        <i data-lucide="star" class="fill-yellow-400 stroke-0"></i>
-                        <span class="font-bold text-gray-800">4.8</span>
-                        <span class="text-sm text-gray-500">(401,444 rating)</span>
-                    </div>
+    <!-- Hero Section - Udemy Style -->
+    <div class="bg-gray-900 text-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <!-- Breadcrumb -->
+            <nav class="text-sm text-purple-300 mb-4">
+                <div class="flex items-center space-x-2">
+                    <a href="{{ route('homepage') }}" class="hover:text-white transition-colors">Home</a>
+                    <span class="text-gray-400">&gt;</span>
+                    <a href="{{ route('courses.index') }}" class="hover:text-white transition-colors">Courses</a>
+                    <span class="text-gray-400">&gt;</span>
+                    <span class="text-gray-300">{{ $course->category->category ?? 'Development' }}</span>
                 </div>
-                <div>
-                    <!-- replace VIDEO_ID with your Vimeo video id -->
-                    <div class="">
-                        <iframe
-                            src="https://player.vimeo.com/video/{{ $course->preview_video_id }}?h=0&autoplay=0&title=0&byline=0&portrait=0"
-                            class="" frameborder="0" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen
-                            loading="lazy" width="1280" height="720"
-                            style="width:100%;max-width:1280px;height:auto;aspect-ratio:16/9;" title="Course preview">
-                        </iframe>
-                    </div>
-                </div>
+            </nav>
 
-                <div class="my-8">
-                    <nav class="tabs tabs-bordered " aria-label="Tabs" role="tablist" aria-orientation="horizontal">
-                        <button type="button" class="tab active-tab:tab-active active text-primary" id="overview-item"
-                            data-tab="#overview" aria-controls="overview" role="tab" aria-selected="true">
-                            Overview
-                        </button>
-                        <button type="button" class="tab active-tab:tab-active text-primary" id="curriculum-item"
-                            data-tab="#curriculum" aria-controls="curriculum" role="tab" aria-selected="false">
-                            Course Curriculum
-                        </button>
-                        <button type="button" class="tab active-tab:tab-active text-primary" id="tabs-basic-item-3"
-                            data-tab="#instructor" aria-controls="instructor" role="tab" aria-selected="false">
-                            Instructor
-                        </button>
-                    </nav>
-                </div>
-                {{-- tab section --}}
-                <div class="mt-3">
-                    {{-- overview section --}}
-                    <div id="overview" role="tabpanel" aria-labelledby="overview-item">
-                        <div class="mb-10">
-                            <h2 class="text-2xl font-semibold font-montserrat my-3">
-                                Description
-                            </h2>
-                            <p>{{ $course->description }}</p>
-                        </div>
-                        <div>
-                            <h2 class="text-2xl font-semibold font-montserrat my-3">
-                                Course Requirements
-                            </h2>
-                            @if($course->requirements->count())
-                            <ul class="mt-2 list-disc list-inside space-y-2 text-gray-700">
-                                @foreach ($course->requirements as $requirement )
-                                <li>{{ $requirement->requirement }}</li>
-                                @endforeach
-                            </ul>
-                            @else
-                            <div class="text-sm text-gray-600">
-                                <p class="mb-2">No course requirements listed.</p>
-                                <p class="text-xs text-gray-500">You don’t need any prior experience to start this
-                                    course.</p>
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <!-- Left Content -->
+                <div class="lg:col-span-2">
+                    <!-- Course Title -->
+                    <h1 class="text-2xl lg:text-4xl font-bold mb-4 leading-tight">
+                        {{ $course->title }}
+                    </h1>
+
+                    <!-- Course Subtitle -->
+                    @if($course->subtitle)
+                    <p class="text-lg text-gray-300 mb-6 leading-relaxed">
+                        {{ $course->subtitle }}
+                    </p>
+                    @endif
+
+                    <!-- Course Meta Information -->
+                    <div class="flex flex-wrap items-center gap-4 mb-6 text-sm">
+                        <div class="flex items-center">
+                            <span class="text-yellow-400 font-bold mr-1">4.6</span>
+                            <div class="flex mr-2">
+                                @for($i = 1; $i <= 5; $i++)
+                                    <svg class="w-4 h-4 {{ $i <= 4 ? 'text-yellow-400' : 'text-gray-400' }}" fill="currentColor" viewBox="0 0 20 20">
+                                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                                    </svg>
+                                @endfor
                             </div>
-                            @endif
+                            <span class="text-purple-300">({{ number_format($course->students ? $course->students->count() : 0) }} ratings)</span>
                         </div>
-                        <div>
-                            <h2 class="text-2xl font-semibold font-montserrat my-3">
-                                Course Outcomes
-                            </h2>
-                            @if($course->outcomes->count())
-                            <ul class="mt-2 list-disc list-inside space-y-2 text-gray-700">
-                                @foreach ($course->outcomes as $outcome)
-                                <li class="text-sm leading-6">
-                                    {{ $outcome->outcome }}
-                                </li>
-                                @endforeach
-                            </ul>
+                        <span class="text-gray-300">{{ number_format($course->students ? $course->students->count() : 0) }} students</span>
+                    </div>
+
+                    <div class="flex flex-wrap items-center gap-4 text-sm text-gray-300">
+                        <div class="flex items-center">
+                            <span>Created by</span>
+                            <a href="#instructor" class="text-purple-300 hover:text-white ml-1 underline">{{ $course->instructor->name }}</a>
+                        </div>
+                        <div class="flex items-center">
+                            <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+                            </svg>
+                            <span>Last updated {{ $course->updated_at->format('M Y') }}</span>
+                        </div>
+                        <div class="flex items-center">
+                            <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M7 2a1 1 0 011 1v1h3a1 1 0 110 2H9.578a18.87 18.87 0 01-1.724 4.78c.29.354.596.696.914 1.026a1 1 0 11-1.44 1.389c-.188-.196-.373-.396-.554-.6a26.86 26.86 0 01-3.622 2.91 1 1 0 11-.927-1.771 24.86 24.86 0 003.156-2.54 21.07 21.07 0 01-2.357-3.615A1 1 0 014 5h3V3a1 1 0 011-1z" clip-rule="evenodd"/>
+                            </svg>
+                            <span>English</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Course Video Preview (Hidden on mobile, shown as thumbnail) -->
+                <div class="lg:col-span-1 hidden lg:block">
+                    <div class="relative">
+                        <div class="aspect-video bg-black rounded-lg overflow-hidden">
+                            @if($course->preview_video_id)
+                                <iframe src="https://player.vimeo.com/video/{{ $course->preview_video_id }}?h=0&title=0&byline=0&portrait=0" 
+                                    class="w-full h-full" frameborder="0" allowfullscreen></iframe>
                             @else
-                            <div class="text-sm text-gray-600">
-                                <p class="mb-2">No course requirements listed.</p>
-                                <p class="text-xs text-gray-500">You don’t need any prior experience to start this
-                                    course.</p>
-                            </div>
+                                <div class="w-full h-full bg-gray-800 flex items-center justify-center">
+                                    <div class="text-center">
+                                        <svg class="w-16 h-16 text-white mx-auto mb-4" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"/>
+                                        </svg>
+                                        <p class="text-white text-sm">Preview this course</p>
+                                    </div>
+                                </div>
                             @endif
                         </div>
                     </div>
-                    {{-- Course curriculum --}}
-                    <div id="curriculum" class="hidden" role="tabpanel" aria-labelledby="curriculum-item">
-                        <div class="accordion divide-neutral/20 divide-y">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Left Content -->
+            <div class="lg:col-span-2 space-y-8">
+
+                <!-- Mobile Video Preview -->
+                <div class="lg:hidden">
+                    <div class="aspect-video bg-black rounded-lg overflow-hidden">
+                        @if($course->preview_video_id)
+                            <iframe src="https://player.vimeo.com/video/{{ $course->preview_video_id }}?h=0&title=0&byline=0&portrait=0" 
+                                class="w-full h-full" frameborder="0" allowfullscreen></iframe>
+                        @else
+                            <div class="w-full h-full bg-gray-800 flex items-center justify-center">
+                                <div class="text-center">
+                                    <svg class="w-16 h-16 text-white mx-auto mb-4" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"/>
+                                    </svg>
+                                    <p class="text-white text-sm">Preview this course</p>
+                                </div>
+                            </div>
+                        @endif
+                    </div>
+                </div>
+
+                <!-- What you'll learn -->
+                <div class="bg-gray-50 border border-gray-200 rounded-lg p-6">
+                    <h2 class="text-xl font-bold text-gray-900 mb-4">What you'll learn</h2>
+                    @if($course->outcomes && $course->outcomes->count())
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            @foreach($course->outcomes as $outcome)
+                            <div class="flex items-start">
+                                <svg class="w-4 h-4 text-gray-600 mt-1 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                                </svg>
+                                <span class="text-sm text-gray-700">{{ $outcome->outcome }}</span>
+                            </div>
+                            @endforeach
+                        </div>
+                    @else
+                        <p class="text-gray-600">Learning outcomes will be updated soon.</p>
+                    @endif
+                </div>
+
+                <!-- Course Content -->
+                <div class="space-y-8">
+                    <!-- Course Description -->
+                    <div>
+                        <h2 class="text-xl font-bold text-gray-900 mb-4">Description</h2>
+                        <div class="prose prose-gray max-w-none">
+                            <p class="text-gray-700 leading-relaxed">{{ $course->description }}</p>
+                        </div>
+                    </div>
+
+                    <!-- Course Curriculum -->
+                    <div>
+                        <div class="flex items-center justify-between mb-4">
+                            <h2 class="text-xl font-bold text-gray-900">Course content</h2>
+                            <span class="text-sm text-gray-600">{{ $course->modules ? $course->modules->count() : 0 }} sections • {{ $course->modules ? $course->modules->sum(fn($m) => $m->lessons ? $m->lessons->count() : 0) : 0 }} lectures</span>
+                        </div>
+
+                        <!-- Udemy-style Curriculum -->
+                        <div class="border border-gray-200 rounded-lg">
                             @forelse($course->modules as $module)
-                            <div class="accordion-item {{ $loop->first ? 'active' : '' }}"
-                                id="module-{{ $module->id }}">
-                                <button class="accordion-toggle inline-flex items-center gap-x-4 text-start w-full"
-                                    aria-controls="module-{{ $module->id }}-collapse"
-                                    aria-expanded="{{ $loop->first ? 'true' : 'false' }}">
-                                    <span
-                                        class="icon-[tabler--plus] accordion-item-active:hidden text-base-content size-4.5 block shrink-0"></span>
-                                    <span
-                                        class="icon-[tabler--minus] accordion-item-active:block text-base-content size-4.5 hidden shrink-0"></span>
-
-                                    <span class="font-medium text-gray-800 font-montserrat">{{ $module->title }}</span>
-                                    <span class="ml-auto text-sm text-gray-500">{{ $module->lessons->count() }} {{
-                                        Str::plural('lesson', $module->lessons->count()) }}</span>
+                            <div class="border-b border-gray-200 last:border-b-0">
+                                <button class="w-full text-left px-6 py-4 hover:bg-gray-50 focus:bg-gray-50 transition-colors" 
+                                        onclick="toggleModule({{ $module->id }})">
+                                    <div class="flex items-center justify-between">
+                                        <div class="flex items-center">
+                                            <svg class="w-4 h-4 text-gray-600 mr-3 transform transition-transform" id="chevron-{{ $module->id }}">
+                                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                                            </svg>
+                                            <h3 class="font-medium text-gray-900">{{ $module->title }}</h3>
+                                        </div>
+                                        <span class="text-sm text-gray-500">{{ $module->lessons ? $module->lessons->count() : 0 }} lectures</span>
+                                    </div>
                                 </button>
-
-                                <div id="module-{{ $module->id }}-collapse"
-                                    class="accordion-content {{ $loop->first ? '' : 'hidden' }} w-full overflow-hidden transition-[height] duration-300"
-                                    aria-labelledby="module-{{ $module->id }}" role="region">
-                                    <div class="px-5 pb-4">
-                                        @if($module->lessons->count())
-                                        <ul class="space-y-2">
-                                            @foreach($module->lessons as $lesson)
-                                            <li class="flex items-center justify-between py-2">
-                                                <div class="flex items-center gap-3">
-                                                    <span
-                                                        class="w-8 h-8 flex items-center justify-center rounded-sm bg-gray-100 text-gray-600 text-sm font-semibold">{{
-                                                        $loop->iteration }}</span>
-
-                                                    {{-- lesson type icon --}}
-                                                    <span class="shrink-0"></span>
-                                                    @switch($lesson->type)
-                                                    @case('video')
-                                                    <span
-                                                        class="icon-[tabler--player-play] size-4.5 text-orange-500"></span>
-                                                    @break
-                                                    @case('pdf')
-                                                    <span
-                                                        class="icon-[tabler--file-text] size-4.5 text-blue-500"></span>
-                                                    @break
-                                                    @case('link')
-                                                    <span class="icon-[tabler--link] size-4.5 text-green-500"></span>
-                                                    @break
-                                                    @default
-                                                    <span class="icon-[tabler--file] size-4.5 text-gray-500"></span>
-                                                    @endswitch
-                                                    </span>
-
-                                                    <div>
-                                                        <div class="text-sm text-gray-800">{{ $lesson->title }}</div>
-                                                        @if(!empty($lesson->subtitle))
-                                                        <div class="text-xs text-gray-500">{{ $lesson->subtitle }}</div>
-                                                        @endif
+                                <div id="module-{{ $module->id }}-collapse" class="hidden border-t border-gray-100">
+                                    <div class="px-6 py-4 bg-gray-50">
+                                        @if($module->lessons && $module->lessons->count())
+                                            <ul class="space-y-2">
+                                                @foreach($module->lessons as $lesson)
+                                                <li class="flex items-center justify-between text-sm">
+                                                    <div class="flex items-center">
+                                                        <div class="w-6 h-6 rounded bg-white border border-gray-200 flex items-center justify-center mr-3">
+                                                            @switch($lesson->type)
+                                                                @case('video')
+                                                                    <svg class="w-3 h-3 text-gray-600" fill="currentColor" viewBox="0 0 20 20">
+                                                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"/>
+                                                                    </svg>
+                                                                @break
+                                                                @case('pdf')
+                                                                    <svg class="w-3 h-3 text-gray-600" fill="currentColor" viewBox="0 0 20 20">
+                                                                        <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" clip-rule="evenodd"/>
+                                                                    </svg>
+                                                                @break
+                                                                @default
+                                                                    <svg class="w-3 h-3 text-gray-600" fill="currentColor" viewBox="0 0 20 20">
+                                                                        <path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd"/>
+                                                                    </svg>
+                                                            @endswitch
+                                                        </div>
+                                                        <span class="text-gray-700">{{ $lesson->title }}</span>
                                                     </div>
-                                                </div>
-                                                @if(!empty($lesson->duration))
-                                                <div class="text-xs text-gray-500">{{ $lesson->duration }}</div>
-                                                @endif
-                                            </li>
-                                            @endforeach
-                                        </ul>
+                                                    @if($lesson->duration)
+                                                        <span class="text-gray-500">{{ $lesson->duration }}</span>
+                                                    @endif
+                                                </li>
+                                                @endforeach
+                                            </ul>
                                         @else
-                                        <p class="text-sm text-gray-600">This module has no lessons yet.</p>
+                                            <p class="text-gray-500 text-sm">No lessons available</p>
                                         @endif
                                     </div>
                                 </div>
                             </div>
                             @empty
-                            <div class="px-5 py-4 text-sm text-gray-600">
-                                No curriculum available for this course.
+                            <div class="p-6 text-center">
+                                <p class="text-gray-500">Course curriculum coming soon</p>
                             </div>
                             @endforelse
                         </div>
                     </div>
-                    <div id="instructor" class="hidden" role="tabpanel" aria-labelledby="tabs-basic-item-3">
-                        <div class="flex items-start gap-6">
-                            <img src="{{ $course->instructor->avatar_url ?? 'https://ui-avatars.com/api/?name='.urlencode($course->instructor->name).'&background=fff&color=4a5568&size=128' }}"
-                                alt="{{ $course->instructor->name }}"
-                                class="w-20 h-20 rounded-full object-cover shadow-sm">
 
-                            <div class="flex-1">
-                                <h3 class="text-xl font-semibold text-gray-900">{{ $course->instructor->name }}</h3>
+                    <!-- Requirements -->
+                    @if($course->requirements && $course->requirements->count())
+                    <div>
+                        <h2 class="text-xl font-bold text-gray-900 mb-4">Requirements</h2>
+                        <ul class="space-y-2">
+                            @foreach($course->requirements as $requirement)
+                            <li class="flex items-start">
+                                <span class="w-2 h-2 bg-gray-400 rounded-full mt-2 mr-3 flex-shrink-0"></span>
+                                <span class="text-gray-700">{{ $requirement->requirement }}</span>
+                            </li>
+                            @endforeach
+                        </ul>
+                    </div>
+                    @endif
 
-                                @if(!empty($course->instructor->title))
-                                <div class="text-sm text-gray-500 mb-2">{{ $course->instructor->title }}</div>
-                                @endif
-
-                                <p class="text-sm text-gray-700">
-                                    {{ $course->instructor->bio ?? 'No bio available for this instructor.' }}
-                                </p>
-
-                                <div class="mt-4 flex flex-wrap items-center gap-3">
-                                    @if(!empty($course->instructor->email))
-                                    <a href="mailto:{{ $course->instructor->email }}"
-                                        class="inline-block px-3 py-2 bg-orange-500 text-white rounded-md text-sm font-semibold hover:bg-orange-600">
-                                        Contact
-                                    </a>
+                    <!-- Instructor -->
+                    <div id="instructor">
+                        <h2 class="text-xl font-bold text-gray-900 mb-4">Instructor</h2>
+                        <div class="border border-gray-200 rounded-lg p-6">
+                            <div class="flex items-start space-x-4">
+                                <img src="{{ $course->instructor->avatar_url ?? 'https://ui-avatars.com/api/?name='.urlencode($course->instructor->name).'&background=6366f1&color=fff&size=128' }}" 
+                                     alt="{{ $course->instructor->name }}" 
+                                     class="w-16 h-16 rounded-full object-cover">
+                                <div class="flex-1">
+                                    <h3 class="text-lg font-semibold text-gray-900 mb-1">{{ $course->instructor->name }}</h3>
+                                    @if($course->instructor->title)
+                                    <p class="text-purple-600 font-medium mb-2">{{ $course->instructor->title }}</p>
                                     @endif
-
-                                    @if(!empty($course->instructor->website))
-                                    <a href="{{ $course->instructor->website }}" target="_blank" rel="noopener"
-                                        class="text-sm text-gray-700 hover:underline">Website</a>
-                                    @endif
-
-                                    @if(!empty($course->instructor->twitter))
-                                    <a href="https://twitter.com/{{ ltrim($course->instructor->twitter, '@') }}"
-                                        target="_blank" rel="noopener"
-                                        class="text-sm text-gray-700 hover:underline">Twitter</a>
-                                    @endif
+                                    
+                                    <div class="flex items-center space-x-4 text-sm text-gray-600 mb-3">
+                                        <div class="flex items-center">
+                                            <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fill-rule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd"/>
+                                            </svg>
+                                            <span>Instructor Rating: 4.6</span>
+                                        </div>
+                                        <div class="flex items-center">
+                                            <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                                <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3z"/>
+                                            </svg>
+                                            <span>{{ number_format($course->students->count() ?? 0) }} Students</span>
+                                        </div>
+                                        <div class="flex items-center">
+                                            <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd"/>
+                                            </svg>
+                                            <span>1 Course</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <p class="text-gray-700 text-sm leading-relaxed">
+                                        {{ $course->instructor->bio ?? 'Experienced instructor passionate about sharing knowledge and helping students achieve their learning goals.' }}
+                                    </p>
                                 </div>
                             </div>
                         </div>
@@ -224,134 +272,128 @@
                 </div>
             </div>
 
+            <!-- Udemy-style Sidebar -->
             <div class="lg:col-span-1">
-                <div class="border border-gray-200 rounded-lg shadow-md p-6 sticky top-8">
-                    <div class="flex items-baseline justify-between mb-1">
-                        <span class="text-3xl font-extrabold text-gray-900">₦{{ number_format($course->price, 2)
-                            }}</span>
-                        {{-- <span class="text-lg text-gray-500 line-through">$26.00</span> --}}
-                        <span class="text-sm font-bold bg-orange-100 text-orange-600 px-2 py-1 rounded-md">56%
-                            OFF</span>
-                    </div>
-                    <p class="text-sm text-red-600 font-medium mb-5">2 days left at this price!</p>
-
-                    <div class="space-y-3 text-sm text-gray-600 mb-6">
-                        <div class="flex justify-between items-center">
-                            <span class="font-medium text-gray-800">Course Level</span><span>{{ $course->level }}</span>
+                <div class="sticky top-8">
+                    <div class="bg-white border border-gray-200 rounded-lg shadow-lg p-6">
+                        <!-- Course Price -->
+                        <div class="text-center mb-6">
+                            <div class="flex items-baseline justify-center mb-2">
+                                <span class="text-3xl font-bold text-gray-900">₦{{ number_format($course->price, 0) }}</span>
+                                @if($course->price > 0)
+                                <span class="text-lg text-gray-500 line-through ml-2">₦{{ number_format($course->price * 1.5, 0) }}</span>
+                                @endif
+                            </div>
+                            @if($course->price > 0)
+                            <div class="flex items-center justify-center">
+                                <span class="bg-yellow-200 text-yellow-800 text-xs font-semibold px-2 py-1 rounded-full">83% off</span>
+                                <span class="text-red-600 text-sm font-medium ml-2">2 days left at this price!</span>
+                            </div>
+                            @else
+                            <span class="text-green-600 font-semibold">Free</span>
+                            @endif
                         </div>
-                        <div class="flex justify-between items-center">
-                            <span class="font-medium text-gray-800">Students Enrolled</span><span>69,419,618</span>
+
+                        <!-- CTA Buttons -->
+                        <div class="space-y-3 mb-6">
+                            <button class="w-full bg-primary hover:bg-primary/90 text-white font-bold py-3 px-4 rounded transition-colors">
+                                Add to cart
+                            </button>
+                            <button class="w-full border border-gray-300 hover:bg-gray-50 text-gray-900 font-bold py-3 px-4 rounded transition-colors">
+                                Buy now
+                            </button>
+                        </div>
+
+                        <!-- Course Includes -->
+                        <div class="space-y-3 text-sm">
+                            <p class="font-semibold text-gray-900 mb-3">This course includes:</p>
+                            <div class="space-y-2">
+                                <div class="flex items-center">
+                                    <svg class="w-4 h-4 text-gray-600 mr-3" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/>
+                                    </svg>
+                                    <span class="text-gray-700">{{ $course->modules ? $course->modules->sum(fn($m) => $m->lessons ? $m->lessons->count() : 0) : 0 }} on-demand videos</span>
+                                </div>
+                                <div class="flex items-center">
+                                    <svg class="w-4 h-4 text-gray-600 mr-3" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                                    </svg>
+                                    <span class="text-gray-700">Downloadable resources</span>
+                                </div>
+                                <div class="flex items-center">
+                                    <svg class="w-4 h-4 text-gray-600 mr-3" fill="currentColor" viewBox="0 0 20 20">
+                                        <path d="M2 6a2 2 0 012-2h6a2 2 0 012 2v6a2 2 0 01-2 2H4a2 2 0 01-2-2V6zM14.553 7.106A1 1 0 0014 8v4a1 1 0 00.553.894l2 1A1 1 0 0018 13V7a1 1 0 00-1.447-.894l-2 1z"/>
+                                    </svg>
+                                    <span class="text-gray-700">Access on mobile and TV</span>
+                                </div>
+                                <div class="flex items-center">
+                                    <svg class="w-4 h-4 text-gray-600 mr-3" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                    </svg>
+                                    <span class="text-gray-700">Full lifetime access</span>
+                                </div>
+                                <div class="flex items-center">
+                                    <svg class="w-4 h-4 text-gray-600 mr-3" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                    </svg>
+                                    <span class="text-gray-700">Certificate of completion</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 30-day guarantee -->
+                        <div class="mt-6 pt-6 border-t border-gray-200 text-center">
+                            <p class="text-xs text-gray-600">30-Day Money-Back Guarantee</p>
                         </div>
                     </div>
 
-                    <div class="space-y-3 mb-4">
-                        <a href="#"
-                            class="block w-full text-center text-white bg-orange-500 hover:bg-orange-600 font-bold py-3 rounded-lg transition-colors">Add
-                            To Cart</a>
-                        <a href="#"
-                            class="block w-full text-center text-gray-800 bg-white border border-gray-400 hover:bg-gray-100 font-bold py-3 rounded-lg transition-colors">Buy
-                            Now</a>
+                    <!-- Course Stats -->
+                    <div class="bg-white border border-gray-200 rounded-lg shadow-lg p-6 mt-6">
+                        <h3 class="font-semibold text-gray-900 mb-4">Course Stats</h3>
+                        <div class="space-y-3 text-sm">
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Skill level</span>
+                                <span class="font-medium">{{ ucfirst($course->level->value ?? 'All Levels') }}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Students</span>
+                                <span class="font-medium">{{ number_format($course->students ? $course->students->count() : 0) }}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Languages</span>
+                                <span class="font-medium">English</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Captions</span>
+                                <span class="font-medium">Yes</span>
+                            </div>
+                        </div>
                     </div>
-
-                    <div class="flex justify-center space-x-6 mb-4">
-                        <a href="#" class="text-sm font-semibold text-gray-800 hover:underline">Add To
-                            Wishlist</a>
-                        <a href="#" class="text-sm font-semibold text-gray-800 hover:underline">Gift Course</a>
-                    </div>
-
-                    <p class="text-xs text-gray-500 text-center mb-6">Note: all course have 30-days money-back guarantee
-                    </p>
-
-                    <h3 class="font-bold text-gray-900 mb-3">This course includes:</h3>
-                    <ul class="space-y-2.5 text-sm text-gray-700">
-                        <li class="flex items-center"><svg class="w-5 h-5 mr-2 text-gray-500" fill="none"
-                                stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z">
-                                </path>
-                            </svg>Lifetime access</li>
-                        <li class="flex items-center"><svg class="w-5 h-5 mr-2 text-gray-500" fill="none"
-                                stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                            </svg>30-days money-back guarantee</li>
-                        <li class="flex items-center"><svg class="w-5 h-5 mr-2 text-gray-500" fill="none"
-                                stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
-                            </svg>Free exercises file & downloadable resources</li>
-                        <li class="flex items-center"><svg class="w-5 h-5 mr-2 text-gray-500" fill="none"
-                                stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z">
-                                </path>
-                            </svg>Shareable certificate of completion</li>
-                        <li class="flex items-center"><svg class="w-5 h-5 mr-2 text-gray-500" fill="none"
-                                stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z">
-                                </path>
-                            </svg>Access on mobile, tablet and TV</li>
-                        <li class="flex items-center"><svg class="w-5 h-5 mr-2 text-gray-500" fill="none"
-                                stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M3 5h12M9 3v2m4 0V3m4 4l-2 2-2-2m5.5 5.5h-13a1.5 1.5 0 000 3h13a1.5 1.5 0 000-3z">
-                                </path>
-                            </svg>English subtitles</li>
-                        <li class="flex items-center"><svg class="w-5 h-5 mr-2 text-gray-500" fill="none"
-                                stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M12 2v10m0 0l-3-3m3 3l3-3"></path>
-                            </svg>100% online course</li>
-                    </ul>
                 </div>
             </div>
         </div>
     </div>
+
+    <!-- Udemy-style JavaScript -->
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const tabs = document.querySelectorAll('button[role=tab]');
-            const tabPanels = document.querySelectorAll('div[role="tabpanel"]');
-            const storageKey = 'activeTabId'
-
-            // function to activate tab
-            function activateTab(tabId) {
-                tabs.forEach(tab => {
-                    const isSelected = tab.getAttribute('data-tab') == tabId
-                    tab.classList.toggle('active', isSelected);
-                    tab.setAttribute('aria-selected', isSelected);
-                })
-                tabPanels.forEach(panel => {
-                    const isSelected = '#' + panel.id === tabId;
-                    panel.classList.toggle('hidden', !isSelected);
-                });
-
-                // Save the active tab ID to localStorage
-                localStorage.setItem(storageKey, tabId);
-            }
-
-            // Event listener for tab clicks
-            tabs.forEach(tab => {
-                tab.addEventListener('click', (event) => {
-                    event.preventDefault(); // Prevent default button behavior
-                    const targetTabId = tab.getAttribute('data-tab');
-                    activateTab(targetTabId);
-                });
-            });
-
-            // On page load, check for a saved tab in localStorage
-            const savedTabId = localStorage.getItem(storageKey);
-
-            // Determine which tab to activate
-            // If a saved tab exists and corresponds to a real tab, use it.
-            // Otherwise, default to the first tab.
-            const tabToActivate = savedTabId && document.querySelector(`button[data-tab="${savedTabId}"]`)
-                ? savedTabId
-                : tabs[0].getAttribute('data-tab');
-
-            activateTab(tabToActivate);
+        document.addEventListener('DOMContentLoaded', function() {
+            // Module toggle functionality
+            window.toggleModule = function(moduleId) {
+                const collapse = document.getElementById(`module-${moduleId}-collapse`);
+                const chevron = document.getElementById(`chevron-${moduleId}`);
+                
+                if (collapse && chevron) {
+                    const isHidden = collapse.classList.contains('hidden');
+                    
+                    if (isHidden) {
+                        collapse.classList.remove('hidden');
+                        chevron.style.transform = 'rotate(90deg)';
+                    } else {
+                        collapse.classList.add('hidden');
+                        chevron.style.transform = 'rotate(0deg)';
+                    }
+                }
+            };
         });
     </script>
 </x-guest-layout>

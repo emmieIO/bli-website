@@ -63,11 +63,84 @@ class CourseController extends Controller
     }
 
     /**
-     * Display the specified resource.
+     * Display the specified resource for public viewing
      */
-    public function show(string $id)
+    public function show(Course $course)
     {
-        //
+        // Load relationships needed for the course detail page
+        $course->load([
+            'instructor',
+            'modules.lessons',
+            'outcomes',
+            'requirements',
+            'students'
+        ]);
+        
+        return view('courses.course-detail', compact('course'));
+    }
+
+    /**
+     * Course learning interface for enrolled students
+     */
+    public function learn(Course $course, $lesson = null)
+    {
+        // Check if user is enrolled in the course
+        if (!auth()->user() || !$course->students()->where('user_id', auth()->id())->exists()) {
+            return redirect()->route('courses.show', $course)
+                ->with('error', 'You must be enrolled in this course to access the learning interface.');
+        }
+
+        // Load course with relationships
+        $course->load([
+            'modules.lessons' => function($query) {
+                $query->orderBy('order_index');
+            }
+        ]);
+
+        // Find current lesson
+        $currentLesson = null;
+        $previousLesson = null;
+        $nextLesson = null;
+        $allLessons = collect();
+
+        // Flatten all lessons from all modules
+        foreach($course->modules as $module) {
+            foreach($module->lessons as $lessonItem) {
+                $allLessons->push($lessonItem);
+            }
+        }
+
+        if ($lesson) {
+            $currentLesson = $allLessons->firstWhere('id', $lesson);
+            
+            if ($currentLesson) {
+                $currentIndex = $allLessons->search(function($item) use ($currentLesson) {
+                    return $item->id === $currentLesson->id;
+                });
+                
+                $previousLesson = $currentIndex > 0 ? $allLessons[$currentIndex - 1] : null;
+                $nextLesson = $currentIndex < $allLessons->count() - 1 ? $allLessons[$currentIndex + 1] : null;
+            }
+        } else {
+            // Default to first lesson if available
+            $currentLesson = $allLessons->first();
+            $nextLesson = $allLessons->count() > 1 ? $allLessons[1] : null;
+        }
+
+        // Calculate progress
+        $totalLessons = $allLessons->count();
+        $completedLessons = 0; // TODO: Implement lesson completion tracking
+        $progress = $totalLessons > 0 ? round(($completedLessons / $totalLessons) * 100) : 0;
+
+        return view('courses.learn', compact(
+            'course',
+            'currentLesson',
+            'previousLesson', 
+            'nextLesson',
+            'progress',
+            'totalLessons',
+            'completedLessons'
+        ));
     }
 
     /**
