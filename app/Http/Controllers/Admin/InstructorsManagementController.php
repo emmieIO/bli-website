@@ -17,24 +17,58 @@ class InstructorsManagementController extends Controller
     public function __construct(protected InstructorService $instructorService){}
     public function index(){
         $instructors = $this->instructorService->fetchPaginatedApproved();
-        
 
-        return view('admin.instructors.index', compact("instructors"));
+
+        return \Inertia\Inertia::render('Admin/Instructors/Index', compact("instructors"));
     }
 
     public function showInstructor(InstructorProfile $instructorProfile){
         $application = $instructorProfile;
         return view("admin.instructors.view-application", compact("application"));
     }
+
+    public function edit(InstructorProfile $instructor){
+        $applicationStatuses = collect(\App\Enums\ApplicationStatus::cases())->map(function($status) {
+            return [
+                'value' => $status->value,
+                'name' => $status->name
+            ];
+        })->toArray();
+
+        return \Inertia\Inertia::render('Admin/Instructors/Edit', compact('instructor', 'applicationStatuses'));
+    }
+
     public function editInstructor(Request $request, InstructorProfile $instructor){
-        return view("admin.instructors.edit", compact("instructor"));
+        $applicationStatuses = collect(\App\Enums\ApplicationStatus::cases())->map(function($status) {
+            return [
+                'value' => $status->value,
+                'name' => $status->name
+            ];
+        })->toArray();
+
+        return \Inertia\Inertia::render('Admin/Instructors/Edit', compact('instructor', 'applicationStatuses'));
+    }
+
+    public function update(UpdateInstructorRequest $request, InstructorProfile $instructor){
+        $uploadedFile = $request->file("resume_path") ?? null;
+        $instructor = $this->instructorService->updateInstructor($request->all(), $instructor, $uploadedFile );
+        if($instructor){
+            return to_route('admin.instructors.index')->with([
+                "type" => "success",
+                "message" => "Instructor profile updated successfully."
+            ]);
+        }
+        return redirect()->back()->with([
+            "type"=> "error",
+            "message"=> "Failed to update instructor profile."
+            ]);
     }
 
     public function updateInstructor(UpdateInstructorRequest $request, InstructorProfile $instructor){
         $uploadedFile = $request->file("resume_path") ?? null;
         $instructor = $this->instructorService->updateInstructor($request->all(), $instructor, $uploadedFile );
         if($instructor){
-            return redirect()->back()->with([
+            return to_route('admin.instructors.index')->with([
                 "type" => "success",
                 "message" => "Instructor profile updated successfully."
             ]);

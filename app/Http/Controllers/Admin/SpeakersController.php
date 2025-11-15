@@ -21,14 +21,14 @@ class SpeakersController extends Controller
     {
         $this->authorize('viewAny', Speaker::class);
         $speakers = $this->speakerService->fetchSpeakers();
-        return view("admin.speakers.index", compact('speakers'));
+        return \Inertia\Inertia::render('Admin/Speakers/Index', compact('speakers'));
     }
 
     public function pendingSpeaker()
     {
         $this->authorize('viewAny', Speaker::class);
         $speakers = $this->speakerService->fetchSpeakers('pending');
-        return view("admin.speakers.pending-speaker", compact('speakers'));
+        return \Inertia\Inertia::render('Admin/Speakers/Pending', compact('speakers'));
     }
 
     public function activateSpeaker(Speaker $speaker)

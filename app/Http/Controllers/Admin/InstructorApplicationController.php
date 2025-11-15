@@ -18,7 +18,7 @@ class InstructorApplicationController extends Controller
         $instructorProfiles = InstructorProfile::with('user')
         // ->where('status', 'draft')
         ->get();
-        return view('admin.instructors.applications', compact('instructorProfiles'));
+        return \Inertia\Inertia::render('Admin/Instructors/Applications', compact('instructorProfiles'));
     }
 
     public function approve(InstructorProfile $application){

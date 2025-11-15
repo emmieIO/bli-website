@@ -12,13 +12,13 @@ class SpeakerInvitationController extends Controller
 
     public function index(){
         $invitations = $this->speakerService->getSpeakerInvites();
-        return view('user_dashboard.my-invitations', compact('invitations'));
+        return \Inertia\Inertia::render('MyInvitations/Index', compact('invitations'));
     }
 
     public function show(SpeakerInvite $invite){
         $invite->load('event');
         $event = $invite->event;
-        return view('user_dashboard.invite-respond', compact('invite', 'event'));
+        return \Inertia\Inertia::render('InviteResponse/Index', compact('invite', 'event'));
     }
 
     public function acceptInvitation(){

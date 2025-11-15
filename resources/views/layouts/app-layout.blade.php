@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" x-data="{ mobileOpen: false }" x-cloak data-theme="mintlify">
+<html lang="en" data-theme="mintlify">
 
 <head>
     <meta charset="UTF-8" />
@@ -16,7 +16,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.css">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <script src="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.js"></script>
-    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    {{-- Alpine.js removed - using vanilla JavaScript instead --}}
 
 
 </head>

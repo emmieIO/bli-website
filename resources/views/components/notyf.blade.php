@@ -1,5 +1,1 @@
-<script>
-    document.addEventListener("DOMContentLoaded", function () {
-       
-    })
-</script>
+{{-- This component was empty and unused - removed empty JavaScript --}}

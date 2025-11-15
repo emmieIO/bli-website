@@ -20,7 +20,17 @@ class User extends Authenticatable implements MustVerifyEmail
      *
      * @var list<string>
      */
-    protected $guarded = [];
+    protected $fillable = [
+        'name',
+        'email',
+        'password',
+        'phone',
+        'linkedin',
+        'website',
+        'headline',
+        'photo',
+        'email_verified_at',
+    ];
 
     /**
      * The attributes that should be hidden for serialization.
@@ -116,7 +126,7 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public function courseEnrollments()
     {
-        return $this->belongsToMany(Course::class, 'course_enrollments')
+        return $this->belongsToMany(Course::class, 'course_user')
             ->withTimestamps();
     }
 

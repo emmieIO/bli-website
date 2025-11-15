@@ -172,7 +172,7 @@
                                                 <a href="{{ asset('storage/' . $application->speaker->photo) }}"
                                                     target="_blank" rel="noopener" class="w-full h-full">
                                                     <img src="{{ asset('storage/' . $application->speaker->photo) }}"
-                                                        alt="Profile Photo" class="w-full h-full object-cover rounded-full">
+                                                        alt="{{ $application->speaker->name ?? 'Speaker' }} profile photo" class="w-full h-full object-cover rounded-full">
                                                 </a>
                                             @else
                                                 <i data-lucide="user" class="w-8 h-8 text-gray-400"></i>
@@ -217,7 +217,7 @@
                                 selected.</p>
                             <textarea id="bio" name="bio" rows="5"
                                 class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-colors resize-none"
-                                placeholder="Tell us about your professional background, achievements, and areas of expertise...">{!! old('bio', $application->speaker->bio ?? '') !!}</textarea>
+                                placeholder="Tell us about your professional background, achievements, and areas of expertise...">{{ old('bio', $application->speaker->bio ?? '') }}</textarea>
                             @error('bio')
                                 <p class="mt-2 text-sm text-red-600 font-medium">{{ $message }}</p>
                             @enderror
@@ -285,7 +285,7 @@
                                 specific and compelling.</p>
                             <textarea id="topic_description" name="topic_description" rows="8"
                                 class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-colors resize-none"
-                                placeholder="Describe your proposed session in detail, including key takeaways, target audience, and why this topic matters now...">{!! old('topic_description', $application->topic_description ?? '') !!}</textarea>
+                                placeholder="Describe your proposed session in detail, including key takeaways, target audience, and why this topic matters now...">{{ old('topic_description', $application->topic_description ?? '') }}</textarea>
                             @error('topic_description')
                                 <p class="mt-2 text-sm text-red-600 font-medium">{{ $message }}</p>
                             @enderror

@@ -142,8 +142,8 @@
                             </h2>
                         </div>
                         
-                        <div class="prose prose-lg max-w-none text-gray-700 leading-relaxed font-lato event-description">
-                            {!! $event->description !!}
+                                                <div class="prose max-w-none">
+                            {{ $event->description }}
                         </div>
                     </div>
 

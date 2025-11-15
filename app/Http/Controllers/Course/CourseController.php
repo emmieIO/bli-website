@@ -26,7 +26,7 @@ class CourseController extends Controller
         $this->authorize('viewAny', Course::class);
         $categories = Category::all();
         $courses = $this->courseService->fetchCourses();
-        return view("admin.courses.index", compact("categories", "courses"));
+        return \Inertia\Inertia::render('Admin/Courses/Index', compact("categories", "courses"));
     }
 
     public function builder(Course $course)

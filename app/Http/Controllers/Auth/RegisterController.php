@@ -6,6 +6,7 @@ use App\Contracts\Auth\UserServiceInterface;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\CreateUserRequest;
 use Illuminate\Http\Request;
+use Inertia\Inertia;
 
 class RegisterController extends Controller
 {
@@ -15,7 +16,7 @@ class RegisterController extends Controller
     }
     public function register()
     {
-        return view('auth.register');
+        return Inertia::render('Auth/Register');
     }
 
     public function store(CreateUserRequest $request)

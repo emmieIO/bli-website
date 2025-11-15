@@ -9,11 +9,24 @@ use Illuminate\Notifications\Notifiable;
 class SpeakerApplication extends Model
 {
     use Notifiable;
-    protected $guarded = [];
+
+    protected $fillable = [
+        'event_id',
+        'user_id',
+        'speaker_id',
+        'topic_title',
+        'topic_description',
+        'session_format',
+        'notes',
+        'status',
+        'feedback',
+        'reviewed_at',
+    ];
 
     protected $casts = [
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
+        'reviewed_at' => 'datetime',
         "session_format" => \App\Enums\SessionFormat::class,
     ];
 

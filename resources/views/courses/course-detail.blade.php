@@ -233,7 +233,7 @@
                         <div class="border border-gray-200 rounded-lg p-6">
                             <div class="flex items-start space-x-4">
                                 <img src="{{ $course->instructor->avatar_url ?? 'https://ui-avatars.com/api/?name='.urlencode($course->instructor->name).'&background=6366f1&color=fff&size=128' }}" 
-                                     alt="{{ $course->instructor->name }}" 
+                                     alt="{{ $course->instructor->name }} - Course Instructor" 
                                      class="w-16 h-16 rounded-full object-cover">
                                 <div class="flex-1">
                                     <h3 class="text-lg font-semibold text-gray-900 mb-1">{{ $course->instructor->name }}</h3>

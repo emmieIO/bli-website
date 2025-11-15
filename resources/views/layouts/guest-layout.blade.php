@@ -88,29 +88,24 @@
                 </li>
 
                 <!-- Join Us Dropdown -->
-                <li class="relative" x-data="{ open: false }" @mouseleave="open = false">
-                    <a href="#" @mouseenter="open = true" @click.prevent="open = !open"
-                        class="flex items-center gap-2 py-2 px-1 transition-all duration-300 group relative"
+                <li class="relative join-us-dropdown">
+                    <a href="#"
+                        class="flex items-center gap-2 py-2 px-1 transition-all duration-300 group relative dropdown-trigger"
                         style="color: #002147;">
                         <i class="fas fa-user-plus text-sm group-hover:scale-110 transition-transform duration-300"
                             style="color: #00a651;"></i>
                         <span>Join Us</span>
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1 transition-transform duration-300"
-                            :class="{ 'rotate-180': open }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg xmlns="http://www.w3.org/2000/svg"
+                            class="h-4 w-4 ml-1 transition-transform duration-300 dropdown-arrow" fill="none"
+                            viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7">
                             </path>
                         </svg>
                         <span class="absolute bottom-0 left-0 w-0 h-0.5 transition-all duration-300 group-hover:w-full"
                             style="background-color: #00a651;"></span>
                     </a>
-                    <ul x-show="open" x-transition:enter="transition ease-out duration-200"
-                        x-transition:enter-start="opacity-0 transform scale-95"
-                        x-transition:enter-end="opacity-100 transform scale-100"
-                        x-transition:leave="transition ease-in duration-150"
-                        x-transition:leave-start="opacity-100 transform scale-100"
-                        x-transition:leave-end="opacity-0 transform scale-95"
-                        class="absolute left-0 bg-white shadow-xl rounded-xl p-3 mt-3 w-64 border border-gray-100 z-50"
-                        @mouseenter="open = true" @mouseleave="open = false" style="display: none;">
+                    <ul class="absolute left-0 bg-white shadow-xl rounded-xl p-3 mt-3 w-64 border border-gray-100 z-50 dropdown-menu hidden opacity-0 scale-95 transition-all duration-200"
+                        style="display: none;">
                         <li>
                             <a href="{{ route('instructors.become-an-instructor') }}"
                                 class="flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-300 group/item hover:shadow-md"
@@ -317,10 +312,75 @@
     <script src="{{ asset('theme-assets/js/purecounter.js') }}"></script>
     <script src="{{ asset('theme-assets/js/main.js') }}"></script>
     <script>
+        // Mobile menu toggle
         const mobileMenuBtn = document.getElementById('mobile-menu-btn');
         const mobileMenu = document.getElementById('mobile-menu');
-        mobileMenuBtn.addEventListener('click', () => {
-            mobileMenu.classList.toggle('hidden');
+        if (mobileMenuBtn && mobileMenu) {
+            mobileMenuBtn.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+            });
+        }
+
+        // Dropdown functionality
+        document.addEventListener('DOMContentLoaded', function () {
+            const dropdown = document.querySelector('.join-us-dropdown');
+            if (dropdown) {
+                const trigger = dropdown.querySelector('.dropdown-trigger');
+                const menu = dropdown.querySelector('.dropdown-menu');
+                const arrow = dropdown.querySelector('.dropdown-arrow');
+
+                let isOpen = false;
+                let hoverTimeout;
+
+                function openDropdown() {
+                    if (hoverTimeout) clearTimeout(hoverTimeout);
+                    isOpen = true;
+                    menu.style.display = 'block';
+                    setTimeout(() => {
+                        menu.classList.remove('opacity-0', 'scale-95');
+                        menu.classList.add('opacity-100', 'scale-100');
+                        arrow.classList.add('rotate-180');
+                    }, 10);
+                }
+
+                function closeDropdown() {
+                    hoverTimeout = setTimeout(() => {
+                        isOpen = false;
+                        menu.classList.remove('opacity-100', 'scale-100');
+                        menu.classList.add('opacity-0', 'scale-95');
+                        arrow.classList.remove('rotate-180');
+                        setTimeout(() => {
+                            if (!isOpen) {
+                                menu.style.display = 'none';
+                            }
+                        }, 200);
+                    }, 100);
+                }
+
+                // Mouse events
+                trigger.addEventListener('mouseenter', openDropdown);
+                dropdown.addEventListener('mouseleave', closeDropdown);
+                menu.addEventListener('mouseenter', () => {
+                    if (hoverTimeout) clearTimeout(hoverTimeout);
+                });
+
+                // Click event for mobile
+                trigger.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    if (isOpen) {
+                        closeDropdown();
+                    } else {
+                        openDropdown();
+                    }
+                });
+
+                // Close dropdown when clicking outside
+                document.addEventListener('click', function (e) {
+                    if (!dropdown.contains(e.target)) {
+                        closeDropdown();
+                    }
+                });
+            }
         });
     </script>
 </body>

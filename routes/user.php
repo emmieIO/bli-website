@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth', 'verified'])->group(function () {
     // Main dashboard
-    Route::get('/dashboard', fn () => view('user_dashboard.index'))->name('user_dashboard');
+    Route::get('/dashboard', fn () => \Inertia\Inertia::render('Dashboard/Index'))->name('user_dashboard');
 
     // User's events management
     Route::get('/user/events', ShowMyEventsController::class)->name('user.events');

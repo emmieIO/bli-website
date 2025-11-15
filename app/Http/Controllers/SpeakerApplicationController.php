@@ -42,12 +42,12 @@ class SpeakerApplicationController extends Controller
     public function pendingApplications()
     {
         $applications = $this->service->fetchPendingSpeakerApplications();
-        return view("admin.speakers.speaker-application.pending", compact('applications'));
+        return \Inertia\Inertia::render('Admin/SpeakerApplications/Pending', compact('applications'));
     }
     public function approvedApplications()
     {
         $applications = $this->service->fetchApprovedSpeakerApplications();
-        return view("admin.speakers.speaker-application.approved", compact("applications"));
+        return \Inertia\Inertia::render('Admin/SpeakerApplications/Approved', compact("applications"));
     }
 
     public function reviewApplication(SpeakerApplication $application)
@@ -92,7 +92,18 @@ class SpeakerApplicationController extends Controller
 
     public function revokeApproval(Request $request, SpeakerApplication $application)
     {
-        dd($application);
+        $this->authorize('manageSpeakers', $application->event);
+
+        $application->update([
+            'status' => ApplicationStatus::PENDING->value,
+            'feedback' => null,
+            'reviewed_at' => null,
+        ]);
+
+        return redirect()->back()->with([
+            'type' => 'success',
+            'message' => 'Speaker application approval has been revoked successfully.'
+        ]);
     }
 
     /**
@@ -132,7 +143,7 @@ class SpeakerApplicationController extends Controller
      */
     public function inviteRespondView(Event $event, SpeakerInvite $invite)
     {
-        return view('user_dashboard.invite-respond', compact('event', 'invite'));
+        return \Inertia\Inertia::render('InviteResponse/Index', compact('event', 'invite'));
     }
 
     /**

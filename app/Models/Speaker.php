@@ -14,7 +14,17 @@ class Speaker extends Model
 {
     use HasFactory, Notifiable;
 
-    protected $guarded = [];
+    protected $fillable = [
+        'name',
+        'email',
+        'phone',
+        'bio',
+        'photo',
+        'organization',
+        'user_id',
+        'status',
+        'created_by',
+    ];
 
     protected $casts = [
         'status' => SpeakerStatus::class,

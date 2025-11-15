@@ -7,22 +7,32 @@ use App\Enums\Permissions\CoursePermissionsEnum;
 use App\Models\Course;
 use App\Models\User;
 use Illuminate\Auth\Access\Response;
+use Illuminate\Auth\Access\HandlesAuthorization;
 
 class CoursePolicy
 {
+    use HandlesAuthorization;
     /**
      * Determine whether the user can view any courses (Admin only).
      */
-    public function viewAny(User $user): bool
+    public function viewAny(?User $user): bool
     {
+        if (!$user) {
+            return false;
+        }
+        
         return $user->hasPermissionTo(CoursePermissionsEnum::VIEW_ANY->value);
     }
 
     /**
      * Determine whether the user can view a specific course.
      */
-    public function view(User $user, Course $course): bool
+    public function view(?User $user, Course $course): bool
     {
+        if (!$user) {
+            return false;
+        }
+        
         // Admin can view any course
         if ($user->hasPermissionTo(CoursePermissionsEnum::VIEW_ANY->value)) {
             return true;
@@ -44,16 +54,24 @@ class CoursePolicy
     /**
      * Determine whether the user can create courses.
      */
-    public function create(User $user): bool
+    public function create(?User $user): bool
     {
+        if (!$user) {
+            return false;
+        }
+        
         return $user->hasPermissionTo(CoursePermissionsEnum::CREATE->value);
     }
 
     /**
      * Determine whether the user can update a course.
      */
-    public function update(User $user, Course $course): bool
+    public function update(?User $user, Course $course): bool
     {
+        if (!$user) {
+            return false;
+        }
+        
         // Admin can update any course
         if ($user->hasPermissionTo(CoursePermissionsEnum::UPDATE_ANY->value)) {
             return true;
@@ -74,8 +92,12 @@ class CoursePolicy
     /**
      * Determine whether the user can delete a course.
      */
-    public function delete(User $user, Course $course): bool
+    public function delete(?User $user, Course $course): bool
     {
+        if (!$user) {
+            return false;
+        }
+        
         // Admin can delete any course
         if ($user->hasPermissionTo(CoursePermissionsEnum::DELETE_ANY->value)) {
             return true;
@@ -93,8 +115,12 @@ class CoursePolicy
     /**
      * Determine whether the user can submit a course for review.
      */
-    public function submitForReview(User $user, Course $course): bool
+    public function submitForReview(?User $user, Course $course): bool
     {
+        if (!$user) {
+            return false;
+        }
+        
         return $user->hasPermissionTo(CoursePermissionsEnum::SUBMIT_REVIEW->value) 
             && $course->instructor_id === $user->id
             && in_array($course->status, [ApplicationStatus::DRAFT, ApplicationStatus::REJECTED]);
@@ -103,8 +129,12 @@ class CoursePolicy
     /**
      * Determine whether the user can approve a course.
      */
-    public function approve(User $user, Course $course): bool
+    public function approve(?User $user, Course $course): bool
     {
+        if (!$user) {
+            return false;
+        }
+        
         return $user->hasPermissionTo(CoursePermissionsEnum::APPROVE->value)
             && $course->status === ApplicationStatus::UNDER_REVIEW;
     }
@@ -112,8 +142,12 @@ class CoursePolicy
     /**
      * Determine whether the user can reject a course.
      */
-    public function reject(User $user, Course $course): bool
+    public function reject(?User $user, Course $course): bool
     {
+        if (!$user) {
+            return false;
+        }
+        
         return $user->hasPermissionTo(CoursePermissionsEnum::REJECT->value)
             && $course->status === ApplicationStatus::UNDER_REVIEW;
     }
@@ -121,8 +155,12 @@ class CoursePolicy
     /**
      * Determine whether the user can publish a course.
      */
-    public function publish(User $user, Course $course): bool
+    public function publish(?User $user, Course $course): bool
     {
+        if (!$user) {
+            return false;
+        }
+        
         return $user->hasPermissionTo(CoursePermissionsEnum::PUBLISH->value)
             && $course->status === ApplicationStatus::APPROVED;
     }
@@ -130,17 +168,25 @@ class CoursePolicy
     /**
      * Determine whether the user can unpublish a course.
      */
-    public function unpublish(User $user, Course $course): bool
+    public function unpublish(?User $user, Course $course): bool
     {
+        if (!$user) {
+            return false;
+        }
+        
         return $user->hasPermissionTo(CoursePermissionsEnum::UNPUBLISH->value)
-            && $course->status === ApplicationStatus::APPROVED; // Assuming published courses have approved status
+            && $course->status === ApplicationStatus::APPROVED;
     }
 
     /**
      * Determine whether the user can enroll in a course.
      */
-    public function enroll(User $user, Course $course): bool
+    public function enroll(?User $user, Course $course): bool
     {
+        if (!$user) {
+            return false;
+        }
+        
         return $user->hasPermissionTo(CoursePermissionsEnum::ENROLL->value)
             && $course->status === ApplicationStatus::APPROVED
             && !$course->students()->where('user_id', $user->id)->exists();
@@ -149,16 +195,24 @@ class CoursePolicy
     /**
      * Determine whether the user can restore the model.
      */
-    public function restore(User $user, Course $course): bool
+    public function restore(?User $user, Course $course): bool
     {
+        if (!$user) {
+            return false;
+        }
+        
         return $user->hasPermissionTo(CoursePermissionsEnum::DELETE_ANY->value);
     }
 
     /**
      * Determine whether the user can permanently delete the model.
      */
-    public function forceDelete(User $user, Course $course): bool
+    public function forceDelete(?User $user, Course $course): bool
     {
+        if (!$user) {
+            return false;
+        }
+        
         return $user->hasPermissionTo(CoursePermissionsEnum::DELETE_ANY->value);
     }
 }

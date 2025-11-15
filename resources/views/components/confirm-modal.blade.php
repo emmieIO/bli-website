@@ -30,7 +30,7 @@
                 @if ($icon)
                     <div id="{{ $id }}-icon"
                         class="mx-auto flex items-center justify-center h-16 w-16 rounded-2xl bg-gradient-to-br from-blue-50 to-blue-100 text-blue-600 shadow-sm">
-                        {!! $icon !!}
+                        <i data-lucide="{{ $icon }}" class="w-8 h-8"></i>
                     </div>
                 @endif
 

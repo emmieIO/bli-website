@@ -47,10 +47,10 @@
                                 <span class="text-gray-700 text-sm">{{ $requirement->requirement }}</span>
                                 <div class="flex items-center space-x-2">
                                     <form action="{{ route('admin.requirements.destroy', [$course, $requirement]) }}"
-                                        method="post" x-data="{ loading: false }">
+                                        method="post" class="delete-form">
                                         @csrf
                                         @method('DELETE')
-                                        <button x-bind:disabled="loading"
+                                        <button type="submit"
                                             class="text-gray-400 text-sm cursor-pointer flex items-center space-x-2">
                                             <i data-lucide="x" class="w-4 h-4 mr-1"></i>
                                         </button>
@@ -61,14 +61,13 @@
                     @endif
                 </ul>
                 <form action="{{ route('admin.requirements.store', $course) }}" method="post" id="requirements-form"
-                    x-data="{ loading: false }" x-on:submit="loading = true" class="flex space-x-2">
+                    class="flex space-x-2">
                     @csrf
                     <input type="text" name="requirement" placeholder="Add new requirement"
                         class="flex-1 rounded-lg border focus:ring-2 focus:ring-orange-600 border-orange-600 p-2 text-sm text-gray-900">
-                    <button type="submit" x-bind:disabled="loading"
+                    <button type="submit" id="requirements-submit"
                         class="px-4 py-2 text-sm font-medium disabled:bg-orange-600/50 text-white bg-orange-600 hover:bg-orange-700 rounded-lg">
-                        <span x-show="!loading">+ Add</span>
-                        <span x-show="loading">Please wait…</span>
+                        <span>+ Add</span>
                     </button>
                 </form>
                 <div>
@@ -88,10 +87,10 @@
                                 <span class="text-gray-700 text-sm">{{ $outcome->outcome }}</span>
                                 <div class="flex items-center space-x-2">
                                     <form action="{{ route('admin.outcomes.destroy', [$course, $outcome]) }}" method="post"
-                                        x-data="{ loading: false }">
+                                        class="delete-form">
                                         @csrf
                                         @method('DELETE')
-                                        <button x-bind:disabled="loading"
+                                        <button type="submit"
                                             class="text-gray-400 text-sm cursor-pointer flex items-center space-x-2">
                                             <i data-lucide="x" class="w-4 h-4 mr-1"></i>
                                         </button>
@@ -101,15 +100,14 @@
                         @endforeach
                     @endif
                 </ul>
-                <form action="{{ route('admin.outcomes.store', $course) }}" method="post" id="outcomes-form"
-                    x-data="{ loading: false }" x-on:submit="loading = true" class="flex space-x-2">
+                <form action="{{ route('admin.outcomes.store', $course) }}" method="POST" id="outcomes-form"
+                    class="flex space-x-2">
                     @csrf
-                    <input type="text" name="outcome" placeholder="Add new outcome"
+                    <input type="text" name="outcome" placeholder="Add learning outcome"
                         class="flex-1 rounded-lg border focus:ring-2 focus:ring-orange-600 border-orange-600 p-2 text-sm text-gray-900">
-                    <button type="submit" x-bind:disabled="loading"
+                    <button type="submit" id="outcomes-submit"
                         class="px-4 py-2 text-sm font-medium disabled:bg-orange-600/50 text-white bg-orange-600 hover:bg-orange-700 rounded-lg">
-                        <span x-show="!loading">+ Add</span>
-                        <span x-show="loading">Please wait…</span>
+                        <span>+ Add</span>
                     </button>
                 </form>
                 <div>
@@ -122,16 +120,14 @@
 
         <!-- Add Module (Static Form - No Action) -->
         <div class="mb-6">
-            <form action="{{ route('admin.modules.store', $course) }}" method="POST" x-data="{ loading: false }"
-                x-on:submit="loading = true"
+            <form action="{{ route('admin.modules.store', $course) }}" method="POST" id="modules-form"
                 class="flex flex-col sm:flex-row sm:items-center sm:space-x-3 space-y-3 sm:space-y-0">
                 @csrf
                 <input type="text" name="title" placeholder="New Module Title"
                     class="w-full sm:w-auto flex-1 rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-orange-600 focus:ring-orange-600">
-                <button type="submit" x-bind:disabled="loading"
+                <button type="submit" id="modules-submit"
                     class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-white bg-orange-600 rounded-lg cursor-pointer disabled:cursor-not-allowed">
-                    <span x-show="!loading">+ Add Module</span>
-                    <span x-show="loading">Please wait…</span>
+                    <span>+ Add Module</span>
                 </button>
             </form>
             @error('title')
@@ -144,19 +140,19 @@
             @if ($course->modules->count())
                 @foreach ($course->modules as $module)
                     {{-- section --}}
-                    <div x-data="{ open: false }" class="bg-white border border-gray-200 rounded-lg shadow-sm">
+                    <div class="bg-white border border-gray-200 rounded-lg shadow-sm module-accordion">
                         <!-- Accordion Header -->
-                        <div class="flex items-center justify-between p-4 cursor-pointer" @click="open = !open">
+                        <div class="flex items-center justify-between p-4 cursor-pointer accordion-header">
                             <h2 class="text-lg font-semibold text-gray-800">{{ $module->title }}</h2>
                             <div class="flex items-center space-x-2">
                                 <!-- Toggle Icon -->
-                                <svg x-show="!open" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500" fill="none"
-                                    viewBox="0 0 24 24" stroke="currentColor">
+                                <svg class="h-5 w-5 text-gray-500 toggle-icon-closed" xmlns="http://www.w3.org/2000/svg"
+                                    fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                                 </svg>
-                                <svg x-show="open" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500" fill="none"
-                                    viewBox="0 0 24 24" stroke="currentColor">
+                                <svg class="h-5 w-5 text-gray-500 toggle-icon-open hidden" xmlns="http://www.w3.org/2000/svg"
+                                    fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 12H6" />
                                 </svg>
 
@@ -176,7 +172,7 @@
                         </div>
 
                         <!-- Accordion Content -->
-                        <div x-show="open" x-collapse class="px-4 pb-4">
+                        <div class="px-4 pb-4 accordion-content hidden">
                             <ul class="space-y-2">
                                 @if ($module->lessons->count())
                                     @foreach ($module->lessons as $lesson)
@@ -241,4 +237,70 @@
             @endif
         </div>
     </div>
+
+    @push('scripts')
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                // Initialize Lucide icons
+                if (typeof lucide !== 'undefined') {
+                    lucide.createIcons();
+                }
+
+                // Form loading states
+                function setupFormLoadingState(formId, buttonId) {
+                    const form = document.getElementById(formId);
+                    const button = document.getElementById(buttonId);
+
+                    if (form && button) {
+                        form.addEventListener('submit', function () {
+                            button.disabled = true;
+                            button.innerHTML = '<span>Please wait…</span>';
+                        });
+                    }
+                }
+
+                // Setup loading states for all forms
+                setupFormLoadingState('requirements-form', 'requirements-submit');
+                setupFormLoadingState('outcomes-form', 'outcomes-submit');
+                setupFormLoadingState('modules-form', 'modules-submit');
+
+                // Delete form confirmations
+                const deleteForms = document.querySelectorAll('.delete-form');
+                deleteForms.forEach(form => {
+                    form.addEventListener('submit', function (e) {
+                        if (!confirm('Are you sure you want to delete this item?')) {
+                            e.preventDefault();
+                        }
+                    });
+                });
+
+                // Accordion functionality for modules
+                const accordions = document.querySelectorAll('.module-accordion');
+                accordions.forEach(accordion => {
+                    const header = accordion.querySelector('.accordion-header');
+                    const content = accordion.querySelector('.accordion-content');
+                    const closedIcon = accordion.querySelector('.toggle-icon-closed');
+                    const openIcon = accordion.querySelector('.toggle-icon-open');
+
+                    if (header && content && closedIcon && openIcon) {
+                        header.addEventListener('click', function () {
+                            const isHidden = content.classList.contains('hidden');
+
+                            if (isHidden) {
+                                // Open accordion
+                                content.classList.remove('hidden');
+                                closedIcon.classList.add('hidden');
+                                openIcon.classList.remove('hidden');
+                            } else {
+                                // Close accordion
+                                content.classList.add('hidden');
+                                closedIcon.classList.remove('hidden');
+                                openIcon.classList.add('hidden');
+                            }
+                        });
+                    }
+                });
+            });
+        </script>
+    @endpush
 </x-app-layout>

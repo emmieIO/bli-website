@@ -10,6 +10,7 @@ use App\Services\Auth\AuthService;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Inertia\Inertia;
 
 class AuthenticatedController extends Controller
 {
@@ -18,7 +19,7 @@ class AuthenticatedController extends Controller
     ){}
     public function login()
     {
-        return view("auth.login");
+        return Inertia::render('Auth/Login');
     }
     public function authenticate(LoginRequest $request)
     {
@@ -49,12 +50,12 @@ class AuthenticatedController extends Controller
                 "type" => 'info'
             ]);
         }
-        return view('auth.verify-email');
+        return Inertia::render('Auth/VerifyEmail');
     }
 
     public function showProfile(){
-        $user = auth()->user();
-        return view("user_dashboard.profile", compact('user'));
+        $user = auth()->user()->load('instructorProfile');
+        return Inertia::render("Profile/Index", compact('user'));
     }
 
     public function updatePhoto(Request $request){
@@ -128,7 +129,7 @@ class AuthenticatedController extends Controller
         $current_password = $request->validate([
             'current_password_destroy' => ['required', 'current_password'],
         ]);
-        if($this->authService->distroyAccount($request)){
+        if($this->authService->destroyAccount($request)){
             return redirect(route('homepage'))->with([
                 'type' => 'success',
                 'message' => 'Account deleted successfully.'
