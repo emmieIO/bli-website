@@ -12,6 +12,7 @@ use App\Services\Course\CourseService;
 use App\Services\Instructors\InstructorStatsService;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
+use Inertia\Inertia;
 
 class InstructorCourseController extends Controller
 {
@@ -32,13 +33,14 @@ class InstructorCourseController extends Controller
         //  Average rating
         $courses = $this->courseService->fetchInstructorCourses($instructorId);
         $instructorStats = $this->instructorStatsService->getInstructorStats($instructorId);
-        return view("instructors.courses.index", compact("courses", "instructorStats"));
+        return Inertia::render("Instructor/Courses/Index", compact("courses", "instructorStats"));
     }
 
     public function create()
     {
         $categories = $this->courseCategoryService->fetchAll();
-        return view("instructors.courses.create-course", compact("categories"));
+        $levels = \App\Enums\CourseLevel::options();
+        return \Inertia\Inertia::render('Instructor/Courses/Create', compact('categories', 'levels'));
     }
 
     public function store(CreateCourseRequest $request)
@@ -84,26 +86,24 @@ class InstructorCourseController extends Controller
     public function edit(Course $course)
     {
         $this->authorize('update', $course);
-        
+
         $categories = $this->courseCategoryService->fetchAll();
-        return view('instructors.courses.edit', compact('course', 'categories'));
+        $levels = \App\Enums\CourseLevel::options();
+        return \Inertia\Inertia::render('Instructor/Courses/Edit', compact('course', 'categories', 'levels'));
     }
 
     public function update(CreateCourseRequest $request, Course $course)
     {
         $this->authorize('update', $course);
-        
+
         try {
-            // Handle file upload if provided
-            $file = $request->file('image');
-            $data = $request->validated();
-            
-            if ($file) {
-                $course = $this->courseService->updateCourse($course, $data, $file);
-            } else {
-                $course = $this->courseService->updateCourse($course, $data);
-            }
-            
+            $course = $this->courseService->updateCourse(
+                $course,
+                $request->validated(),
+                $request->file('thumbnail_path'),
+                $request->file('preview_video')
+            );
+
             return redirect()->route('instructor.courses.index')->with([
                 "message" => "Course updated successfully!",
                 "type" => "success"
@@ -119,13 +119,19 @@ class InstructorCourseController extends Controller
     public function builder(Course $course)
     {
         $this->authorize('update', $course);
-        
-        // Load course with modules and lessons for the builder
-        $course->load(['modules.lessons' => function($query) {
-            $query->orderBy('order');
-        }]);
-        
-        return view('instructors.courses.builder', compact('course'));
+
+        // Load course with modules, lessons, requirements, and outcomes
+        $course->load([
+            'modules.lessons' => function($query) {
+                $query->orderBy('order');
+            },
+            'requirements',
+            'outcomes',
+            'category',
+            'instructor'
+        ]);
+
+        return \Inertia\Inertia::render('Instructor/Courses/Builder', compact('course'));
     }
 
     public function submitForReview(Course $course)

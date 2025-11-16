@@ -24,7 +24,7 @@ class LessonController extends Controller
         $this->authorize('update', $module->course);
 
         $lessontypes = LessonType::options();
-        return view("admin.courses.addLesson", compact("lessontypes", "module"));
+        return \Inertia\Inertia::render('Admin/Courses/AddLesson', compact('lessontypes', 'module'));
     }
 
     /**

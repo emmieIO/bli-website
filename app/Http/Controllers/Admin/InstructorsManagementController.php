@@ -95,7 +95,7 @@ class InstructorsManagementController extends Controller
     public function fetchApplicationLogs(){
         $logs = $this->instructorService->fetchApplicationLogs();
 
-        return view("admin.instructors.application-logs", compact('logs'));
+        return \Inertia\Inertia::render('Admin/Instructors/ApplicationLogs', compact('logs'));
     }
 
     public function deleteApplicationLog(ApplicationLog $log){

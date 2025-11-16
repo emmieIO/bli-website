@@ -21,7 +21,7 @@ class ProgrammeController extends Controller
     {
         $searchQuery = $request->input('q', null);
         $events = $this->eventService->getPublishedEvents($searchQuery);
-        return view("upcoming_events.index", [
+        return \Inertia\Inertia::render("Events/Index", [
             'upcomingEvents' => Event::upcoming()->count(),
             'ongoingEvents' => Event::ongoing()->count(),
             'expiredEvents'=> Event::ended()->count(),
@@ -52,7 +52,17 @@ class ProgrammeController extends Controller
     {
         try {
             $event = $this->programRepository->findProgramsBySlug($slug);
-            return view('upcoming_events.show-event',compact("event"));
+
+            // Generate signed route for speaker application if applicable
+            $signedSpeakerRoute = null;
+            if ($event->is_allowing_application) {
+                $signedSpeakerRoute = \URL::signedRoute('event.speakers.apply', [$event]);
+            }
+
+            return \Inertia\Inertia::render("Events/Show", [
+                'event' => $event,
+                'signed_speaker_route' => $signedSpeakerRoute,
+            ]);
         } catch (\Exception $e) {
             abort(404,"Event does not exist");
         }

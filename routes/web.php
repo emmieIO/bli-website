@@ -4,13 +4,20 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ProgrammeController;
 use App\Http\Controllers\SpeakerUserController;
 use App\Http\Controllers\Instructors\InstructorsController;
+use App\Http\Controllers\ContactController;
+use App\Http\Controllers\NewsletterController;
 use Illuminate\Support\Facades\Route;
 
 // Public pages
 Route::get('/', [HomeController::class, 'index'])->name('homepage');
 Route::get('/privacy', fn() => view('legal.privacy'))->name('privacy-policy');
 Route::get('/agreement-terms', fn() => view('legal.terms'))->name('terms-of-service');
-Route::get('/contact', fn() => view('contact.contact'))->name('contact-us');
+Route::get('/contact', fn() => \Inertia\Inertia::render('Contact'))->name('contact-us');
+Route::post('/contact', [ContactController::class, 'submit'])->name('contact.submit');
+
+// Newsletter
+Route::post('/newsletter/subscribe', [NewsletterController::class, 'subscribe'])->name('newsletter.subscribe');
+Route::post('/newsletter/unsubscribe', [NewsletterController::class, 'unsubscribe'])->name('newsletter.unsubscribe');
 
 // Public events browsing
 Route::get('/events', [ProgrammeController::class, 'index'])->name('events.index');

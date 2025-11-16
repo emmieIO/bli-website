@@ -48,7 +48,7 @@ class SpeakersController extends Controller
     public function create()
     {
         $this->authorize('create', Speaker::class);
-        return view("admin.speakers.create-speaker");
+        return \Inertia\Inertia::render('Admin/Speakers/Create');
     }
 
     public function store(CreateSpeakerRequest $request)
@@ -71,7 +71,7 @@ class SpeakersController extends Controller
 
     public function show(Speaker $speaker)
     {
-        return view("admin.speakers.view-speaker", compact("speaker"));
+        return \Inertia\Inertia::render('Admin/Speakers/View', compact('speaker'));
     }
 
     public function viewSpeakerProfile(Speaker $speaker)
@@ -81,7 +81,7 @@ class SpeakersController extends Controller
 
     public function edit(Speaker $speaker)
     {
-        return view("admin.speakers.edit-speaker", compact("speaker"));
+        return \Inertia\Inertia::render('Admin/Speakers/Edit', compact('speaker'));
     }
 
     public function update(UpdateSpeakerRequest $request, Speaker $speaker)
@@ -123,7 +123,7 @@ class SpeakersController extends Controller
     {
         $speakers = $this->speakerService->fetchSpeakers();
         $assignedSpeakerIds = $event->speakers()->pluck('speakers.id')->toArray();
-        return view("admin.speakers.assign-speaker", compact("event", 'speakers', "assignedSpeakerIds"));
+        return \Inertia\Inertia::render('Admin/Speakers/AssignSpeaker', compact('event', 'speakers', 'assignedSpeakerIds'));
     }
 
 }

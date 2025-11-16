@@ -78,18 +78,18 @@ class InstructorService
                     'name' => $data['name'],
                     'email' => $data['email'],
                     'phone' => $data['phone'],
+                    'headline' => $data['headline'],
+                    'linkedin_url' => $data['linkedin_url'],
+                    'website' => $data['website'],
                 ]);
 
                 // upddate the instructor profile if updated
                 $instructorProfile->update([
                     'bio' => $data['bio'],
-                    'headline' => $data['headline'],
                     'teaching_history' => $data['teaching_history'],
                     'experience_years' => $data['experience_years'],
                     'intro_video_url' => $data['intro_video_url'],
                     'area_of_expertise' => $data['area_of_expertise'],
-                    'linkedin_url' => $data['linkedin_url'],
-                    'website' => $data['website'],
                     'resume_path' => $newPath,
                     'status' => $data['application_status'],
                     'is_approved' => $data['is_approved'],

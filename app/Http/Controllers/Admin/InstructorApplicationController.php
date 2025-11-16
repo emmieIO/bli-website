@@ -52,7 +52,7 @@ class InstructorApplicationController extends Controller
     }
 
     public function view(InstructorProfile $application){
-        return view("admin.instructors.view-application", compact('application'));
+        return \Inertia\Inertia::render('Admin/Instructors/ViewApplication', compact('application'));
     }
 
     public function viewOwnApplication(User $user){

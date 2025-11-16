@@ -20,11 +20,11 @@ class UserCourseController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(): View
+    public function index()
     {
         $courses = $this->courseRepository->getPublishedCourses();
 
-        return view('courses.index', compact('courses'));
+        return \Inertia\Inertia::render('Courses/Index', compact('courses'));
     }
 
     /**
@@ -46,7 +46,7 @@ class UserCourseController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Course $course): View
+    public function show(Course $course)
     {
         $courseWithRelations = $this->courseRepository->getWithRelations($course->id, [
             'instructor',
@@ -54,21 +54,22 @@ class UserCourseController extends Controller
             'outcomes',
             'requirements',
             'students',
+            'category',
         ]);
 
-        return view('courses.course-detail', ['course' => $courseWithRelations]);
+        return \Inertia\Inertia::render('Courses/CourseDetail', ['course' => $courseWithRelations]);
     }
 
     /**
      * Course learning interface for enrolled students
      */
-    public function learn(Course $course, $lesson = null): View|RedirectResponse
+    public function learn(Course $course, $lesson = null)
     {
         $user = auth()->user();
 
         // Check enrollment
         if (! $user || ! $this->courseRepository->isUserEnrolled($user, $course)) {
-            return redirect()->route('courses.show', $course)
+            return redirect()->route('courses.show', $course->slug)
                 ->with('error', 'You must be enrolled in this course to access the learning interface.');
         }
 
@@ -77,6 +78,7 @@ class UserCourseController extends Controller
             'modules.lessons' => function ($query) {
                 $query->orderBy('order_index');
             },
+            'outcomes',
         ]);
 
         // Get course progress
@@ -85,7 +87,7 @@ class UserCourseController extends Controller
         // Handle lesson navigation logic
         $lessonNavigation = $this->buildLessonNavigation($courseWithLessons, $lesson);
 
-        return view('courses.learn', [
+        return \Inertia\Inertia::render('Courses/Learn', [
             'course' => $courseWithLessons,
             'currentLesson' => $lessonNavigation['current'],
             'previousLesson' => $lessonNavigation['previous'],

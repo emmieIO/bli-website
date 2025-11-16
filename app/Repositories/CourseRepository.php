@@ -45,8 +45,8 @@ class CourseRepository implements CourseRepositoryInterface
 
     public function getPublishedCourses(): Collection
     {
-        return Course::where('status', 'published')
-            ->with(['instructor', 'modules.lessons'])
+        return Course::whereIn('status', ['published', 'draft']) // Temporarily include draft for testing
+            ->with(['instructor', 'category', 'modules.lessons'])
             ->orderBy('created_at', 'desc')
             ->get();
     }

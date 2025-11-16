@@ -7,12 +7,12 @@ interface User {
     name: string;
     email: string;
     phone?: string;
+    headline: string;
 }
 
 interface Instructor {
     id: number;
     application_id: string;
-    headline: string;
     created_at: string;
     deleted_at?: string;
     user: User;
@@ -278,7 +278,7 @@ export default function InstructorsIndex({ instructors }: InstructorsProps) {
                                             {/* Headline */}
                                             <td className="px-6 py-4">
                                                 <div className="text-sm text-gray-900 font-montserrat line-clamp-2">
-                                                    {instructor.headline}
+                                                    {instructor.user.headline}
                                                 </div>
                                             </td>
 

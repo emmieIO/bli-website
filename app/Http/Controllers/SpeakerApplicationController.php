@@ -52,7 +52,7 @@ class SpeakerApplicationController extends Controller
 
     public function reviewApplication(SpeakerApplication $application)
     {
-        return view("admin.speakers.speaker-application.review", compact('application'));
+        return \Inertia\Inertia::render('Admin/SpeakerApplications/Review', compact('application'));
     }
 
     public function approveApplication(SpeakerApplication $application)

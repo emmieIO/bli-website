@@ -9,20 +9,20 @@ interface User {
     name: string;
     email: string;
     phone: string;
+    headline: string;
+    linkedin_url: string;
+    website: string;
+    resume_path: string;
 }
 
 interface InstructorProfile {
     id: number;
     user: User;
-    headline: string;
     bio: string;
     experience_years: number;
     area_of_expertise: string;
     teaching_history: string;
     intro_video_url: string;
-    linkedin_url: string;
-    website: string;
-    resume_path: string;
     status: string;
 }
 
@@ -58,14 +58,14 @@ export default function EditInstructor({ instructor, applicationStatuses }: Edit
         name: instructor.user.name || '',
         email: instructor.user.email || '',
         phone: instructor.user.phone || '',
-        headline: instructor.headline || '',
+        headline: instructor.user.headline || '',
         bio: instructor.bio || '',
         experience_years: instructor.experience_years?.toString() || '0',
         area_of_expertise: instructor.area_of_expertise || '',
         teaching_history: instructor.teaching_history || '',
         intro_video_url: instructor.intro_video_url || '',
-        linkedin_url: instructor.linkedin_url || '',
-        website: instructor.website || '',
+        linkedin_url: instructor.user.linkedin_url || '',
+        website: instructor.user.website || '',
         application_status: instructor.status || '',
     });
     const [resumeFile, setResumeFile] = useState<File | null>(null);
@@ -115,8 +115,8 @@ export default function EditInstructor({ instructor, applicationStatuses }: Edit
                 {/* Header Section */}
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
                     <div className="flex items-center gap-3">
-                        <div className="p-3 rounded-lg bg-[#00275E]/10">
-                            <i className="fas fa-user w-6 h-6 text-[#00275E]"></i>
+                        <div className="p-3 rounded-lg bg-[#002147]/10">
+                            <i className="fas fa-user w-6 h-6 text-[#002147]"></i>
                         </div>
                         <div>
                             <h1 className="text-2xl md:text-3xl font-extrabold text-gray-900">Edit Instructor Profile</h1>
@@ -127,7 +127,7 @@ export default function EditInstructor({ instructor, applicationStatuses }: Edit
                     {/* Back Button */}
                     <Link
                         href={route('admin.instructors.index')}
-                        className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#00275E] transition"
+                        className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#002147] transition"
                     >
                         <i className="fas fa-arrow-left w-4 h-4 mr-2"></i>
                         Back
@@ -302,9 +302,9 @@ export default function EditInstructor({ instructor, applicationStatuses }: Edit
                                         id="resume_path"
                                         accept=".pdf,.doc,.docx"
                                         onChange={handleFileChange}
-                                        className="block w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#00275E] focus:border-[#00275E]
+                                        className="block w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#002147] focus:border-[#002147]
                                             file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium
-                                            file:bg-[#00275E] file:text-white hover:file:bg-[#001a44] transition"
+                                            file:bg-[#002147] file:text-white hover:file:bg-[#001a44] transition"
                                     />
                                     {instructor.resume_path && (
                                         <p className="mt-2 text-xs text-gray-600">
@@ -312,7 +312,7 @@ export default function EditInstructor({ instructor, applicationStatuses }: Edit
                                             <a
                                                 href={`/storage/${instructor.resume_path}`}
                                                 target="_blank"
-                                                className="underline hover:text-[#00275E]"
+                                                className="underline hover:text-[#002147]"
                                             >
                                                 View Resume
                                             </a>
@@ -332,7 +332,7 @@ export default function EditInstructor({ instructor, applicationStatuses }: Edit
                                         name="application_status"
                                         value={formData.application_status}
                                         onChange={handleInputChange}
-                                        className="block w-full p-3 text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#00275E] focus:border-[#00275E] transition"
+                                        className="block w-full p-3 text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#002147] focus:border-[#002147] transition"
                                     >
                                         {applicationStatuses.map((status) => (
                                             <option key={status.value} value={status.value}>
@@ -359,7 +359,7 @@ export default function EditInstructor({ instructor, applicationStatuses }: Edit
                             <button
                                 type="submit"
                                 disabled={isSubmitting}
-                                className="px-6 py-2.5 text-sm font-medium text-white bg-[#00275E] rounded-lg hover:bg-[#001a44] focus:ring-4 focus:ring-blue-300 focus:outline-none transition flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
+                                className="px-6 py-2.5 text-sm font-medium text-white bg-[#002147] rounded-lg hover:bg-[#001a44] focus:ring-4 focus:ring-blue-300 focus:outline-none transition flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                                 <i className="fas fa-check w-4 h-4 mr-2"></i>
                                 {isSubmitting ? 'Updating...' : 'Update Instructor Profile'}

@@ -1,11 +1,13 @@
 import { PropsWithChildren, useState } from 'react';
 import { Link, router, usePage } from '@inertiajs/react';
+import { ToastContainer, useToastNotifications } from '@/Components/Toast';
 
 interface SideLink {
     title: string;
     icon: string;
     route?: string;
     permission?: string | string[];
+    exclude_permission?: string | string[];
     variant?: string;
     children?: Array<{
         title: string;
@@ -21,6 +23,9 @@ interface DashboardLayoutProps extends PropsWithChildren {
 export default function DashboardLayout({ children, sideLinks }: DashboardLayoutProps) {
     const { auth } = usePage().props as any;
     const user = auth?.user;
+
+    // Toast notifications
+    useToastNotifications();
 
     // Fallback to empty array if sideLinks is undefined
     const links = sideLinks || [];
@@ -44,6 +49,24 @@ export default function DashboardLayout({ children, sideLinks }: DashboardLayout
         return permissions.some(p => user.permissions.includes(p));
     };
 
+    const hasExcludedPermission = (excludePermission?: string | string[]) => {
+        if (!excludePermission) return false;
+        if (!user?.permissions) return false;
+
+        const excludePermissions = Array.isArray(excludePermission) ? excludePermission : [excludePermission];
+        return excludePermissions.some(p => user.permissions.includes(p));
+    };
+
+    const shouldShowLink = (link: SideLink) => {
+        // Check if user has required permissions
+        if (!hasPermission(link.permission)) return false;
+
+        // Check if user has excluded permissions (should hide if they do)
+        if (hasExcludedPermission(link.exclude_permission)) return false;
+
+        return true;
+    };
+
     const logout = (e: React.FormEvent) => {
         e.preventDefault();
         router.post(route('logout'));
@@ -58,6 +81,9 @@ export default function DashboardLayout({ children, sideLinks }: DashboardLayout
 
     return (
         <div className="min-h-screen bg-gray-50">
+            {/* Toast Notifications */}
+            <ToastContainer />
+
             {/* Sidebar */}
             <aside
                 className={`fixed top-0 left-0 z-40 w-64 h-screen transition-transform ${
@@ -91,7 +117,7 @@ export default function DashboardLayout({ children, sideLinks }: DashboardLayout
                     <nav className="text-slate-300">
                         <ul className="space-y-1">
                             {links.map((link, index) => {
-                                if (!hasPermission(link.permission)) return null;
+                                if (!shouldShowLink(link)) return null;
 
                                 if (link.children) {
                                     const isExpanded = expandedMenus.includes(link.title);

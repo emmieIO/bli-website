@@ -31,8 +31,18 @@ class CourseController extends Controller
 
     public function builder(Course $course)
     {
-        $lessontypes = LessonType::options();
-        return view("admin.courses.builder", compact("course", "lessontypes"));
+        // Load course with modules, lessons, requirements, and outcomes
+        $course->load([
+            'modules.lessons' => function($query) {
+                $query->orderBy('order');
+            },
+            'requirements',
+            'outcomes',
+            'category',
+            'instructor'
+        ]);
+
+        return \Inertia\Inertia::render('Admin/Courses/Builder', compact('course'));
     }
 
     /**
@@ -40,7 +50,10 @@ class CourseController extends Controller
      */
     public function create()
     {
-        //
+        $this->authorize('create', Course::class);
+        $categories = Category::all();
+        $levels = \App\Enums\CourseLevel::options();
+        return \Inertia\Inertia::render('Admin/Courses/Create', compact('categories', 'levels'));
     }
 
     /**
@@ -49,10 +62,10 @@ class CourseController extends Controller
     public function store(CreateCourseRequest $request)
     {
         $this->authorize('create', Course::class);
-        $course = $this->courseService->createCourse($request->all(), $request->file('thumbnail_path'));
+        $course = $this->courseService->createCourse($request->all(), $request->file('thumbnail'));
         if ($course) {
-            return redirect()->back()->with([
-                "message" => "Course created successfully",
+            return to_route('admin.courses.builder', $course)->with([
+                "message" => "Course created successfully. Now add modules and lessons!",
                 "type" => "success"
             ]);
         }
@@ -146,9 +159,13 @@ class CourseController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(string $id)
+    public function edit(Course $course)
     {
-        //
+        $this->authorize('update', $course);
+
+        $categories = Category::all();
+        $levels = \App\Enums\CourseLevel::options();
+        return \Inertia\Inertia::render('Admin/Courses/Edit', compact('course', 'categories', 'levels'));
     }
 
     /**
@@ -157,31 +174,36 @@ class CourseController extends Controller
     public function update(Request $request, Course $course)
     {
         $this->authorize('update', $course);
-        
+
         $validated = $request->validate([
             'title' => 'required|string|max:255',
+            'subtitle' => 'nullable|string|max:500',
             'description' => 'nullable|string',
+            'language' => 'required|string',
             'level' => 'required|string',
             'category_id' => 'required|exists:categories,id',
+            'is_free' => 'nullable|boolean',
             'price' => 'required|numeric|min:0',
-            'thumbnail_path' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048'
+            'thumbnail_path' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'preview_video' => 'nullable|file|mimes:mp4,mov,avi,wmv|max:51200'
         ]);
 
         try {
             $updatedCourse = $this->courseService->updateCourse(
-                $course, 
-                $validated, 
-                $request->file('thumbnail_path')
+                $course,
+                $validated,
+                $request->file('thumbnail_path'),
+                $request->file('preview_video')
             );
-            
+
             if ($updatedCourse) {
-                return redirect()->back()->with([
+                return redirect()->route('admin.courses.index')->with([
                     "message" => "Course updated successfully",
                     "type" => "success"
                 ]);
             }
         } catch (\Exception $e) {
-            return redirect()->back()->with([
+            return redirect()->back()->withInput()->with([
                 "message" => "Error updating course: " . $e->getMessage(),
                 "type" => "error"
             ]);

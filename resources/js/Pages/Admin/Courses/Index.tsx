@@ -14,14 +14,13 @@ interface Category {
 
 interface Course {
     id: number;
+    slug: string;
     title: string;
     description?: string;
     price: number;
     level: string;
     thumbnail_path?: string;
-    status: {
-        value: 'draft' | 'published' | 'archived';
-    };
+    status: 'draft' | 'published' | 'archived';
     instructor: Instructor;
     category: Category;
 }
@@ -46,7 +45,7 @@ export default function CoursesIndex({ courses, categories }: CoursesProps) {
         if (!selectedCourse) return;
 
         setIsDeleting(true);
-        router.delete(route('admin.courses.destroy', selectedCourse.id), {
+        router.delete(route('admin.courses.destroy', selectedCourse.slug), {
             preserveScroll: true,
             onFinish: () => {
                 setIsDeleting(false);
@@ -197,20 +196,20 @@ export default function CoursesIndex({ courses, categories }: CoursesProps) {
                                     </td>
 
                                     {/* Status */}
-                                    <td className="px-6 py-4">{getStatusBadge(course.status.value)}</td>
+                                    <td className="px-6 py-4">{getStatusBadge(course.status)}</td>
 
                                     {/* Actions */}
                                     <td className="px-6 py-4">
                                         <div className="flex items-center gap-2">
                                             <Link
-                                                href={route('admin.courses.edit', course.id)}
+                                                href={route('admin.courses.edit', course.slug)}
                                                 title="Edit Course"
                                                 className="inline-flex items-center justify-center w-8 h-8 text-primary-600 hover:text-primary-700 hover:bg-primary-50 rounded-lg transition-colors duration-200"
                                             >
                                                 <i className="fas fa-edit w-4 h-4"></i>
                                             </Link>
                                             <Link
-                                                href={route('admin.courses.builder', course.id)}
+                                                href={route('admin.courses.builder', course.slug)}
                                                 title="Course Builder"
                                                 className="inline-flex items-center justify-center w-8 h-8 text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition-colors duration-200"
                                             >
