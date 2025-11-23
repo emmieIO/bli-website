@@ -46,8 +46,8 @@ class SearchController extends Controller
                 ];
             });
 
-        // Search Courses
-        $courses = Course::where('is_published', true)
+        // Search Courses (only approved courses)
+        $courses = Course::where('status', 'approved')
             ->where(function ($q) use ($query) {
                 $q->where('title', 'LIKE', "%{$query}%")
                     ->orWhere('description', 'LIKE', "%{$query}%");
@@ -67,24 +67,27 @@ class SearchController extends Controller
                 ];
             });
 
-        // Search Speakers
-        $speakers = Speaker::where(function ($q) use ($query) {
-                $q->where('name', 'LIKE', "%{$query}%")
-                    ->orWhere('bio', 'LIKE', "%{$query}%")
-                    ->orWhere('expertise', 'LIKE', "%{$query}%");
+        // Search Speakers (search in bio and organization, and join with users for name)
+        $speakers = Speaker::with('user')
+            ->where(function ($q) use ($query) {
+                $q->where('bio', 'LIKE', "%{$query}%")
+                    ->orWhere('organization', 'LIKE', "%{$query}%")
+                    ->orWhereHas('user', function ($userQuery) use ($query) {
+                        $userQuery->where('name', 'LIKE', "%{$query}%");
+                    });
             })
             ->limit(5)
-            ->get(['id', 'slug', 'name', 'bio', 'expertise', 'profile_picture'])
+            ->get(['id', 'user_id', 'bio', 'organization', 'photo'])
             ->map(function ($speaker) {
                 return [
                     'id' => $speaker->id,
-                    'slug' => $speaker->slug,
-                    'title' => $speaker->name,
-                    'subtitle' => $speaker->expertise,
+                    'slug' => $speaker->user->id ?? $speaker->id, // Use user ID as slug fallback
+                    'title' => $speaker->user->name ?? 'Unknown Speaker',
+                    'subtitle' => $speaker->organization,
                     'meta' => strlen($speaker->bio ?? '') > 60
                         ? substr($speaker->bio, 0, 60) . '...'
                         : $speaker->bio,
-                    'thumbnail' => $speaker->profile_picture,
+                    'thumbnail' => $speaker->photo,
                     'type' => 'speaker',
                 ];
             });
