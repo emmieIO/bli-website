@@ -3,6 +3,7 @@
 use App\Actions\JoinEventAction;
 use App\Http\Controllers\Events\EventCalenderController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\SearchController;
 use App\Http\Controllers\SpeakerApplicationController;
 use App\Http\Controllers\SpeakerInvitationController;
 use App\Http\Controllers\UserDashBoard\DashboardController;
@@ -13,6 +14,9 @@ use Illuminate\Support\Facades\Route;
 Route::middleware(['auth', 'verified'])->group(function () {
     // Main dashboard
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('user_dashboard');
+
+    // Global search
+    Route::get('/search', [SearchController::class, 'search'])->name('search');
 
     // User's events management
     Route::get('/user/events', ShowMyEventsController::class)->name('user.events');

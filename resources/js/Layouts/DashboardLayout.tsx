@@ -1,4 +1,4 @@
-import { PropsWithChildren, useState } from 'react';
+import { PropsWithChildren, useState, useEffect, useRef } from 'react';
 import { Link, router, usePage } from '@inertiajs/react';
 import { ToastContainer, useToastNotifications } from '@/Components/Toast';
 import {
@@ -20,6 +20,7 @@ import {
     User,
     LogOut
 } from 'lucide-react';
+import axios from 'axios';
 
 interface SideLink {
     title: string;
@@ -39,6 +40,22 @@ interface DashboardLayoutProps extends PropsWithChildren {
     sideLinks: SideLink[];
 }
 
+interface SearchResult {
+    id: number;
+    slug: string;
+    title: string;
+    subtitle?: string;
+    meta?: string;
+    thumbnail?: string;
+    type: 'event' | 'course' | 'speaker';
+}
+
+interface SearchResults {
+    events: SearchResult[];
+    courses: SearchResult[];
+    speakers: SearchResult[];
+}
+
 export default function DashboardLayout({ children, sideLinks }: DashboardLayoutProps) {
     const { auth } = usePage().props as any;
     const user = auth?.user;
@@ -51,6 +68,14 @@ export default function DashboardLayout({ children, sideLinks }: DashboardLayout
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [expandedMenus, setExpandedMenus] = useState<string[]>([]);
     const [showMobileSearch, setShowMobileSearch] = useState(false);
+
+    // Search state
+    const [searchQuery, setSearchQuery] = useState('');
+    const [searchResults, setSearchResults] = useState<SearchResults | null>(null);
+    const [isSearching, setIsSearching] = useState(false);
+    const [showResults, setShowResults] = useState(false);
+    const searchRef = useRef<HTMLDivElement>(null);
+    const searchTimeoutRef = useRef<NodeJS.Timeout>();
 
     const toggleMenu = (title: string) => {
         setExpandedMenus(prev =>
@@ -97,6 +122,81 @@ export default function DashboardLayout({ children, sideLinks }: DashboardLayout
         }
         return `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.name || '')}&background=002147&color=fff`;
     };
+
+    // Handle search with debouncing
+    const handleSearch = (query: string) => {
+        setSearchQuery(query);
+
+        // Clear previous timeout
+        if (searchTimeoutRef.current) {
+            clearTimeout(searchTimeoutRef.current);
+        }
+
+        // Don't search if query is too short
+        if (query.trim().length < 2) {
+            setSearchResults(null);
+            setShowResults(false);
+            return;
+        }
+
+        setIsSearching(true);
+        setShowResults(true);
+
+        // Debounce search by 300ms
+        searchTimeoutRef.current = setTimeout(async () => {
+            try {
+                const response = await axios.get(route('search'), {
+                    params: { q: query }
+                });
+                setSearchResults(response.data);
+            } catch (error) {
+                console.error('Search error:', error);
+                setSearchResults(null);
+            } finally {
+                setIsSearching(false);
+            }
+        }, 300);
+    };
+
+    // Navigate to result
+    const navigateToResult = (result: SearchResult) => {
+        let url = '';
+        switch (result.type) {
+            case 'event':
+                url = route('events.show', result.slug);
+                break;
+            case 'course':
+                url = route('courses.show', result.slug);
+                break;
+            case 'speaker':
+                url = route('speakers.show', result.slug);
+                break;
+        }
+        router.visit(url);
+        setShowResults(false);
+        setSearchQuery('');
+    };
+
+    // Close search dropdown when clicking outside
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
+                setShowResults(false);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
+
+    // Cleanup timeout on unmount
+    useEffect(() => {
+        return () => {
+            if (searchTimeoutRef.current) {
+                clearTimeout(searchTimeoutRef.current);
+            }
+        };
+    }, []);
 
     // Map icon names to Lucide components
     const getIcon = (iconName: string) => {
@@ -235,17 +335,37 @@ export default function DashboardLayout({ children, sideLinks }: DashboardLayout
                             </div>
 
                             {/* Center: Search (Desktop) */}
-                            <div className="hidden lg:flex flex-1 max-w-lg mx-8">
+                            <div className="hidden lg:flex flex-1 max-w-lg mx-8" ref={searchRef}>
                                 <div className="relative w-full">
                                     <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                                         <Search size={16} className="text-slate-400" />
                                     </div>
                                     <input
                                         type="search"
+                                        value={searchQuery}
+                                        onChange={(e) => handleSearch(e.target.value)}
+                                        onFocus={() => searchQuery.length >= 2 && setShowResults(true)}
                                         className="block w-full pl-10 pr-4 py-2.5 text-sm text-slate-900 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:border-primary-500 transition-all"
                                         style={{ '--tw-ring-color': '#002147' } as any}
                                         placeholder="Search events, courses, speakers..."
                                     />
+
+                                    {/* Search Results Dropdown */}
+                                    {showResults && (
+                                        <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-xl shadow-2xl border border-slate-200 max-h-96 overflow-y-auto z-50">
+                                            {isSearching ? (
+                                                <div className="p-8 text-center text-slate-500">
+                                                    <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
+                                                    <p className="mt-2 text-sm">Searching...</p>
+                                                </div>
+                                            ) : searchResults && (
+                                                <SearchResultsDisplay
+                                                    results={searchResults}
+                                                    onSelect={navigateToResult}
+                                                />
+                                            )}
+                                        </div>
+                                    )}
                                 </div>
                             </div>
 
@@ -331,9 +451,29 @@ export default function DashboardLayout({ children, sideLinks }: DashboardLayout
                                     </div>
                                     <input
                                         type="search"
+                                        value={searchQuery}
+                                        onChange={(e) => handleSearch(e.target.value)}
+                                        onFocus={() => searchQuery.length >= 2 && setShowResults(true)}
                                         className="block w-full pl-10 pr-4 py-2.5 text-sm text-slate-900 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:border-primary-500"
                                         placeholder="Search events, courses, speakers..."
                                     />
+
+                                    {/* Mobile Search Results */}
+                                    {showResults && (
+                                        <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-xl shadow-2xl border border-slate-200 max-h-96 overflow-y-auto z-50">
+                                            {isSearching ? (
+                                                <div className="p-8 text-center text-slate-500">
+                                                    <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
+                                                    <p className="mt-2 text-sm">Searching...</p>
+                                                </div>
+                                            ) : searchResults && (
+                                                <SearchResultsDisplay
+                                                    results={searchResults}
+                                                    onSelect={navigateToResult}
+                                                />
+                                            )}
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         )}
@@ -345,6 +485,138 @@ export default function DashboardLayout({ children, sideLinks }: DashboardLayout
                     {children}
                 </main>
             </div>
+        </div>
+    );
+}
+
+// Search Results Display Component
+function SearchResultsDisplay({
+    results,
+    onSelect
+}: {
+    results: SearchResults;
+    onSelect: (result: SearchResult) => void;
+}) {
+    const totalResults = results.events.length + results.courses.length + results.speakers.length;
+
+    if (totalResults === 0) {
+        return (
+            <div className="p-8 text-center text-slate-500">
+                <Search size={32} className="mx-auto text-slate-300 mb-2" />
+                <p className="text-sm font-medium">No results found</p>
+                <p className="text-xs mt-1">Try a different search term</p>
+            </div>
+        );
+    }
+
+    return (
+        <div className="py-2">
+            {/* Events Section */}
+            {results.events.length > 0 && (
+                <div className="mb-2">
+                    <div className="px-4 py-2 text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                        Events ({results.events.length})
+                    </div>
+                    {results.events.map((event) => (
+                        <button
+                            key={`event-${event.id}`}
+                            onClick={() => onSelect(event)}
+                            className="w-full px-4 py-3 hover:bg-slate-50 transition-colors text-left border-b border-slate-100 last:border-0"
+                        >
+                            <div className="flex items-start gap-3">
+                                <Calendar size={16} className="text-blue-500 mt-1 flex-shrink-0" />
+                                <div className="flex-1 min-w-0">
+                                    <p className="font-medium text-sm text-slate-900 truncate">{event.title}</p>
+                                    {event.subtitle && (
+                                        <p className="text-xs text-slate-600 truncate">{event.subtitle}</p>
+                                    )}
+                                    {event.meta && (
+                                        <p className="text-xs text-slate-500 mt-0.5">{event.meta}</p>
+                                    )}
+                                </div>
+                            </div>
+                        </button>
+                    ))}
+                </div>
+            )}
+
+            {/* Courses Section */}
+            {results.courses.length > 0 && (
+                <div className="mb-2">
+                    <div className="px-4 py-2 text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                        Courses ({results.courses.length})
+                    </div>
+                    {results.courses.map((course) => (
+                        <button
+                            key={`course-${course.id}`}
+                            onClick={() => onSelect(course)}
+                            className="w-full px-4 py-3 hover:bg-slate-50 transition-colors text-left border-b border-slate-100 last:border-0"
+                        >
+                            <div className="flex items-start gap-3">
+                                {course.thumbnail ? (
+                                    <img
+                                        src={`/storage/${course.thumbnail}`}
+                                        alt={course.title}
+                                        className="w-12 h-12 rounded object-cover flex-shrink-0"
+                                    />
+                                ) : (
+                                    <div className="w-12 h-12 rounded bg-gradient-to-br from-green-100 to-green-50 flex items-center justify-center flex-shrink-0">
+                                        <BookOpen size={20} className="text-green-600" />
+                                    </div>
+                                )}
+                                <div className="flex-1 min-w-0">
+                                    <p className="font-medium text-sm text-slate-900 truncate">{course.title}</p>
+                                    {course.subtitle && (
+                                        <p className="text-xs text-slate-600 truncate">By {course.subtitle}</p>
+                                    )}
+                                    {course.meta && (
+                                        <p className="text-xs text-slate-500 mt-0.5">{course.meta}</p>
+                                    )}
+                                </div>
+                            </div>
+                        </button>
+                    ))}
+                </div>
+            )}
+
+            {/* Speakers Section */}
+            {results.speakers.length > 0 && (
+                <div>
+                    <div className="px-4 py-2 text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                        Speakers ({results.speakers.length})
+                    </div>
+                    {results.speakers.map((speaker) => (
+                        <button
+                            key={`speaker-${speaker.id}`}
+                            onClick={() => onSelect(speaker)}
+                            className="w-full px-4 py-3 hover:bg-slate-50 transition-colors text-left border-b border-slate-100 last:border-0"
+                        >
+                            <div className="flex items-start gap-3">
+                                {speaker.thumbnail ? (
+                                    <img
+                                        src={`/storage/${speaker.thumbnail}`}
+                                        alt={speaker.title}
+                                        className="w-12 h-12 rounded-full object-cover flex-shrink-0"
+                                    />
+                                ) : (
+                                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-100 to-purple-50 flex items-center justify-center flex-shrink-0">
+                                        <Mic size={20} className="text-purple-600" />
+                                    </div>
+                                )}
+                                <div className="flex-1 min-w-0">
+                                    <p className="font-medium text-sm text-slate-900 truncate">{speaker.title}</p>
+                                    {speaker.subtitle && (
+                                        <p className="text-xs text-slate-600 truncate">{speaker.subtitle}</p>
+                                    )}
+                                    {speaker.meta && (
+                                        <p className="text-xs text-slate-500 mt-0.5 line-clamp-2">{speaker.meta}</p>
+                                    )}
+                                </div>
+                            </div>
+                        </button>
+                    ))}
+                </div>
+            )}
         </div>
     );
 }
