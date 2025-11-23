@@ -2,9 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Notifications\ContactFormSubmitted;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Notification;
 
 class ContactController extends Controller
 {
@@ -20,12 +21,13 @@ class ContactController extends Controller
         ]);
 
         try {
-            // Send email to admin
-            Mail::send('emails.contact', $validated, function ($message) use ($validated) {
-                $message->to(config('mail.from.address'))
-                    ->subject('New Contact Form Submission from ' . $validated['name'])
-                    ->replyTo($validated['email'], $validated['name']);
-            });
+            // Send notification to admin
+            Notification::route('mail', config('mail.from.address'))
+                ->notify(new ContactFormSubmitted(
+                    $validated['name'],
+                    $validated['email'],
+                    $validated['message']
+                ));
 
             // Log the contact submission
             Log::info('Contact form submitted', [

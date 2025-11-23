@@ -1,5 +1,6 @@
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, router, usePage } from '@inertiajs/react';
 import GuestLayout from '@/Layouts/GuestLayout';
+import VimeoPlayer from '@/Components/VimeoPlayer';
 import { useState } from 'react';
 
 interface Instructor {
@@ -52,6 +53,7 @@ interface Course {
     subtitle?: string;
     description: string;
     price: number;
+    is_free: boolean;
     preview_video_id?: string;
     thumbnail_path?: string;
     level?: {
@@ -69,10 +71,13 @@ interface Course {
 
 interface CourseDetailProps {
     course: Course;
+    isEnrolled: boolean;
 }
 
-export default function CourseDetail({ course }: CourseDetailProps) {
+export default function CourseDetail({ course, isEnrolled }: CourseDetailProps) {
+    const { auth } = usePage().props as any;
     const [expandedModules, setExpandedModules] = useState<number[]>([]);
+    const [isEnrolling, setIsEnrolling] = useState(false);
 
     const toggleModule = (moduleId: number) => {
         setExpandedModules(prev =>
@@ -85,6 +90,21 @@ export default function CourseDetail({ course }: CourseDetailProps) {
     const formatDate = (dateString: string) => {
         const date = new Date(dateString);
         return date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+    };
+
+    const handleEnroll = () => {
+        if (!auth.user) {
+            router.visit(route('login'));
+            return;
+        }
+
+        setIsEnrolling(true);
+        router.post(route('courses.enroll', course.slug), {}, {
+            preserveScroll: true,
+            onFinish: () => {
+                setIsEnrolling(false);
+            },
+        });
     };
 
     const getLessonIcon = (type: string) => {
@@ -194,12 +214,10 @@ export default function CourseDetail({ course }: CourseDetailProps) {
                             <div className="relative">
                                 <div className="aspect-video bg-black rounded-lg overflow-hidden">
                                     {course.preview_video_id ? (
-                                        <iframe
-                                            src={`https://player.vimeo.com/video/${course.preview_video_id}?h=0&title=0&byline=0&portrait=0`}
+                                        <VimeoPlayer
+                                            videoId={course.preview_video_id}
                                             className="w-full h-full"
-                                            frameBorder="0"
-                                            allowFullScreen
-                                        ></iframe>
+                                        />
                                     ) : (
                                         <div className="w-full h-full bg-gray-800 flex items-center justify-center">
                                             <div className="text-center">
@@ -226,12 +244,10 @@ export default function CourseDetail({ course }: CourseDetailProps) {
                         <div className="lg:hidden">
                             <div className="aspect-video bg-black rounded-lg overflow-hidden">
                                 {course.preview_video_id ? (
-                                    <iframe
-                                        src={`https://player.vimeo.com/video/${course.preview_video_id}?h=0&title=0&byline=0&portrait=0`}
+                                    <VimeoPlayer
+                                        videoId={course.preview_video_id}
                                         className="w-full h-full"
-                                        frameBorder="0"
-                                        allowFullScreen
-                                    ></iframe>
+                                    />
                                 ) : (
                                     <div className="w-full h-full bg-gray-800 flex items-center justify-center">
                                         <div className="text-center">
@@ -434,12 +450,42 @@ export default function CourseDetail({ course }: CourseDetailProps) {
 
                                 {/* CTA Buttons */}
                                 <div className="space-y-3 mb-6">
-                                    <button className="w-full bg-primary hover:bg-primary/90 text-white font-bold py-3 px-4 rounded transition-colors">
-                                        Add to cart
-                                    </button>
-                                    <button className="w-full border border-gray-300 hover:bg-gray-50 text-gray-900 font-bold py-3 px-4 rounded transition-colors">
-                                        Buy now
-                                    </button>
+                                    {isEnrolled ? (
+                                        <Link
+                                            href={route('courses.learn', course.slug)}
+                                            className="w-full bg-accent hover:bg-accent/90 text-white font-bold py-3 px-4 rounded transition-colors flex items-center justify-center gap-2"
+                                        >
+                                            <i className="fas fa-play-circle"></i>
+                                            Continue Learning
+                                        </Link>
+                                    ) : course.is_free || course.price === 0 ? (
+                                        <button
+                                            onClick={handleEnroll}
+                                            disabled={isEnrolling}
+                                            className="w-full bg-primary hover:bg-primary/90 text-white font-bold py-3 px-4 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                                        >
+                                            {isEnrolling ? (
+                                                <>
+                                                    <i className="fas fa-spinner fa-spin"></i>
+                                                    Enrolling...
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <i className="fas fa-graduation-cap"></i>
+                                                    Enroll for Free
+                                                </>
+                                            )}
+                                        </button>
+                                    ) : (
+                                        <>
+                                            <button className="w-full bg-primary hover:bg-primary/90 text-white font-bold py-3 px-4 rounded transition-colors">
+                                                Add to cart
+                                            </button>
+                                            <button className="w-full border border-gray-300 hover:bg-gray-50 text-gray-900 font-bold py-3 px-4 rounded transition-colors">
+                                                Buy now
+                                            </button>
+                                        </>
+                                    )}
                                 </div>
 
                                 {/* Course Includes */}

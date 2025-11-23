@@ -161,4 +161,49 @@ class CourseService
             throw $th;
         }
     }
+
+    public function deleteCourse(Course $course): bool
+    {
+        try {
+            return DB::transaction(function () use ($course) {
+                // Load relationships to access files before deletion
+                $course->load('modules.lessons');
+
+                // Delete course files
+                if ($course->thumbnail_path) {
+                    $this->deleteFile($course->thumbnail_path);
+                }
+                if ($course->preview_video_id) {
+                    $this->deleteFile($course->preview_video_id);
+                }
+
+                // Delete lesson content files
+                foreach ($course->modules as $module) {
+                    foreach ($module->lessons as $lesson) {
+                        if ($lesson->content_path) {
+                            $this->deleteFile($lesson->content_path);
+                        }
+                    }
+                }
+
+                // Delete related records
+                $course->requirements()->delete();
+                $course->outcomes()->delete();
+
+                // Detach enrolled students
+                $course->students()->detach();
+
+                // Delete the course (database cascade will handle modules, lessons, and lesson_progress)
+                $course->delete();
+
+                return true;
+            });
+        } catch (\Throwable $th) {
+            Log::error("Error deleting course", [
+                'course_id' => $course->id,
+                'error' => $th->getMessage()
+            ]);
+            throw $th;
+        }
+    }
 }

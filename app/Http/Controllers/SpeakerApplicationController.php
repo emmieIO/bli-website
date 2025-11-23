@@ -26,14 +26,14 @@ class SpeakerApplicationController extends Controller
         $existing = $this->service->getExistingApplication($event);
 
         if ($existing && $existing->isApproved()) {
-            return redirect()->signedRoute('events.show', $event->slug)->with([
+            return redirect()->route('events.show', $event->slug)->with([
                 "type" => "warning",
                 "message" => "You have already been approved to speak at this event."
             ]);
         }
 
         $application = $existing;
-        return view('speakers.apply', compact("event", "application"));
+        return \Inertia\Inertia::render('Speakers/Apply', compact("event", "application"));
     }
 
     /**

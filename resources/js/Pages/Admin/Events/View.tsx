@@ -141,9 +141,11 @@ export default function ViewEvent({ event, speakers }: ViewEventProps) {
                                     </div>
 
                                     {/* Description */}
-                                    <div className="prose max-w-none text-gray-600 mb-6 font-lato">
-                                        <p>{event.description}</p>
-                                    </div>
+                                    <div
+                                        className="prose prose-lg max-w-none text-gray-700 mb-6 font-lato prose-headings:font-montserrat prose-headings:text-primary prose-p:leading-relaxed prose-a:text-accent prose-a:no-underline hover:prose-a:underline prose-strong:text-primary prose-ul:list-disc prose-ol:list-decimal prose-li:marker:text-accent"
+                                        dangerouslySetInnerHTML={{ __html: event.description }}
+                                    />
+
 
                                     {/* Details grid */}
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 border-t border-gray-200 pt-6 mt-6">
@@ -231,11 +233,21 @@ export default function ViewEvent({ event, speakers }: ViewEventProps) {
                             </div>
 
                             {/* Resources Section */}
-                            {event.resources && event.resources.length > 0 && (
-                                <div className="bg-white shadow rounded-lg border border-gray-200 p-6">
-                                    <h2 className="text-lg font-semibold text-gray-900 mb-4 font-montserrat">
+                            <div className="bg-white shadow rounded-lg border border-gray-200 p-6">
+                                <div className="flex items-center justify-between mb-4">
+                                    <h2 className="text-lg font-semibold text-gray-900 font-montserrat">
                                         Event Resources
                                     </h2>
+                                    <Link
+                                        href={route('admin.events.resources.create', event.slug)}
+                                        className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white rounded-lg transition-all duration-200 hover:shadow-lg font-montserrat"
+                                        style={{ backgroundColor: '#00a651' }}
+                                    >
+                                        <i className="fas fa-plus w-4 h-4"></i>
+                                        Add Resource
+                                    </Link>
+                                </div>
+                                {event.resources && event.resources.length > 0 ? (
                                     <div className="space-y-3">
                                         {event.resources.map((resource) => (
                                             <div
@@ -255,19 +267,38 @@ export default function ViewEvent({ event, speakers }: ViewEventProps) {
                                                         )}
                                                     </div>
                                                 </div>
-                                                <a
-                                                    href={`/storage/${resource.file_path}`}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    className="text-primary hover:text-primary-600 text-sm font-medium font-montserrat"
-                                                >
-                                                    Download
-                                                </a>
+                                                <div className="flex items-center gap-2">
+                                                    <a
+                                                        href={`/storage/${resource.file_path}`}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="text-primary hover:text-primary-600 text-sm font-medium font-montserrat"
+                                                    >
+                                                        Download
+                                                    </a>
+                                                    <button
+                                                        onClick={() => {
+                                                            if (confirm('Are you sure you want to delete this resource?')) {
+                                                                router.delete(route('admin.events.resources.destroy', [event.slug, resource.id]));
+                                                            }
+                                                        }}
+                                                        className="text-red-600 hover:text-red-700 text-sm font-medium font-montserrat ml-3"
+                                                    >
+                                                        <i className="fas fa-trash w-4 h-4"></i>
+                                                    </button>
+                                                </div>
                                             </div>
                                         ))}
                                     </div>
-                                </div>
-                            )}
+                                ) : (
+                                    <div className="text-center py-8">
+                                        <i className="fas fa-folder-open w-12 h-12 text-gray-400 mb-3"></i>
+                                        <p className="text-sm text-gray-500 font-lato">
+                                            No resources added yet. Add resources to share materials with attendees.
+                                        </p>
+                                    </div>
+                                )}
+                            </div>
                         </div>
 
                         {/* Right column - Speakers */}

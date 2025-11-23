@@ -1,4 +1,4 @@
-import { Head, Link, router } from '@inertiajs/react';
+import { Head, Link, router, useForm } from '@inertiajs/react';
 import GuestLayout from '@/Layouts/GuestLayout';
 import { useState, FormEvent } from 'react';
 
@@ -16,8 +16,21 @@ interface Event {
     slots_remaining?: number;
 }
 
+interface PaginatedEvents {
+    data: Event[];
+    current_page: number;
+    last_page: number;
+    per_page: number;
+    total: number;
+    links: Array<{
+        url: string | null;
+        label: string;
+        active: boolean;
+    }>;
+}
+
 interface EventsIndexProps {
-    events: Event[];
+    events: PaginatedEvents;
     upcomingEvents: number;
     ongoingEvents: number;
     expiredEvents: number;
@@ -25,6 +38,9 @@ interface EventsIndexProps {
 
 export default function EventsIndex({ events, upcomingEvents, ongoingEvents, expiredEvents }: EventsIndexProps) {
     const [searchQuery, setSearchQuery] = useState('');
+    const newsletterForm = useForm({
+        email: '',
+    });
 
     const handleSearch = (e: FormEvent) => {
         e.preventDefault();
@@ -149,9 +165,9 @@ export default function EventsIndex({ events, upcomingEvents, ongoingEvents, exp
             {/* Events Grid Section */}
             <section className="py-20 bg-white">
                 <div className="container mx-auto px-6">
-                    {events.length > 0 ? (
+                    {events.data && events.data.length > 0 ? (
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                            {events.map((event, index) => {
+                            {events.data.map((event, index) => {
                                 const status = getEventStatus(event.start_date, event.end_date);
 
                                 return (
@@ -238,7 +254,7 @@ export default function EventsIndex({ events, upcomingEvents, ongoingEvents, exp
                                             {/* Action Button */}
                                             <Link
                                                 href={route('events.show', event.slug)}
-                                                className="w-full flex items-center justify-center gap-2 font-semibold py-3 px-4 rounded-xl transition-all duration-300 shadow-md hover:shadow-lg transform hover:scale-105 text-white font-montserrat bg-primary hover:bg-primary-dark"
+                                                className="w-full flex items-center justify-center gap-2 font-semibold py-3 px-4 rounded-xl transition-all duration-300 shadow-md hover:shadow-lg transform hover:scale-105 text-white font-montserrat bg-primary hover:bg-primary"
                                             >
                                                 <span>View Details</span>
                                                 <i className="fas fa-arrow-right text-sm group-hover:translate-x-1 transition-transform"></i>
@@ -274,7 +290,7 @@ export default function EventsIndex({ events, upcomingEvents, ongoingEvents, exp
             </section>
 
             {/* Newsletter CTA Section */}
-            <section className="py-20 bg-gradient-to-r from-primary to-primary-dark">
+            <section className="py-20 bg-gradient-to-r from-primary to-primary">
                 <div className="container mx-auto px-6">
                     <div className="max-w-4xl mx-auto text-center text-white">
                         {/* Section Icon */}
@@ -294,23 +310,41 @@ export default function EventsIndex({ events, upcomingEvents, ongoingEvents, exp
 
                         {/* Newsletter Signup */}
                         <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-8 border border-white/20 max-w-2xl mx-auto">
-                            <form className="flex flex-col md:flex-row gap-4">
+                            <form
+                                onSubmit={(e) => {
+                                    e.preventDefault();
+                                    newsletterForm.post(route('newsletter.subscribe'), {
+                                        onSuccess: () => newsletterForm.reset(),
+                                    });
+                                }}
+                                className="flex flex-col md:flex-row gap-4"
+                            >
                                 <div className="flex-1 relative">
                                     <i className="fas fa-envelope absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
                                     <input
                                         type="email"
+                                        value={newsletterForm.data.email}
+                                        onChange={(e) => newsletterForm.setData('email', e.target.value)}
+                                        required
                                         placeholder="Enter your email address"
                                         className="w-full pl-12 pr-4 py-4 rounded-xl border border-white/30 bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent font-lato"
                                     />
                                 </div>
                                 <button
                                     type="submit"
-                                    className="px-8 py-4 rounded-xl font-semibold transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 text-white font-montserrat whitespace-nowrap bg-accent hover:bg-accent-700"
+                                    disabled={newsletterForm.processing}
+                                    className="px-8 py-4 rounded-xl font-semibold transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 text-white font-montserrat whitespace-nowrap bg-accent hover:bg-accent-700 disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
                                     <i className="fas fa-paper-plane mr-2"></i>
-                                    Subscribe Now
+                                    {newsletterForm.processing ? 'Subscribing...' : 'Subscribe Now'}
                                 </button>
                             </form>
+                            {newsletterForm.errors.email && (
+                                <p className="mt-3 text-sm text-red-300 flex items-center">
+                                    <i className="fas fa-exclamation-circle mr-2"></i>
+                                    {newsletterForm.errors.email}
+                                </p>
+                            )}
 
                             <div className="flex items-center justify-center gap-6 mt-8 text-sm text-white/80 flex-wrap">
                                 <div className="flex items-center gap-2">

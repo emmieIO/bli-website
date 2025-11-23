@@ -114,7 +114,7 @@ export default function EditEvent({ event }: Props) {
         // Add _method for PUT request
         data.append('_method', 'PUT');
 
-        router.post(route('admin.events.update', event.id), data, {
+        router.post(route('admin.events.update', event.slug), data, {
             preserveScroll: true,
             onFinish: () => {
                 setIsSubmitting(false);

@@ -78,7 +78,7 @@ export default function BecomeInstructor({ auth }: BecomeInstructorProps) {
         {
             step: 2,
             title: 'Start Instructor Application',
-            desc: 'Click "Become an Instructor" or scroll down to the application form to begin.',
+            desc: 'Click "Start Your Journey" or scroll down to the application form to begin.',
             icon: 'edit',
         },
         {
@@ -112,7 +112,7 @@ export default function BecomeInstructor({ auth }: BecomeInstructorProps) {
             <Head title="Become an Instructor" />
 
             {/* Hero Section */}
-            <section className="relative min-h-screen flex items-center overflow-hidden bg-gradient-to-br from-primary via-primary-dark to-primary">
+            <section className="relative min-h-screen flex items-center overflow-hidden bg-gradient-to-br from-primary via-primary to-primary">
                 {/* Background Pattern */}
                 <div className="absolute inset-0 opacity-10">
                     <div
@@ -320,7 +320,7 @@ export default function BecomeInstructor({ auth }: BecomeInstructorProps) {
             </section>
 
             {/* Benefits */}
-            <section className="py-20 relative overflow-hidden bg-gradient-to-br from-primary to-primary-dark">
+            <section className="py-20 relative overflow-hidden bg-gradient-to-br from-primary to-primary">
                 {/* Background Pattern */}
                 <div className="absolute inset-0 opacity-5">
                     <div
@@ -438,7 +438,7 @@ export default function BecomeInstructor({ auth }: BecomeInstructorProps) {
                     <div className="max-w-5xl mx-auto">
                         <div className="bg-white rounded-3xl shadow-2xl overflow-hidden border border-gray-100">
                             {/* Header Section */}
-                            <div className="relative p-8 md:p-12 text-center bg-gradient-to-br from-primary to-primary-dark">
+                            <div className="relative p-8 md:p-12 text-center bg-gradient-to-br from-primary to-primary">
                                 <div className="absolute inset-0 opacity-10">
                                     <div
                                         className="absolute inset-0 bg-cover"
@@ -782,7 +782,7 @@ export default function BecomeInstructor({ auth }: BecomeInstructorProps) {
                             <div className="flex flex-col sm:flex-row gap-4 justify-center">
                                 <a
                                     href="mailto:instructors@example.com"
-                                    className="inline-flex items-center px-6 py-3 rounded-xl font-semibold transition-all duration-300 hover:shadow-lg font-montserrat bg-primary text-white hover:bg-primary-dark"
+                                    className="inline-flex items-center px-6 py-3 rounded-xl font-semibold transition-all duration-300 hover:shadow-lg font-montserrat bg-primary text-white hover:bg-primary"
                                 >
                                     <i className="fas fa-envelope mr-2"></i>
                                     Email Us

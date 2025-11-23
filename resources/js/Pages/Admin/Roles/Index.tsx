@@ -46,6 +46,22 @@ export default function RolesManagement({ roles, permissions }: RolesProps) {
         );
     };
 
+    const handleResetToDefaults = () => {
+        if (!confirm('Are you sure you want to reset all roles to their default permissions? This action cannot be undone.')) {
+            return;
+        }
+
+        router.post(route('admin.roles.reset-defaults'), {}, {
+            preserveScroll: true,
+        });
+    };
+
+    const handleViewAuditLog = () => {
+        router.get(route('admin.roles.audit-log'), {}, {
+            preserveScroll: true,
+        });
+    };
+
     return (
         <DashboardLayout sideLinks={sideLinks}>
             <Head title="Roles & Permissions - Beacon Leadership Institute" />
@@ -175,21 +191,21 @@ export default function RolesManagement({ roles, permissions }: RolesProps) {
                 <h3 className="text-lg font-semibold text-gray-800 mb-4 font-montserrat">Quick Actions</h3>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <button
-                        onClick={() => alert('Reset to defaults functionality would be implemented here')}
+                        onClick={handleResetToDefaults}
                         className="flex items-center justify-center gap-2 px-4 py-3 bg-yellow-500 hover:bg-yellow-600 text-white rounded-lg transition-colors font-montserrat"
                     >
                         <i className="fas fa-undo w-4 h-4"></i>
                         Reset to Defaults
                     </button>
-                    <button
-                        onClick={() => alert('Export configuration functionality would be implemented here')}
+                    <a
+                        href={route('admin.roles.export')}
                         className="flex items-center justify-center gap-2 px-4 py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors font-montserrat"
                     >
                         <i className="fas fa-download w-4 h-4"></i>
                         Export Configuration
-                    </button>
+                    </a>
                     <button
-                        onClick={() => alert('Audit log functionality would be implemented here')}
+                        onClick={handleViewAuditLog}
                         className="flex items-center justify-center gap-2 px-4 py-3 bg-purple-500 hover:bg-purple-600 text-white rounded-lg transition-colors font-montserrat"
                     >
                         <i className="fas fa-clock w-4 h-4"></i>

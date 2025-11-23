@@ -76,7 +76,7 @@ class SpeakersController extends Controller
 
     public function viewSpeakerProfile(Speaker $speaker)
     {
-        return view("speakers.speaker-profile", compact("speaker"));
+        return \Inertia\Inertia::render('Speakers/Profile', compact('speaker'));
     }
 
     public function edit(Speaker $speaker)

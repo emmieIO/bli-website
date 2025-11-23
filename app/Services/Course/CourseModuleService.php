@@ -29,6 +29,7 @@ class CourseModuleService
                 $module = CourseModule::create([
                     'course_id' => $course->id,
                     'title' => $data['title'],
+                    'description' => $data['description'] ?? null,
                     'order' => $order,
                 ]);
                 return $module;
@@ -39,21 +40,80 @@ class CourseModuleService
         }
     }
 
+    public function updateModule(CourseModule $module, array $data)
+    {
+        try {
+            return DB::transaction(function () use ($module, $data) {
+                $module->update([
+                    'title' => $data['title'] ?? $module->title,
+                    'description' => $data['description'] ?? $module->description,
+                ]);
+                return $module;
+            });
+        } catch (\Throwable $th) {
+            Log::error('Error updating module', [
+                'module_id' => $module->id,
+                'error' => $th->getMessage(),
+            ]);
+            throw $th;
+        }
+    }
+
+    public function deleteModule(CourseModule $module)
+    {
+        try {
+            return DB::transaction(function () use ($module) {
+                // Delete all lessons in the module
+                foreach ($module->lessons as $lesson) {
+                    // Delete associated files
+                    if ($lesson->type === 'pdf' && $lesson->content_path) {
+                        $this->deleteFile($lesson->content_path);
+                    }
+
+                    // Delete Vimeo video
+                    if ($lesson->type === 'video' && $lesson->vimeo_id) {
+                        $this->vimeoService->deleteVideo($lesson->vimeo_id);
+                    }
+
+                    $lesson->delete();
+                }
+
+                // Delete the module
+                return $module->delete();
+            });
+        } catch (\Throwable $th) {
+            Log::error('Error deleting module', [
+                'module_id' => $module->id,
+                'error' => $th->getMessage(),
+            ]);
+            throw $th;
+        }
+    }
+
     public function createModuleLesson(CourseModule $module, array $data, ?UploadedFile $file = null, ?UploadedFile $videoFile = null)
     {
         try {
-            $order = $module->lessons()->max('order') + 1;
-            DB::transaction(function () use ($module, $data, $order, $file, $videoFile) {
+            // For video uploads, don't use transaction as upload happens outside
+            if ($data['type'] === 'video') {
+                return $this->saveVideo($module, $data, $videoFile);
+            }
+
+            // For other types (pdf, link), use transaction
+            $result = DB::transaction(function () use ($module, $data, $file) {
                 return match ($data['type']) {
                     'pdf' => $this->savePdf($module, $data, $file),
-                    'video' => $this->saveVideo($module, $data, $videoFile),
                     'link' => $this->saveLink($module, $data),
                     default => throw new \Exception('Invalid lesson type'),
                 };
             });
-            return true;
+
+            return $result;
         } catch (\Throwable $th) {
-            Log::error($th->getMessage());
+            Log::error("Error creating module lesson", [
+                'module_id' => $module->id,
+                'type' => $data['type'] ?? 'unknown',
+                'error' => $th->getMessage(),
+            ]);
             throw $th;
         }
     }
@@ -83,24 +143,64 @@ class CourseModuleService
 
     public function saveVideo(CourseModule $module, array $data, UploadedFile $file)
     {
-        $vimeo = $this->vimeoService->getClient();
-        // Upload the video to Vimeo
-        $uri = $vimeo->upload($file->getRealPath(), [
-            'name' => $data['title'],
-            'description' => $data['description'] ?? '',
-
-        ]);
-
-        $videoId = last(explode('/', $uri));
-
-        $module->lessons()->create([
+        // Create lesson with pending status first (before upload)
+        $lesson = $module->lessons()->create([
             'title' => $data['title'],
             'type' => 'video',
             'description' => $data['description'] ?? null,
-            'vimeo_id' => $videoId,
-            'content_path' => $uri,
             'order' => $module->lessons()->max('order') + 1,
+            'video_status' => 'uploading',
         ]);
+
+        try {
+            // Upload video to Vimeo (outside of any transaction)
+            $uploadResult = $this->vimeoService->uploadVideo(
+                $file->getRealPath(),
+                [
+                    'name' => $data['title'],
+                    'description' => $data['description'] ?? '',
+                ]
+            );
+
+            if (!$uploadResult['success']) {
+                // Upload failed, update lesson status
+                $lesson->update([
+                    'video_status' => 'failed',
+                    'video_error' => $uploadResult['error'],
+                ]);
+
+                throw new \Exception($uploadResult['error']);
+            }
+
+            // Upload successful, update lesson with video info
+            $lesson->update([
+                'vimeo_id' => $uploadResult['video_id'],
+                'content_path' => $uploadResult['uri'],
+                'video_status' => 'processing',
+                'video_uploaded_at' => now(),
+            ]);
+
+            Log::info("Lesson video uploaded successfully", [
+                'lesson_id' => $lesson->id,
+                'vimeo_id' => $uploadResult['video_id'],
+            ]);
+
+            return $lesson;
+
+        } catch (\Exception $e) {
+            // Ensure lesson is marked as failed
+            $lesson->update([
+                'video_status' => 'failed',
+                'video_error' => $e->getMessage(),
+            ]);
+
+            Log::error("Failed to save video lesson", [
+                'lesson_id' => $lesson->id,
+                'error' => $e->getMessage(),
+            ]);
+
+            throw $e;
+        }
     }
 
 }

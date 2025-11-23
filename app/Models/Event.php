@@ -12,6 +12,15 @@ class Event extends Model
 {
     use HasFactory, HasUUID;
 
+    /**
+     * Get the route key for the model.
+     * Use 'slug' for route binding to support SEO-friendly URLs.
+     */
+    public function getRouteKeyName(): string
+    {
+        return 'slug';
+    }
+
     protected $fillable = [
         'uuid',
         'slug',

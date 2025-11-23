@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Instructors;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Instructors\SavePersonalInfoRequest;
-use App\Mail\Instructors\InstructorsApplication;
 use App\Models\InstructorProfile;
 use App\Models\User;
 use App\Rules\VideoUrlRule;

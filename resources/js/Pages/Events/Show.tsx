@@ -1,4 +1,4 @@
-import { Head, Link, router, usePage } from '@inertiajs/react';
+import { Head, Link, router} from '@inertiajs/react';
 import GuestLayout from '@/Layouts/GuestLayout';
 import { useState, useEffect, FormEvent } from 'react';
 
@@ -19,9 +19,11 @@ interface Speaker {
 interface Resource {
     id: number;
     title: string;
+    description?: string;
     type: 'file' | 'link';
     file_path?: string;
     external_link?: string;
+    is_downloadable: boolean;
 }
 
 interface Event {
@@ -254,7 +256,7 @@ export default function EventShow({ event, auth, signed_speaker_route }: EventSh
                             {/* Event Description */}
                             <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-8 md:p-10">
                                 <div className="flex items-center gap-4 mb-6 md:mb-8">
-                                    <div className="w-12 h-12 rounded-2xl flex items-center justify-center bg-gradient-to-br from-primary to-primary-dark">
+                                    <div className="w-12 h-12 rounded-2xl flex items-center justify-center bg-gradient-to-br from-primary to-primary">
                                         <i className="fas fa-info-circle text-white text-xl"></i>
                                     </div>
                                     <h2 className="text-2xl md:text-3xl font-bold font-montserrat text-primary">
@@ -262,9 +264,26 @@ export default function EventShow({ event, auth, signed_speaker_route }: EventSh
                                     </h2>
                                 </div>
 
-                                <div className="prose max-w-none text-gray-700 font-lato whitespace-pre-wrap">
-                                    {event.description}
-                                </div>
+                                <div
+                                    className="prose prose-lg max-w-none text-gray-700 font-lato
+                                        prose-headings:font-montserrat prose-headings:text-primary prose-headings:font-bold
+                                        prose-h1:text-3xl prose-h2:text-2xl prose-h3:text-xl prose-h4:text-lg
+                                        prose-p:leading-relaxed prose-p:mb-4 prose-p:text-gray-700
+                                        prose-a:text-accent prose-a:font-semibold prose-a:no-underline hover:prose-a:underline prose-a:transition-all
+                                        prose-strong:text-primary prose-strong:font-bold
+                                        prose-em:text-gray-600 prose-em:italic
+                                        prose-ul:list-disc prose-ul:ml-6 prose-ul:mb-4
+                                        prose-ol:list-decimal prose-ol:ml-6 prose-ol:mb-4
+                                        prose-li:mb-2 prose-li:text-gray-700 prose-li:marker:text-accent
+                                        prose-blockquote:border-l-4 prose-blockquote:border-accent prose-blockquote:pl-4 prose-blockquote:italic prose-blockquote:text-gray-600 prose-blockquote:bg-gray-50 prose-blockquote:py-2
+                                        prose-code:bg-gray-100 prose-code:px-2 prose-code:py-1 prose-code:rounded prose-code:text-sm prose-code:text-primary
+                                        prose-pre:bg-gray-900 prose-pre:text-gray-100 prose-pre:p-4 prose-pre:rounded-lg prose-pre:overflow-x-auto
+                                        prose-img:rounded-lg prose-img:shadow-md
+                                        prose-table:border-collapse prose-table:w-full
+                                        prose-th:bg-primary prose-th:text-white prose-th:p-3 prose-th:text-left prose-th:font-semibold
+                                        prose-td:border prose-td:border-gray-300 prose-td:p-3"
+                                    dangerouslySetInnerHTML={{ __html: event.description }}
+                                />
                             </div>
 
                             {/* Event Speakers */}
@@ -347,25 +366,42 @@ export default function EventShow({ event, auth, signed_speaker_route }: EventSh
                                 </div>
                             )}
 
-                            {/* Event Resources (only for registered users) */}
-                            {auth?.user && isRegistered && event.resources && event.resources.length > 0 && (
-                                <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 md:p-8">
-                                    <h2 className="text-xl md:text-2xl font-bold text-primary mb-4 md:mb-6 flex items-center gap-3 font-montserrat">
-                                        <div className="w-1 h-6 md:h-8 bg-secondary rounded-full"></div>
-                                        Event Resources
-                                    </h2>
-                                    <ul className="space-y-3">
-                                        {event.resources.map((resource) => (
-                                            <li key={resource.id}>
+                            {/* Event Resources (only for registered users with downloadable resources) */}
+                            {auth?.user && isRegistered && event.resources && event.resources.filter(r => r.is_downloadable).length > 0 && (
+                                <div className="bg-gradient-to-br from-white to-green-50 rounded-2xl shadow-lg border-2 border-accent/20 p-6 md:p-8">
+                                    <div className="flex items-center gap-3 mb-6">
+                                        <div className="w-12 h-12 rounded-xl flex items-center justify-center" style={{ backgroundColor: '#e6f7ed' }}>
+                                            <i className="fas fa-download text-2xl" style={{ color: '#00a651' }}></i>
+                                        </div>
+                                        <div>
+                                            <h2 className="text-xl md:text-2xl font-bold text-primary font-montserrat">Event Resources</h2>
+                                            <p className="text-sm text-gray-600 font-lato">Downloadable materials for attendees</p>
+                                        </div>
+                                    </div>
+                                    <div className="grid grid-cols-1 gap-3">
+                                        {event.resources.filter(r => r.is_downloadable).map((resource) => (
+                                            <div key={resource.id}>
                                                 {resource.type === 'file' && resource.file_path && (
                                                     <a
                                                         href={`/storage/${resource.file_path}`}
+                                                        download
                                                         target="_blank"
                                                         rel="noopener noreferrer"
-                                                        className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100 transition-all duration-300 font-lato"
+                                                        className="flex items-center gap-4 p-4 bg-white rounded-xl border-2 border-gray-200 hover:border-accent hover:shadow-md transition-all duration-300 font-lato group"
                                                     >
-                                                        <i className="fas fa-file-text text-secondary"></i>
-                                                        <span className="font-medium">{resource.title}</span>
+                                                        <div className="w-12 h-12 rounded-lg flex items-center justify-center bg-primary/10 group-hover:bg-accent/10 transition-colors flex-shrink-0">
+                                                            <i className="fas fa-file-pdf text-xl text-primary group-hover:text-accent transition-colors"></i>
+                                                        </div>
+                                                        <div className="flex-1 min-w-0">
+                                                            <p className="font-semibold text-gray-900 font-montserrat truncate">{resource.title}</p>
+                                                            {resource.description && (
+                                                                <p className="text-sm text-gray-600 font-lato mt-1 line-clamp-1">{resource.description}</p>
+                                                            )}
+                                                        </div>
+                                                        <div className="flex items-center gap-2 flex-shrink-0">
+                                                            <span className="text-xs font-medium text-accent bg-accent/10 px-3 py-1 rounded-full font-lato">File</span>
+                                                            <i className="fas fa-download text-accent text-lg group-hover:scale-110 transition-transform"></i>
+                                                        </div>
                                                     </a>
                                                 )}
                                                 {resource.type === 'link' && resource.external_link && (
@@ -373,15 +409,26 @@ export default function EventShow({ event, auth, signed_speaker_route }: EventSh
                                                         href={resource.external_link}
                                                         target="_blank"
                                                         rel="noopener noreferrer"
-                                                        className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100 transition-all duration-300 font-lato"
+                                                        className="flex items-center gap-4 p-4 bg-white rounded-xl border-2 border-gray-200 hover:border-accent hover:shadow-md transition-all duration-300 font-lato group"
                                                     >
-                                                        <i className="fas fa-link text-secondary"></i>
-                                                        <span className="font-medium">{resource.title}</span>
+                                                        <div className="w-12 h-12 rounded-lg flex items-center justify-center bg-primary/10 group-hover:bg-accent/10 transition-colors flex-shrink-0">
+                                                            <i className="fas fa-link text-xl text-primary group-hover:text-accent transition-colors"></i>
+                                                        </div>
+                                                        <div className="flex-1 min-w-0">
+                                                            <p className="font-semibold text-gray-900 font-montserrat truncate">{resource.title}</p>
+                                                            {resource.description && (
+                                                                <p className="text-sm text-gray-600 font-lato mt-1 line-clamp-1">{resource.description}</p>
+                                                            )}
+                                                        </div>
+                                                        <div className="flex items-center gap-2 flex-shrink-0">
+                                                            <span className="text-xs font-medium text-accent bg-accent/10 px-3 py-1 rounded-full font-lato">Link</span>
+                                                            <i className="fas fa-external-link-alt text-accent text-lg group-hover:scale-110 transition-transform"></i>
+                                                        </div>
                                                     </a>
                                                 )}
-                                            </li>
+                                            </div>
                                         ))}
-                                    </ul>
+                                    </div>
                                 </div>
                             )}
                         </div>
@@ -391,7 +438,7 @@ export default function EventShow({ event, auth, signed_speaker_route }: EventSh
                             {/* Registration Card */}
                             <div className="relative overflow-hidden rounded-2xl shadow-2xl">
                                 {/* Gradient Background */}
-                                <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary-dark to-accent"></div>
+                                <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary to-accent"></div>
 
                                 {/* Content */}
                                 <div className="relative p-8 text-white">
@@ -401,64 +448,130 @@ export default function EventShow({ event, auth, signed_speaker_route }: EventSh
                                             <i className="fas fa-ticket-alt text-2xl text-white"></i>
                                         </div>
                                         <h3 className="text-2xl font-bold font-montserrat">Event Registration</h3>
-                                        <p className="text-white/80 font-lato mt-2">Secure your spot today</p>
+                                        <p className="text-white/80 font-lato mt-2">
+                                            {isRegistered ? 'You\'re all set!' : 'Secure your spot today'}
+                                        </p>
                                     </div>
+
+                                    {/* Registration Status - Show when registered */}
+                                    {isRegistered && (
+                                        <div className="mb-6 p-5 bg-white/15 backdrop-blur-sm rounded-xl border-2 border-white/30">
+                                            <div className="flex items-center gap-3 mb-3">
+                                                <div className="w-12 h-12 bg-accent rounded-full flex items-center justify-center flex-shrink-0">
+                                                    <i className="fas fa-check text-white text-xl"></i>
+                                                </div>
+                                                <div className="flex-1">
+                                                    <p className="font-bold text-white font-montserrat text-lg">Registration Confirmed</p>
+                                                    <p className="text-white/90 text-sm font-lato">Your spot is secured</p>
+                                                </div>
+                                            </div>
+                                            <div className="pt-3 border-t border-white/20">
+                                                <p className="text-white/90 text-sm font-lato flex items-start gap-2">
+                                                    <i className="fas fa-info-circle mt-0.5 flex-shrink-0"></i>
+                                                    <span>Check your email for confirmation and event details. You'll receive a reminder before the event starts.</span>
+                                                </p>
+                                            </div>
+                                        </div>
+                                    )}
 
                                     {/* Event Details */}
                                     <div className="space-y-4 mb-8">
-                                        <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
-                                            <div className="flex justify-between items-center">
-                                                <span className="text-white/90 font-medium font-lato flex items-center gap-2">
-                                                    <i className="fas fa-users text-sm"></i>
-                                                    Slots Remaining
+                                        {/* Slots Remaining */}
+                                        <div className="bg-white/10 backdrop-blur-sm rounded-xl p-5 border border-white/20">
+                                            <div className="flex justify-between items-center mb-2">
+                                                <span className="text-white/90 font-semibold font-lato flex items-center gap-2">
+                                                    <i className="fas fa-users text-base"></i>
+                                                    Available Slots
                                                 </span>
-                                                <span className="font-bold text-xl text-white font-montserrat">{slotsRemaining}</span>
+                                                <span className="font-bold text-2xl text-white font-montserrat">{slotsRemaining}</span>
                                             </div>
+                                            {slotsRemaining <= 10 && slotsRemaining > 0 && (
+                                                <p className="text-white/80 text-xs font-lato mt-2">
+                                                    <i className="fas fa-exclamation-circle mr-1"></i>
+                                                    Limited slots available - Register soon!
+                                                </p>
+                                            )}
+                                            {slotsRemaining === 0 && (
+                                                <p className="text-red-200 text-xs font-lato mt-2 font-semibold">
+                                                    <i className="fas fa-times-circle mr-1"></i>
+                                                    Event is fully booked
+                                                </p>
+                                            )}
                                         </div>
 
-                                        <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
-                                            <div className="flex justify-between items-center">
-                                                <span className="text-white/90 font-medium font-lato flex items-center gap-2">
-                                                    <i className="fas fa-tag text-sm"></i>
-                                                    Registration Fee
-                                                </span>
-                                                {event.entry_fee > 0 ? (
-                                                    <span className="font-bold text-xl text-white font-montserrat">
-                                                        ₦{event.entry_fee.toLocaleString()}
+                                        {/* Registration Fee */}
+                                        <div className="bg-white/10 backdrop-blur-sm rounded-xl p-5 border border-white/20">
+                                            <div className="flex justify-between items-start mb-2">
+                                                <div className="flex-1">
+                                                    <span className="text-white/90 font-semibold font-lato flex items-center gap-2 mb-1">
+                                                        <i className="fas fa-tag text-base"></i>
+                                                        Entry Fee
                                                     </span>
-                                                ) : (
-                                                    <span className="font-bold text-xl text-white font-montserrat">FREE</span>
-                                                )}
+                                                    {event.entry_fee > 0 && (
+                                                        <p className="text-white/70 text-xs font-lato">Per participant</p>
+                                                    )}
+                                                </div>
+                                                <div className="text-right">
+                                                    {event.entry_fee > 0 ? (
+                                                        <>
+                                                            <span className="font-bold text-3xl text-white font-montserrat block leading-none">
+                                                                ₦{event.entry_fee.toLocaleString()}
+                                                            </span>
+                                                            <span className="text-white/70 text-xs font-lato mt-1 block">
+                                                                Non-refundable
+                                                            </span>
+                                                        </>
+                                                    ) : (
+                                                        <>
+                                                            <span className="font-bold text-3xl text-white font-montserrat block leading-none">FREE</span>
+                                                            <span className="text-white/70 text-xs font-lato mt-1 block">
+                                                                No payment required
+                                                            </span>
+                                                        </>
+                                                    )}
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
 
                                     {/* Registration Button */}
-                                    <button
-                                        onClick={() => setShowModal(true)}
-                                        disabled={isRegistered || revokeCount === 4}
-                                        className="w-full bg-white text-primary py-4 px-6 rounded-xl font-bold text-lg hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl flex items-center justify-center gap-3 font-montserrat mb-4"
-                                    >
-                                        {isRegistered ? (
-                                            <>
-                                                <i className="fas fa-check-circle text-xl text-accent"></i>
-                                                <span>Already Registered</span>
-                                            </>
-                                        ) : revokeCount === 4 ? (
-                                            <>
-                                                <i className="fas fa-users text-xl text-gray-500"></i>
-                                                <span>Max Registrations</span>
-                                            </>
-                                        ) : (
-                                            <>
-                                                <i className="fas fa-hand-paper text-xl text-primary"></i>
-                                                <span>Register Now</span>
-                                            </>
-                                        )}
-                                    </button>
+                                    {!isRegistered ? (
+                                        <button
+                                            onClick={() => setShowModal(true)}
+                                            disabled={revokeCount === 4 || slotsRemaining === 0 || !auth?.user}
+                                            className="w-full bg-white text-primary py-4 px-6 rounded-xl font-bold text-lg hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl flex items-center justify-center gap-3 font-montserrat mb-4"
+                                        >
+                                            {revokeCount === 4 ? (
+                                                <>
+                                                    <i className="fas fa-ban text-xl text-gray-500"></i>
+                                                    <span>Maximum Registrations Reached</span>
+                                                </>
+                                            ) : slotsRemaining === 0 ? (
+                                                <>
+                                                    <i className="fas fa-users-slash text-xl text-gray-500"></i>
+                                                    <span>Event Full</span>
+                                                </>
+                                            ) : !auth?.user ? (
+                                                <>
+                                                    <i className="fas fa-sign-in-alt text-xl text-primary"></i>
+                                                    <span>Login to Register</span>
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <i className="fas fa-hand-paper text-xl text-primary"></i>
+                                                    <span>Register Now</span>
+                                                </>
+                                            )}
+                                        </button>
+                                    ) : (
+                                        <div className="w-full bg-white/20 backdrop-blur-sm border-2 border-white/40 text-white py-4 px-6 rounded-xl font-bold text-lg cursor-default shadow-lg flex items-center justify-center gap-3 font-montserrat mb-4">
+                                            <i className="fas fa-check-circle text-2xl text-accent"></i>
+                                            <span>You're Registered!</span>
+                                        </div>
+                                    )}
 
                                     {/* Speaker Application */}
-                                    {event.is_allowing_application && signed_speaker_route && (
+                                    {event.is_allowing_application === true && signed_speaker_route && !isRegistered && (
                                         <a
                                             href={signed_speaker_route}
                                             className="w-full border-2 border-white text-white py-3 px-6 rounded-xl font-semibold hover:bg-white hover:text-primary transition-all duration-300 flex items-center justify-center gap-3 font-montserrat group"
@@ -475,6 +588,25 @@ export default function EventShow({ event, auth, signed_speaker_route }: EventSh
                                                 <i className="fas fa-info-circle"></i>
                                                 You must be logged in to register for this event
                                             </p>
+                                        </div>
+                                    )}
+
+                                    {/* Registered Users: Quick Actions */}
+                                    {isRegistered && (
+                                        <div className="mt-6 space-y-3">
+                                            <div className="border-t border-white/20 pt-4">
+                                                <p className="text-white/90 text-sm font-semibold font-montserrat mb-3">Quick Actions</p>
+                                                <div className="space-y-2">
+                                                    <Link
+                                                        href={route('user.events')}
+                                                        className="flex items-center gap-3 p-3 bg-white/10 backdrop-blur-sm rounded-lg hover:bg-white/20 transition-all duration-300 font-lato group border border-white/20"
+                                                    >
+                                                        <i className="fas fa-calendar-check text-white group-hover:scale-110 transition-transform"></i>
+                                                        <span className="font-medium text-white text-sm">View My Events</span>
+                                                        <i className="fas fa-arrow-right text-xs ml-auto opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all duration-300 text-white"></i>
+                                                    </Link>
+                                                </div>
+                                            </div>
                                         </div>
                                     )}
                                 </div>
@@ -525,8 +657,8 @@ export default function EventShow({ event, auth, signed_speaker_route }: EventSh
                                                     {event.mode === 'offline'
                                                         ? 'Venue Address'
                                                         : event.mode === 'online'
-                                                        ? 'Meeting Link'
-                                                        : 'Location'}
+                                                            ? 'Meeting Link'
+                                                            : 'Location'}
                                                 </p>
                                                 {event.mode === 'offline' && event.physical_address && (
                                                     <p className="text-gray-700 text-sm break-words font-lato">{event.physical_address}</p>
@@ -645,7 +777,7 @@ export default function EventShow({ event, auth, signed_speaker_route }: EventSh
                     <div className="relative p-4 w-full max-w-lg max-h-full">
                         <div className="relative bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden">
                             {/* Modal Header with Gradient */}
-                            <div className="relative p-6 text-center bg-gradient-to-br from-primary to-primary-dark">
+                            <div className="relative p-6 text-center bg-gradient-to-br from-primary to-primary">
                                 {/* Close Button */}
                                 <button
                                     type="button"

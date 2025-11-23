@@ -57,7 +57,16 @@ class UserCourseController extends Controller
             'category',
         ]);
 
-        return \Inertia\Inertia::render('Courses/CourseDetail', ['course' => $courseWithRelations]);
+        // Check if user is enrolled
+        $isEnrolled = false;
+        if (auth()->check()) {
+            $isEnrolled = $this->courseRepository->isUserEnrolled(auth()->user(), $course);
+        }
+
+        return \Inertia\Inertia::render('Courses/CourseDetail', [
+            'course' => $courseWithRelations,
+            'isEnrolled' => $isEnrolled,
+        ]);
     }
 
     /**
@@ -76,7 +85,7 @@ class UserCourseController extends Controller
         // Load course with relationships
         $courseWithLessons = $this->courseRepository->getWithRelations($course->id, [
             'modules.lessons' => function ($query) {
-                $query->orderBy('order_index');
+                $query->orderBy('order');
             },
             'outcomes',
         ]);
@@ -154,6 +163,46 @@ class UserCourseController extends Controller
     public function update(Request $request, string $id)
     {
         //
+    }
+
+    /**
+     * Enroll user in a course
+     */
+    public function enroll(Course $course)
+    {
+        $user = auth()->user();
+
+        if (!$user) {
+            return redirect()->route('login')->with([
+                'message' => 'Please login to enroll in this course',
+                'type' => 'info'
+            ]);
+        }
+
+        // Check if already enrolled
+        if ($this->courseRepository->isUserEnrolled($user, $course)) {
+            return redirect()->route('courses.show', $course->slug)->with([
+                'message' => 'You are already enrolled in this course',
+                'type' => 'info'
+            ]);
+        }
+
+        // For now, only allow free courses to be enrolled directly
+        // Paid courses should go through payment gateway
+        if ($course->price > 0 && !$course->is_free) {
+            return redirect()->route('courses.show', $course->slug)->with([
+                'message' => 'Please complete payment to enroll in this course',
+                'type' => 'warning'
+            ]);
+        }
+
+        // Enroll the user
+        $this->courseRepository->enrollUser($user, $course);
+
+        return redirect()->route('courses.learn', ['course' => $course->slug])->with([
+            'message' => 'Successfully enrolled! Start learning now.',
+            'type' => 'success'
+        ]);
     }
 
     /**

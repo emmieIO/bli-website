@@ -452,4 +452,26 @@ class InstructorCourseController extends Controller
             ], 500);
         }
     }
+
+    /**
+     * Delete a course (instructors can only delete their own draft courses)
+     */
+    public function destroy(Course $course)
+    {
+        $this->authorize('delete', $course);
+
+        try {
+            $this->courseService->deleteCourse($course);
+
+            return redirect()->route('instructor.courses.index')->with([
+                "message" => "Course deleted successfully",
+                "type" => "success"
+            ]);
+        } catch (\Exception $e) {
+            return redirect()->back()->with([
+                "message" => "Error deleting course: " . $e->getMessage(),
+                "type" => "error"
+            ]);
+        }
+    }
 }

@@ -24,6 +24,7 @@ interface Outcome {
 
 interface Lesson {
     id: number;
+    slug: string;
     title: string;
     type: 'video' | 'pdf' | 'link';
     content_path: string;
@@ -31,6 +32,7 @@ interface Lesson {
 
 interface CourseModule {
     id: number;
+    slug: string;
     title: string;
     lessons: Lesson[];
 }
@@ -139,11 +141,38 @@ export default function Builder({ course }: BuilderProps) {
         });
     };
 
-    const handleDeleteLesson = (moduleId: number, lessonId: number) => {
+    const handleDeleteLesson = (moduleSlug: string, lessonSlug: string) => {
         if (!confirm('Are you sure you want to delete this lesson?')) return;
 
-        router.delete(route('admin.lessons.destroy', [moduleId, lessonId]), {
+        router.delete(route('admin.lessons.destroy', [moduleSlug, lessonSlug]), {
             preserveScroll: true,
+        });
+    };
+
+    const handleEditModule = (moduleSlug: string, currentTitle: string) => {
+        const newTitle = prompt('Edit Module Title:', currentTitle);
+        if (!newTitle || newTitle.trim() === '' || newTitle === currentTitle) return;
+
+        setIsSubmitting(true);
+        router.put(route('admin.modules.update', [course.slug, moduleSlug]), {
+            title: newTitle.trim(),
+        }, {
+            preserveScroll: true,
+            onFinish: () => {
+                setIsSubmitting(false);
+            },
+        });
+    };
+
+    const handleDeleteModule = (moduleSlug: string) => {
+        if (!confirm('Are you sure you want to delete this module? All lessons within this module will also be deleted.')) return;
+
+        setIsSubmitting(true);
+        router.delete(route('admin.modules.destroy', [course.slug, moduleSlug]), {
+            preserveScroll: true,
+            onFinish: () => {
+                setIsSubmitting(false);
+            },
         });
     };
 
@@ -333,11 +362,25 @@ export default function Builder({ course }: BuilderProps) {
                                         {/* Action Buttons */}
                                         <div className="flex space-x-2" onClick={(e) => e.stopPropagation()}>
                                             <Link
-                                                href={route('admin.lessons.create', module.id)}
+                                                href={route('admin.lessons.create', module.slug)}
                                                 className="inline-flex cursor-pointer items-center px-3 py-1.5 text-sm font-medium text-gray-500 hover:text-primary rounded-lg"
                                             >
                                                 + Add Lesson
                                             </Link>
+                                            <button
+                                                onClick={() => handleEditModule(module.slug, module.title)}
+                                                className="inline-flex cursor-pointer items-center px-3 py-1.5 text-sm font-medium text-blue-600 hover:text-blue-800 rounded-lg"
+                                                title="Edit Module"
+                                            >
+                                                <i className="fas fa-edit"></i>
+                                            </button>
+                                            <button
+                                                onClick={() => handleDeleteModule(module.slug)}
+                                                className="inline-flex cursor-pointer items-center px-3 py-1.5 text-sm font-medium text-red-600 hover:text-red-800 rounded-lg"
+                                                title="Delete Module"
+                                            >
+                                                <i className="fas fa-trash"></i>
+                                            </button>
                                         </div>
                                     </div>
                                 </div>
@@ -383,7 +426,7 @@ export default function Builder({ course }: BuilderProps) {
                                                                 </a>
                                                             )}
                                                             <button
-                                                                onClick={() => handleDeleteLesson(module.id, lesson.id)}
+                                                                onClick={() => handleDeleteLesson(module.slug, lesson.slug)}
                                                                 className="inline-flex items-center text-red-600 hover:text-red-800"
                                                                 title="Delete Lesson"
                                                             >

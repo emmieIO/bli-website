@@ -39,9 +39,15 @@ export default function CoursesIndex({ courses }: CoursesIndexProps) {
 
     // Filter courses based on search and category
     const filteredCourses = courses.filter(course => {
-        const matchesSearch = course.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            course.description?.toLowerCase().includes(searchQuery.toLowerCase());
+        // If no search query, show all courses (only filter by category)
+        const matchesSearch = !searchQuery.trim() ||
+            course.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            (course.description && course.description.toLowerCase().includes(searchQuery.toLowerCase())) ||
+            (course.instructor.name && course.instructor.name.toLowerCase().includes(searchQuery.toLowerCase())) ||
+            course.category.name.toLowerCase().includes(searchQuery.toLowerCase());
+
         const matchesCategory = !selectedCategory || course.category.name === selectedCategory;
+
         return matchesSearch && matchesCategory;
     });
 

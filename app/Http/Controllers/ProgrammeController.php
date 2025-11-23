@@ -53,6 +53,32 @@ class ProgrammeController extends Controller
         try {
             $event = $this->programRepository->findProgramsBySlug($slug);
 
+            // Load speakers relationship
+            $event->load('speakers.user');
+
+            // Calculate slots remaining
+            $slotsRemaining = $event->slotsRemaining();
+
+            // Handle non-numeric slots remaining (Unlimited, Full)
+            if ($slotsRemaining === 'Unlimited') {
+                $slotsRemaining = 999; // Large number to indicate unlimited
+            } elseif ($slotsRemaining === 'Full') {
+                $slotsRemaining = 0;
+            }
+
+            // Check if user is registered
+            $isRegistered = false;
+            $revokeCount = 0;
+            if (auth()->check()) {
+                $isRegistered = $event->isRegistered();
+                $revokeCount = $event->getRevokeCount();
+            }
+
+            // Append calculated values to event
+            $event->slots_remaining = $slotsRemaining;
+            $event->is_registered = $isRegistered;
+            $event->revoke_count = $revokeCount;
+
             // Generate signed route for speaker application if applicable
             $signedSpeakerRoute = null;
             if ($event->is_allowing_application) {

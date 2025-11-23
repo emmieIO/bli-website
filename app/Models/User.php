@@ -134,4 +134,36 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return $this->hasMany(LessonProgress::class);
     }
+
+    /**
+     * Ratings given by this user to instructors
+     */
+    public function ratingsGiven()
+    {
+        return $this->hasMany(InstructorRating::class, 'user_id');
+    }
+
+    /**
+     * Ratings received by this user as an instructor
+     */
+    public function ratingsReceived()
+    {
+        return $this->hasMany(InstructorRating::class, 'instructor_id');
+    }
+
+    /**
+     * Get the average rating for this instructor
+     */
+    public function getAverageRatingAttribute()
+    {
+        return $this->ratingsReceived()->avg('rating') ?? 0;
+    }
+
+    /**
+     * Get the total number of ratings for this instructor
+     */
+    public function getTotalRatingsAttribute()
+    {
+        return $this->ratingsReceived()->count();
+    }
 }

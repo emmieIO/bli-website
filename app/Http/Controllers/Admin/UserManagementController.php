@@ -148,4 +148,76 @@ class UserManagementController extends Controller
             'type' => 'success',
         ]);
     }
+
+    /**
+     * Reset role permissions to defaults
+     */
+    public function resetToDefaults()
+    {
+        // Default permission mappings
+        $defaults = [
+            'admin' => Permission::all()->pluck('name')->toArray(),
+            'instructor' => [
+                'course-create',
+                'course-edit',
+                'course-view',
+                'course-delete',
+                'lesson-create',
+                'lesson-edit',
+                'lesson-view',
+                'lesson-delete',
+            ],
+            'student' => [
+                'course-view',
+                'lesson-view',
+            ],
+        ];
+
+        foreach ($defaults as $roleName => $permissions) {
+            $role = Role::findByName($roleName);
+            if ($role) {
+                $role->syncPermissions($permissions);
+            }
+        }
+
+        return redirect()->back()->with([
+            'message' => 'All roles have been reset to default permissions successfully',
+            'type' => 'success',
+        ]);
+    }
+
+    /**
+     * Export role configuration
+     */
+    public function exportConfiguration()
+    {
+        $roles = Role::with('permissions')->get();
+
+        $config = $roles->map(function ($role) {
+            return [
+                'role' => $role->name,
+                'permissions' => $role->permissions->pluck('name')->toArray(),
+            ];
+        });
+
+        $fileName = 'roles-permissions-' . now()->format('Y-m-d-His') . '.json';
+
+        return response()->json($config, 200, [
+            'Content-Type' => 'application/json',
+            'Content-Disposition' => "attachment; filename=\"{$fileName}\"",
+        ]);
+    }
+
+    /**
+     * View audit log for role/permission changes
+     */
+    public function auditLog()
+    {
+        // For now, return a simple message. In production, you'd integrate with
+        // spatie/laravel-activitylog or similar package
+        return redirect()->back()->with([
+            'message' => 'Audit log feature coming soon. Integrate spatie/laravel-activitylog for full audit trail functionality.',
+            'type' => 'info',
+        ]);
+    }
 }

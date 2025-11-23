@@ -86,6 +86,9 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
         Route::get('/roles', [\App\Http\Controllers\Admin\UserManagementController::class, 'roles'])->name('roles.index');
         Route::post('/roles/update-permissions/{role}', [\App\Http\Controllers\Admin\UserManagementController::class, 'updateRolePermissions'])->name('roles.update-permissions');
         Route::post('/roles/toggle-permission', [\App\Http\Controllers\Admin\UserManagementController::class, 'togglePermission'])->name('roles.toggle-permission');
+        Route::post('/roles/reset-defaults', [\App\Http\Controllers\Admin\UserManagementController::class, 'resetToDefaults'])->name('roles.reset-defaults');
+        Route::get('/roles/export', [\App\Http\Controllers\Admin\UserManagementController::class, 'exportConfiguration'])->name('roles.export');
+        Route::get('/roles/audit-log', [\App\Http\Controllers\Admin\UserManagementController::class, 'auditLog'])->name('roles.audit-log');
     });
 
     // Course Categories (appears to be pure CRUD - can use resource)

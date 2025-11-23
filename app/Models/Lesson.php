@@ -19,6 +19,13 @@ class Lesson extends Model
         'content_path',
         'assignment_instructions',
         'order',
+        'video_status',
+        'video_error',
+        'video_uploaded_at',
+    ];
+
+    protected $casts = [
+        'video_uploaded_at' => 'datetime',
     ];
 
     public function courseModule()

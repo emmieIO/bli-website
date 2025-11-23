@@ -6,73 +6,88 @@ use App\Http\Controllers\Controller;
 use App\Models\Course;
 use App\Models\CourseModule;
 use App\Services\Course\CourseModuleService;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
 
 class CourseModuleController extends Controller
 {
-    public function __construct(public CourseModuleService $courseModuleService){}
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
-    {
-        //
-    }
+    use AuthorizesRequests;
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
+    public function __construct(protected CourseModuleService $courseModuleService) {}
 
     /**
      * Store a newly created resource in storage.
      */
     public function store(Request $request, Course $course)
     {
+        $this->authorize('update', $course);
+
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
         ]);
-        $courseModule = $this->courseModuleService->createModule($course, $validated);
 
-        return redirect()->back()->with([
-            'message'=> $courseModule ? 'Module created successfully' : 'Failed to create module',
-            'type' => $courseModule ? 'success' : 'error',
-        ]);
-    }
+        try {
+            $this->courseModuleService->createModule($course, $validated);
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
+            return redirect()->back()->with([
+                'message' => 'Module created successfully',
+                'type' => 'success',
+            ]);
+        } catch (\Exception $e) {
+            return redirect()->back()->with([
+                'message' => 'Failed to create module: ' . $e->getMessage(),
+                'type' => 'error',
+            ]);
+        }
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(Request $request, Course $course, CourseModule $module)
     {
-        //
+        $this->authorize('update', $course);
+
+        $validated = $request->validate([
+            'title' => 'required|string|max:255',
+            'description' => 'nullable|string',
+        ]);
+
+        try {
+            $this->courseModuleService->updateModule($module, $validated);
+
+            return redirect()->back()->with([
+                'message' => 'Module updated successfully',
+                'type' => 'success',
+            ]);
+        } catch (\Exception $e) {
+            return redirect()->back()->with([
+                'message' => 'Failed to update module: ' . $e->getMessage(),
+                'type' => 'error',
+            ]);
+        }
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(Course $course, CourseModule $module)
     {
-        //
+        $this->authorize('update', $course);
+
+        try {
+            $this->courseModuleService->deleteModule($module);
+
+            return redirect()->back()->with([
+                'message' => 'Module deleted successfully',
+                'type' => 'success',
+            ]);
+        } catch (\Exception $e) {
+            return redirect()->back()->with([
+                'message' => 'Failed to delete module: ' . $e->getMessage(),
+                'type' => 'error',
+            ]);
+        }
     }
 }

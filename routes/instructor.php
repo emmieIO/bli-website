@@ -36,6 +36,7 @@ Route::prefix('instructor')->name('instructor.')->middleware(['auth', 'role:inst
     Route::get('/courses/{course}', [InstructorCourseController::class, 'show'])->name('courses.show');
     Route::get('/courses/{course}/edit', [InstructorCourseController::class, 'edit'])->name('courses.edit');
     Route::put('/courses/{course}', [InstructorCourseController::class, 'update'])->name('courses.update');
+    Route::delete('/courses/{course}', [InstructorCourseController::class, 'destroy'])->name('courses.destroy');
     Route::get('/courses/{course}/builder', [InstructorCourseController::class, 'builder'])->name('courses.builder');
     Route::post('/courses/{course}/submit-for-review', [InstructorCourseController::class, 'submitForReview'])->name('courses.submit-for-review');
     
