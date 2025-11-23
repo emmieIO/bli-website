@@ -46,9 +46,8 @@ class SearchController extends Controller
                 ];
             });
 
-        // Search Courses (only approved courses)
-        $courses = Course::where('status', 'approved')
-            ->where(function ($q) use ($query) {
+        // Search Courses (search all courses - permissions handled by frontend)
+        $courses = Course::where(function ($q) use ($query) {
                 $q->where('title', 'LIKE', "%{$query}%")
                     ->orWhere('description', 'LIKE', "%{$query}%");
             })
