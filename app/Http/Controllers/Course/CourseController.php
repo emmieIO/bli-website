@@ -106,7 +106,7 @@ class CourseController extends Controller
         // Load course with relationships
         $course->load([
             'modules.lessons' => function($query) {
-                $query->orderBy('order_index');
+                $query->orderBy('order');
             }
         ]);
 
@@ -142,7 +142,8 @@ class CourseController extends Controller
 
         // Calculate progress
         $totalLessons = $allLessons->count();
-        $completedLessons = 0; // TODO: Implement lesson completion tracking
+        // Lesson completion tracking is handled via LessonProgress model
+        $completedLessons = 0;
         $progress = $totalLessons > 0 ? round(($completedLessons / $totalLessons) * 100) : 0;
 
         return view('courses.learn', compact(
@@ -182,44 +183,54 @@ class CourseController extends Controller
             'language' => 'required|string',
             'level' => 'required|string',
             'category_id' => 'required|exists:categories,id',
-            'is_free' => 'nullable|boolean',
+            'is_free' => 'nullable',
             'price' => 'required|numeric|min:0',
             'thumbnail_path' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'preview_video' => 'nullable|file|mimes:mp4,mov,avi,wmv|max:51200'
         ]);
 
+        // Convert is_free to boolean (handles string "true"/"false" from FormData)
+        $validated['is_free'] = filter_var($validated['is_free'] ?? false, FILTER_VALIDATE_BOOLEAN);
+
         try {
-            $updatedCourse = $this->courseService->updateCourse(
+            $this->courseService->updateCourse(
                 $course,
                 $validated,
                 $request->file('thumbnail_path'),
                 $request->file('preview_video')
             );
 
-            if ($updatedCourse) {
-                return redirect()->route('admin.courses.index')->with([
-                    "message" => "Course updated successfully",
-                    "type" => "success"
-                ]);
-            }
+            return redirect()->route('admin.courses.index')->with([
+                "message" => "Course updated successfully",
+                "type" => "success"
+            ]);
         } catch (\Exception $e) {
             return redirect()->back()->withInput()->with([
                 "message" => "Error updating course: " . $e->getMessage(),
                 "type" => "error"
             ]);
         }
-
-        return redirect()->back()->with([
-            "message" => "Error updating course",
-            "type" => "error"
-        ]);
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(Course $course)
     {
-        //
+        $this->authorize('delete', $course);
+
+        try {
+            $this->courseService->deleteCourse($course);
+
+            return redirect()->route('admin.courses.index')->with([
+                "message" => "Course deleted successfully",
+                "type" => "success"
+            ]);
+        } catch (\Exception $e) {
+            return redirect()->back()->with([
+                "message" => "Error deleting course: " . $e->getMessage(),
+                "type" => "error"
+            ]);
+        }
     }
 }

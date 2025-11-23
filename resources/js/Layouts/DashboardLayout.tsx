@@ -1,6 +1,25 @@
 import { PropsWithChildren, useState } from 'react';
 import { Link, router, usePage } from '@inertiajs/react';
 import { ToastContainer, useToastNotifications } from '@/Components/Toast';
+import {
+    LayoutDashboard,
+    BookOpen,
+    CalendarHeart,
+    Send,
+    Calendar,
+    Mic,
+    GraduationCap,
+    Users,
+    Settings,
+    ChevronDown,
+    Menu,
+    X,
+    Home,
+    Search,
+    ExternalLink,
+    User,
+    LogOut
+} from 'lucide-react';
 
 interface SideLink {
     title: string;
@@ -79,6 +98,22 @@ export default function DashboardLayout({ children, sideLinks }: DashboardLayout
         return `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.name || '')}&background=002147&color=fff`;
     };
 
+    // Map icon names to Lucide components
+    const getIcon = (iconName: string) => {
+        const iconMap: Record<string, any> = {
+            'chart-area': LayoutDashboard,
+            'book-open': BookOpen,
+            'calendar-heart': CalendarHeart,
+            'send': Send,
+            'calendar': Calendar,
+            'mic': Mic,
+            'graduation-cap': GraduationCap,
+            'users': Users,
+            'settings': Settings,
+        };
+        return iconMap[iconName] || LayoutDashboard;
+    };
+
     return (
         <div className="min-h-screen bg-gray-50">
             {/* Toast Notifications */}
@@ -109,7 +144,7 @@ export default function DashboardLayout({ children, sideLinks }: DashboardLayout
                             onClick={() => setIsSidebarOpen(false)}
                             className="inline-flex items-center p-2 text-sm text-slate-400 rounded-lg sm:hidden hover:bg-slate-700/50 hover:text-white"
                         >
-                            <i className="fas fa-times w-5 h-5"></i>
+                            <X size={20} />
                         </button>
                     </div>
 
@@ -121,15 +156,16 @@ export default function DashboardLayout({ children, sideLinks }: DashboardLayout
 
                                 if (link.children) {
                                     const isExpanded = expandedMenus.includes(link.title);
+                                    const IconComponent = getIcon(link.icon);
                                     return (
                                         <li key={index}>
                                             <button
                                                 onClick={() => toggleMenu(link.title)}
                                                 className="flex items-center w-full p-3 text-sm font-medium text-slate-300 transition-all duration-200 rounded-xl group hover:bg-slate-700/50 hover:text-white"
                                             >
-                                                <i className={`fas fa-${link.icon} flex-shrink-0 w-5 h-5 text-slate-400 transition-colors duration-200 group-hover:text-blue-400`}></i>
-                                                <span className="flex-1 ms-3 text-left whitespace-nowrap">{link.title}</span>
-                                                <i className={`fas fa-chevron-down w-4 h-4 text-slate-400 transition-all duration-200 ${isExpanded ? 'rotate-180' : ''}`}></i>
+                                                <IconComponent size={18} className="text-slate-400 transition-colors duration-200 group-hover:text-blue-400 mr-3 flex-shrink-0" />
+                                                <span className="flex-1 text-left whitespace-nowrap">{link.title}</span>
+                                                <ChevronDown size={16} className={`text-slate-400 transition-all duration-200 ${isExpanded ? 'rotate-180' : ''}`} />
                                             </button>
                                             {isExpanded && (
                                                 <ul className="mt-2 space-y-1 ml-4">
@@ -153,14 +189,15 @@ export default function DashboardLayout({ children, sideLinks }: DashboardLayout
                                     );
                                 }
 
+                                const IconComponent = getIcon(link.icon);
                                 return (
                                     <li key={index}>
                                         <Link
                                             href={route(link.route!)}
                                             className="flex items-center p-3 text-sm font-medium text-slate-300 rounded-xl transition-all duration-200 hover:bg-slate-700/50 hover:text-white group"
                                         >
-                                            <i className={`fas fa-${link.icon} flex-shrink-0 w-5 h-5 text-slate-400 transition-colors duration-200 group-hover:text-blue-400`}></i>
-                                            <span className="flex-1 ms-3 whitespace-nowrap">{link.title}</span>
+                                            <IconComponent size={18} className="text-slate-400 transition-colors duration-200 group-hover:text-blue-400 mr-3 flex-shrink-0" />
+                                            <span className="flex-1 whitespace-nowrap">{link.title}</span>
                                         </Link>
                                     </li>
                                 );
@@ -182,7 +219,7 @@ export default function DashboardLayout({ children, sideLinks }: DashboardLayout
                                     onClick={() => setIsSidebarOpen(!isSidebarOpen)}
                                     className="inline-flex items-center p-2 text-slate-600 rounded-xl sm:hidden hover:bg-primary-600 hover:text-white"
                                 >
-                                    <i className="fas fa-bars w-5 h-5"></i>
+                                    <Menu size={20} />
                                 </button>
 
                                 <nav className="hidden sm:flex items-center space-x-2 text-sm">
@@ -191,7 +228,7 @@ export default function DashboardLayout({ children, sideLinks }: DashboardLayout
                                         className="flex items-center text-slate-500 hover:text-primary-600 transition-colors"
                                         style={{ color: route().current('user_dashboard') ? '#002147' : undefined }}
                                     >
-                                        <i className="fas fa-home w-4 h-4 mr-1"></i>
+                                        <Home size={16} className="mr-1" />
                                         <span className="font-medium">Dashboard</span>
                                     </Link>
                                 </nav>
@@ -201,7 +238,7 @@ export default function DashboardLayout({ children, sideLinks }: DashboardLayout
                             <div className="hidden lg:flex flex-1 max-w-lg mx-8">
                                 <div className="relative w-full">
                                     <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                                        <i className="fas fa-search w-4 h-4 text-slate-400"></i>
+                                        <Search size={16} className="text-slate-400" />
                                     </div>
                                     <input
                                         type="search"
@@ -218,12 +255,12 @@ export default function DashboardLayout({ children, sideLinks }: DashboardLayout
                                     href={route('homepage')}
                                     className="hidden md:inline-flex items-center gap-2 px-3 py-2 text-sm font-medium text-slate-600 bg-slate-100 rounded-lg hover:bg-primary-600 hover:text-white transition-all"
                                 >
-                                    <i className="fas fa-external-link-alt w-4 h-4"></i>
+                                    <ExternalLink size={16} />
                                     <span className="hidden lg:inline">Website</span>
                                 </Link>
 
                                 <button className="lg:hidden p-2 text-slate-600 rounded-lg hover:bg-slate-100" onClick={() => setShowMobileSearch(!showMobileSearch)}>
-                                    <i className="fas fa-search w-5 h-5"></i>
+                                    <Search size={20} />
                                 </button>
 
                                 {/* User Dropdown */}
@@ -242,7 +279,7 @@ export default function DashboardLayout({ children, sideLinks }: DashboardLayout
                                                 {user?.email?.substring(0, 20)}
                                             </p>
                                         </div>
-                                        <i className="fas fa-chevron-down w-4 h-4 text-slate-400"></i>
+                                        <ChevronDown size={16} className="text-slate-400" />
                                     </button>
 
                                     {/* Dropdown Menu */}
@@ -257,16 +294,16 @@ export default function DashboardLayout({ children, sideLinks }: DashboardLayout
                                                     href={route('homepage')}
                                                     className="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 hover:text-primary-600 transition-colors"
                                                 >
-                                                    <i className="fas fa-external-link-alt w-4 h-4 text-slate-400"></i>
+                                                    <ExternalLink size={16} className="text-slate-400" />
                                                     Visit Website
                                                 </Link>
                                             </li>
                                             <li>
                                                 <Link
-                                                    href={route('profile')}
+                                                    href={route('profile.edit')}
                                                     className="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 hover:text-primary-600 transition-colors"
                                                 >
-                                                    <i className="fas fa-user w-4 h-4 text-slate-400"></i>
+                                                    <User size={16} className="text-slate-400" />
                                                     Profile Settings
                                                 </Link>
                                             </li>
@@ -275,7 +312,7 @@ export default function DashboardLayout({ children, sideLinks }: DashboardLayout
                                                     onClick={logout}
                                                     className="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors"
                                                 >
-                                                    <i className="fas fa-sign-out-alt w-4 h-4 text-red-500"></i>
+                                                    <LogOut size={16} className="text-red-500" />
                                                     Sign out
                                                 </button>
                                             </li>
@@ -290,7 +327,7 @@ export default function DashboardLayout({ children, sideLinks }: DashboardLayout
                             <div className="lg:hidden mt-4 pt-4 border-t border-slate-200">
                                 <div className="relative">
                                     <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                                        <i className="fas fa-search w-4 h-4 text-slate-400"></i>
+                                        <Search size={16} className="text-slate-400" />
                                     </div>
                                     <input
                                         type="search"
