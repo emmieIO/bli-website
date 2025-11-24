@@ -204,10 +204,13 @@ export default function DashboardLayout({ children, sideLinks }: DashboardLayout
     const fetchNotifications = async () => {
         try {
             const response = await axios.get(route('notifications.index'));
-            setNotifications(response.data.notifications);
-            setUnreadCount(response.data.unread_count);
+            setNotifications(response.data.notifications || []);
+            setUnreadCount(response.data.unread_count || 0);
         } catch (error) {
             console.error('Error fetching notifications:', error);
+            // Silently fail - notifications are not critical
+            setNotifications([]);
+            setUnreadCount(0);
         }
     };
 
