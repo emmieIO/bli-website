@@ -38,8 +38,8 @@ Route::group(['middleware' => ['auth']], function () {
     Route::post('/email/resend', [AuthenticatedController::class, 'resendVerificationEmail'])
         ->name('verification.send');
 
-    // update user photo
-    Route::patch('/profile/update-photo', [UserController::class, 'updatePhoto'])->name('profile.photo.update');
+    // update user photo (Legacy - consider removing if not used)
+    Route::patch('/profile/update-photo', [UserController::class, 'updatePhoto'])->name('profile.photo.update_legacy');
 
     // Logout Route
     Route::post('invalidate-session', [AuthenticatedController::class, 'logout'])->name('logout');
