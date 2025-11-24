@@ -22,11 +22,8 @@ class ShowMyEventsController extends Controller
                 ? 'upcoming'
                 : (now()->isAfter($event->end_date) ? 'ended' : 'ongoing');
 
-            // $event->start_date = $event->start_date;
-            // $event->end_date = $event->end_date;
-
             return $event;
         });
-        return view("user_dashboard.my-events", compact("events"));
+        return \Inertia\Inertia::render("MyEvents/Index", compact("events"));
     }
 }

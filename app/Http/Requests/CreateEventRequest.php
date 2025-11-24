@@ -30,7 +30,7 @@ class CreateEventRequest extends FormRequest {
             'mode' => 'required|string|in:' . implode( ',', array_column( \App\Enums\EventModeEnum::cases(), 'value' ) ),
             'start_date' => 'required|date|after_or_equal:today',
             'end_date' => 'required|date|after_or_equal:start_date',
-            'physical_address' => 'nullable|string|max:255, required_if:mode,offline,hybrid',
+            'physical_address' => 'nullable|string|max:255|required_if:mode,offline,hybrid',
             'creator_id' => 'required|exists:users,id',
             'is_active' => 'sometimes|boolean',
             'metadata' => 'nullable|array',

@@ -23,22 +23,22 @@ class EventController extends Controller
     public function index()
     {
         $query = request()->query('status');
-        return view('admin.events.index', [
+        return \Inertia\Inertia::render('Admin/Events/Index', [
             'events' => $this->eventService->getEventsCreatedByUser($query)
         ]);
     }
 
     public function create()
     {
-        return view('admin.events.create-event');
+        return \Inertia\Inertia::render('Admin/Events/Create');
     }
 
     public function show(Event $event)
     {
-        $event->load('speakers', "resources");
+        $event->load('speakers.user', "resources");
         $speakers = $this->speakerService->fetchSpeakers();
 
-        return view("admin.events.view-event", compact('event', 'speakers'));
+        return \Inertia\Inertia::render('Admin/Events/View', compact('event', 'speakers'));
     }
     public function store(CreateEventRequest $request)
     {
@@ -46,7 +46,7 @@ class EventController extends Controller
         $validated = $request->validated();
         $event = $this->eventService->createEvent($validated, $program_cover);
         if ($event) {
-            return redirect()->back()->with([
+            return to_route('admin.events.index')->with([
                 'type' => 'success',
                 'message' => 'Event created successfully.'
             ]);
@@ -60,7 +60,7 @@ class EventController extends Controller
     public function edit(string $slug)
     {
         $event = Event::findBySlug($slug)->firstOrFail();
-        return view('admin.events.edit-event', compact('event'));
+        return \Inertia\Inertia::render('Admin/Events/Edit', compact('event'));
     }
 
     public function update(UpdateEventRequest $request, Event $event)
@@ -70,7 +70,7 @@ class EventController extends Controller
         $event = $this->eventService->updateEvent($validated, $event, $program_cover);
 
         if ($event) {
-            return redirect()->back()->with([
+            return to_route('admin.events.index')->with([
                 'type' => 'success',
                 'message' => 'Event updated successfully.'
             ]);

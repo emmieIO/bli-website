@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Services\Event\EventService;
 use App\Services\MiscService;
 use Illuminate\Http\Request;
+use Inertia\Inertia;
 
 class HomeController extends Controller
 {
@@ -16,6 +17,6 @@ class HomeController extends Controller
     public function index(){
         $events = $this->eventService->fetchFeaturedEvents();
         $categories = $this->miscService->fetchFiveCategories();
-        return view("index", compact("events", "categories"));
+        return Inertia::render("Index", compact("events", "categories"));
     }
 }

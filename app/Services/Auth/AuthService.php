@@ -79,7 +79,7 @@ class AuthService {
         }
     }
 
-    public function distroyAccount(Request $request)
+    public function destroyAccount(Request $request)
     {
         try {
             $user = auth()->user();

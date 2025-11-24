@@ -59,4 +59,17 @@ return [
 
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Allowed Domains for Video Embedding
+    |--------------------------------------------------------------------------
+    |
+    | List of domains that are allowed to embed your Vimeo videos.
+    | This is used when 'embed' privacy setting is set to 'whitelist'.
+    | Leave empty to disable domain whitelisting.
+    |
+    */
+
+    'allowed_domains' => array_filter(explode(',', env('VIMEO_ALLOWED_DOMAINS', ''))),
+
 ];

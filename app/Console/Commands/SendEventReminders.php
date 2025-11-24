@@ -2,12 +2,10 @@
 
 namespace App\Console\Commands;
 
-use App\Mail\EventReminder;
 use App\Models\Event;
 use App\Notifications\UpcomingEventReminder;
 use Illuminate\Console\Command;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Notification;
 use Log;
 
@@ -33,16 +31,40 @@ class SendEventReminders extends Command
      */
     public function handle()
     {
-        $events = Event::with('attendees')
-            ->where('start_date','>', now())
-            ->where('start_date','<=', Carbon::now()->addDay())
-            ->chunkById(20, function ($events) {
-                foreach ($events as $event) {
-                    $attendees = $event->attendees;
-                    foreach ($attendees as $attendee) {
-                        Notification::send($attendee, new UpcomingEventReminder($event));
-                    }
-                }
-            });
+        $now = Carbon::now();
+        $reminderCount = 0;
+
+        // Send reminders for events starting in approximately 24 hours (23h 55m to 24h 5m window)
+        // This 10-minute window accommodates two 5-minute cron runs
+        $events24h = Event::with('attendees')
+            ->where('start_date', '>', $now->copy()->addHours(23)->addMinutes(55))
+            ->where('start_date', '<=', $now->copy()->addHours(24)->addMinutes(5))
+            ->get();
+
+        foreach ($events24h as $event) {
+            foreach ($event->attendees()->where('status', 'registered')->get() as $attendee) {
+                Notification::send($attendee, new UpcomingEventReminder($event));
+                $reminderCount++;
+            }
+        }
+
+        // Send reminders for events starting in approximately 2 hours (1h 55m to 2h 5m window)
+        // This 10-minute window accommodates two 5-minute cron runs
+        $events2h = Event::with('attendees')
+            ->where('start_date', '>', $now->copy()->addHours(1)->addMinutes(55))
+            ->where('start_date', '<=', $now->copy()->addHours(2)->addMinutes(5))
+            ->get();
+
+        foreach ($events2h as $event) {
+            foreach ($event->attendees()->where('status', 'registered')->get() as $attendee) {
+                Notification::send($attendee, new UpcomingEventReminder($event));
+                $reminderCount++;
+            }
+        }
+
+        $this->info("Sent {$reminderCount} event reminders.");
+        Log::info("Event reminders sent: {$reminderCount} notifications");
+
+        return Command::SUCCESS;
     }
 }

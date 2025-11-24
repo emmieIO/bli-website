@@ -11,7 +11,40 @@ use Illuminate\Support\Carbon;
 class Event extends Model
 {
     use HasFactory, HasUUID;
-    protected $guarded = [];
+
+    /**
+     * Get the route key for the model.
+     * Use 'slug' for route binding to support SEO-friendly URLs.
+     */
+    public function getRouteKeyName(): string
+    {
+        return 'slug';
+    }
+
+    protected $fillable = [
+        'uuid',
+        'slug',
+        'title',
+        'theme',
+        'description',
+        'program_cover',
+        'mode',
+        'location',
+        'attendee_slots',
+        'physical_address',
+        'venue',
+        'contact_email',
+        'start_date',
+        'end_date',
+        'creator_id',
+        'is_active',
+        'is_published',
+        'is_allowing_application',
+        'is_featured',
+        'entry_fee',
+        'metadata',
+    ];
+
     protected $casts = [
         'metadata' => 'array',
         'start_date' => 'datetime',

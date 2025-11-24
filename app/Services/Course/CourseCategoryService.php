@@ -110,7 +110,7 @@ class CourseCategoryService
         }
 
 
-        return $query->paginate($perPage);
+        return $query->get();
     }
 
     public function fetchAll()

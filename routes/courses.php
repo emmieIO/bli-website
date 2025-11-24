@@ -7,9 +7,10 @@ use Illuminate\Support\Facades\Route;
 Route::prefix('courses')->name('courses.')->group(function () {
     Route::get('/', [UserCourseController::class, 'index'])->name('index');
     Route::get('/{course}', [UserCourseController::class, 'show'])->name('show');
-    
+
     // Authenticated learning routes
     Route::middleware(['auth'])->group(function () {
+        Route::post('/{course}/enroll', [UserCourseController::class, 'enroll'])->name('enroll');
         Route::get('/{course}/learn/{lesson?}', [UserCourseController::class, 'learn'])->name('learn');
     });
 });

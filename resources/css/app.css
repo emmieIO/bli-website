@@ -8,10 +8,10 @@
 @import "./dashboard.css";
 @import "./home-nav.css";
 @import "./auth-enhancements.css";
-@plugin "flyonui" {
+/* @plugin "flyonui" {
     themes: light --default, dark --prefersdark, gourmet, claude, slack, soft,
         mintlify;
-}
+} */
 @import "../../node_modules/flyonui/variants.css";
 
 @plugin "flowbite/plugin";

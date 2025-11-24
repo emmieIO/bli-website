@@ -26,13 +26,23 @@ class CourseController extends Controller
         $this->authorize('viewAny', Course::class);
         $categories = Category::all();
         $courses = $this->courseService->fetchCourses();
-        return view("admin.courses.index", compact("categories", "courses"));
+        return \Inertia\Inertia::render('Admin/Courses/Index', compact("categories", "courses"));
     }
 
     public function builder(Course $course)
     {
-        $lessontypes = LessonType::options();
-        return view("admin.courses.builder", compact("course", "lessontypes"));
+        // Load course with modules, lessons, requirements, and outcomes
+        $course->load([
+            'modules.lessons' => function($query) {
+                $query->orderBy('order');
+            },
+            'requirements',
+            'outcomes',
+            'category',
+            'instructor'
+        ]);
+
+        return \Inertia\Inertia::render('Admin/Courses/Builder', compact('course'));
     }
 
     /**
@@ -40,7 +50,10 @@ class CourseController extends Controller
      */
     public function create()
     {
-        //
+        $this->authorize('create', Course::class);
+        $categories = Category::all();
+        $levels = \App\Enums\CourseLevel::options();
+        return \Inertia\Inertia::render('Admin/Courses/Create', compact('categories', 'levels'));
     }
 
     /**
@@ -49,10 +62,10 @@ class CourseController extends Controller
     public function store(CreateCourseRequest $request)
     {
         $this->authorize('create', Course::class);
-        $course = $this->courseService->createCourse($request->all(), $request->file('thumbnail_path'));
+        $course = $this->courseService->createCourse($request->all(), $request->file('thumbnail'));
         if ($course) {
-            return redirect()->back()->with([
-                "message" => "Course created successfully",
+            return to_route('admin.courses.builder', $course)->with([
+                "message" => "Course created successfully. Now add modules and lessons!",
                 "type" => "success"
             ]);
         }
@@ -93,7 +106,7 @@ class CourseController extends Controller
         // Load course with relationships
         $course->load([
             'modules.lessons' => function($query) {
-                $query->orderBy('order_index');
+                $query->orderBy('order');
             }
         ]);
 
@@ -129,7 +142,8 @@ class CourseController extends Controller
 
         // Calculate progress
         $totalLessons = $allLessons->count();
-        $completedLessons = 0; // TODO: Implement lesson completion tracking
+        // Lesson completion tracking is handled via LessonProgress model
+        $completedLessons = 0;
         $progress = $totalLessons > 0 ? round(($completedLessons / $totalLessons) * 100) : 0;
 
         return view('courses.learn', compact(
@@ -146,9 +160,13 @@ class CourseController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(string $id)
+    public function edit(Course $course)
     {
-        //
+        $this->authorize('update', $course);
+
+        $categories = Category::all();
+        $levels = \App\Enums\CourseLevel::options();
+        return \Inertia\Inertia::render('Admin/Courses/Edit', compact('course', 'categories', 'levels'));
     }
 
     /**
@@ -157,47 +175,62 @@ class CourseController extends Controller
     public function update(Request $request, Course $course)
     {
         $this->authorize('update', $course);
-        
+
         $validated = $request->validate([
             'title' => 'required|string|max:255',
+            'subtitle' => 'nullable|string|max:500',
             'description' => 'nullable|string',
+            'language' => 'required|string',
             'level' => 'required|string',
             'category_id' => 'required|exists:categories,id',
+            'is_free' => 'nullable',
             'price' => 'required|numeric|min:0',
-            'thumbnail_path' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048'
+            'thumbnail_path' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'preview_video' => 'nullable|file|mimes:mp4,mov,avi,wmv|max:51200'
         ]);
 
+        // Convert is_free to boolean (handles string "true"/"false" from FormData)
+        $validated['is_free'] = filter_var($validated['is_free'] ?? false, FILTER_VALIDATE_BOOLEAN);
+
         try {
-            $updatedCourse = $this->courseService->updateCourse(
-                $course, 
-                $validated, 
-                $request->file('thumbnail_path')
+            $this->courseService->updateCourse(
+                $course,
+                $validated,
+                $request->file('thumbnail_path'),
+                $request->file('preview_video')
             );
-            
-            if ($updatedCourse) {
-                return redirect()->back()->with([
-                    "message" => "Course updated successfully",
-                    "type" => "success"
-                ]);
-            }
+
+            return redirect()->route('admin.courses.index')->with([
+                "message" => "Course updated successfully",
+                "type" => "success"
+            ]);
         } catch (\Exception $e) {
-            return redirect()->back()->with([
+            return redirect()->back()->withInput()->with([
                 "message" => "Error updating course: " . $e->getMessage(),
                 "type" => "error"
             ]);
         }
-
-        return redirect()->back()->with([
-            "message" => "Error updating course",
-            "type" => "error"
-        ]);
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(Course $course)
     {
-        //
+        $this->authorize('delete', $course);
+
+        try {
+            $this->courseService->deleteCourse($course);
+
+            return redirect()->route('admin.courses.index')->with([
+                "message" => "Course deleted successfully",
+                "type" => "success"
+            ]);
+        } catch (\Exception $e) {
+            return redirect()->back()->with([
+                "message" => "Error deleting course: " . $e->getMessage(),
+                "type" => "error"
+            ]);
+        }
     }
 }

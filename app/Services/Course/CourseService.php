@@ -73,7 +73,7 @@ class CourseService
 
     public function fetchCourses()
     {
-        return Course::with(['category', 'instructor'])->latest()->paginate(10);
+        return Course::with(['category', 'instructor'])->latest()->get();
     }
 
     public function fetchInstructorCourses(int $instructorId)
@@ -119,26 +119,38 @@ class CourseService
         return $course->outcomes()->where('id', $outcome->id)->delete();
     }
 
-    public function updateCourse(Course $course, array $data, ?UploadedFile $file = null)
+    public function updateCourse(Course $course, array $data, ?UploadedFile $thumbnailFile = null, ?UploadedFile $previewVideoFile = null)
     {
         try {
-            return DB::transaction(function () use ($course, $data, $file) {
+            return DB::transaction(function () use ($course, $data, $thumbnailFile, $previewVideoFile) {
                 $updateData = [
                     'title' => $data['title'],
+                    'subtitle' => $data['subtitle'] ?? null,
                     'description' => $data['description'] ?? null,
+                    'language' => $data['language'] ?? 'English',
                     'level' => $data['level'],
                     'category_id' => $data['category_id'],
-                    'price' => $data['price'],
+                    'is_free' => $data['is_free'] ?? false,
+                    'price' => $data['price'] ?? 0,
                     'status' => $data['status'] ?? $course->status,
                 ];
 
-                // Handle file upload if provided
-                if ($file) {
+                // Handle thumbnail upload if provided
+                if ($thumbnailFile) {
                     // Delete old thumbnail if exists
                     if ($course->thumbnail_path) {
                         $this->deleteFile($course->thumbnail_path);
                     }
-                    $updateData['thumbnail_path'] = $this->uploadFile($file, 'courses');
+                    $updateData['thumbnail_path'] = $this->uploadFile($thumbnailFile, 'courses/thumbnails');
+                }
+
+                // Handle preview video upload if provided
+                if ($previewVideoFile) {
+                    // Delete old preview video if exists
+                    if ($course->preview_video_path) {
+                        $this->deleteFile($course->preview_video_path);
+                    }
+                    $updateData['preview_video_path'] = $this->uploadFile($previewVideoFile, 'courses/previews');
                 }
 
                 $course->update($updateData);
@@ -146,6 +158,51 @@ class CourseService
             });
         } catch (\Throwable $th) {
             Log::error("Error updating course", ['error' => $th->getMessage()]);
+            throw $th;
+        }
+    }
+
+    public function deleteCourse(Course $course): bool
+    {
+        try {
+            return DB::transaction(function () use ($course) {
+                // Load relationships to access files before deletion
+                $course->load('modules.lessons');
+
+                // Delete course files
+                if ($course->thumbnail_path) {
+                    $this->deleteFile($course->thumbnail_path);
+                }
+                if ($course->preview_video_id) {
+                    $this->deleteFile($course->preview_video_id);
+                }
+
+                // Delete lesson content files
+                foreach ($course->modules as $module) {
+                    foreach ($module->lessons as $lesson) {
+                        if ($lesson->content_path) {
+                            $this->deleteFile($lesson->content_path);
+                        }
+                    }
+                }
+
+                // Delete related records
+                $course->requirements()->delete();
+                $course->outcomes()->delete();
+
+                // Detach enrolled students
+                $course->students()->detach();
+
+                // Delete the course (database cascade will handle modules, lessons, and lesson_progress)
+                $course->delete();
+
+                return true;
+            });
+        } catch (\Throwable $th) {
+            Log::error("Error deleting course", [
+                'course_id' => $course->id,
+                'error' => $th->getMessage()
+            ]);
             throw $th;
         }
     }

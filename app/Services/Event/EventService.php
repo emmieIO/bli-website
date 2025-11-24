@@ -6,10 +6,10 @@ use App\Events\EventRegisterEvent;
 use App\Events\Events\EventCreated;
 use App\Http\Requests\CreateEventRequest;
 use App\Http\Requests\UpdateEventRequest;
-use App\Mail\InvitationToSpeakerMail;
 use App\Models\Event;
 use App\Models\SpeakerApplication;
 use App\Models\SpeakerInvite;
+use App\Notifications\SpeakerInvitationNotification;
 use App\Services\Speakers\SpeakerApplicationService;
 use App\Traits\HasFileUpload;
 use DB;
@@ -21,7 +21,6 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Str;
-use Mail;
 
 use Throwable;
 
@@ -298,7 +297,7 @@ class EventService
             DB::transaction(function () use ($data) {
                 $invitation = SpeakerInvite::create($data);
 
-                Mail::to($invitation->speaker->user->email)->send(new InvitationToSpeakerMail($invitation));
+                $invitation->speaker->user->notify(new SpeakerInvitationNotification($invitation));
             });
             return true;
         } catch (Throwable $e) {

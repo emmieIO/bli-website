@@ -18,11 +18,14 @@ class VideoUrlRule implements ValidationRule {
             'loom' => '/^(https?:\/\/)?(www\.)?loom\.com\/share\/.+/'
         ];
 
-        foreach($patterns as $pattern){
-            if(!preg_match($pattern, $value)){
-                $fail('The :attribute must be a valid Vimeo, or Loom video URL.');
-                return;
+        // Check if the value matches ANY of the patterns (OR logic)
+        foreach($patterns as $platform => $pattern){
+            if(preg_match($pattern, $value)){
+                return; // Valid URL found, no need to fail
             }
         }
+
+        // None of the patterns matched, fail validation
+        $fail('The :attribute must be a valid Vimeo or Loom video URL.');
     }
 }

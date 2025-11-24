@@ -44,10 +44,10 @@ class CertificateController extends Controller
     /**
      * Verify certificate by certificate number
      */
-    public function verify($certificateNumber = null): View
+    public function verify($certificateNumber = null)
     {
         if (!$certificateNumber) {
-            return view('certificates.verify', [
+            return \Inertia\Inertia::render('Certificates/Verify', [
                 'certificate' => null,
                 'error' => null
             ]);
@@ -56,13 +56,13 @@ class CertificateController extends Controller
         $certificate = $this->certificateService->verifyCertificate($certificateNumber);
 
         if (!$certificate) {
-            return view('certificates.verify', [
+            return \Inertia\Inertia::render('Certificates/Verify', [
                 'certificate' => null,
-                'error' => 'Certificate not found.'
+                'error' => 'Certificate not found. Please check the certificate number and try again.'
             ]);
         }
 
-        return view('certificates.verify', compact('certificate'));
+        return \Inertia\Inertia::render('Certificates/Verify', compact('certificate'));
     }
 
     /**

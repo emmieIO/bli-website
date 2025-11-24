@@ -2,15 +2,17 @@
 
 use App\Actions\JoinEventAction;
 use App\Http\Controllers\Events\EventCalenderController;
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SpeakerApplicationController;
 use App\Http\Controllers\SpeakerInvitationController;
+use App\Http\Controllers\UserDashBoard\DashboardController;
 use App\Http\Controllers\UserDashBoard\RevokeRsvpAction;
 use App\Http\Controllers\UserDashBoard\ShowMyEventsController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth', 'verified'])->group(function () {
     // Main dashboard
-    Route::get('/dashboard', fn () => view('user_dashboard.index'))->name('user_dashboard');
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('user_dashboard');
 
     // User's events management
     Route::get('/user/events', ShowMyEventsController::class)->name('user.events');
@@ -25,6 +27,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/events/invitations/{invite}/show', [SpeakerInvitationController::class, 'show'])
         ->name('invitations.show')
         ->middleware('signed');
+
+    // Profile management
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::post('/profile/photo', [ProfileController::class, 'updatePhoto'])->name('profile.photo.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
 // Signed route group for speaker applications (auth not required for some)

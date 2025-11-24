@@ -39,14 +39,21 @@ class CourseRepository implements CourseRepositoryInterface
     public function enrollUser(User $user, Course $course): void
     {
         if (!$this->isUserEnrolled($user, $course)) {
-            $course->students()->attach($user->id, ['enrolled_at' => now()]);
+            $course->students()->attach($user->id);
         }
     }
 
     public function getPublishedCourses(): Collection
     {
-        return Course::where('status', 'published')
-            ->with(['instructor', 'modules.lessons'])
+        return Course::whereIn('status', ['published', 'draft']) // Temporarily include draft for testing
+            ->with([
+                'instructor' => function ($query) {
+                    $query->withCount('ratingsReceived')
+                          ->withAvg('ratingsReceived', 'rating');
+                },
+                'category',
+                'modules.lessons'
+            ])
             ->orderBy('created_at', 'desc')
             ->get();
     }

@@ -25,6 +25,7 @@ return [
             'title' => 'Course Management',
             'icon' => 'book-open',
             'permission' => ['course-view-own', 'course-create'],
+            'exclude_permission' => ['course-view-any'], // Hide from admins who have course-view-any
             'children' => [
                 [
                     'title' => 'My Courses',
@@ -66,14 +67,14 @@ return [
             'permission' => ['course-view-any'],
             'children' => [
                 [
+                    'title' => 'All Courses',
+                    'route' => 'admin.courses.index',
+                    'permission' => ['course-view-any'],
+                ],
+                [
                     'title' => 'Course Categories',
                     'route' => 'admin.category.index',
                     'permission' => ['category-view'],
-                ],
-                [
-                    'title' => 'Course Management',
-                    'route' => 'admin.courses.index',
-                    'permission' => ['course-view-any'],
                 ],
             ],
         ],

@@ -20,7 +20,17 @@ class User extends Authenticatable implements MustVerifyEmail
      *
      * @var list<string>
      */
-    protected $guarded = [];
+    protected $fillable = [
+        'name',
+        'email',
+        'password',
+        'phone',
+        'linkedin',
+        'website',
+        'headline',
+        'photo',
+        'email_verified_at',
+    ];
 
     /**
      * The attributes that should be hidden for serialization.
@@ -116,12 +126,44 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public function courseEnrollments()
     {
-        return $this->belongsToMany(Course::class, 'course_enrollments')
+        return $this->belongsToMany(Course::class, 'course_user')
             ->withTimestamps();
     }
 
     public function lessonProgress()
     {
         return $this->hasMany(LessonProgress::class);
+    }
+
+    /**
+     * Ratings given by this user to instructors
+     */
+    public function ratingsGiven()
+    {
+        return $this->hasMany(InstructorRating::class, 'user_id');
+    }
+
+    /**
+     * Ratings received by this user as an instructor
+     */
+    public function ratingsReceived()
+    {
+        return $this->hasMany(InstructorRating::class, 'instructor_id');
+    }
+
+    /**
+     * Get the average rating for this instructor
+     */
+    public function getAverageRatingAttribute()
+    {
+        return $this->ratingsReceived()->avg('rating') ?? 0;
+    }
+
+    /**
+     * Get the total number of ratings for this instructor
+     */
+    public function getTotalRatingsAttribute()
+    {
+        return $this->ratingsReceived()->count();
     }
 }

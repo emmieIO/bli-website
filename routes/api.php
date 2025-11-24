@@ -9,7 +9,7 @@ Route::get('/user', function (Request $request) {
 })->middleware('auth:sanctum');
 
 // Lesson Progress API Routes
-Route::middleware(['auth:sanctum'])->group(function () {
+Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
     Route::post('/lessons/{lesson}/progress', [LessonProgressController::class, 'updateProgress']);
     Route::post('/lessons/{lesson}/complete', [LessonProgressController::class, 'markCompleted']);
     Route::get('/lessons/{lesson}/progress', [LessonProgressController::class, 'getProgress']);

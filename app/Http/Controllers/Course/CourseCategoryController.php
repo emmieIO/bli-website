@@ -21,7 +21,7 @@ class CourseCategoryController extends Controller
     public function index()
     {
         $categories = $this->courseCategoryService->getAllCategories();
-        return view("admin.courses.category.index", compact("categories"));
+        return \Inertia\Inertia::render('Admin/Courses/CategoryIndex', compact('categories'));
     }
 
     /**
@@ -82,7 +82,7 @@ class CourseCategoryController extends Controller
     {
         $this->authorize('category-update', Category::class);
         $validated = $request->validate([
-            "name" => ["required", "string", "unique:categories,name,{$category->id}"],
+            "name" => ["required", "string", "unique:categories,name," . $category->id],
             "category_image" => ["nullable", "file", "mimes:jpg,jpeg,png,gif,webp,svg", "max:1024"],
             "description" => ["nullable", "string"],
         ]);

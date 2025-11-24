@@ -11,12 +11,14 @@
     "require": {
         "php": "^8.2",
         "binarycabin/laravel-uuid": "^1.0",
+        "inertiajs/inertia-laravel": "^2.0",
         "laravel/framework": "^12.0",
         "laravel/tinker": "^2.10.1",
         "muxinc/mux-php": "^5.1",
         "propaganistas/laravel-phone": "^6.0",
         "spatie/icalendar-generator": "^3.0",
         "spatie/laravel-permission": "^6.20",
+        "tightenco/ziggy": "^2.6",
         "vimeo/laravel": "^5.10",
         "vimeo/vimeo-api": "^3.0"
     },

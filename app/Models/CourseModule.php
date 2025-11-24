@@ -7,7 +7,13 @@ use Illuminate\Support\Str;
 
 class CourseModule extends Model
 {
-    protected $guarded = [];
+    protected $fillable = [
+        'course_id',
+        'title',
+        'slug',
+        'description',
+        'order',
+    ];
 
     public function course()
     {

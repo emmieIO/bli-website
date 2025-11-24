@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Instructors;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Instructors\SavePersonalInfoRequest;
-use App\Mail\Instructors\InstructorsApplication;
 use App\Models\InstructorProfile;
 use App\Models\User;
 use App\Rules\VideoUrlRule;
@@ -27,7 +26,7 @@ class InstructorsController extends Controller
 
     public function registerInstructor()
     {
-        return view('instructors.become-an-instructor');
+        return \Inertia\Inertia::render('Instructors/BecomeInstructor');
     }
 
     public function resume(string $applicationId)
@@ -36,7 +35,7 @@ class InstructorsController extends Controller
             ->with('user')->firstOrFail();
         $user = $profile->user;
         if (!$profile->is_approved) {
-            return view('instructors.application-form', compact('user', 'profile'));
+            return \Inertia\Inertia::render('Instructors/ApplicationForm', compact('user', 'profile'));
         }
         return redirect(route('homepage'))->with([
             "type" => "error",
@@ -79,7 +78,7 @@ class InstructorsController extends Controller
         }
 
         $profile = $user->instructorProfile;
-        return view('instructors.application-form', compact('user', 'profile'));
+        return \Inertia\Inertia::render('Instructors/ApplicationForm', compact('user', 'profile'));
     }
 
     public function savePersonalInformation(Request $request, User $user)

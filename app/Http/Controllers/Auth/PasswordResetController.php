@@ -8,17 +8,21 @@ use App\Http\Requests\PasswordResetRequest;
 use App\Services\Auth\PasswordResetService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Password;
+use Inertia\Inertia;
 
 class PasswordResetController extends Controller
 {
     public function __construct(protected PasswordResetService $passwordResetService){}
 
     public function forgotPassword(){
-        return view("auth.forgot-password");
+        return Inertia::render('Auth/ForgotPassword');
     }
 
     public function passwordReset(string $token){
-        return view("auth.password-reset", compact('token'));
+        return Inertia::render('Auth/ResetPassword', [
+            'token' => $token,
+            'email' => request()->query('email')
+        ]);
     }
 
     public function sendPasswordResetLink(ForgotPasswordRequest $request){

@@ -12,7 +12,7 @@ class SpeakerUserController extends Controller
     public function __construct(protected SpeakerService $speakerService){}
     public function index()
     {
-        return view('speakers.become-a-speaker');
+        return \Inertia\Inertia::render('Speakers/BecomeASpeaker');
     }
 
     public function store(CreateSpeakerRequest $request)
@@ -20,15 +20,17 @@ class SpeakerUserController extends Controller
         $validated = $request->validated();
         $photo = $validated['userInfo']['photo'];
         $speaker = $this->speakerService->createSpeaker($validated, $photo);
+
         if ($speaker) {
-            return response()->json([
-                "type" => "success",
-                "message" => "Thank you for registering as a speaker! Your application has been submitted successfully."
+            return back()->with([
+                'type' => 'success',
+                'message' => 'Thank you for registering as a speaker! Your application has been submitted successfully.'
             ]);
         }
-        return response()->json([
-            "type" => "error",
-            "message" => "An error occured, Try again later"
+
+        return back()->with([
+            'type' => 'error',
+            'message' => 'An error occurred. Please try again later.'
         ]);
     }
 }

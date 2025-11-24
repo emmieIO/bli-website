@@ -25,7 +25,7 @@ class EventResourceController extends Controller
      */
     public function create(Event $event)
     {
-        return view("admin.events.add-resource", compact("event"));
+        return \Inertia\Inertia::render('Admin/Events/AddResource', compact('event'));
     }
 
     /**

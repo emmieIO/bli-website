@@ -26,14 +26,14 @@ class SpeakerApplicationController extends Controller
         $existing = $this->service->getExistingApplication($event);
 
         if ($existing && $existing->isApproved()) {
-            return redirect()->signedRoute('events.show', $event->slug)->with([
+            return redirect()->route('events.show', $event->slug)->with([
                 "type" => "warning",
                 "message" => "You have already been approved to speak at this event."
             ]);
         }
 
         $application = $existing;
-        return view('speakers.apply', compact("event", "application"));
+        return \Inertia\Inertia::render('Speakers/Apply', compact("event", "application"));
     }
 
     /**
@@ -42,17 +42,17 @@ class SpeakerApplicationController extends Controller
     public function pendingApplications()
     {
         $applications = $this->service->fetchPendingSpeakerApplications();
-        return view("admin.speakers.speaker-application.pending", compact('applications'));
+        return \Inertia\Inertia::render('Admin/SpeakerApplications/Pending', compact('applications'));
     }
     public function approvedApplications()
     {
         $applications = $this->service->fetchApprovedSpeakerApplications();
-        return view("admin.speakers.speaker-application.approved", compact("applications"));
+        return \Inertia\Inertia::render('Admin/SpeakerApplications/Approved', compact("applications"));
     }
 
     public function reviewApplication(SpeakerApplication $application)
     {
-        return view("admin.speakers.speaker-application.review", compact('application'));
+        return \Inertia\Inertia::render('Admin/SpeakerApplications/Review', compact('application'));
     }
 
     public function approveApplication(SpeakerApplication $application)
@@ -92,7 +92,18 @@ class SpeakerApplicationController extends Controller
 
     public function revokeApproval(Request $request, SpeakerApplication $application)
     {
-        dd($application);
+        $this->authorize('manageSpeakers', $application->event);
+
+        $application->update([
+            'status' => ApplicationStatus::PENDING->value,
+            'feedback' => null,
+            'reviewed_at' => null,
+        ]);
+
+        return redirect()->back()->with([
+            'type' => 'success',
+            'message' => 'Speaker application approval has been revoked successfully.'
+        ]);
     }
 
     /**
@@ -132,7 +143,7 @@ class SpeakerApplicationController extends Controller
      */
     public function inviteRespondView(Event $event, SpeakerInvite $invite)
     {
-        return view('user_dashboard.invite-respond', compact('event', 'invite'));
+        return \Inertia\Inertia::render('InviteResponse/Index', compact('event', 'invite'));
     }
 
     /**

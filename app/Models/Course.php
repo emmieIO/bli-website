@@ -9,8 +9,21 @@ use Str;
 
 class Course extends Model
 {
-
-    protected $guarded = [];
+    protected $fillable = [
+        'title',
+        'subtitle',
+        'slug',
+        'description',
+        'thumbnail_path',
+        'preview_video_id',
+        'language',
+        'level',
+        'category_id',
+        'instructor_id',
+        'status',
+        'is_free',
+        'price',
+    ];
 
     protected $casts = [
         'level' => CourseLevel::class,

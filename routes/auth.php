@@ -41,11 +41,6 @@ Route::group(['middleware' => ['auth']], function () {
     // update user photo
     Route::patch('/profile/update-photo', [UserController::class, 'updatePhoto'])->name('profile.photo.update');
 
-    // Dashboard Route (requires verified email)
-    Route::get('/dashboard', function () {
-        return view('user_dashboard.index');
-    })->name('user_dashboard')->middleware(['verified']);
-
     // Logout Route
     Route::post('invalidate-session', [AuthenticatedController::class, 'logout'])->name('logout');
     Route::delete('/account/destroy', [AuthenticatedController::class, 'destroyAccount'])->name('account.destroy');

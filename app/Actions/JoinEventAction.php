@@ -23,6 +23,17 @@ class JoinEventAction
 
         $event = Event::findBySlug($slug)->firstOrFail();
 
+        // Check if user is already registered
+        $userId = auth()->id();
+        $existing = $event->attendees()->where('user_id', $userId)->first();
+
+        if ($existing && $existing->pivot->status === 'registered') {
+            return back()->with([
+                "type" => "info",
+                "message" => "You are already registered for this event."
+            ]);
+        }
+
         // Check if event has expired
         if (isset($event->end_date) && now()->greaterThan($event->end_date)) {
             return back()->with([
