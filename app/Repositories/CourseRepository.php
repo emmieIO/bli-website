@@ -45,7 +45,7 @@ class CourseRepository implements CourseRepositoryInterface
 
     public function getPublishedCourses(): Collection
     {
-        return Course::whereIn('status', ['published', 'draft']) // Temporarily include draft for testing
+        return Course::where('status', 'approved')
             ->with([
                 'instructor' => function ($query) {
                     $query->withCount('ratingsReceived')

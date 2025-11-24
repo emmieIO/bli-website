@@ -18,7 +18,10 @@ import {
     Search,
     ExternalLink,
     User,
-    LogOut
+    LogOut,
+    Bell,
+    Check,
+    Trash2
 } from 'lucide-react';
 import axios from 'axios';
 
@@ -56,6 +59,16 @@ interface SearchResults {
     speakers: SearchResult[];
 }
 
+interface Notification {
+    id: string;
+    type: string;
+    message: string;
+    action_url: string | null;
+    read_at: string | null;
+    created_at: string;
+    data: any;
+}
+
 export default function DashboardLayout({ children, sideLinks }: DashboardLayoutProps) {
     const { auth } = usePage().props as any;
     const user = auth?.user;
@@ -76,6 +89,16 @@ export default function DashboardLayout({ children, sideLinks }: DashboardLayout
     const [showResults, setShowResults] = useState(false);
     const searchRef = useRef<HTMLDivElement>(null);
     const searchTimeoutRef = useRef<NodeJS.Timeout>();
+
+    // Profile dropdown state
+    const [showProfileDropdown, setShowProfileDropdown] = useState(false);
+    const profileDropdownRef = useRef<HTMLDivElement>(null);
+
+    // Notification state
+    const [showNotifications, setShowNotifications] = useState(false);
+    const [notifications, setNotifications] = useState<Notification[]>([]);
+    const [unreadCount, setUnreadCount] = useState(0);
+    const notificationRef = useRef<HTMLDivElement>(null);
 
     const toggleMenu = (title: string) => {
         setExpandedMenus(prev =>
@@ -177,11 +200,69 @@ export default function DashboardLayout({ children, sideLinks }: DashboardLayout
         setSearchQuery('');
     };
 
-    // Close search dropdown when clicking outside
+    // Fetch notifications
+    const fetchNotifications = async () => {
+        try {
+            const response = await axios.get(route('notifications.index'));
+            setNotifications(response.data.notifications);
+            setUnreadCount(response.data.unread_count);
+        } catch (error) {
+            console.error('Error fetching notifications:', error);
+        }
+    };
+
+    // Mark notification as read
+    const markAsRead = async (notificationId: string) => {
+        try {
+            const response = await axios.post(route('notifications.mark-as-read', notificationId));
+            setUnreadCount(response.data.unread_count);
+            // Update local state
+            setNotifications(prev => prev.map(n =>
+                n.id === notificationId ? { ...n, read_at: new Date().toISOString() } : n
+            ));
+        } catch (error) {
+            console.error('Error marking notification as read:', error);
+        }
+    };
+
+    // Mark all as read
+    const markAllAsRead = async () => {
+        try {
+            await axios.post(route('notifications.mark-all-as-read'));
+            setUnreadCount(0);
+            setNotifications(prev => prev.map(n => ({ ...n, read_at: new Date().toISOString() })));
+        } catch (error) {
+            console.error('Error marking all as read:', error);
+        }
+    };
+
+    // Handle notification click
+    const handleNotificationClick = (notification: Notification) => {
+        if (!notification.read_at) {
+            markAsRead(notification.id);
+        }
+        if (notification.action_url) {
+            window.location.href = notification.action_url;
+        }
+        setShowNotifications(false);
+    };
+
+    // Fetch notifications on mount
+    useEffect(() => {
+        fetchNotifications();
+    }, []);
+
+    // Close dropdowns when clicking outside
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
             if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
                 setShowResults(false);
+            }
+            if (profileDropdownRef.current && !profileDropdownRef.current.contains(event.target as Node)) {
+                setShowProfileDropdown(false);
+            }
+            if (notificationRef.current && !notificationRef.current.contains(event.target as Node)) {
+                setShowNotifications(false);
             }
         };
 
@@ -383,9 +464,87 @@ export default function DashboardLayout({ children, sideLinks }: DashboardLayout
                                     <Search size={20} />
                                 </button>
 
+                                {/* Notification Bell */}
+                                <div className="relative" ref={notificationRef}>
+                                    <button
+                                        onClick={() => {
+                                            setShowNotifications(!showNotifications);
+                                            if (!showNotifications) {
+                                                fetchNotifications();
+                                            }
+                                        }}
+                                        className="relative p-2 text-slate-600 rounded-lg hover:bg-slate-100 transition-all"
+                                    >
+                                        <Bell size={20} />
+                                        {unreadCount > 0 && (
+                                            <span className="absolute top-0 right-0 flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-red-500 rounded-full">
+                                                {unreadCount > 9 ? '9+' : unreadCount}
+                                            </span>
+                                        )}
+                                    </button>
+
+                                    {/* Notification Dropdown */}
+                                    {showNotifications && (
+                                        <div className="absolute right-0 mt-2 w-96 max-h-[32rem] bg-white rounded-xl shadow-xl border border-slate-200 overflow-hidden z-50">
+                                            <div className="px-4 py-3 bg-gradient-to-r from-primary-50 to-slate-50 flex items-center justify-between">
+                                                <h3 className="text-sm font-semibold text-slate-800">Notifications</h3>
+                                                {unreadCount > 0 && (
+                                                    <button
+                                                        onClick={markAllAsRead}
+                                                        className="text-xs text-primary-600 hover:text-primary-700 font-medium"
+                                                    >
+                                                        Mark all as read
+                                                    </button>
+                                                )}
+                                            </div>
+                                            <div className="max-h-96 overflow-y-auto">
+                                                {notifications.length === 0 ? (
+                                                    <div className="px-4 py-8 text-center text-slate-500">
+                                                        <Bell size={32} className="mx-auto mb-2 text-slate-300" />
+                                                        <p className="text-sm">No notifications yet</p>
+                                                    </div>
+                                                ) : (
+                                                    <ul>
+                                                        {notifications.map((notification) => (
+                                                            <li
+                                                                key={notification.id}
+                                                                className={`border-b border-slate-100 last:border-b-0 ${
+                                                                    !notification.read_at ? 'bg-blue-50/50' : ''
+                                                                }`}
+                                                            >
+                                                                <button
+                                                                    onClick={() => handleNotificationClick(notification)}
+                                                                    className="w-full px-4 py-3 text-left hover:bg-slate-50 transition-colors"
+                                                                >
+                                                                    <div className="flex items-start gap-3">
+                                                                        <div className="flex-1 min-w-0">
+                                                                            <p className="text-sm text-slate-800 line-clamp-2">
+                                                                                {notification.message}
+                                                                            </p>
+                                                                            <p className="text-xs text-slate-500 mt-1">
+                                                                                {notification.created_at}
+                                                                            </p>
+                                                                        </div>
+                                                                        {!notification.read_at && (
+                                                                            <div className="w-2 h-2 bg-blue-500 rounded-full mt-1 flex-shrink-0"></div>
+                                                                        )}
+                                                                    </div>
+                                                                </button>
+                                                            </li>
+                                                        ))}
+                                                    </ul>
+                                                )}
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+
                                 {/* User Dropdown */}
-                                <div className="relative group">
-                                    <button className="flex items-center gap-2 p-1.5 text-sm bg-slate-50 rounded-xl hover:bg-slate-100 transition-all">
+                                <div className="relative" ref={profileDropdownRef}>
+                                    <button
+                                        onClick={() => setShowProfileDropdown(!showProfileDropdown)}
+                                        className="flex items-center gap-2 p-1.5 text-sm bg-slate-50 rounded-xl hover:bg-slate-100 transition-all"
+                                    >
                                         <img
                                             className="w-8 h-8 rounded-lg object-cover border border-slate-200"
                                             src={getAvatarUrl()}
@@ -399,11 +558,12 @@ export default function DashboardLayout({ children, sideLinks }: DashboardLayout
                                                 {user?.email?.substring(0, 20)}
                                             </p>
                                         </div>
-                                        <ChevronDown size={16} className="text-slate-400" />
+                                        <ChevronDown size={16} className={`text-slate-400 transition-transform duration-200 ${showProfileDropdown ? 'rotate-180' : ''}`} />
                                     </button>
 
                                     {/* Dropdown Menu */}
-                                    <div className="absolute hidden group-hover:block right-0 mt-2 w-56 bg-white rounded-xl shadow-xl border border-slate-200 overflow-hidden">
+                                    {showProfileDropdown && (
+                                    <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-xl border border-slate-200 overflow-hidden z-50">
                                         <div className="px-4 py-3 bg-gradient-to-r from-primary-50 to-slate-50">
                                             <p className="text-sm font-semibold text-slate-800">{user?.name}</p>
                                             <p className="text-sm text-slate-600 truncate">{user?.email}</p>
@@ -438,6 +598,7 @@ export default function DashboardLayout({ children, sideLinks }: DashboardLayout
                                             </li>
                                         </ul>
                                     </div>
+                                    )}
                                 </div>
                             </div>
                         </div>

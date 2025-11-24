@@ -213,6 +213,64 @@ class CourseController extends Controller
     }
 
     /**
+     * Approve a course
+     */
+    public function approve(Course $course)
+    {
+        $this->authorize('update', $course);
+
+        try {
+            // Update course status to approved
+            $course->update(['status' => \App\Enums\ApplicationStatus::APPROVED]);
+
+            // Notify the instructor
+            $course->instructor->notify(new \App\Notifications\CourseApproved($course));
+
+            return redirect()->back()->with([
+                "message" => "Course approved successfully",
+                "type" => "success"
+            ]);
+        } catch (\Exception $e) {
+            return redirect()->back()->with([
+                "message" => "Error approving course: " . $e->getMessage(),
+                "type" => "error"
+            ]);
+        }
+    }
+
+    /**
+     * Reject a course
+     */
+    public function reject(Request $request, Course $course)
+    {
+        $this->authorize('update', $course);
+
+        $validated = $request->validate([
+            'rejection_reason' => 'nullable|string|max:1000'
+        ]);
+
+        try {
+            // Update course status to rejected
+            $course->update(['status' => \App\Enums\ApplicationStatus::REJECTED]);
+
+            // Notify the instructor with rejection reason
+            $course->instructor->notify(
+                new \App\Notifications\CourseRejected($course, $validated['rejection_reason'] ?? null)
+            );
+
+            return redirect()->back()->with([
+                "message" => "Course rejected successfully",
+                "type" => "success"
+            ]);
+        } catch (\Exception $e) {
+            return redirect()->back()->with([
+                "message" => "Error rejecting course: " . $e->getMessage(),
+                "type" => "error"
+            ]);
+        }
+    }
+
+    /**
      * Remove the specified resource from storage.
      */
     public function destroy(Course $course)
