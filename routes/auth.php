@@ -26,9 +26,9 @@ Route::middleware('guest')->group(function () {
 
 // Authenticated User Routes
 Route::group(['middleware' => ['auth']], function () {
-    // Profile Route
-    Route::get('/profile', [AuthenticatedController::class, 'showProfile'])->name("profile");
-    Route::patch('/profile/update-information', [AuthenticatedController::class, "updatePersonalInfo"])->name("profile.update");
+    // Profile Route (Legacy - consider removing if not used)
+    Route::get('/profile-legacy', [AuthenticatedController::class, 'showProfile'])->name("profile.legacy");
+    Route::patch('/profile/update-information', [AuthenticatedController::class, "updatePersonalInfo"])->name("profile.update_information");
     Route::patch('/profile/update-password', [PasswordResetController::class, 'updatePassword'])->name('profile.update_password');
 
     // Email Verification Routes
