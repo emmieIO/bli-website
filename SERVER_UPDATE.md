@@ -24,11 +24,13 @@ chmod -R 775 bootstrap/cache
 
 ## What Was Fixed
 
-### Route Conflict Fixed
-- **Issue:** Duplicate route name `profile.update` was defined in both `routes/auth.php` and `routes/user.php`
-- **Solution:** Renamed the routes in `auth.php` to avoid conflict:
-  - `profile` → `profile.legacy`
-  - `profile.update` → `profile.update_information`
+### Route Conflicts Fixed
+- **Issue 1:** Duplicate route name `profile.update` was defined in both `routes/auth.php` and `routes/user.php`
+  - **Solution:** Renamed in `auth.php`: `profile.update` → `profile.update_information`
+
+- **Issue 2:** Duplicate route name `profile.photo.update` in both route files
+  - **Solution:** Renamed in `auth.php`: `profile.photo.update` → `profile.photo.update_legacy`
+
 - **Result:** Route optimization now works without errors
 
 ### Latest Features Deployed
