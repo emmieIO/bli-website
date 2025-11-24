@@ -48,6 +48,12 @@ class UserCourseController extends Controller
      */
     public function show(Course $course)
     {
+        // Only allow viewing approved courses for public users
+        // Instructors and admins can view their own courses via separate routes
+        if ($course->status !== \App\Enums\ApplicationStatus::APPROVED) {
+            abort(404, 'Course not found or not available.');
+        }
+
         $courseWithRelations = $this->courseRepository->getWithRelations($course->id, [
             'instructor',
             'modules.lessons',
@@ -176,6 +182,14 @@ class UserCourseController extends Controller
             return redirect()->route('login')->with([
                 'message' => 'Please login to enroll in this course',
                 'type' => 'info'
+            ]);
+        }
+
+        // Authorization check - ensures course is approved and user can enroll
+        if (!$user->can('enroll', $course)) {
+            return redirect()->route('courses.show', $course->slug)->with([
+                'message' => 'This course is not available for enrollment',
+                'type' => 'error'
             ]);
         }
 

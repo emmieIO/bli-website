@@ -137,7 +137,7 @@ class InstructorCourseController extends Controller
     public function submitForReview(Course $course)
     {
         $this->authorize('update', $course);
-        
+
         try {
             // Only allow submission if course is in draft status
             if ($course->status !== \App\Enums\ApplicationStatus::DRAFT) {
@@ -146,10 +146,16 @@ class InstructorCourseController extends Controller
                     "type" => "error"
                 ]);
             }
-            
+
             // Update course status to pending review
             $course->update(['status' => \App\Enums\ApplicationStatus::PENDING]);
-            
+
+            // Notify all admins about the course submission
+            $admins = \App\Models\User::role(['admin', 'super-admin'])->get();
+            foreach ($admins as $admin) {
+                $admin->notify(new \App\Notifications\CourseSubmittedForReview($course));
+            }
+
             return back()->with([
                 "message" => "Course submitted for review successfully! You'll be notified once it's approved.",
                 "type" => "success"

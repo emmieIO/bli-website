@@ -104,6 +104,10 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
     Route::delete('/courses/{course}', [CourseController::class, 'destroy'])->name('courses.destroy');
     Route::get('/courses/builder/{course}', [CourseController::class, 'builder'])->name('courses.builder');
 
+    // Course approval/rejection routes
+    Route::post('/courses/{course}/approve', [CourseController::class, 'approve'])->name('courses.approve');
+    Route::post('/courses/{course}/reject', [CourseController::class, 'reject'])->name('courses.reject');
+
     // Course nested resources (appear to be CRUD)
     Route::resource('{course}/requirements', CourseResourseController::class);
     Route::resource('{course}/outcomes', CourseOutcomeController::class);

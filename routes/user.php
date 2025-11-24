@@ -2,7 +2,9 @@
 
 use App\Actions\JoinEventAction;
 use App\Http\Controllers\Events\EventCalenderController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\SearchController;
 use App\Http\Controllers\SpeakerApplicationController;
 use App\Http\Controllers\SpeakerInvitationController;
 use App\Http\Controllers\UserDashBoard\DashboardController;
@@ -13,6 +15,16 @@ use Illuminate\Support\Facades\Route;
 Route::middleware(['auth', 'verified'])->group(function () {
     // Main dashboard
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('user_dashboard');
+
+    // Global search
+    Route::get('/search', [SearchController::class, 'search'])->name('search');
+
+    // Notifications
+    Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
+    Route::get('/notifications/unread-count', [NotificationController::class, 'unreadCount'])->name('notifications.unread-count');
+    Route::post('/notifications/{id}/mark-as-read', [NotificationController::class, 'markAsRead'])->name('notifications.mark-as-read');
+    Route::post('/notifications/mark-all-as-read', [NotificationController::class, 'markAllAsRead'])->name('notifications.mark-all-as-read');
+    Route::delete('/notifications/{id}', [NotificationController::class, 'destroy'])->name('notifications.destroy');
 
     // User's events management
     Route::get('/user/events', ShowMyEventsController::class)->name('user.events');
