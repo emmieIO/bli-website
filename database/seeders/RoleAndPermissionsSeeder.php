@@ -24,7 +24,7 @@ class RoleAndPermissionsSeeder extends Seeder
             'admin' => [
                 // Event management
                 'manage events',
-                
+
                 // Speaker management
                 "create-speaker",
                 'view-speaker',
@@ -35,6 +35,12 @@ class RoleAndPermissionsSeeder extends Seeder
                 'approve-speaker-applications',
                 'track-applications',
                 'manage-activity-log',
+
+                // Blog Management
+                'manage-blog',
+
+                // Instructor Ratings Management
+                'manage-ratings',
 
                 // User Management
                 'create-user',
