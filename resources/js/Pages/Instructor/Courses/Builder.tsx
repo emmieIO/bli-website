@@ -1,6 +1,7 @@
 import { useState, FormEvent, ChangeEvent } from 'react';
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import DashboardLayout from '@/Layouts/DashboardLayout';
+import ConfirmModal from '@/Components/ConfirmModal';
 
 interface Category {
     id: number;
@@ -27,11 +28,13 @@ interface Lesson {
     title: string;
     type: 'video' | 'pdf' | 'link';
     content_path: string;
+    description?: string;
 }
 
 interface CourseModule {
     id: number;
     title: string;
+    description?: string;
     lessons: Lesson[];
 }
 
@@ -53,6 +56,11 @@ interface BuilderProps {
     course: Course;
 }
 
+interface ModuleFormData {
+    title: string;
+    description: string;
+}
+
 export default function Builder({ course }: BuilderProps) {
     const { sideLinks, errors } = usePage().props as any;
     const [newRequirement, setNewRequirement] = useState('');
@@ -60,6 +68,25 @@ export default function Builder({ course }: BuilderProps) {
     const [newModuleTitle, setNewModuleTitle] = useState('');
     const [expandedModules, setExpandedModules] = useState<number[]>([]);
     const [isSubmitting, setIsSubmitting] = useState(false);
+
+    // Module editing state
+    const [editingModuleId, setEditingModuleId] = useState<number | null>(null);
+    const [moduleFormData, setModuleFormData] = useState<ModuleFormData>({ title: '', description: '' });
+
+    // Lesson creation state
+
+    // Delete modal state
+    const [deleteModal, setDeleteModal] = useState<{
+        show: boolean;
+        type: 'requirement' | 'outcome' | 'module' | 'lesson' | null;
+        id: number | null;
+        moduleId?: number;
+        title?: string;
+    }>({
+        show: false,
+        type: null,
+        id: null
+    });
 
     const toggleModule = (moduleId: number) => {
         setExpandedModules(prev =>
@@ -88,11 +115,59 @@ export default function Builder({ course }: BuilderProps) {
     };
 
     const handleDeleteRequirement = (requirementId: number) => {
-        if (!confirm('Are you sure you want to delete this requirement?')) return;
-
-        router.delete(route('admin.requirements.destroy', [course.slug, requirementId]), {
-            preserveScroll: true,
+        setDeleteModal({
+            show: true,
+            type: 'requirement',
+            id: requirementId,
+            title: 'Delete Requirement'
         });
+    };
+
+    const confirmDelete = () => {
+        if (!deleteModal.id || !deleteModal.type) return;
+
+        setIsSubmitting(true);
+
+        switch (deleteModal.type) {
+            case 'requirement':
+                router.delete(route('admin.requirements.destroy', [course.slug, deleteModal.id]), {
+                    preserveScroll: true,
+                    onFinish: () => {
+                        setIsSubmitting(false);
+                        setDeleteModal({ show: false, type: null, id: null });
+                    }
+                });
+                break;
+            case 'outcome':
+                router.delete(route('admin.outcomes.destroy', [course.slug, deleteModal.id]), {
+                    preserveScroll: true,
+                    onFinish: () => {
+                        setIsSubmitting(false);
+                        setDeleteModal({ show: false, type: null, id: null });
+                    }
+                });
+                break;
+            case 'module':
+                router.delete(route('instructor.courses.modules.delete', [course.slug, deleteModal.id]), {
+                    preserveScroll: true,
+                    onFinish: () => {
+                        setIsSubmitting(false);
+                        setDeleteModal({ show: false, type: null, id: null });
+                    }
+                });
+                break;
+            case 'lesson':
+                if (deleteModal.moduleId) {
+                    router.delete(route('instructor.courses.lessons.delete', [course.slug, deleteModal.moduleId, deleteModal.id]), {
+                        preserveScroll: true,
+                        onFinish: () => {
+                            setIsSubmitting(false);
+                            setDeleteModal({ show: false, type: null, id: null });
+                        }
+                    });
+                }
+                break;
+        }
     };
 
     const handleAddOutcome = (e: FormEvent) => {
@@ -114,10 +189,11 @@ export default function Builder({ course }: BuilderProps) {
     };
 
     const handleDeleteOutcome = (outcomeId: number) => {
-        if (!confirm('Are you sure you want to delete this outcome?')) return;
-
-        router.delete(route('admin.outcomes.destroy', [course.slug, outcomeId]), {
-            preserveScroll: true,
+        setDeleteModal({
+            show: true,
+            type: 'outcome',
+            id: outcomeId,
+            title: 'Delete Learning Outcome'
         });
     };
 
@@ -139,11 +215,55 @@ export default function Builder({ course }: BuilderProps) {
         });
     };
 
-    const handleDeleteLesson = (moduleId: number, lessonId: number) => {
-        if (!confirm('Are you sure you want to delete this lesson?')) return;
+    const startEditingModule = (module: CourseModule) => {
+        setEditingModuleId(module.id);
+        setModuleFormData({
+            title: module.title,
+            description: module.description || ''
+        });
+    };
 
-        router.delete(route('instructor.courses.lessons.delete', [course.id, moduleId, lessonId]), {
+    const handleUpdateModule = (e: FormEvent, moduleId: number) => {
+        e.preventDefault();
+        if (!moduleFormData.title.trim()) return;
+
+        setIsSubmitting(true);
+        router.put(route('instructor.courses.modules.update', [course.slug, moduleId]), {
+            title: moduleFormData.title,
+            description: moduleFormData.description
+        }, {
             preserveScroll: true,
+            onSuccess: () => {
+                setEditingModuleId(null);
+                setModuleFormData({ title: '', description: '' });
+            },
+            onFinish: () => {
+                setIsSubmitting(false);
+            },
+        });
+    };
+
+    const handleDeleteModule = (moduleId: number, moduleTitle: string) => {
+        setDeleteModal({
+            show: true,
+            type: 'module',
+            id: moduleId,
+            title: `Delete Module: ${moduleTitle}`
+        });
+    };
+
+    const startAddingLesson = (moduleId: number) => {
+        // Navigate to the Add Lesson page
+        router.visit(route('instructor.courses.lessons.create', [course.slug, moduleId]));
+    };
+
+    const handleDeleteLesson = (moduleId: number, lessonId: number, lessonTitle: string) => {
+        setDeleteModal({
+            show: true,
+            type: 'lesson',
+            id: lessonId,
+            moduleId: moduleId,
+            title: `Delete Lesson: ${lessonTitle}`
         });
     };
 
@@ -319,49 +439,102 @@ export default function Builder({ course }: BuilderProps) {
                     {course.modules && course.modules.length > 0 ? (
                         course.modules.map((module) => (
                             <div key={module.id} className="bg-white border border-gray-200 rounded-lg shadow-sm">
-                                {/* Accordion Header */}
-                                <div className="flex items-center justify-between p-4 cursor-pointer" onClick={() => toggleModule(module.id)}>
-                                    <h2 className="text-lg font-semibold text-gray-800">{module.title}</h2>
-                                    <div className="flex items-center space-x-2">
-                                        {/* Toggle Icon */}
-                                        {expandedModules.includes(module.id) ? (
-                                            <i className="fas fa-minus w-5 h-5 text-gray-500"></i>
-                                        ) : (
-                                            <i className="fas fa-plus w-5 h-5 text-gray-500"></i>
-                                        )}
-
-                                        {/* Action Buttons */}
-                                        <div className="flex space-x-2" onClick={(e) => e.stopPropagation()}>
-                                            <Link
-                                                href={route('admin.lessons.create', module.id)}
-                                                className="inline-flex cursor-pointer items-center px-3 py-1.5 text-sm font-medium text-gray-500 hover:text-primary rounded-lg"
+                                {/* Module Header */}
+                                {editingModuleId === module.id ? (
+                                    /* Edit Module Form */
+                                    <form onSubmit={(e) => handleUpdateModule(e, module.id)} className="p-4 border-b">
+                                        <input
+                                            type="text"
+                                            value={moduleFormData.title}
+                                            onChange={(e) => setModuleFormData({ ...moduleFormData, title: e.target.value })}
+                                            className="w-full mb-2 rounded-lg border border-gray-300 p-2 text-sm"
+                                            placeholder="Module Title"
+                                        />
+                                        <textarea
+                                            value={moduleFormData.description}
+                                            onChange={(e) => setModuleFormData({ ...moduleFormData, description: e.target.value })}
+                                            className="w-full mb-2 rounded-lg border border-gray-300 p-2 text-sm"
+                                            placeholder="Module Description (optional)"
+                                            rows={2}
+                                        />
+                                        <div className="flex space-x-2">
+                                            <button
+                                                type="submit"
+                                                disabled={isSubmitting}
+                                                className="px-3 py-1.5 text-sm bg-primary text-white rounded-lg disabled:opacity-50"
                                             >
-                                                + Add Lesson
-                                            </Link>
+                                                Save
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={() => setEditingModuleId(null)}
+                                                className="px-3 py-1.5 text-sm bg-gray-200 text-gray-700 rounded-lg"
+                                            >
+                                                Cancel
+                                            </button>
+                                        </div>
+                                    </form>
+                                ) : (
+                                    /* Module Header Display */
+                                    <div className="flex items-center justify-between p-4 cursor-pointer" onClick={() => toggleModule(module.id)}>
+                                        <h2 className="text-lg font-semibold text-gray-800">{module.title}</h2>
+                                        <div className="flex items-center space-x-2">
+                                            {/* Action Buttons */}
+                                            <div className="flex space-x-2" onClick={(e) => e.stopPropagation()}>
+                                                <button
+                                                    onClick={() => startAddingLesson(module.id)}
+                                                    className="inline-flex items-center px-3 py-1.5 text-sm font-medium text-primary cursor-pointer hover:bg-primary-50 rounded-lg"
+                                                    title="Add Lesson"
+                                                >
+                                                    <i className="fas fa-plus mr-1"></i> Add Lesson
+                                                </button>
+                                                <button
+                                                    onClick={() => startEditingModule(module)}
+                                                    className="inline-flex items-center px-2 py-1.5 text-sm text-gray-600 hover:text-blue-600"
+                                                    title="Edit Module"
+                                                >
+                                                    <i className="fas fa-edit"></i>
+                                                </button>
+                                                <button
+                                                    onClick={() => handleDeleteModule(module.id, module.title)}
+                                                    className="inline-flex items-center px-2 py-1.5 text-sm text-gray-600 hover:text-red-600"
+                                                    title="Delete Module"
+                                                >
+                                                    <i className="fas fa-trash"></i>
+                                                </button>
+                                            </div>
+
+                                            {/* Toggle Icon */}
+                                            {expandedModules.includes(module.id) ? (
+                                                <i className="fas fa-chevron-up w-5 h-5 text-gray-500"></i>
+                                            ) : (
+                                                <i className="fas fa-chevron-down w-5 h-5 text-gray-500"></i>
+                                            )}
                                         </div>
                                     </div>
-                                </div>
+                                )}
 
-                                {/* Accordion Content */}
+                                {/* Module Content */}
                                 {expandedModules.includes(module.id) && (
                                     <div className="px-4 pb-4">
+                                        {/* Lessons List */}
                                         <ul className="space-y-2">
                                             {module.lessons && module.lessons.length > 0 ? (
                                                 module.lessons.map((lesson) => (
                                                     <li key={lesson.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                                                        <span className="text-sm text-gray-700 font-bold">
+                                                        <span className="text-sm text-gray-700 font-medium">
                                                             {getLessonIcon(lesson.type)} {lesson.type.charAt(0).toUpperCase() + lesson.type.slice(1)}: {lesson.title}
                                                         </span>
-                                                        <div className="flex items-center gap-2">
-                                                            {lesson.type === 'video' && (
+                                                        <div className="flex items-center gap-3">
+                                                            {lesson.type === 'video' && lesson.content_path && (
                                                                 <a
                                                                     href={`/storage/${lesson.content_path}`}
-                                                                    className="text-green-500 hover:text-green-700 text-sm"
+                                                                    className="text-green-600 hover:text-green-800 text-sm"
                                                                 >
                                                                     View
                                                                 </a>
                                                             )}
-                                                            {lesson.type === 'pdf' && (
+                                                            {lesson.type === 'pdf' && lesson.content_path && (
                                                                 <a
                                                                     href={`/storage/${lesson.content_path}`}
                                                                     target="_blank"
@@ -372,7 +545,7 @@ export default function Builder({ course }: BuilderProps) {
                                                                     <i className="fas fa-file-pdf w-4 h-4"></i>
                                                                 </a>
                                                             )}
-                                                            {lesson.type === 'link' && (
+                                                            {lesson.type === 'link' && lesson.content_path && (
                                                                 <a
                                                                     href={lesson.content_path}
                                                                     target="_blank"
@@ -382,9 +555,16 @@ export default function Builder({ course }: BuilderProps) {
                                                                     <i className="fas fa-external-link-alt w-4 h-4"></i>
                                                                 </a>
                                                             )}
+                                                            <Link
+                                                                href={route('instructor.courses.lessons.edit', [course.slug, module.id, lesson.id])}
+                                                                className="inline-flex items-center text-blue-600 hover:text-blue-800 transition-colors"
+                                                                title="Edit Lesson"
+                                                            >
+                                                                <i className="fas fa-edit w-4 h-4"></i>
+                                                            </Link>
                                                             <button
-                                                                onClick={() => handleDeleteLesson(module.id, lesson.id)}
-                                                                className="inline-flex items-center text-red-600 hover:text-red-800"
+                                                                onClick={() => handleDeleteLesson(module.id, lesson.id, lesson.title)}
+                                                                className="inline-flex items-center text-red-600 hover:text-red-800 transition-colors"
                                                                 title="Delete Lesson"
                                                             >
                                                                 <i className="fas fa-trash w-4 h-4"></i>
@@ -393,7 +573,7 @@ export default function Builder({ course }: BuilderProps) {
                                                     </li>
                                                 ))
                                             ) : (
-                                                <li className="text-sm text-gray-500 italic">No lessons yet.</li>
+                                                <li className="text-sm text-gray-500 italic">No lessons yet. Click "Add Lesson" to get started.</li>
                                             )}
                                         </ul>
                                     </div>
@@ -407,6 +587,31 @@ export default function Builder({ course }: BuilderProps) {
                     )}
                 </div>
             </div>
+
+            {/* Delete Confirmation Modal */}
+            <ConfirmModal
+                show={deleteModal.show}
+                onClose={() => setDeleteModal({ show: false, type: null, id: null })}
+                onConfirm={confirmDelete}
+                title={deleteModal.title || 'Confirm Delete'}
+                message={
+                    deleteModal.type === 'module'
+                        ? 'Are you sure you want to delete this module? All lessons in this module will be deleted, including any video lessons which will be permanently removed from Vimeo. This action cannot be undone.'
+                        : deleteModal.type === 'lesson'
+                        ? 'Are you sure you want to delete this lesson? If this is a video lesson, the video will also be removed from Vimeo. This action cannot be undone.'
+                        : 'Are you sure you want to delete this item? This action cannot be undone.'
+                }
+                confirmText="Delete"
+                cancelText="Cancel"
+                confirmButtonClass="bg-red-600 hover:bg-red-700 text-white"
+                icon={
+                    <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100">
+                        <i className="fas fa-trash text-red-600 text-xl"></i>
+                    </div>
+                }
+                isProcessing={isSubmitting}
+                processingText="Deleting..."
+            />
         </DashboardLayout>
     );
 }

@@ -6,6 +6,7 @@ use App\Enums\ApplicationStatus;
 use App\Models\Course;
 use App\Models\CourseOutcome;
 use App\Models\CourseRequirement;
+use App\Services\VimeoService;
 use App\Traits\HasFileUpload;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
@@ -14,12 +15,15 @@ use Illuminate\Support\Facades\Log;
 class CourseService
 {
     use HasFileUpload;
+
+    protected VimeoService $vimeoService;
+
     /**
      * Create a new class instance.
      */
-    public function __construct()
+    public function __construct(VimeoService $vimeoService)
     {
-        //
+        $this->vimeoService = $vimeoService;
     }
 
     public function createCourse(array $data, ?UploadedFile $thumbnail = null, ?UploadedFile $previewVideo = null)
@@ -34,9 +38,32 @@ class CourseService
                     $thumbnailPath = $this->uploadFile($thumbnail, 'courses/thumbnails');
                 }
 
-                // Upload preview video
+                // Upload preview video to Vimeo
                 if ($previewVideo) {
-                    $previewVideoId = $this->uploadFile($previewVideo, 'courses/videos');
+                    $videoMetadata = [
+                        'name' => $data['title'] . ' - Preview',
+                        'description' => $data['subtitle'] ?? $data['description'] ?? 'Course preview video',
+                    ];
+
+                    $privacySettings = [
+                        'view' => 'anybody',
+                        'embed' => 'public',
+                        'download' => false,
+                        'add' => false,
+                        'comments' => 'nobody',
+                    ];
+
+                    $uploadResult = $this->vimeoService->uploadVideo(
+                        $previewVideo->getRealPath(),
+                        $videoMetadata,
+                        $privacySettings
+                    );
+
+                    if ($uploadResult['success']) {
+                        $previewVideoId = $uploadResult['video_id'];
+                    } else {
+                        throw new \Exception("Failed to upload preview video to Vimeo: " . $uploadResult['error']);
+                    }
                 }
 
                 $course = Course::create([
@@ -53,27 +80,43 @@ class CourseService
                     'instructor_id' => auth()->id(),
                     'status' => ApplicationStatus::DRAFT->value,
                 ]);
-                
+
                 return $course;
             });
         } catch (\Throwable $th) {
             Log::error("Error creating course", ['error' => $th->getMessage()]);
-            
+
             // Clean up uploaded files on error
             if (!empty($thumbnailPath)) {
                 $this->deleteFile($thumbnailPath);
             }
             if (!empty($previewVideoId)) {
-                $this->deleteFile($previewVideoId);
+                // Delete from Vimeo
+                $this->vimeoService->deleteVideo($previewVideoId);
             }
-            
+
             throw $th;
         }
     }
 
     public function fetchCourses()
     {
-        return Course::with(['category', 'instructor'])->latest()->get();
+        $userId = auth()->id();
+
+        return Course::with(['category', 'instructor'])
+            ->where(function ($query) use ($userId) {
+                // Show courses created by the current user
+                $query->where('instructor_id', $userId)
+                    // OR courses submitted for approval (not draft)
+                    ->orWhereIn('status', [
+                        ApplicationStatus::PENDING->value,
+                        ApplicationStatus::UNDER_REVIEW->value,
+                        ApplicationStatus::APPROVED->value,
+                        ApplicationStatus::REJECTED->value,
+                    ]);
+            })
+            ->latest()
+            ->get();
     }
 
     public function fetchInstructorCourses(int $instructorId)
@@ -144,13 +187,52 @@ class CourseService
                     $updateData['thumbnail_path'] = $this->uploadFile($thumbnailFile, 'courses/thumbnails');
                 }
 
-                // Handle preview video upload if provided
+                // Handle preview video upload to Vimeo if provided
                 if ($previewVideoFile) {
-                    // Delete old preview video if exists
-                    if ($course->preview_video_path) {
-                        $this->deleteFile($course->preview_video_path);
+                    // Delete old preview video from Vimeo if exists
+                    if ($course->preview_video_id) {
+                        $this->vimeoService->deleteVideo($course->preview_video_id);
                     }
-                    $updateData['preview_video_path'] = $this->uploadFile($previewVideoFile, 'courses/previews');
+
+                    // Upload new video to Vimeo
+                    $videoMetadata = [
+                        'name' => $data['title'] . ' - Preview',
+                        'description' => $data['subtitle'] ?? $data['description'] ?? 'Course preview video',
+                    ];
+
+                    $privacySettings = [
+                        'view' => 'anybody',
+                        'embed' => 'public',
+                        'download' => false,
+                        'add' => false,
+                        'comments' => 'nobody',
+                    ];
+
+                    $uploadResult = $this->vimeoService->uploadVideo(
+                        $previewVideoFile->getRealPath(),
+                        $videoMetadata,
+                        $privacySettings
+                    );
+
+                    if ($uploadResult['success']) {
+                        $updateData['preview_video_id'] = $uploadResult['video_id'];
+                    } else {
+                        throw new \Exception("Failed to upload preview video to Vimeo: " . $uploadResult['error']);
+                    }
+                } elseif ($course->preview_video_id) {
+                    // Update existing Vimeo video metadata if title or description changed
+                    $titleChanged = $course->title !== $data['title'];
+                    $descriptionChanged = $course->subtitle !== ($data['subtitle'] ?? null) ||
+                                         $course->description !== ($data['description'] ?? null);
+
+                    if ($titleChanged || $descriptionChanged) {
+                        $videoMetadata = [
+                            'name' => $data['title'] . ' - Preview',
+                            'description' => $data['subtitle'] ?? $data['description'] ?? 'Course preview video',
+                        ];
+
+                        $this->vimeoService->updateVideoMetadata($course->preview_video_id, $videoMetadata);
+                    }
                 }
 
                 $course->update($updateData);
@@ -173,17 +255,45 @@ class CourseService
                 if ($course->thumbnail_path) {
                     $this->deleteFile($course->thumbnail_path);
                 }
+
+                // Delete preview video from Vimeo
                 if ($course->preview_video_id) {
-                    $this->deleteFile($course->preview_video_id);
+                    $this->vimeoService->deleteVideo($course->preview_video_id);
                 }
 
-                // Delete lesson content files
+                // Delete lesson content files and Vimeo videos
+                $vimeoDeletedCount = 0;
+                $vimeoTotalCount = 0;
+
                 foreach ($course->modules as $module) {
                     foreach ($module->lessons as $lesson) {
-                        if ($lesson->content_path) {
+                        // Delete Vimeo video if it exists
+                        if ($lesson->type === 'video' && $lesson->vimeo_id) {
+                            $vimeoTotalCount++;
+                            Log::info("Attempting to delete Vimeo video from course deletion", [
+                                'course_id' => $course->id,
+                                'lesson_id' => $lesson->id,
+                                'vimeo_id' => $lesson->vimeo_id
+                            ]);
+
+                            if ($this->vimeoService->deleteVideo($lesson->vimeo_id)) {
+                                $vimeoDeletedCount++;
+                            }
+                        }
+
+                        // Delete lesson content files (PDFs, etc)
+                        if ($lesson->content_path && $lesson->type !== 'video') {
                             $this->deleteFile($lesson->content_path);
                         }
                     }
+                }
+
+                if ($vimeoTotalCount > 0) {
+                    Log::info("Deleted Vimeo videos from course", [
+                        'course_id' => $course->id,
+                        'videos_deleted' => $vimeoDeletedCount,
+                        'total_videos' => $vimeoTotalCount
+                    ]);
                 }
 
                 // Delete related records

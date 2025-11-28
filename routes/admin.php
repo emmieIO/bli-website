@@ -81,7 +81,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
         Route::post('/users/{user}/assign-role', [\App\Http\Controllers\Admin\UserManagementController::class, 'assignRole'])->name('users.assign-role');
         Route::delete('/users/{user}/remove-role/{role}', [\App\Http\Controllers\Admin\UserManagementController::class, 'removeRole'])->name('users.remove-role');
         Route::get('/users/statistics', [\App\Http\Controllers\Admin\UserManagementController::class, 'statistics'])->name('users.statistics');
-        
+
         // Role & Permission Management
         Route::get('/roles', [\App\Http\Controllers\Admin\UserManagementController::class, 'roles'])->name('roles.index');
         Route::post('/roles/update-permissions/{role}', [\App\Http\Controllers\Admin\UserManagementController::class, 'updateRolePermissions'])->name('roles.update-permissions');
@@ -89,6 +89,18 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
         Route::post('/roles/reset-defaults', [\App\Http\Controllers\Admin\UserManagementController::class, 'resetToDefaults'])->name('roles.reset-defaults');
         Route::get('/roles/export', [\App\Http\Controllers\Admin\UserManagementController::class, 'exportConfiguration'])->name('roles.export');
         Route::get('/roles/audit-log', [\App\Http\Controllers\Admin\UserManagementController::class, 'auditLog'])->name('roles.audit-log');
+    });
+
+    // Blog Management
+    Route::middleware(['permission:manage-blog'])->group(function () {
+        Route::resource('posts', \App\Http\Controllers\Admin\PostController::class);
+    });
+
+    // Instructor Ratings Management
+    Route::middleware(['permission:manage-ratings'])->group(function () {
+        Route::get('/ratings', [\App\Http\Controllers\Admin\InstructorRatingController::class, 'index'])->name('ratings.index');
+        Route::get('/ratings/{rating}', [\App\Http\Controllers\Admin\InstructorRatingController::class, 'show'])->name('ratings.show');
+        Route::delete('/ratings/{rating}', [\App\Http\Controllers\Admin\InstructorRatingController::class, 'destroy'])->name('ratings.destroy');
     });
 
     // Course Categories (appears to be pure CRUD - can use resource)

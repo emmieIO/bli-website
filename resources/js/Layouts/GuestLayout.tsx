@@ -153,6 +153,20 @@ export default function GuestLayout({ children }: PropsWithChildren) {
 
                         </li>
 
+                        <li>
+
+                            <Link href={route('blog.index')} className="flex items-center gap-2 relative py-2 px-1 transition-all duration-300 group" style={{ color: '#002147' }}>
+
+                                <i className="fas fa-blog text-sm group-hover:scale-110 transition-transform duration-300" style={{ color: '#00a651' }}></i>
+
+                                <span>Blog</span>
+
+                                <span className="absolute bottom-0 left-0 w-0 h-0.5 transition-all duration-300 group-hover:w-full" style={{ backgroundColor: '#00a651' }}></span>
+
+                            </Link>
+
+                        </li>
+
                         <li className="relative" ref={joinUsDropdownRef}>
 
                             <button onClick={() => setJoinUsDropdownOpen(!joinUsDropdownOpen)} className="flex items-center gap-2 py-2 px-1 transition-all duration-300 group relative dropdown-trigger" style={{ color: '#002147' }}>
@@ -214,20 +228,6 @@ export default function GuestLayout({ children }: PropsWithChildren) {
                                 </ul>
 
                             )}
-
-                        </li>
-
-                        <li>
-
-                            <a href="#" className="flex items-center gap-2 relative py-2 px-1 transition-all duration-300 group" style={{ color: '#002147' }}>
-
-                                <i className="fas fa-blog text-sm group-hover:scale-110 transition-transform duration-300" style={{ color: '#00a651' }}></i>
-
-                                <span>Blog</span>
-
-                                <span className="absolute bottom-0 left-0 w-0 h-0.5 transition-all duration-300 group-hover:w-full" style={{ backgroundColor: '#00a651' }}></span>
-
-                            </a>
 
                         </li>
 
@@ -333,6 +333,18 @@ export default function GuestLayout({ children }: PropsWithChildren) {
 
                                 </li>
 
+                                <li>
+
+                                    <Link href={route('blog.index')} className="flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300" style={{ color: '#002147' }} onMouseOver={e => e.currentTarget.style.backgroundColor = 'rgba(0, 166, 81, 0.1)'} onMouseOut={e => e.currentTarget.style.backgroundColor = 'transparent'}>
+
+                                        <i className="fas fa-blog text-sm" style={{ color: '#00a651' }}></i>
+
+                                        <span>Blog</span>
+
+                                    </Link>
+
+                                </li>
+
                                 <li className="pt-2">
 
                                     <div className="px-4 py-2">
@@ -356,18 +368,6 @@ export default function GuestLayout({ children }: PropsWithChildren) {
                                         <span>Become a Speaker</span>
 
                                     </Link>
-
-                                </li>
-
-                                <li>
-
-                                    <a href="#" className="flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300" style={{ color: '#002147' }} onMouseOver={e => e.currentTarget.style.backgroundColor = 'rgba(0, 166, 81, 0.1)'} onMouseOut={e => e.currentTarget.style.backgroundColor = 'transparent'}>
-
-                                        <i className="fas fa-blog text-sm" style={{ color: '#00a651' }}></i>
-
-                                        <span>Blog</span>
-
-                                    </a>
 
                                 </li>
 

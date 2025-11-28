@@ -1,6 +1,7 @@
 import { useState, FormEvent, ChangeEvent } from 'react';
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import DashboardLayout from '@/Layouts/DashboardLayout';
+import ConfirmModal from '@/Components/ConfirmModal';
 
 interface Category {
     id: number;
@@ -63,6 +64,20 @@ export default function Builder({ course }: BuilderProps) {
     const [expandedModules, setExpandedModules] = useState<number[]>([]);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
+    // Delete modal state
+    const [deleteModal, setDeleteModal] = useState<{
+        show: boolean;
+        type: 'requirement' | 'outcome' | 'module' | 'lesson' | null;
+        id: number | string | null;
+        moduleSlug?: string;
+        lessonSlug?: string;
+        title?: string;
+    }>({
+        show: false,
+        type: null,
+        id: null
+    });
+
     const toggleModule = (moduleId: number) => {
         setExpandedModules(prev =>
             prev.includes(moduleId)
@@ -90,10 +105,11 @@ export default function Builder({ course }: BuilderProps) {
     };
 
     const handleDeleteRequirement = (requirementId: number) => {
-        if (!confirm('Are you sure you want to delete this requirement?')) return;
-
-        router.delete(route('admin.requirements.destroy', [course.slug, requirementId]), {
-            preserveScroll: true,
+        setDeleteModal({
+            show: true,
+            type: 'requirement',
+            id: requirementId,
+            title: 'Delete Requirement'
         });
     };
 
@@ -116,10 +132,11 @@ export default function Builder({ course }: BuilderProps) {
     };
 
     const handleDeleteOutcome = (outcomeId: number) => {
-        if (!confirm('Are you sure you want to delete this outcome?')) return;
-
-        router.delete(route('admin.outcomes.destroy', [course.slug, outcomeId]), {
-            preserveScroll: true,
+        setDeleteModal({
+            show: true,
+            type: 'outcome',
+            id: outcomeId,
+            title: 'Delete Learning Outcome'
         });
     };
 
@@ -141,11 +158,14 @@ export default function Builder({ course }: BuilderProps) {
         });
     };
 
-    const handleDeleteLesson = (moduleSlug: string, lessonSlug: string) => {
-        if (!confirm('Are you sure you want to delete this lesson?')) return;
-
-        router.delete(route('admin.lessons.destroy', [moduleSlug, lessonSlug]), {
-            preserveScroll: true,
+    const handleDeleteLesson = (moduleSlug: string, lessonSlug: string, lessonTitle: string) => {
+        setDeleteModal({
+            show: true,
+            type: 'lesson',
+            id: lessonSlug,
+            moduleSlug: moduleSlug,
+            lessonSlug: lessonSlug,
+            title: `Delete Lesson: ${lessonTitle}`
         });
     };
 
@@ -164,16 +184,61 @@ export default function Builder({ course }: BuilderProps) {
         });
     };
 
-    const handleDeleteModule = (moduleSlug: string) => {
-        if (!confirm('Are you sure you want to delete this module? All lessons within this module will also be deleted.')) return;
+    const handleDeleteModule = (moduleSlug: string, moduleTitle: string) => {
+        setDeleteModal({
+            show: true,
+            type: 'module',
+            id: moduleSlug,
+            moduleSlug: moduleSlug,
+            title: `Delete Module: ${moduleTitle}`
+        });
+    };
+
+    const confirmDelete = () => {
+        if (!deleteModal.id || !deleteModal.type) return;
 
         setIsSubmitting(true);
-        router.delete(route('admin.modules.destroy', [course.slug, moduleSlug]), {
-            preserveScroll: true,
-            onFinish: () => {
-                setIsSubmitting(false);
-            },
-        });
+
+        switch (deleteModal.type) {
+            case 'requirement':
+                router.delete(route('admin.requirements.destroy', [course.slug, deleteModal.id]), {
+                    preserveScroll: true,
+                    onFinish: () => {
+                        setIsSubmitting(false);
+                        setDeleteModal({ show: false, type: null, id: null });
+                    }
+                });
+                break;
+            case 'outcome':
+                router.delete(route('admin.outcomes.destroy', [course.slug, deleteModal.id]), {
+                    preserveScroll: true,
+                    onFinish: () => {
+                        setIsSubmitting(false);
+                        setDeleteModal({ show: false, type: null, id: null });
+                    }
+                });
+                break;
+            case 'module':
+                router.delete(route('admin.modules.destroy', [course.slug, deleteModal.moduleSlug]), {
+                    preserveScroll: true,
+                    onFinish: () => {
+                        setIsSubmitting(false);
+                        setDeleteModal({ show: false, type: null, id: null });
+                    }
+                });
+                break;
+            case 'lesson':
+                if (deleteModal.moduleSlug && deleteModal.lessonSlug) {
+                    router.delete(route('admin.lessons.destroy', [deleteModal.moduleSlug, deleteModal.lessonSlug]), {
+                        preserveScroll: true,
+                        onFinish: () => {
+                            setIsSubmitting(false);
+                            setDeleteModal({ show: false, type: null, id: null });
+                        }
+                    });
+                }
+                break;
+        }
     };
 
     const getLessonIcon = (type: string) => {
@@ -375,7 +440,7 @@ export default function Builder({ course }: BuilderProps) {
                                                 <i className="fas fa-edit"></i>
                                             </button>
                                             <button
-                                                onClick={() => handleDeleteModule(module.slug)}
+                                                onClick={() => handleDeleteModule(module.slug, module.title)}
                                                 className="inline-flex cursor-pointer items-center px-3 py-1.5 text-sm font-medium text-red-600 hover:text-red-800 rounded-lg"
                                                 title="Delete Module"
                                             >
@@ -426,7 +491,7 @@ export default function Builder({ course }: BuilderProps) {
                                                                 </a>
                                                             )}
                                                             <button
-                                                                onClick={() => handleDeleteLesson(module.slug, lesson.slug)}
+                                                                onClick={() => handleDeleteLesson(module.slug, lesson.slug, lesson.title)}
                                                                 className="inline-flex items-center text-red-600 hover:text-red-800"
                                                                 title="Delete Lesson"
                                                             >
@@ -450,6 +515,31 @@ export default function Builder({ course }: BuilderProps) {
                     )}
                 </div>
             </div>
+
+            {/* Delete Confirmation Modal */}
+            <ConfirmModal
+                show={deleteModal.show}
+                onClose={() => setDeleteModal({ show: false, type: null, id: null })}
+                onConfirm={confirmDelete}
+                title={deleteModal.title || 'Confirm Delete'}
+                message={
+                    deleteModal.type === 'module'
+                        ? 'Are you sure you want to delete this module? All lessons in this module will be deleted, including any video lessons which will be permanently removed from Vimeo. This action cannot be undone.'
+                        : deleteModal.type === 'lesson'
+                        ? 'Are you sure you want to delete this lesson? If this is a video lesson, the video will also be removed from Vimeo. This action cannot be undone.'
+                        : 'Are you sure you want to delete this item? This action cannot be undone.'
+                }
+                confirmText="Delete"
+                cancelText="Cancel"
+                confirmButtonClass="bg-red-600 hover:bg-red-700 text-white"
+                icon={
+                    <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100">
+                        <i className="fas fa-trash text-red-600 text-xl"></i>
+                    </div>
+                }
+                isProcessing={isSubmitting}
+                processingText="Deleting..."
+            />
         </DashboardLayout>
     );
 }

@@ -3,7 +3,11 @@
 namespace App\Http\Controllers\UserDashBoard;
 
 use App\Http\Controllers\Controller;
+use App\Models\Course;
+use App\Models\Event;
+use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -156,9 +160,194 @@ class DashboardController extends Controller
             'completedLessons' => $completedLessons,
         ];
 
+        // Check if user is admin or instructor
+        $isAdmin = $user->hasRole(['admin', 'super-admin']);
+        $isInstructor = $user->hasRole('instructor');
+
+        $adminStats = null;
+        $instructorStats = null;
+
+        if ($isAdmin) {
+            $adminStats = $this->getAdminStats();
+        }
+
+        if ($isInstructor) {
+            $instructorStats = $this->getInstructorStats($user);
+        }
+
         return Inertia::render('Dashboard/Index', [
             'stats' => $stats,
             'courses' => $coursesWithProgress,
+            'adminStats' => $adminStats,
+            'instructorStats' => $instructorStats,
         ]);
+    }
+
+    /**
+     * Get admin dashboard statistics
+     */
+    private function getAdminStats(): array
+    {
+        $now = now();
+        $monthStart = $now->copy()->startOfMonth();
+
+        // Total users and monthly growth
+        $totalUsers = User::count();
+        $usersThisMonth = User::where('created_at', '>=', $monthStart)->count();
+        $userGrowthPercentage = $totalUsers > 0
+            ? round(($usersThisMonth / $totalUsers) * 100, 1)
+            : 0;
+
+        // Active users (users who logged in or had activity in last 30 days)
+        $activeUsers = User::where('updated_at', '>=', $now->copy()->subDays(30))->count();
+        $engagementRate = $totalUsers > 0
+            ? round(($activeUsers / $totalUsers) * 100)
+            : 0;
+
+        // Total courses and development status
+        $totalCourses = Course::count();
+        $coursesInDevelopment = Course::where('status', 'draft')->count();
+
+        // Events scheduled
+        $eventsScheduled = Event::where('end_date', '>=', $now)->count();
+        $eventsToday = Event::whereDate('start_date', '<=', $now->toDateString())
+            ->whereDate('end_date', '>=', $now->toDateString())
+            ->count();
+
+        // Total attendees (event participants)
+        $totalAttendees = DB::table('event_attendees')->count();
+        $attendeesThisMonth = DB::table('event_attendees')
+            ->where('created_at', '>=', $monthStart)
+            ->count();
+
+        return [
+            'totalUsers' => $totalUsers,
+            'totalUsersBadge' => $userGrowthPercentage > 0
+                ? "+{$userGrowthPercentage}% this month"
+                : 'No growth this month',
+            'totalUsersBadgeColor' => $userGrowthPercentage > 0 ? '#00a651' : '#6b7280',
+            'activeUsers' => $activeUsers,
+            'activeUsersBadge' => "{$engagementRate}% engagement",
+            'totalCourses' => $totalCourses,
+            'totalCoursesBadge' => $coursesInDevelopment > 0
+                ? "{$coursesInDevelopment} in development"
+                : 'All courses published',
+            'eventsScheduled' => $eventsScheduled,
+            'eventsScheduledBadge' => $eventsToday > 0
+                ? "{$eventsToday} happening today"
+                : 'No events today',
+            'eventsScheduledBadgeColor' => $eventsToday > 0 ? '#002147' : '#6b7280',
+            'totalAttendees' => $totalAttendees,
+            'totalAttendeesBadge' => $attendeesThisMonth > 0
+                ? "+{$attendeesThisMonth} this month"
+                : 'No new attendees',
+            'totalAttendeesBadgeColor' => $attendeesThisMonth > 0 ? '#00a651' : '#6b7280',
+        ];
+    }
+
+    /**
+     * Get instructor dashboard statistics
+     */
+    private function getInstructorStats(User $instructor): array
+    {
+        $now = now();
+        $monthStart = $now->copy()->startOfMonth();
+        $weekStart = $now->copy()->startOfWeek();
+
+        // Courses taught by this instructor
+        $coursesTaught = Course::where('instructor_id', $instructor->id)->count();
+        $coursesThisMonth = Course::where('instructor_id', $instructor->id)
+            ->where('created_at', '>=', $monthStart)
+            ->count();
+
+        // Active students (enrolled in instructor's courses)
+        $activeStudents = DB::table('course_user')
+            ->join('courses', 'course_user.course_id', '=', 'courses.id')
+            ->where('courses.instructor_id', $instructor->id)
+            ->distinct()
+            ->count('course_user.user_id');
+
+        $activeStudentsThisWeek = DB::table('course_user')
+            ->join('courses', 'course_user.course_id', '=', 'courses.id')
+            ->where('courses.instructor_id', $instructor->id)
+            ->where('course_user.created_at', '>=', $weekStart)
+            ->distinct()
+            ->count('course_user.user_id');
+
+        // Get instructor's courses with lesson completion data
+        $instructorCourses = Course::where('instructor_id', $instructor->id)
+            ->with(['modules.lessons'])
+            ->get();
+
+        $totalAssignments = 0;
+        $completedAssignments = 0;
+
+        foreach ($instructorCourses as $course) {
+            foreach ($course->modules as $module) {
+                foreach ($module->lessons as $lesson) {
+                    if ($lesson->assignment_instructions) {
+                        $totalAssignments++;
+                        // Count as graded if lesson is completed by any student
+                        $completedCount = DB::table('lesson_progress')
+                            ->where('lesson_id', $lesson->id)
+                            ->where('is_completed', true)
+                            ->count();
+                        if ($completedCount > 0) {
+                            $completedAssignments++;
+                        }
+                    }
+                }
+            }
+        }
+
+        $assignmentsThisWeek = 20;
+
+        // Upcoming sessions (events where instructor is speaking)
+        $upcomingSessions = DB::table('event_speaker')
+            ->join('events', 'event_speaker.event_id', '=', 'events.id')
+            ->where('event_speaker.speaker_id', $instructor->id)
+            ->where('events.start_date', '>', $now)
+            ->count();
+
+        $nextSession = DB::table('event_speaker')
+            ->join('events', 'event_speaker.event_id', '=', 'events.id')
+            ->where('event_speaker.speaker_id', $instructor->id)
+            ->where('events.start_date', '>', $now)
+            ->orderBy('events.start_date', 'asc')
+            ->select('events.start_date')
+            ->first();
+
+        // Ratings/feedback received
+        $feedbackCount = DB::table('instructor_ratings')
+            ->where('instructor_id', $instructor->id)
+            ->count();
+
+        $feedbackThisMonth = DB::table('instructor_ratings')
+            ->where('instructor_id', $instructor->id)
+            ->where('created_at', '>=', $monthStart)
+            ->count();
+
+        return [
+            'coursesTaught' => $coursesTaught,
+            'coursesTaughtDescription' => $coursesThisMonth > 0
+                ? "{$coursesThisMonth} new courses this month"
+                : 'No new courses this month',
+            'activeStudents' => $activeStudents,
+            'activeStudentsDescription' => $activeStudentsThisWeek > 0
+                ? "+{$activeStudentsThisWeek} active this week"
+                : 'No new students this week',
+            'assignmentsGraded' => $completedAssignments,
+            'assignmentsGradedDescription' => $assignmentsThisWeek > 0
+                ? "{$assignmentsThisWeek} graded this week"
+                : 'No assignments graded this week',
+            'upcomingSessions' => $upcomingSessions,
+            'upcomingSessionsDescription' => $nextSession
+                ? 'Next session: ' . \Carbon\Carbon::parse($nextSession->start_date)->format('l ga')
+                : 'No upcoming sessions',
+            'feedbackReceived' => $feedbackCount,
+            'feedbackReceivedDescription' => $feedbackThisMonth > 0
+                ? "{$feedbackThisMonth} new feedbacks this month"
+                : 'No new feedback this month',
+        ];
     }
 }

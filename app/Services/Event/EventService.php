@@ -48,7 +48,7 @@ class EventService
             ->orderBy('created_at', 'asc')
             ->paginate()
             ->withQueryString();
-            // dd($events);
+
         return $events;
     }
 

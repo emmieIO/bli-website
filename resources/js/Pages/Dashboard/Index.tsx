@@ -23,6 +23,31 @@ interface Course {
     } | null;
 }
 
+interface AdminStats {
+    totalUsers: number;
+    totalUsersBadge: string;
+    totalUsersBadgeColor: string;
+    activeUsers: number;
+    activeUsersBadge: string;
+    totalCourses: number;
+    totalCoursesBadge: string;
+    eventsScheduled: number;
+    eventsScheduledBadge: string;
+    eventsScheduledBadgeColor: string;
+    totalAttendees: number;
+    totalAttendeesBadge: string;
+    totalAttendeesBadgeColor: string;
+}
+
+interface InstructorStats {
+    coursesTaught: number;
+    coursesTaughtDescription: string;
+    activeStudents: number;
+    activeStudentsDescription: string;
+    feedbackReceived: number;
+    feedbackReceivedDescription: string;
+}
+
 interface DashboardProps {
     stats?: {
         totalCourses?: number;
@@ -33,9 +58,11 @@ interface DashboardProps {
         completedLessons?: number;
     };
     courses?: Course[];
+    adminStats?: AdminStats | null;
+    instructorStats?: InstructorStats | null;
 }
 
-export default function Dashboard({ stats, courses }: DashboardProps) {
+export default function Dashboard({ stats, courses, adminStats, instructorStats }: DashboardProps) {
     const { auth, sideLinks } = usePage().props as any;
     const user = auth?.user;
     const isAdmin = user?.roles?.some((role: string) => ['admin', 'super-admin'].includes(role));
@@ -65,9 +92,9 @@ export default function Dashboard({ stats, courses }: DashboardProps) {
 
                     {/* Stats Cards */}
                     {isAdmin ? (
-                        <AdminDashboard />
+                        <AdminDashboard adminStats={adminStats} />
                     ) : isInstructor ? (
-                        <InstructorDashboard />
+                        <InstructorDashboard instructorStats={instructorStats} />
                     ) : (
                         <StudentDashboard stats={stats} courses={courses} />
                     )}
@@ -77,36 +104,102 @@ export default function Dashboard({ stats, courses }: DashboardProps) {
     );
 }
 
-function AdminDashboard() {
-    const adminStats = [
-        { title: 'Total Users', value: '1,842', icon: 'fa-users', color: '#002147', badge: '+12.5% this month', badgeColor: '#00a651' },
-        { title: 'Active Users', value: '1,294', icon: 'fa-chart-line', color: '#00a651', badge: '72% engagement' },
-        { title: 'Total Courses', value: '86', icon: 'fa-book-open', color: '#002147', badge: '24 in development' },
-        { title: 'Events Scheduled', value: '32', icon: 'fa-calendar', color: '#002147', badge: '5 happening today', badgeColor: '#002147' },
-        { title: 'Total Attendees', value: '4,217', icon: 'fa-user-check', color: '#00a651', badge: '+827 this month', badgeColor: '#00a651' },
+function AdminDashboard({ adminStats }: { adminStats?: AdminStats | null }) {
+    if (!adminStats) {
+        return (
+            <div className="text-center py-12">
+                <p className="text-gray-600 font-lato">Loading admin statistics...</p>
+            </div>
+        );
+    }
+
+    const statsArray = [
+        {
+            title: 'Total Users',
+            value: adminStats.totalUsers.toLocaleString(),
+            icon: 'fa-users',
+            color: '#002147',
+            badge: adminStats.totalUsersBadge,
+            badgeColor: adminStats.totalUsersBadgeColor
+        },
+        {
+            title: 'Active Users',
+            value: adminStats.activeUsers.toLocaleString(),
+            icon: 'fa-chart-line',
+            color: '#00a651',
+            badge: adminStats.activeUsersBadge
+        },
+        {
+            title: 'Total Courses',
+            value: adminStats.totalCourses.toLocaleString(),
+            icon: 'fa-book-open',
+            color: '#002147',
+            badge: adminStats.totalCoursesBadge
+        },
+        {
+            title: 'Events Scheduled',
+            value: adminStats.eventsScheduled.toLocaleString(),
+            icon: 'fa-calendar',
+            color: '#002147',
+            badge: adminStats.eventsScheduledBadge,
+            badgeColor: adminStats.eventsScheduledBadgeColor
+        },
+        {
+            title: 'Total Attendees',
+            value: adminStats.totalAttendees.toLocaleString(),
+            icon: 'fa-user-check',
+            color: '#00a651',
+            badge: adminStats.totalAttendeesBadge,
+            badgeColor: adminStats.totalAttendeesBadgeColor
+        },
     ];
 
     return (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {adminStats.map((stat, index) => (
+            {statsArray.map((stat, index) => (
                 <StatCard key={index} {...stat} />
             ))}
         </div>
     );
 }
 
-function InstructorDashboard() {
-    const instructorStats = [
-        { title: 'Courses Taught', value: '12', icon: 'fa-book-open', color: '#002147', description: '2 new courses this month' },
-        { title: 'Active Students', value: '158', icon: 'fa-users', color: '#00a651', description: '+15 active this week' },
-        { title: 'Assignments Graded', value: '47', icon: 'fa-check-square', color: '#002147', description: '8 graded this week' },
-        { title: 'Upcoming Sessions', value: '3', icon: 'fa-calendar', color: '#002147', description: 'Next session: Friday 10am' },
-        { title: 'Feedback Received', value: '21', icon: 'fa-comment', color: '#00a651', description: '5 new feedbacks this month' },
+function InstructorDashboard({ instructorStats }: { instructorStats?: InstructorStats | null }) {
+    if (!instructorStats) {
+        return (
+            <div className="text-center py-12">
+                <p className="text-gray-600 font-lato">Loading instructor statistics...</p>
+            </div>
+        );
+    }
+
+    const statsArray = [
+        {
+            title: 'Courses Taught',
+            value: instructorStats.coursesTaught.toString(),
+            icon: 'fa-book-open',
+            color: '#002147',
+            description: instructorStats.coursesTaughtDescription
+        },
+        {
+            title: 'Active Students',
+            value: instructorStats.activeStudents.toLocaleString(),
+            icon: 'fa-users',
+            color: '#00a651',
+            description: instructorStats.activeStudentsDescription
+        },
+
+        {
+            title: 'Feedback Received',
+            value: instructorStats.feedbackReceived.toString(),
+            icon: 'fa-comment',
+            color: '#00a651',
+            description: instructorStats.feedbackReceivedDescription
+        },
     ];
 
     return (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {instructorStats.map((stat, index) => (
+            {statsArray.map((stat, index) => (
                 <StatCard key={index} {...stat} />
             ))}
         </div>

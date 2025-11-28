@@ -1,5 +1,6 @@
 import { PropsWithChildren } from 'react';
 import { Head, Link } from '@inertiajs/react';
+import { ToastContainer, useToastNotifications } from '@/Components/Toast';
 
 interface AuthLayoutProps extends PropsWithChildren {
     title?: string;
@@ -7,9 +8,15 @@ interface AuthLayoutProps extends PropsWithChildren {
 }
 
 export default function AuthLayout({ title, description, children }: AuthLayoutProps) {
+    // Toast notifications
+    useToastNotifications();
+
     return (
         <>
             <Head title={title || 'Authentication'} />
+
+            {/* Toast Notifications */}
+            <ToastContainer />
 
             <div className="overflow-x-hidden min-h-screen">
                 {/* Mobile/Tablet Header */}

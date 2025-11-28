@@ -4,11 +4,10 @@ namespace App\Notifications;
 
 use App\Models\Course;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-class CourseRejected extends Notification implements ShouldQueue
+class CourseRejected extends Notification
 {
     use Queueable;
 
@@ -48,7 +47,7 @@ class CourseRejected extends Notification implements ShouldQueue
         }
 
         $message->line('You can make the necessary changes and resubmit your course for review.')
-            ->action('Edit Course', url("/instructor/courses/{$this->course->id}/edit"))
+            ->action('Edit Course', route('instructor.courses.edit', $this->course))
             ->line('If you have any questions, please contact our support team.');
 
         return $message;
@@ -67,7 +66,7 @@ class CourseRejected extends Notification implements ShouldQueue
             'course_slug' => $this->course->slug,
             'rejection_reason' => $this->rejectionReason,
             'message' => "Your course '{$this->course->title}' was not approved",
-            'action_url' => url("/instructor/courses/{$this->course->id}/edit"),
+            'action_url' => route('instructor.courses.edit', $this->course),
             'type' => 'course_rejected',
         ];
     }

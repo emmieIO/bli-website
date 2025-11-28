@@ -65,7 +65,8 @@ export default function UserManagement({ users, roles }: UserManagementProps) {
             setStats(data);
             setShowStats(true);
         } catch (error) {
-            console.error('Failed to load statistics:', error);
+            // Failed to load statistics - silently fail
+            setShowStats(false);
         } finally {
             setLoading(false);
         }

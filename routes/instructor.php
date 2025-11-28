@@ -47,7 +47,9 @@ Route::prefix('instructor')->name('instructor.')->middleware(['auth', 'role:inst
     Route::post('/courses/{course}/modules/reorder', [InstructorCourseController::class, 'reorderModules'])->name('courses.modules.reorder');
     
     // Course Lesson Management
+    Route::get('/courses/{course}/modules/{module}/lessons/create', [InstructorCourseController::class, 'createLesson'])->name('courses.lessons.create');
     Route::post('/courses/{course}/modules/{module}/lessons', [InstructorCourseController::class, 'storeLesson'])->name('courses.lessons.store');
+    Route::get('/courses/{course}/modules/{module}/lessons/{lesson}/edit', [InstructorCourseController::class, 'editLesson'])->name('courses.lessons.edit');
     Route::put('/courses/{course}/modules/{module}/lessons/{lesson}', [InstructorCourseController::class, 'updateLesson'])->name('courses.lessons.update');
     Route::delete('/courses/{course}/modules/{module}/lessons/{lesson}', [InstructorCourseController::class, 'deleteLesson'])->name('courses.lessons.delete');
     Route::post('/courses/{course}/modules/{module}/lessons/reorder', [InstructorCourseController::class, 'reorderLessons'])->name('courses.lessons.reorder');
