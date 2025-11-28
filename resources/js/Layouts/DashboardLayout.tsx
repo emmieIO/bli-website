@@ -173,7 +173,7 @@ export default function DashboardLayout({ children, sideLinks }: DashboardLayout
                 });
                 setSearchResults(response.data);
             } catch (error) {
-                console.error('Search error:', error);
+                // Search failed - show no results
                 setSearchResults(null);
             } finally {
                 setIsSearching(false);
@@ -207,8 +207,7 @@ export default function DashboardLayout({ children, sideLinks }: DashboardLayout
             setNotifications(response.data.notifications || []);
             setUnreadCount(response.data.unread_count || 0);
         } catch (error) {
-            console.error('Error fetching notifications:', error);
-            // Silently fail - notifications are not critical
+            // Failed to fetch notifications - silently fail, notifications are not critical
             setNotifications([]);
             setUnreadCount(0);
         }
@@ -224,7 +223,7 @@ export default function DashboardLayout({ children, sideLinks }: DashboardLayout
                 n.id === notificationId ? { ...n, read_at: new Date().toISOString() } : n
             ));
         } catch (error) {
-            console.error('Error marking notification as read:', error);
+            // Failed to mark as read - silently fail
         }
     };
 
@@ -235,7 +234,7 @@ export default function DashboardLayout({ children, sideLinks }: DashboardLayout
             setUnreadCount(0);
             setNotifications(prev => prev.map(n => ({ ...n, read_at: new Date().toISOString() })));
         } catch (error) {
-            console.error('Error marking all as read:', error);
+            // Failed to mark all as read - silently fail
         }
     };
 
@@ -245,7 +244,8 @@ export default function DashboardLayout({ children, sideLinks }: DashboardLayout
             markAsRead(notification.id);
         }
         if (notification.action_url) {
-            window.location.href = notification.action_url;
+            // Use Inertia router for proper navigation
+            router.visit(notification.action_url);
         }
         setShowNotifications(false);
     };

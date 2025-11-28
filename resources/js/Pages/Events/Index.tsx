@@ -1,4 +1,4 @@
-import { Head, Link, router, useForm } from '@inertiajs/react';
+import { Head, Link, router } from '@inertiajs/react';
 import GuestLayout from '@/Layouts/GuestLayout';
 import { useState, FormEvent } from 'react';
 
@@ -38,9 +38,6 @@ interface EventsIndexProps {
 
 export default function EventsIndex({ events, upcomingEvents, ongoingEvents, expiredEvents }: EventsIndexProps) {
     const [searchQuery, setSearchQuery] = useState('');
-    const newsletterForm = useForm({
-        email: '',
-    });
 
     const handleSearch = (e: FormEvent) => {
         e.preventDefault();
@@ -286,82 +283,6 @@ export default function EventsIndex({ events, upcomingEvents, ongoingEvents, exp
                             </div>
                         </div>
                     )}
-                </div>
-            </section>
-
-            {/* Newsletter CTA Section */}
-            <section className="py-20 bg-gradient-to-r from-primary to-primary">
-                <div className="container mx-auto px-6">
-                    <div className="max-w-4xl mx-auto text-center text-white">
-                        {/* Section Icon */}
-                        <div className="mb-8">
-                            <div className="w-20 h-20 rounded-2xl mx-auto flex items-center justify-center bg-accent/20">
-                                <i className="fas fa-bell text-3xl text-accent"></i>
-                            </div>
-                        </div>
-
-                        <h2 className="text-3xl md:text-4xl font-bold mb-6 font-montserrat">
-                            Never Miss a Transformational Event
-                        </h2>
-                        <p className="text-xl text-white/90 mb-12 font-lato leading-relaxed max-w-3xl mx-auto">
-                            Subscribe to our newsletter and be the first to know about upcoming programs, prophetic workshops, and kingdom
-                            leadership gatherings.
-                        </p>
-
-                        {/* Newsletter Signup */}
-                        <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-8 border border-white/20 max-w-2xl mx-auto">
-                            <form
-                                onSubmit={(e) => {
-                                    e.preventDefault();
-                                    newsletterForm.post(route('newsletter.subscribe'), {
-                                        onSuccess: () => newsletterForm.reset(),
-                                    });
-                                }}
-                                className="flex flex-col md:flex-row gap-4"
-                            >
-                                <div className="flex-1 relative">
-                                    <i className="fas fa-envelope absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-                                    <input
-                                        type="email"
-                                        value={newsletterForm.data.email}
-                                        onChange={(e) => newsletterForm.setData('email', e.target.value)}
-                                        required
-                                        placeholder="Enter your email address"
-                                        className="w-full pl-12 pr-4 py-4 rounded-xl border border-white/30 bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent font-lato"
-                                    />
-                                </div>
-                                <button
-                                    type="submit"
-                                    disabled={newsletterForm.processing}
-                                    className="px-8 py-4 rounded-xl font-semibold transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 text-white font-montserrat whitespace-nowrap bg-accent hover:bg-accent-700 disabled:opacity-50 disabled:cursor-not-allowed"
-                                >
-                                    <i className="fas fa-paper-plane mr-2"></i>
-                                    {newsletterForm.processing ? 'Subscribing...' : 'Subscribe Now'}
-                                </button>
-                            </form>
-                            {newsletterForm.errors.email && (
-                                <p className="mt-3 text-sm text-red-300 flex items-center">
-                                    <i className="fas fa-exclamation-circle mr-2"></i>
-                                    {newsletterForm.errors.email}
-                                </p>
-                            )}
-
-                            <div className="flex items-center justify-center gap-6 mt-8 text-sm text-white/80 flex-wrap">
-                                <div className="flex items-center gap-2">
-                                    <i className="fas fa-users text-sm text-accent"></i>
-                                    <span className="font-lato">12,000+ Leaders</span>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                    <i className="fas fa-shield-alt text-sm text-accent"></i>
-                                    <span className="font-lato">No Spam Promise</span>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                    <i className="fas fa-times text-sm text-accent"></i>
-                                    <span className="font-lato">Unsubscribe Anytime</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
                 </div>
             </section>
         </GuestLayout>

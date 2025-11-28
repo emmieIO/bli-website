@@ -203,6 +203,90 @@ class VimeoService
     }
 
     /**
+     * Update video metadata on Vimeo
+     *
+     * @param string $videoId Vimeo video ID
+     * @param array $metadata Video metadata (name, description)
+     * @return bool
+     */
+    public function updateVideoMetadata(string $videoId, array $metadata): bool
+    {
+        try {
+            $response = $this->client->request("/videos/{$videoId}", $metadata, 'PATCH');
+
+            if ($response['status'] === 200) {
+                Log::info("Vimeo video metadata updated successfully", [
+                    'video_id' => $videoId,
+                    'metadata' => $metadata,
+                ]);
+                return true;
+            }
+
+            Log::warning("Failed to update Vimeo video metadata", [
+                'video_id' => $videoId,
+                'metadata' => $metadata,
+                'response' => $response,
+            ]);
+
+            return false;
+        } catch (\Exception $e) {
+            Log::error("Error updating Vimeo video metadata", [
+                'video_id' => $videoId,
+                'error' => $e->getMessage(),
+            ]);
+
+            return false;
+        }
+    }
+
+    /**
+     * Check video processing status
+     *
+     * @param string $videoId Vimeo video ID
+     * @return array ['status' => string, 'is_ready' => bool, 'info' => array|null]
+     */
+    public function getVideoStatus(string $videoId): array
+    {
+        try {
+            $videoInfo = $this->getVideoInfo($videoId);
+
+            if (!$videoInfo) {
+                return [
+                    'status' => 'unknown',
+                    'is_ready' => false,
+                    'info' => null,
+                ];
+            }
+
+            // Check upload and transcode status
+            $uploadStatus = $videoInfo['upload']['status'] ?? 'unknown';
+            $transcodeStatus = $videoInfo['transcode']['status'] ?? 'unknown';
+
+            // Video is ready when upload is complete and transcode is complete or in_progress
+            $isReady = $uploadStatus === 'complete' && in_array($transcodeStatus, ['complete', 'in_progress']);
+
+            return [
+                'status' => $transcodeStatus,
+                'is_ready' => $isReady,
+                'upload_status' => $uploadStatus,
+                'info' => $videoInfo,
+            ];
+
+        } catch (\Exception $e) {
+            Log::error("Error checking Vimeo video status", [
+                'video_id' => $videoId,
+                'error' => $e->getMessage(),
+            ]);
+
+            return [
+                'status' => 'error',
+                'is_ready' => false,
+                'info' => null,
+            ];
+        }
+    }
+
+    /**
      * Delete video from Vimeo
      *
      * @param string $videoId Vimeo video ID

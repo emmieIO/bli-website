@@ -24,12 +24,14 @@ class CreateCourseRequest extends FormRequest
      */
     public function rules(): array
     {
+        $isUpdating = $this->isMethod('PUT') || $this->isMethod('PATCH') || $this->has('_method');
+
         return [
             "title" => ["required", "string", "max:255"],
             "subtitle" => ["nullable", "string", "max:500"],
             "description" => ["required", "string", "min:100"],
             "language" => ["required", "string", "max:50"],
-            "thumbnail" => ["required", "file", "mimes:jpg,jpeg,png,webp", "max:2048"],
+            "thumbnail" => [$isUpdating ? "nullable" : "required", "file", "mimes:jpg,jpeg,png,webp", "max:2048"],
             "preview_video" => ["nullable", "file", "mimes:mp4,mov,avi,wmv", "max:51200"], // 50MB max
             "level" => ["required", "string", "in:" . implode(',', array_column(CourseLevel::cases(), 'value'))],
             "category_id" => ["required", "exists:categories,id"],
@@ -40,6 +42,8 @@ class CreateCourseRequest extends FormRequest
 
     public function messages(): array
     {
+        $isUpdating = $this->isMethod('PUT') || $this->isMethod('PATCH') || $this->has('_method');
+
         return [
             'title.required' => 'Course title is required.',
             'title.max' => 'Course title cannot exceed 255 characters.',
@@ -47,7 +51,7 @@ class CreateCourseRequest extends FormRequest
             'description.required' => 'Course description is required.',
             'description.min' => 'Course description must be at least 100 characters.',
             'language.required' => 'Course language is required.',
-            'thumbnail.required' => 'Course thumbnail image is required.',
+            'thumbnail.required' => $isUpdating ? 'Course thumbnail image is optional when updating.' : 'Course thumbnail image is required.',
             'thumbnail.mimes' => 'Thumbnail must be a JPG, JPEG, PNG, or WEBP file.',
             'thumbnail.max' => 'Thumbnail file size cannot exceed 2MB.',
             'preview_video.mimes' => 'Preview video must be MP4, MOV, AVI, or WMV format.',

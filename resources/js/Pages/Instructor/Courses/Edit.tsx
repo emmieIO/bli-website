@@ -101,7 +101,7 @@ export default function EditCourse({ course, categories, levels }: EditCoursePro
 
         // Append files only if new ones are selected
         if (thumbnailFile) {
-            data.append('thumbnail_path', thumbnailFile);
+            data.append('thumbnail', thumbnailFile);
         }
 
         if (previewVideoFile) {

@@ -136,7 +136,7 @@ export default function Learn({
                 }
             }
         } catch (error) {
-            console.error('Failed to load lesson progress:', error);
+            // Failed to load lesson progress - continue with default state
         }
     };
 
@@ -157,7 +157,7 @@ export default function Learn({
                 }),
             });
         } catch (error) {
-            console.error('Failed to save progress:', error);
+            // Failed to save progress - will retry on next interaction
         }
     };
 
@@ -187,7 +187,7 @@ export default function Learn({
                 }
             }
         } catch (error) {
-            console.error('Failed to mark lesson as complete:', error);
+            // Failed to mark lesson as complete - user can retry manually
         }
     };
 
@@ -296,24 +296,39 @@ export default function Learn({
                         <div className="bg-black rounded-xl overflow-hidden shadow-2xl relative mb-6">
                             {currentLesson && currentLesson.video_url ? (
                                 <div className="aspect-video relative">
-                                    <video
-                                        ref={videoRef}
-                                        className="w-full h-full"
-                                        controls
-                                        preload="metadata"
-                                        poster="/images/video-placeholder.jpg"
-                                    >
-                                        <source src={currentLesson.video_url} type="video/mp4" />
-                                        Your browser does not support the video tag.
-                                    </video>
+                                    {currentLesson.video_url.includes('vimeo.com') || currentLesson.video_url.includes('player.vimeo.com') ? (
+                                        // Vimeo iframe player
+                                        <iframe
+                                            src={currentLesson.video_url}
+                                            className="w-full h-full"
+                                            frameBorder="0"
+                                            allow="autoplay; fullscreen; picture-in-picture"
+                                            allowFullScreen
+                                            title={currentLesson.title}
+                                        ></iframe>
+                                    ) : (
+                                        // Regular HTML5 video player
+                                        <>
+                                            <video
+                                                ref={videoRef}
+                                                className="w-full h-full"
+                                                controls
+                                                preload="metadata"
+                                                poster="/images/video-placeholder.jpg"
+                                            >
+                                                <source src={currentLesson.video_url} type="video/mp4" />
+                                                Your browser does not support the video tag.
+                                            </video>
 
-                                    {/* Progress Bar */}
-                                    <div className="absolute bottom-0 left-0 right-0 h-1 bg-gray-700">
-                                        <div
-                                            className="h-full bg-gradient-to-r from-primary to-accent transition-all duration-300"
-                                            style={{ width: `${watchProgress}%` }}
-                                        ></div>
-                                    </div>
+                                            {/* Progress Bar */}
+                                            <div className="absolute bottom-0 left-0 right-0 h-1 bg-gray-700">
+                                                <div
+                                                    className="h-full bg-gradient-to-r from-primary to-accent transition-all duration-300"
+                                                    style={{ width: `${watchProgress}%` }}
+                                                ></div>
+                                            </div>
+                                        </>
+                                    )}
                                 </div>
                             ) : (
                                 <div className="aspect-video flex items-center justify-center bg-gradient-to-br from-gray-800 to-gray-900 text-gray-400">

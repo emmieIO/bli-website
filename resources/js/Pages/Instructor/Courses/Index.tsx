@@ -2,6 +2,7 @@ import { Head, Link, router } from '@inertiajs/react';
 import DashboardLayout from '@/Layouts/DashboardLayout';
 import { PageProps } from '@/types';
 import { useState } from 'react';
+import ConfirmModal from '@/Components/ConfirmModal';
 
 // Define the structure of the props passed from the controller
 interface Course {
@@ -34,8 +35,10 @@ interface InstructorCoursesPageProps extends PageProps {
 export default function InstructorCoursesIndex({ auth, courses, instructorStats, sideLinks }: InstructorCoursesPageProps) {
     const coursesList = courses.data || [];
     const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [showSubmitModal, setShowSubmitModal] = useState(false);
     const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
     const [isDeleting, setIsDeleting] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     const openDeleteModal = (course: Course) => {
         setSelectedCourse(course);
@@ -56,11 +59,32 @@ export default function InstructorCoursesIndex({ auth, courses, instructorStats,
         });
     };
 
+    const openSubmitModal = (course: Course) => {
+        setSelectedCourse(course);
+        setShowSubmitModal(true);
+    };
+
+    const handleSubmitForReview = () => {
+        if (!selectedCourse) return;
+
+        setIsSubmitting(true);
+        router.post(route('instructor.courses.submit-for-review', selectedCourse.slug), {}, {
+            preserveScroll: true,
+            onFinish: () => {
+                setIsSubmitting(false);
+                setShowSubmitModal(false);
+                setSelectedCourse(null);
+            },
+        });
+    };
+
     const getStatusBadge = (status: string) => {
         const statusMap: { [key: string]: { label: string; className: string } } = {
             draft: { label: 'Draft', className: 'bg-gray-100 text-gray-800' },
-            published: { label: 'Published', className: 'bg-green-100 text-green-800' },
-            pending: { label: 'In Review', className: 'bg-yellow-100 text-yellow-800' },
+            pending: { label: 'Pending Review', className: 'bg-yellow-100 text-yellow-800' },
+            under_review: { label: 'Under Review', className: 'bg-blue-100 text-blue-800' },
+            approved: { label: 'Approved', className: 'bg-green-100 text-green-800' },
+            rejected: { label: 'Rejected', className: 'bg-red-100 text-red-800' },
         };
         return statusMap[status] || { label: 'Unknown', className: 'bg-gray-100 text-gray-800' };
     };
@@ -139,13 +163,23 @@ export default function InstructorCoursesIndex({ auth, courses, instructorStats,
                                                 <Link href={route('instructor.courses.builder', course.slug)} className="text-primary hover:text-primary-dark" title="Edit Content">
                                                     <i className="fas fa-layer-group"></i>
                                                 </Link>
-                                                <Link href={route('instructor.courses.edit', course.slug)} className="text-blue-600 hover:text-blue-800" title="Edit Settings">
-                                                    <i className="fas fa-cog"></i>
-                                                </Link>
                                                 {course.status === 'draft' && (
-                                                    <button onClick={() => openDeleteModal(course)} className="text-red-600 hover:text-red-800" title="Delete (Draft only)">
-                                                        <i className="fas fa-trash"></i>
-                                                    </button>
+                                                    <>
+                                                        <Link href={route('instructor.courses.edit', course.slug)} className="text-blue-600 hover:text-blue-800" title="Edit Settings">
+                                                            <i className="fas fa-cog"></i>
+                                                        </Link>
+                                                        <button onClick={() => openSubmitModal(course)} className="text-green-600 hover:text-green-800" title="Submit for Review">
+                                                            <i className="fas fa-paper-plane"></i>
+                                                        </button>
+                                                        <button onClick={() => openDeleteModal(course)} className="text-red-600 hover:text-red-800" title="Delete">
+                                                            <i className="fas fa-trash"></i>
+                                                        </button>
+                                                    </>
+                                                )}
+                                                {course.status === 'rejected' && (
+                                                    <Link href={route('instructor.courses.edit', course.slug)} className="text-blue-600 hover:text-blue-800" title="Edit & Resubmit">
+                                                        <i className="fas fa-cog"></i>
+                                                    </Link>
                                                 )}
                                             </div>
                                         </td>
@@ -236,6 +270,36 @@ export default function InstructorCoursesIndex({ auth, courses, instructorStats,
                     </div>
                 </div>
             )}
+
+            {/* Submit for Review Modal */}
+            <ConfirmModal
+                show={showSubmitModal && selectedCourse !== null}
+                onClose={() => {
+                    setShowSubmitModal(false);
+                    setSelectedCourse(null);
+                }}
+                onConfirm={handleSubmitForReview}
+                title="Submit Course for Review"
+                message={
+                    <>
+                        <p>
+                            Submit <span className="font-semibold text-gray-900">"{selectedCourse?.title}"</span> for admin review?
+                        </p>
+                        <p className="mt-2 text-yellow-600">
+                            You won't be able to edit this course until it has been reviewed by an admin.
+                        </p>
+                    </>
+                }
+                confirmText="Submit for Review"
+                confirmButtonClass="bg-green-600 hover:bg-green-700 text-white"
+                icon={
+                    <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+                        <i className="fas fa-paper-plane w-6 h-6 text-green-600"></i>
+                    </div>
+                }
+                isProcessing={isSubmitting}
+                processingText="Submitting..."
+            />
         </DashboardLayout>
     );
 }

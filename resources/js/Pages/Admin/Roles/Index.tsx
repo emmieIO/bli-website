@@ -1,6 +1,7 @@
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import DashboardLayout from '@/Layouts/DashboardLayout';
 import { useState } from 'react';
+import ConfirmModal from '@/Components/ConfirmModal';
 
 interface Permission {
     id: number;
@@ -24,36 +25,83 @@ interface RolesProps {
 
 export default function RolesManagement({ roles, permissions }: RolesProps) {
     const { sideLinks } = usePage().props as any;
+    const [isProcessing, setIsProcessing] = useState(false);
+
+    // Modal state
+    const [confirmModal, setConfirmModal] = useState<{
+        show: boolean;
+        type: 'toggle-permission' | 'reset-defaults' | null;
+        title: string;
+        message: string;
+        data?: any;
+    }>({
+        show: false,
+        type: null,
+        title: '',
+        message: ''
+    });
 
     const handleTogglePermission = (roleName: string, permissionName: string, hasPermission: boolean) => {
         const action = hasPermission ? 'remove' : 'add';
-        const message = `${action === 'add' ? 'Grant' : 'Remove'} "${permissionName}" permission ${
-            action === 'add' ? 'to' : 'from'
-        } ${roleName} role?`;
+        const formattedPermission = permissionName
+            .replace(/[_-]/g, ' ')
+            .split(' ')
+            .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+            .join(' ');
+        const formattedRole = roleName.charAt(0).toUpperCase() + roleName.slice(1);
 
-        if (!confirm(message)) return;
-
-        router.post(
-            route('admin.roles.toggle-permission'),
-            {
-                role: roleName,
-                permission: permissionName,
-                action,
-            },
-            {
-                preserveScroll: true,
-            }
-        );
+        setConfirmModal({
+            show: true,
+            type: 'toggle-permission',
+            title: `${action === 'add' ? 'Grant' : 'Remove'} Permission`,
+            message: `Are you sure you want to ${action === 'add' ? 'grant' : 'remove'} "${formattedPermission}" permission ${
+                action === 'add' ? 'to' : 'from'
+            } the ${formattedRole} role?`,
+            data: { roleName, permissionName, action }
+        });
     };
 
     const handleResetToDefaults = () => {
-        if (!confirm('Are you sure you want to reset all roles to their default permissions? This action cannot be undone.')) {
-            return;
-        }
-
-        router.post(route('admin.roles.reset-defaults'), {}, {
-            preserveScroll: true,
+        setConfirmModal({
+            show: true,
+            type: 'reset-defaults',
+            title: 'Reset to Default Permissions',
+            message: 'Are you sure you want to reset all roles to their default permissions? This will override any custom permission settings you have configured. This action cannot be undone.',
+            data: null
         });
+    };
+
+    const confirmAction = () => {
+        if (!confirmModal.type) return;
+
+        setIsProcessing(true);
+
+        if (confirmModal.type === 'toggle-permission' && confirmModal.data) {
+            const { roleName, permissionName, action } = confirmModal.data;
+            router.post(
+                route('admin.roles.toggle-permission'),
+                {
+                    role: roleName,
+                    permission: permissionName,
+                    action,
+                },
+                {
+                    preserveScroll: true,
+                    onFinish: () => {
+                        setIsProcessing(false);
+                        setConfirmModal({ show: false, type: null, title: '', message: '' });
+                    }
+                }
+            );
+        } else if (confirmModal.type === 'reset-defaults') {
+            router.post(route('admin.roles.reset-defaults'), {}, {
+                preserveScroll: true,
+                onFinish: () => {
+                    setIsProcessing(false);
+                    setConfirmModal({ show: false, type: null, title: '', message: '' });
+                }
+            });
+        }
     };
 
     const handleViewAuditLog = () => {
@@ -213,6 +261,45 @@ export default function RolesManagement({ roles, permissions }: RolesProps) {
                     </button>
                 </div>
             </div>
+
+            {/* Confirm Action Modal */}
+            <ConfirmModal
+                show={confirmModal.show}
+                onClose={() => setConfirmModal({ show: false, type: null, title: '', message: '' })}
+                onConfirm={confirmAction}
+                title={confirmModal.title}
+                message={confirmModal.message}
+                confirmText={confirmModal.type === 'toggle-permission'
+                    ? (confirmModal.data?.action === 'add' ? 'Grant Permission' : 'Remove Permission')
+                    : 'Reset to Defaults'}
+                cancelText="Cancel"
+                confirmButtonClass={
+                    confirmModal.type === 'toggle-permission' && confirmModal.data?.action === 'remove'
+                        ? 'bg-red-600 hover:bg-red-700 text-white'
+                        : confirmModal.type === 'reset-defaults'
+                        ? 'bg-yellow-600 hover:bg-yellow-700 text-white'
+                        : 'bg-green-600 hover:bg-green-700 text-white'
+                }
+                icon={
+                    <div className={`mx-auto flex items-center justify-center h-12 w-12 rounded-full ${
+                        confirmModal.type === 'toggle-permission' && confirmModal.data?.action === 'remove'
+                            ? 'bg-red-100'
+                            : confirmModal.type === 'reset-defaults'
+                            ? 'bg-yellow-100'
+                            : 'bg-green-100'
+                    }`}>
+                        <i className={`fas ${
+                            confirmModal.type === 'toggle-permission' && confirmModal.data?.action === 'remove'
+                                ? 'fa-times-circle text-red-600'
+                                : confirmModal.type === 'reset-defaults'
+                                ? 'fa-undo text-yellow-600'
+                                : 'fa-check-circle text-green-600'
+                        } text-xl`}></i>
+                    </div>
+                }
+                isProcessing={isProcessing}
+                processingText={confirmModal.type === 'reset-defaults' ? 'Resetting...' : 'Processing...'}
+            />
         </DashboardLayout>
     );
 }

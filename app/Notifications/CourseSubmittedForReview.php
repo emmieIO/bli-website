@@ -4,11 +4,10 @@ namespace App\Notifications;
 
 use App\Models\Course;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-class CourseSubmittedForReview extends Notification implements ShouldQueue
+class CourseSubmittedForReview extends Notification
 {
     use Queueable;
 
@@ -44,7 +43,7 @@ class CourseSubmittedForReview extends Notification implements ShouldQueue
             ->line("**Course Title:** {$this->course->title}")
             ->line("**Instructor:** {$instructorName}")
             ->line("**Category:** " . ($this->course->category->name ?? 'Uncategorized'))
-            ->action('Review Course', url("/admin/courses/{$this->course->id}"))
+            ->action('Review Course', route('admin.courses.index'))
             ->line('Please review and approve or reject this course at your earliest convenience.');
     }
 
@@ -62,7 +61,7 @@ class CourseSubmittedForReview extends Notification implements ShouldQueue
             'instructor_name' => $this->course->instructor->name ?? 'Unknown Instructor',
             'instructor_id' => $this->course->instructor_id,
             'message' => "New course '{$this->course->title}' submitted for review",
-            'action_url' => url("/admin/courses/{$this->course->id}"),
+            'action_url' => route('admin.courses.index'),
             'type' => 'course_submitted',
         ];
     }

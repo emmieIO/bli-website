@@ -7,6 +7,7 @@ interface CourseModule {
     title: string;
     course: {
         id: number;
+        slug: string;
     };
 }
 
@@ -101,7 +102,7 @@ export default function AddLesson({ module, lessontypes }: AddLessonProps) {
             data.append('content_path', pdfFile);
         }
 
-        router.post(route('instructor.lessons.store', module.id), data, {
+        router.post(route('instructor.courses.lessons.store', [module.course.slug, module.id]), data, {
             preserveScroll: true,
             onFinish: () => {
                 setIsSubmitting(false);
@@ -121,7 +122,7 @@ export default function AddLesson({ module, lessontypes }: AddLessonProps) {
                 <h1 className="text-3xl font-bold mb-2">Add Lesson to {module.title}</h1>
                 <p className="text-gray-600">Create a new lesson and assign it to the selected module.</p>
                 <Link
-                    href={route('instructor.courses.builder', module.course.id)}
+                    href={route('instructor.courses.builder', module.course.slug)}
                     className="bg-white p-2.5 text-gray-800 border rounded-md my-1 inline-block"
                 >
                     Go back to builder

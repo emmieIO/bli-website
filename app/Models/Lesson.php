@@ -28,6 +28,28 @@ class Lesson extends Model
         'video_uploaded_at' => 'datetime',
     ];
 
+    protected $appends = [
+        'video_url',
+    ];
+
+    /**
+     * Get the video URL for Vimeo videos
+     */
+    public function getVideoUrlAttribute(): ?string
+    {
+        if ($this->type === 'video' && $this->vimeo_id) {
+            // Return Vimeo player URL for iframe embedding
+            return "https://player.vimeo.com/video/{$this->vimeo_id}";
+        }
+
+        // For non-Vimeo videos or other types, return content_path
+        if ($this->type === 'video' && $this->content_path) {
+            return $this->content_path;
+        }
+
+        return null;
+    }
+
     public function courseModule()
     {
         return $this->belongsTo(CourseModule::class, 'module_id');

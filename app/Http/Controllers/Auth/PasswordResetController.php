@@ -36,7 +36,7 @@ class PasswordResetController extends Controller
         $status = $this->passwordResetService->resetPassword($request->only('token', "email", 'password'));
         return $status === Password::PASSWORD_RESET
         ? redirect()->route('login')->with(['type' => "success", "message" => __($status)])
-        : back()->withErrors(['type' => "error", "message" => __($status)]);
+        : back()->with(['type' => "error", "message" => __($status)]);
     }
 
     public function updatePassword(Request $request){
@@ -48,6 +48,6 @@ class PasswordResetController extends Controller
         if($this->passwordResetService->updatePassword($request)){
             return back()->with(['type' => 'success', 'message' => 'Password updated successfully.']);
         }
-        return back()->withErrors(['type' => 'error', 'message' => 'Failed to update password.']);
+        return back()->with(['type' => 'error', 'message' => 'Failed to update password.']);
     }
 }

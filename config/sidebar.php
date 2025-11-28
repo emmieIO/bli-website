@@ -85,6 +85,18 @@ return [
             'permission' => 'manage-instructor-applications',
         ],
         [
+            'title' => 'Blog Manager',
+            'icon' => 'blog',
+            'route' => 'admin.posts.index',
+            'permission' => 'manage-blog',
+        ],
+        [
+            'title' => 'Instructor Ratings',
+            'icon' => 'star',
+            'route' => 'admin.ratings.index',
+            'permission' => 'manage-ratings',
+        ],
+        [
             'title' => 'System Management',
             'icon' => 'settings',
             'permission' => ['view-user-list'],

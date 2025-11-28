@@ -4,11 +4,10 @@ namespace App\Notifications;
 
 use App\Models\Course;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-class CourseApproved extends Notification implements ShouldQueue
+class CourseApproved extends Notification
 {
     use Queueable;
 
@@ -41,7 +40,7 @@ class CourseApproved extends Notification implements ShouldQueue
             ->line('Congratulations! Your course has been approved.')
             ->line("**Course Title:** {$this->course->title}")
             ->line('Your course is now live and available for students to enroll.')
-            ->action('View Course', url("/instructor/courses/{$this->course->id}"))
+            ->action('View My Courses', route('instructor.courses.index'))
             ->line('Thank you for contributing quality content to our platform!');
     }
 
@@ -56,8 +55,8 @@ class CourseApproved extends Notification implements ShouldQueue
             'course_id' => $this->course->id,
             'course_title' => $this->course->title,
             'course_slug' => $this->course->slug,
-            'message' => "Your course '{$this->course->title}' has been approved",
-            'action_url' => url("/instructor/courses/{$this->course->id}"),
+            'message' => "Congratulations! Your course '{$this->course->title}' has been approved and is now live.",
+            'action_url' => route('instructor.courses.index'),
             'type' => 'course_approved',
         ];
     }

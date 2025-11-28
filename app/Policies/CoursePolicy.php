@@ -71,21 +71,22 @@ class CoursePolicy
         if (!$user) {
             return false;
         }
-        
+
         // Admin can update any course
         if ($user->hasPermissionTo(CoursePermissionsEnum::UPDATE_ANY->value)) {
             return true;
         }
-        
-        // Instructor can update their own courses, but only if draft or rejected
-        if ($user->hasPermissionTo(CoursePermissionsEnum::UPDATE_OWN->value) 
+
+        // Instructor can update their own courses
+        // EXCEPT when under review (pending or under_review)
+        if ($user->hasPermissionTo(CoursePermissionsEnum::UPDATE_OWN->value)
             && $course->instructor_id === $user->id) {
-            return in_array($course->status, [
-                ApplicationStatus::DRAFT, 
-                ApplicationStatus::REJECTED
-            ]);
+            // Cannot edit while course is being reviewed
+            // Using !== for explicit enum comparison
+            return $course->status !== ApplicationStatus::PENDING
+                && $course->status !== ApplicationStatus::UNDER_REVIEW;
         }
-        
+
         return false;
     }
 
@@ -134,9 +135,12 @@ class CoursePolicy
         if (!$user) {
             return false;
         }
-        
+
         return $user->hasPermissionTo(CoursePermissionsEnum::APPROVE->value)
-            && $course->status === ApplicationStatus::UNDER_REVIEW;
+            && in_array($course->status, [
+                ApplicationStatus::PENDING,
+                ApplicationStatus::UNDER_REVIEW
+            ]);
     }
 
     /**
@@ -147,9 +151,12 @@ class CoursePolicy
         if (!$user) {
             return false;
         }
-        
+
         return $user->hasPermissionTo(CoursePermissionsEnum::REJECT->value)
-            && $course->status === ApplicationStatus::UNDER_REVIEW;
+            && in_array($course->status, [
+                ApplicationStatus::PENDING,
+                ApplicationStatus::UNDER_REVIEW
+            ]);
     }
 
     /**
