@@ -33,7 +33,7 @@ export default function BecomeASpeaker() {
             <Head title="Become a Speaker" />
 
             {/* Hero Section */}
-            <section className="min-h-screen py-12 bg-gradient-to-br from-gray-50 via-white to-gray-100">
+            <section className="min-h-screen py-12 bg-linear-to-br from-gray-50 via-white to-gray-100">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     {/* Header Section */}
                     <div className="text-center mb-16" data-aos="fade-up">
@@ -447,7 +447,7 @@ export default function BecomeASpeaker() {
                                         <div className="group p-4 rounded-2xl transition-all duration-300 hover:bg-white/10">
                                             <div className="flex items-start gap-4">
                                                 <div
-                                                    className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 transition-all duration-300 group-hover:scale-110"
+                                                    className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 transition-all duration-300 group-hover:scale-110"
                                                     style={{ background: 'rgba(0, 166, 81, 0.2)' }}
                                                 >
                                                     <i className="fas fa-users text-lg" style={{ color: '#00a651' }}></i>
@@ -465,7 +465,7 @@ export default function BecomeASpeaker() {
                                         <div className="group p-4 rounded-2xl transition-all duration-300 hover:bg-white/10">
                                             <div className="flex items-start gap-4">
                                                 <div
-                                                    className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 transition-all duration-300 group-hover:scale-110"
+                                                    className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 transition-all duration-300 group-hover:scale-110"
                                                     style={{ background: 'rgba(237, 28, 36, 0.2)' }}
                                                 >
                                                     <i className="fas fa-award text-lg" style={{ color: '#ed1c24' }}></i>
@@ -483,7 +483,7 @@ export default function BecomeASpeaker() {
                                         <div className="group p-4 rounded-2xl transition-all duration-300 hover:bg-white/10">
                                             <div className="flex items-start gap-4">
                                                 <div
-                                                    className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 transition-all duration-300 group-hover:scale-110"
+                                                    className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 transition-all duration-300 group-hover:scale-110"
                                                     style={{ background: 'rgba(0, 166, 81, 0.2)' }}
                                                 >
                                                     <i className="fas fa-handshake text-lg" style={{ color: '#00a651' }}></i>
@@ -501,7 +501,7 @@ export default function BecomeASpeaker() {
                                         <div className="group p-4 rounded-2xl transition-all duration-300 hover:bg-white/10">
                                             <div className="flex items-start gap-4">
                                                 <div
-                                                    className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 transition-all duration-300 group-hover:scale-110"
+                                                    className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 transition-all duration-300 group-hover:scale-110"
                                                     style={{ background: 'rgba(237, 28, 36, 0.2)' }}
                                                 >
                                                     <i className="fas fa-microphone-alt text-lg" style={{ color: '#ed1c24' }}></i>

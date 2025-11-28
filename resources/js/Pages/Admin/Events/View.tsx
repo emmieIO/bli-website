@@ -150,7 +150,7 @@ export default function ViewEvent({ event, speakers }: ViewEventProps) {
                                     {/* Details grid */}
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 border-t border-gray-200 pt-6 mt-6">
                                         <div className="flex items-start gap-3">
-                                            <i className="fas fa-calendar w-5 h-5 text-primary mt-0.5 flex-shrink-0"></i>
+                                            <i className="fas fa-calendar w-5 h-5 text-primary mt-0.5 shrink-0"></i>
                                             <div>
                                                 <h3 className="text-sm font-medium text-gray-500 font-montserrat">
                                                     Dates
@@ -166,7 +166,7 @@ export default function ViewEvent({ event, speakers }: ViewEventProps) {
 
                                         {(event.mode === 'hybrid' || event.mode === 'offline') && (
                                             <div className="flex items-start gap-3">
-                                                <i className="fas fa-map-marker-alt w-5 h-5 text-primary mt-0.5 flex-shrink-0"></i>
+                                                <i className="fas fa-map-marker-alt w-5 h-5 text-primary mt-0.5 shrink-0"></i>
                                                 <div>
                                                     <h3 className="text-sm font-medium text-gray-700 font-montserrat">
                                                         Location
@@ -184,7 +184,7 @@ export default function ViewEvent({ event, speakers }: ViewEventProps) {
 
                                         {(event.mode === 'online' || event.mode === 'hybrid') && event.location && (
                                             <div className="flex items-start gap-3">
-                                                <i className="fas fa-link w-5 h-5 text-primary mt-0.5 flex-shrink-0"></i>
+                                                <i className="fas fa-link w-5 h-5 text-primary mt-0.5 shrink-0"></i>
                                                 <div>
                                                     <h3 className="text-sm font-medium text-gray-700 font-montserrat">
                                                         Meeting Link
@@ -203,7 +203,7 @@ export default function ViewEvent({ event, speakers }: ViewEventProps) {
 
                                         {event.contact_email && (
                                             <div className="flex items-start gap-3">
-                                                <i className="fas fa-envelope w-5 h-5 text-primary mt-0.5 flex-shrink-0"></i>
+                                                <i className="fas fa-envelope w-5 h-5 text-primary mt-0.5 shrink-0"></i>
                                                 <div>
                                                     <h3 className="text-sm font-medium text-gray-700 font-montserrat">
                                                         Contact Email
@@ -217,7 +217,7 @@ export default function ViewEvent({ event, speakers }: ViewEventProps) {
 
                                         {event.max_attendees && (
                                             <div className="flex items-start gap-3">
-                                                <i className="fas fa-users w-5 h-5 text-primary mt-0.5 flex-shrink-0"></i>
+                                                <i className="fas fa-users w-5 h-5 text-primary mt-0.5 shrink-0"></i>
                                                 <div>
                                                     <h3 className="text-sm font-medium text-gray-700 font-montserrat">
                                                         Max Attendees
@@ -311,7 +311,7 @@ export default function ViewEvent({ event, speakers }: ViewEventProps) {
                                     <div className="space-y-3">
                                         {event.speakers.map((speaker) => (
                                             <div key={speaker.id} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-                                                <div className="w-10 h-10 bg-primary-100 rounded-full flex items-center justify-center flex-shrink-0">
+                                                <div className="w-10 h-10 bg-primary-100 rounded-full flex items-center justify-center shrink-0">
                                                     <span className="text-sm font-semibold text-primary-700 font-montserrat">
                                                         {speaker.user.name.charAt(0).toUpperCase()}
                                                     </span>

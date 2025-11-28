@@ -107,7 +107,7 @@ export default function ViewSpeaker({ speaker }: ViewSpeakerProps) {
                         {/* Speaker Bio & Profile Card */}
                         <div className="bg-white border border-gray-100 rounded-xl shadow-sm overflow-hidden">
                             <div className="p-6 flex flex-col sm:flex-row items-start sm:items-center gap-6">
-                                <div className="flex-shrink-0">
+                                <div className="shrink-0">
                                     <img
                                         src={photoUrl}
                                         className="w-24 h-24 rounded-full object-cover border-2 border-gray-200 shadow-sm"

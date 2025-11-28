@@ -130,7 +130,7 @@ function ProfileHeader({ user, formatMemberSince }: { user: User; formatMemberSi
     };
 
     return (
-        <div className="bg-gradient-to-r from-primary to-primary-700 rounded-xl shadow-lg p-6 text-white mb-10">
+        <div className="bg-linear-to-r from-primary to-primary-700 rounded-xl shadow-lg p-6 text-white mb-10">
             <div className="flex items-center gap-6">
                 <div className="relative group">
                     <img

@@ -110,7 +110,7 @@ export default function ApplicationForm({ user, profile }: ApplicationFormProps)
             <Head title="Instructor Application" />
 
             {/* Enhanced Application Form Section */}
-            <section className="min-h-screen py-12 bg-gradient-to-br from-gray-50 via-white to-gray-100 font-lato">
+            <section className="min-h-screen py-12 bg-linear-to-br from-gray-50 via-white to-gray-100 font-lato">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     {/* Header */}
                     <div className="text-center mb-12">
@@ -156,8 +156,8 @@ export default function ApplicationForm({ user, profile }: ApplicationFormProps)
                                 {/* Left Column */}
                                 <div className="space-y-8">
                                     {/* Personal Information Card */}
-                                    <div className="bg-gradient-to-br from-white to-gray-50 border-2 border-gray-100 rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300">
-                                        <div className="px-8 py-6 border-b border-gray-200 bg-gradient-to-br from-accent to-green-700">
+                                    <div className="bg-linear-to-br from-white to-gray-50 border-2 border-gray-100 rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300">
+                                        <div className="px-8 py-6 border-b border-gray-200 bg-linear-to-br from-accent to-green-700">
                                             <h3 className="text-xl font-bold text-white flex items-center font-montserrat">
                                                 <div className="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center mr-4">
                                                     <i className="fas fa-user text-lg"></i>
@@ -266,8 +266,8 @@ export default function ApplicationForm({ user, profile }: ApplicationFormProps)
                                     </div>
 
                                     {/* Documents Card */}
-                                    <div className="bg-gradient-to-br from-white to-gray-50 border-2 border-gray-100 rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300">
-                                        <div className="px-8 py-6 border-b border-gray-200 bg-gradient-to-br from-primary to-primary-dark">
+                                    <div className="bg-linear-to-br from-white to-gray-50 border-2 border-gray-100 rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300">
+                                        <div className="px-8 py-6 border-b border-gray-200 bg-linear-to-br from-primary to-primary-dark">
                                             <h3 className="text-xl font-bold text-white flex items-center font-montserrat">
                                                 <div className="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center mr-4">
                                                     <i className="fas fa-file-upload text-lg"></i>
@@ -379,8 +379,8 @@ export default function ApplicationForm({ user, profile }: ApplicationFormProps)
                                 {/* Right Column */}
                                 <div className="space-y-8">
                                     {/* Experience Card */}
-                                    <div className="bg-gradient-to-br from-white to-gray-50 border-2 border-gray-100 rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300">
-                                        <div className="px-8 py-6 border-b border-gray-200 bg-gradient-to-br from-secondary to-red-700">
+                                    <div className="bg-linear-to-br from-white to-gray-50 border-2 border-gray-100 rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300">
+                                        <div className="px-8 py-6 border-b border-gray-200 bg-linear-to-br from-secondary to-red-700">
                                             <h3 className="text-xl font-bold text-white flex items-center font-montserrat">
                                                 <div className="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center mr-4">
                                                     <i className="fas fa-graduation-cap text-lg"></i>
@@ -451,7 +451,7 @@ export default function ApplicationForm({ user, profile }: ApplicationFormProps)
                                                     {expertiseTags.map((tag, index) => (
                                                         <div
                                                             key={index}
-                                                            className="group flex items-center px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300 hover:shadow-lg transform hover:scale-105 bg-gradient-to-br from-primary/10 to-accent/10 text-primary border-2 border-accent/30"
+                                                            className="group flex items-center px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300 hover:shadow-lg transform hover:scale-105 bg-linear-to-br from-primary/10 to-accent/10 text-primary border-2 border-accent/30"
                                                         >
                                                             <span className="font-montserrat">{tag}</span>
                                                             <button
@@ -548,8 +548,8 @@ export default function ApplicationForm({ user, profile }: ApplicationFormProps)
                                     </div>
 
                                     {/* Enhanced Submission Card */}
-                                    <div className="bg-gradient-to-br from-white to-gray-50 border-2 border-gray-100 rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300">
-                                        <div className="px-8 py-6 border-b border-gray-200 bg-gradient-to-br from-accent to-green-700">
+                                    <div className="bg-linear-to-br from-white to-gray-50 border-2 border-gray-100 rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300">
+                                        <div className="px-8 py-6 border-b border-gray-200 bg-linear-to-br from-accent to-green-700">
                                             <h3 className="text-xl font-bold text-white flex items-center font-montserrat">
                                                 <div className="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center mr-4">
                                                     <i className="fas fa-paper-plane text-lg"></i>
@@ -629,7 +629,7 @@ export default function ApplicationForm({ user, profile }: ApplicationFormProps)
                                                 <button
                                                     type="submit"
                                                     disabled={!finalForm.data.terms || finalForm.processing}
-                                                    className="w-full py-4 px-6 rounded-xl text-lg font-bold transition-all duration-300 font-montserrat disabled:opacity-50 disabled:cursor-not-allowed bg-gradient-to-br from-accent to-green-700 text-white hover:shadow-lg"
+                                                    className="w-full py-4 px-6 rounded-xl text-lg font-bold transition-all duration-300 font-montserrat disabled:opacity-50 disabled:cursor-not-allowed bg-linear-to-br from-accent to-green-700 text-white hover:shadow-lg"
                                                 >
                                                     <i className="fas fa-rocket mr-2"></i>
                                                     {finalForm.processing ? 'Submitting...' : 'Submit My Application'}

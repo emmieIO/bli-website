@@ -259,7 +259,7 @@ export default function AddResource({ event }: AddResourceProps) {
                     />
 
                     {/* Downloadable Option */}
-                    <div className="bg-gradient-to-r from-blue-50 to-green-50 rounded-xl p-6 border-2 transition-all duration-300" style={{ borderColor: formData.is_downloadable ? '#00a651' : '#e5e7eb' }}>
+                    <div className="bg-linear-to-r from-blue-50 to-green-50 rounded-xl p-6 border-2 transition-all duration-300" style={{ borderColor: formData.is_downloadable ? '#00a651' : '#e5e7eb' }}>
                         <div className="flex items-start gap-4">
                             <div className="flex items-center h-5">
                                 <input

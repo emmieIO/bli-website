@@ -41,7 +41,7 @@ export default function BlogShow({ post, relatedPosts }: BlogShowProps) {
             <Head title={post.title} />
 
             {/* Article Header */}
-            <article className="py-12 bg-gradient-to-br from-white to-gray-50">
+            <article className="py-12 bg-linear-to-br from-white to-gray-50">
                 <div className="container mx-auto px-6 max-w-4xl">
                     <Link
                         href={route('blog.index')}
@@ -128,7 +128,7 @@ export default function BlogShow({ post, relatedPosts }: BlogShowProps) {
                                                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                                             />
                                         ) : (
-                                            <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-accent/20 to-primary/20">
+                                            <div className="w-full h-full flex items-center justify-center bg-linear-to-br from-accent/20 to-primary/20">
                                                 <i className="fas fa-file-alt text-3xl text-accent/40"></i>
                                             </div>
                                         )}

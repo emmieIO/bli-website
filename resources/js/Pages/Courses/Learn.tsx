@@ -58,11 +58,10 @@ export default function Learn({
     const [sidebarOpen, setSidebarOpen] = useState(true);
     const [isCompleted, setIsCompleted] = useState(currentLesson?.completed || false);
     const [watchProgress, setWatchProgress] = useState(0);
-    const [playbackSpeed, setPlaybackSpeed] = useState(1);
     const [isBookmarked, setIsBookmarked] = useState(false);
 
     const videoRef = useRef<HTMLVideoElement>(null);
-    const progressIntervalRef = useRef<NodeJS.Timeout>();
+    const progressIntervalRef = useRef<NodeJS.Timeout | undefined>(undefined);
 
     useEffect(() => {
         // Open first module by default
@@ -191,13 +190,6 @@ export default function Learn({
         }
     };
 
-    const changePlaybackSpeed = (speed: number) => {
-        setPlaybackSpeed(speed);
-        if (videoRef.current) {
-            videoRef.current.playbackRate = speed;
-        }
-    };
-
     const toggleBookmark = () => {
         setIsBookmarked(!isBookmarked);
         // TODO: Implement API call to save bookmark
@@ -243,7 +235,7 @@ export default function Learn({
         <>
             <Head title={`${course.title} - Learn`} />
 
-            <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+            <div className="min-h-screen bg-linear-to-br from-gray-50 to-gray-100">
                 {/* Course Header */}
                 <div className="bg-white shadow-md border-b border-gray-200 sticky top-0 z-50">
                     <div className="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8">
@@ -252,7 +244,7 @@ export default function Learn({
                             <div className="flex items-center space-x-4 flex-1 min-w-0">
                                 <Link
                                     href={route('courses.show', course.slug)}
-                                    className="flex-shrink-0 p-2 text-gray-600 hover:text-primary hover:bg-primary/5 rounded-lg transition-all duration-200"
+                                    className="shrink-0 p-2 text-gray-600 hover:text-primary hover:bg-primary/5 rounded-lg transition-all duration-200"
                                     title="Back to course details"
                                 >
                                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -264,7 +256,7 @@ export default function Learn({
                                     <div className="flex items-center mt-1">
                                         <div className="w-24 sm:w-32 bg-gray-200 rounded-full h-1.5 mr-3">
                                             <div
-                                                className="bg-gradient-to-r from-primary to-primary-600 h-1.5 rounded-full transition-all duration-500"
+                                                className="bg-linear-to-r from-primary to-primary-600 h-1.5 rounded-full transition-all duration-500"
                                                 style={{ width: `${progress}%` }}
                                             ></div>
                                         </div>
@@ -323,7 +315,7 @@ export default function Learn({
                                             {/* Progress Bar */}
                                             <div className="absolute bottom-0 left-0 right-0 h-1 bg-gray-700">
                                                 <div
-                                                    className="h-full bg-gradient-to-r from-primary to-accent transition-all duration-300"
+                                                    className="h-full bg-linear-to-r from-primary to-accent transition-all duration-300"
                                                     style={{ width: `${watchProgress}%` }}
                                                 ></div>
                                             </div>
@@ -331,7 +323,7 @@ export default function Learn({
                                     )}
                                 </div>
                             ) : (
-                                <div className="aspect-video flex items-center justify-center bg-gradient-to-br from-gray-800 to-gray-900 text-gray-400">
+                                <div className="aspect-video flex items-center justify-center bg-linear-to-br from-gray-800 to-gray-900 text-gray-400">
                                     <div className="text-center p-8">
                                         <div className="w-20 h-20 mx-auto mb-4 bg-gray-700/50 rounded-full flex items-center justify-center">
                                             <svg className="w-10 h-10 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -360,8 +352,8 @@ export default function Learn({
                                         disabled={isCompleted}
                                         className={`flex items-center px-5 py-2.5 rounded-lg font-medium transition-all duration-200 shadow-sm ${
                                             isCompleted
-                                                ? 'bg-gradient-to-r from-green-500 to-green-600 text-white cursor-not-allowed opacity-75'
-                                                : 'bg-gradient-to-r from-green-600 to-green-700 text-white hover:from-green-700 hover:to-green-800 hover:shadow-md transform hover:-translate-y-0.5'
+                                                ? 'bg-linear-to-r from-green-500 to-green-600 text-white cursor-not-allowed opacity-75'
+                                                : 'bg-linear-to-r from-green-600 to-green-700 text-white hover:from-green-700 hover:to-green-800 hover:shadow-md transform hover:-translate-y-0.5'
                                         }`}
                                     >
                                         <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -375,7 +367,7 @@ export default function Learn({
                                         onClick={toggleBookmark}
                                         className={`flex items-center px-5 py-2.5 rounded-lg font-medium transition-all duration-200 shadow-sm ${
                                             isBookmarked
-                                                ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-white'
+                                                ? 'bg-linear-to-r from-amber-500 to-amber-600 text-white'
                                                 : 'bg-white border-2 border-amber-500 text-amber-600 hover:bg-amber-50 hover:shadow-md transform hover:-translate-y-0.5'
                                         }`}
                                     >
@@ -401,7 +393,7 @@ export default function Learn({
                         {/* Lesson Content */}
                         <div className="flex-1 bg-white overflow-hidden flex flex-col rounded-xl shadow-lg mt-6">
                             {/* Lesson Navigation */}
-                            <div className="border-b border-gray-200 px-6 py-5 bg-gradient-to-r from-gray-50 to-white">
+                            <div className="border-b border-gray-200 px-6 py-5 bg-linear-to-r from-gray-50 to-white">
                                 <div className="flex items-center justify-between">
                                     <div className="w-24">
                                         {previousLesson && (
@@ -426,7 +418,7 @@ export default function Learn({
                                         {nextLesson && (
                                             <Link
                                                 href={route('courses.learn', { course: course.slug, lesson: nextLesson.id })}
-                                                className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-primary to-primary-600 hover:from-primary-600 hover:to-primary-700 rounded-lg transition-all duration-200 shadow-sm hover:shadow-md transform hover:-translate-y-0.5"
+                                                className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-linear-to-r from-primary to-primary-600 hover:from-primary-600 hover:to-primary-700 rounded-lg transition-all duration-200 shadow-sm hover:shadow-md transform hover:-translate-y-0.5"
                                             >
                                                 <span className="hidden sm:inline">Next</span>
                                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -488,7 +480,7 @@ export default function Learn({
                                                         <ul className="text-left text-green-700 space-y-1 max-w-2xl mx-auto">
                                                             {course.outcomes.slice(0, 5).map((outcome) => (
                                                                 <li key={outcome.id} className="flex items-start">
-                                                                    <svg className="w-4 h-4 text-green-600 mt-0.5 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                                                    <svg className="w-4 h-4 text-green-600 mt-0.5 mr-2 shrink-0" fill="currentColor" viewBox="0 0 20 20">
                                                                         <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                                                                     </svg>
                                                                     {outcome.outcome}
@@ -555,7 +547,7 @@ export default function Learn({
                     {/* Course Navigation Sidebar */}
                     <div className={`w-80 xl:w-96 bg-white border-l border-gray-200 flex flex-col ${!sidebarOpen ? 'hidden' : ''} lg:flex shadow-xl`}>
                         {/* Course Progress */}
-                        <div className="p-6 border-b border-gray-200 bg-gradient-to-br from-primary/5 to-accent/5">
+                        <div className="p-6 border-b border-gray-200 bg-linear-to-br from-primary/5 to-accent/5">
                             <h3 className="font-bold text-gray-900 mb-4 text-lg">Course Progress</h3>
                             <div className="space-y-3">
                                 <div className="flex justify-between text-sm font-medium">
@@ -566,7 +558,7 @@ export default function Learn({
                                 </div>
                                 <div className="w-full bg-gray-200 rounded-full h-3 shadow-inner overflow-hidden">
                                     <div
-                                        className="bg-gradient-to-r from-primary via-primary-600 to-accent h-3 rounded-full transition-all duration-500 shadow-sm"
+                                        className="bg-linear-to-r from-primary via-primary-600 to-accent h-3 rounded-full transition-all duration-500 shadow-sm"
                                         style={{ width: `${progress}%` }}
                                     ></div>
                                 </div>
@@ -588,7 +580,7 @@ export default function Learn({
                                     <div key={module.id} className="border-b border-gray-200 last:border-b-0">
                                         <button
                                             onClick={() => toggleModule(module.id)}
-                                            className="w-full text-left p-5 hover:bg-gradient-to-r hover:from-gray-50 hover:to-transparent transition-all duration-200"
+                                            className="w-full text-left p-5 hover:bg-linear-to-r hover:from-gray-50 hover:to-transparent transition-all duration-200"
                                         >
                                             <div className="flex items-center justify-between">
                                                 <div className="flex-1">
@@ -625,16 +617,16 @@ export default function Learn({
                                                         href={route('courses.learn', { course: course.slug, lesson: lesson.id })}
                                                         className={`block px-6 py-3.5 border-t border-gray-100 hover:bg-white transition-all duration-200 group ${
                                                             currentLesson && currentLesson.id === lesson.id
-                                                                ? 'bg-gradient-to-r from-primary/10 to-transparent border-l-4 border-l-primary shadow-sm'
+                                                                ? 'bg-linear-to-r from-primary/10 to-transparent border-l-4 border-l-primary shadow-sm'
                                                                 : ''
                                                         }`}
                                                     >
                                                         <div className="flex items-center justify-between gap-3">
                                                             <div className="flex items-center flex-1 min-w-0 gap-3">
                                                                 <div
-                                                                    className={`w-7 h-7 rounded-full border-2 flex-shrink-0 flex items-center justify-center transition-all duration-200 ${
+                                                                    className={`w-7 h-7 rounded-full border-2 shrink-0 flex items-center justify-center transition-all duration-200 ${
                                                                         lesson.completed
-                                                                            ? 'bg-gradient-to-br from-green-400 to-green-600 border-green-600 shadow-sm'
+                                                                            ? 'bg-linear-to-br from-green-400 to-green-600 border-green-600 shadow-sm'
                                                                             : currentLesson && currentLesson.id === lesson.id
                                                                             ? 'border-primary bg-primary/10'
                                                                             : 'border-gray-300 group-hover:border-primary'
@@ -665,7 +657,7 @@ export default function Learn({
                                                                 </div>
                                                             </div>
 
-                                                            <div className="flex items-center gap-2 flex-shrink-0">
+                                                            <div className="flex items-center gap-2 shrink-0">
                                                                 {getLessonIcon(lesson.type)}
                                                                 {currentLesson && currentLesson.id === lesson.id && (
                                                                     <div className="w-2 h-2 bg-primary rounded-full animate-pulse"></div>

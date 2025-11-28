@@ -72,7 +72,7 @@ export default function Dashboard({ stats, courses, adminStats, instructorStats 
         <DashboardLayout sideLinks={sideLinks}>
             <Head title="Dashboard - Beacon Leadership Institute" />
 
-            <section className="min-h-screen bg-gradient-to-br from-gray-50 to-primary-50/30">
+            <section className="min-h-screen bg-linear-to-br from-gray-50 to-primary-50/30">
                 <div className="space-y-8">
                     {/* Header */}
                     <div className="mb-8">
@@ -315,7 +315,7 @@ function StudentDashboard({ stats, courses }: DashboardProps) {
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                         {/* Overall Progress */}
-                        <div className="bg-gradient-to-br from-primary-50 to-white rounded-xl p-6 border border-primary-100">
+                        <div className="bg-linear-to-br from-primary-50 to-white rounded-xl p-6 border border-primary-100">
                             <div className="flex items-center justify-between mb-4">
                                 <h3 className="text-lg font-bold font-montserrat" style={{ color: '#002147' }}>
                                     Overall Progress
@@ -339,7 +339,7 @@ function StudentDashboard({ stats, courses }: DashboardProps) {
                         </div>
 
                         {/* Course Status Breakdown */}
-                        <div className="bg-gradient-to-br from-green-50 to-white rounded-xl p-6 border border-green-100">
+                        <div className="bg-linear-to-br from-green-50 to-white rounded-xl p-6 border border-green-100">
                             <h3 className="text-lg font-bold font-montserrat mb-4" style={{ color: '#002147' }}>
                                 Course Status
                             </h3>
@@ -366,7 +366,7 @@ function StudentDashboard({ stats, courses }: DashboardProps) {
                         </div>
 
                         {/* Learning Time */}
-                        <div className="bg-gradient-to-br from-blue-50 to-white rounded-xl p-6 border border-blue-100">
+                        <div className="bg-linear-to-br from-blue-50 to-white rounded-xl p-6 border border-blue-100">
                             <h3 className="text-lg font-bold font-montserrat mb-4" style={{ color: '#002147' }}>
                                 Learning Time
                             </h3>
@@ -483,7 +483,7 @@ function CourseCard({ course }: { course: Course }) {
     return (
         <div className="bg-white border border-gray-200 rounded-xl overflow-hidden hover:shadow-lg transition-all duration-300 group">
             {/* Thumbnail */}
-            <div className="relative h-40 bg-gradient-to-br from-primary-100 to-primary-50 overflow-hidden">
+            <div className="relative h-40 bg-linear-to-br from-primary-100 to-primary-50 overflow-hidden">
                 {course.thumbnail_path ? (
                     <img
                         src={`/storage/${course.thumbnail_path}`}

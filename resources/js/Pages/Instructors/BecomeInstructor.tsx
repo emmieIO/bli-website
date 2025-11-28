@@ -112,7 +112,7 @@ export default function BecomeInstructor({ auth }: BecomeInstructorProps) {
             <Head title="Become an Instructor" />
 
             {/* Hero Section */}
-            <section className="relative min-h-screen flex items-center overflow-hidden bg-gradient-to-br from-primary via-primary to-primary">
+            <section className="relative min-h-screen flex items-center overflow-hidden bg-linear-to-br from-primary via-primary to-primary">
                 {/* Background Pattern */}
                 <div className="absolute inset-0 opacity-10">
                     <div
@@ -254,7 +254,7 @@ export default function BecomeInstructor({ auth }: BecomeInstructorProps) {
             </section>
 
             {/* How It Works */}
-            <section id="how-it-works" className="py-20 bg-gradient-to-br from-gray-50 to-white">
+            <section id="how-it-works" className="py-20 bg-linear-to-br from-gray-50 to-white">
                 <div className="container mx-auto px-4">
                     <div className="text-center mb-16">
                         <div className="inline-flex items-center px-4 py-2 rounded-full mb-6 bg-primary/10">
@@ -274,17 +274,17 @@ export default function BecomeInstructor({ auth }: BecomeInstructorProps) {
                             <div key={stepData.step} className="step-card group relative">
                                 {/* Connection Line (hidden on small screens) */}
                                 {stepData.step < 6 && (
-                                    <div className="hidden lg:block absolute top-8 left-full w-8 h-0.5 z-0 bg-gradient-to-r from-accent to-transparent"></div>
+                                    <div className="hidden lg:block absolute top-8 left-full w-8 h-0.5 z-0 bg-linear-to-r from-accent to-transparent"></div>
                                 )}
 
                                 <div className="relative bg-white p-8 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 border border-gray-100 group-hover:border-gray-200">
                                     {/* Step Number Badge */}
-                                    <div className="absolute -top-4 -left-4 w-12 h-12 rounded-xl flex items-center justify-center font-bold text-white text-lg shadow-lg bg-gradient-to-br from-accent to-green-700">
+                                    <div className="absolute -top-4 -left-4 w-12 h-12 rounded-xl flex items-center justify-center font-bold text-white text-lg shadow-lg bg-linear-to-br from-accent to-green-700">
                                         {stepData.step}
                                     </div>
 
                                     {/* Icon */}
-                                    <div className="w-16 h-16 rounded-2xl flex items-center justify-center mb-6 transition-all duration-300 group-hover:scale-110 bg-gradient-to-br from-primary/10 to-accent/10">
+                                    <div className="w-16 h-16 rounded-2xl flex items-center justify-center mb-6 transition-all duration-300 group-hover:scale-110 bg-linear-to-br from-primary/10 to-accent/10">
                                         <i className={`fas fa-${stepData.icon} text-2xl text-primary`}></i>
                                     </div>
 
@@ -295,7 +295,7 @@ export default function BecomeInstructor({ auth }: BecomeInstructorProps) {
                                     <p className="text-gray-600 leading-relaxed font-lato">{stepData.desc}</p>
 
                                     {/* Hover Effect */}
-                                    <div className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-all duration-300 pointer-events-none bg-gradient-to-br from-accent/5 to-primary/5"></div>
+                                    <div className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-all duration-300 pointer-events-none bg-linear-to-br from-accent/5 to-primary/5"></div>
                                 </div>
                             </div>
                         ))}
@@ -320,7 +320,7 @@ export default function BecomeInstructor({ auth }: BecomeInstructorProps) {
             </section>
 
             {/* Benefits */}
-            <section className="py-20 relative overflow-hidden bg-gradient-to-br from-primary to-primary">
+            <section className="py-20 relative overflow-hidden bg-linear-to-br from-primary to-primary">
                 {/* Background Pattern */}
                 <div className="absolute inset-0 opacity-5">
                     <div
@@ -433,12 +433,12 @@ export default function BecomeInstructor({ auth }: BecomeInstructorProps) {
             </section>
 
             {/* Application CTA */}
-            <section id="apply-now" className="py-20 bg-gradient-to-br from-gray-50 to-white">
+            <section id="apply-now" className="py-20 bg-linear-to-br from-gray-50 to-white">
                 <div className="container mx-auto px-4">
                     <div className="max-w-5xl mx-auto">
                         <div className="bg-white rounded-3xl shadow-2xl overflow-hidden border border-gray-100">
                             {/* Header Section */}
-                            <div className="relative p-8 md:p-12 text-center bg-gradient-to-br from-primary to-primary">
+                            <div className="relative p-8 md:p-12 text-center bg-linear-to-br from-primary to-primary">
                                 <div className="absolute inset-0 opacity-10">
                                     <div
                                         className="absolute inset-0 bg-cover"
@@ -510,7 +510,7 @@ export default function BecomeInstructor({ auth }: BecomeInstructorProps) {
                                     <button
                                         type="submit"
                                         disabled={isSubmitting}
-                                        className="w-full py-4 px-8 rounded-xl font-bold text-lg text-white transition-all duration-300 transform hover:scale-105 hover:shadow-xl font-montserrat flex items-center justify-center gap-3 bg-gradient-to-br from-accent to-green-700"
+                                        className="w-full py-4 px-8 rounded-xl font-bold text-lg text-white transition-all duration-300 transform hover:scale-105 hover:shadow-xl font-montserrat flex items-center justify-center gap-3 bg-linear-to-br from-accent to-green-700"
                                     >
                                         {isSubmitting ? (
                                             <>
@@ -694,7 +694,7 @@ export default function BecomeInstructor({ auth }: BecomeInstructorProps) {
 
                     {/* Call to Action */}
                     <div className="text-center mt-16">
-                        <div className="bg-gradient-to-r from-gray-50 to-gray-100 p-8 rounded-2xl max-w-2xl mx-auto">
+                        <div className="bg-linear-to-r from-gray-50 to-gray-100 p-8 rounded-2xl max-w-2xl mx-auto">
                             <h3 className="text-2xl font-bold mb-4 font-montserrat text-primary">Ready to Share Your Success Story?</h3>
                             <p className="text-gray-600 mb-6 font-lato">
                                 Join thousands of successful instructors who are making a difference
@@ -712,7 +712,7 @@ export default function BecomeInstructor({ auth }: BecomeInstructorProps) {
             </section>
 
             {/* FAQ */}
-            <section id="faq" className="py-20 bg-gradient-to-br from-gray-50 to-white">
+            <section id="faq" className="py-20 bg-linear-to-br from-gray-50 to-white">
                 <div className="container mx-auto px-4 max-w-4xl">
                     <div className="text-center mb-16">
                         <div className="inline-flex items-center px-4 py-2 rounded-full mb-6 bg-primary/10">

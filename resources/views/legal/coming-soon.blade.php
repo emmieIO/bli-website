@@ -1,5 +1,5 @@
 <x-guest-layout>
-    <div class="min-h-screen bg-gradient-to-br from-primary-50 to-white flex items-center justify-center p-4">
+    <div class="min-h-screen bg-linear-to-br from-primary-50 to-white flex items-center justify-center p-4">
         <div class="max-w-4xl mx-auto text-center">
             <!-- Main Content -->
             <div class="mb-16">
@@ -103,7 +103,7 @@
             }
         }
 
-        .bg-gradient-to-br {
+        .bg-linear-to-br {
             background-size: 200% 200%;
             animation: gradientShift 15s ease infinite;
         }

@@ -144,7 +144,7 @@ function InvitationCard({ invitation, delay }: { invitation: Invitation; delay: 
     return (
         <div className="bg-white rounded-2xl shadow-lg border border-primary-100 overflow-hidden hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 flex flex-col group">
             {/* Card Header */}
-            <div className="p-6 flex-grow">
+            <div className="p-6 grow">
                 <div className="flex items-start justify-between mb-4">
                     {/* Event Type Icon */}
                     <div className="p-3 rounded-xl bg-primary/10 text-primary group-hover:bg-primary/20 transition-colors">
@@ -178,7 +178,7 @@ function InvitationCard({ invitation, delay }: { invitation: Invitation; delay: 
 
                 {/* Event Location */}
                 <div className="flex items-start text-sm text-gray-600 mb-4 font-lato">
-                    <i className="fas fa-map-marker-alt w-4 h-4 mr-2 mt-0.5 flex-shrink-0 text-primary/60"></i>
+                    <i className="fas fa-map-marker-alt w-4 h-4 mr-2 mt-0.5 shrink-0 text-primary/60"></i>
                     <span className="break-words leading-relaxed">
                         {invitation.event.mode === 'online'
                             ? invitation.event.location

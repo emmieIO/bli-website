@@ -200,7 +200,7 @@ export default function SpeakersIndex({ speakers }: SpeakersProps) {
                                         {/* Speaker Column */}
                                         <td className="px-6 py-4">
                                             <div className="flex items-center gap-3">
-                                                <div className="flex-shrink-0 h-10 w-10 relative">
+                                                <div className="shrink-0 h-10 w-10 relative">
                                                     <img
                                                         className="h-10 w-10 rounded-full object-cover border border-gray-200"
                                                         src={

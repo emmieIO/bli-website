@@ -163,7 +163,7 @@ export default function Register() {
                             checked={data.agree_terms}
                             onChange={(e) => setData('agree_terms', e.target.checked)}
                             required
-                            className="rounded border-gray-300 focus:ring-offset-0 mt-1 flex-shrink-0"
+                            className="rounded border-gray-300 focus:ring-offset-0 mt-1 shrink-0"
                             style={{ color: '#002147' }}
                         />
                         <label htmlFor="agree_terms" className="text-sm text-gray-600 font-lato">
@@ -196,7 +196,7 @@ export default function Register() {
                             id="marketing_consent"
                             checked={data.marketing_consent}
                             onChange={(e) => setData('marketing_consent', e.target.checked)}
-                            className="rounded border-gray-300 focus:ring-offset-0 mt-1 flex-shrink-0"
+                            className="rounded border-gray-300 focus:ring-offset-0 mt-1 shrink-0"
                             style={{ color: '#00a651' }}
                         />
                         <label htmlFor="marketing_consent" className="text-sm text-gray-600 font-lato">

@@ -125,7 +125,7 @@ export default function AuthLayout({ title, description, children }: AuthLayoutP
                                 {/* Features */}
                                 <div className="grid grid-cols-1 gap-4 mt-8">
                                     <div className="flex items-center gap-4 p-4 bg-white/5 rounded-xl backdrop-blur-sm border border-white/10">
-                                        <div className="flex-shrink-0 w-12 h-12 rounded-lg flex items-center justify-center" style={{ backgroundColor: '#00a651' }}>
+                                        <div className="shrink-0 w-12 h-12 rounded-lg flex items-center justify-center" style={{ backgroundColor: '#00a651' }}>
                                             <i className="fas fa-graduation-cap text-white text-xl"></i>
                                         </div>
                                         <div className="text-left">
@@ -134,7 +134,7 @@ export default function AuthLayout({ title, description, children }: AuthLayoutP
                                         </div>
                                     </div>
                                     <div className="flex items-center gap-4 p-4 bg-white/5 rounded-xl backdrop-blur-sm border border-white/10">
-                                        <div className="flex-shrink-0 w-12 h-12 rounded-lg flex items-center justify-center" style={{ backgroundColor: '#00a651' }}>
+                                        <div className="shrink-0 w-12 h-12 rounded-lg flex items-center justify-center" style={{ backgroundColor: '#00a651' }}>
                                             <i className="fas fa-users text-white text-xl"></i>
                                         </div>
                                         <div className="text-left">
@@ -143,7 +143,7 @@ export default function AuthLayout({ title, description, children }: AuthLayoutP
                                         </div>
                                     </div>
                                     <div className="flex items-center gap-4 p-4 bg-white/5 rounded-xl backdrop-blur-sm border border-white/10">
-                                        <div className="flex-shrink-0 w-12 h-12 rounded-lg flex items-center justify-center" style={{ backgroundColor: '#00a651' }}>
+                                        <div className="shrink-0 w-12 h-12 rounded-lg flex items-center justify-center" style={{ backgroundColor: '#00a651' }}>
                                             <i className="fas fa-certificate text-white text-xl"></i>
                                         </div>
                                         <div className="text-left">

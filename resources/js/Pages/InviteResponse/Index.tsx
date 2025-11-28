@@ -145,7 +145,7 @@ export default function InviteResponse({ event, invite }: InviteResponseProps) {
 
                         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5 text-sm">
                             <div className="flex items-start space-x-3 p-4 bg-gray-50 rounded-xl">
-                                <i className="fas fa-map-marker-alt w-5 h-5 text-gray-500 mt-0.5 flex-shrink-0"></i>
+                                <i className="fas fa-map-marker-alt w-5 h-5 text-gray-500 mt-0.5 shrink-0"></i>
                                 <div>
                                     <p className="font-medium text-gray-900 font-montserrat">Location</p>
                                     <p className="text-gray-600 mt-1 font-lato">
@@ -156,7 +156,7 @@ export default function InviteResponse({ event, invite }: InviteResponseProps) {
 
                             {event.contact_email && (
                                 <div className="flex items-start space-x-3 p-4 bg-gray-50 rounded-xl">
-                                    <i className="fas fa-envelope w-5 h-5 text-gray-500 mt-0.5 flex-shrink-0"></i>
+                                    <i className="fas fa-envelope w-5 h-5 text-gray-500 mt-0.5 shrink-0"></i>
                                     <div>
                                         <p className="font-medium text-gray-900 font-montserrat">Contact</p>
                                         <p className="text-gray-600 mt-1 break-all font-lato">{event.contact_email}</p>
@@ -165,7 +165,7 @@ export default function InviteResponse({ event, invite }: InviteResponseProps) {
                             )}
 
                             <div className="flex items-start space-x-3 p-4 bg-gray-50 rounded-xl">
-                                <i className="fas fa-clock w-5 h-5 text-gray-500 mt-0.5 flex-shrink-0"></i>
+                                <i className="fas fa-clock w-5 h-5 text-gray-500 mt-0.5 shrink-0"></i>
                                 <div>
                                     <p className="font-medium text-gray-900 font-montserrat">Date & Time</p>
                                     <p className="text-gray-600 mt-1 font-lato">

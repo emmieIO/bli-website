@@ -127,7 +127,7 @@ export default function Index({ events, categories }: IndexProps) {
             </section>
 
             {/* Course Categories Section */}
-            <section className="py-20 bg-gradient-to-b from-white to-gray-50">
+            <section className="py-20 bg-linear-to-b from-white to-gray-50">
                 <div className="container mx-auto px-4">
                     {/* Section Header */}
                     <div className="text-center mb-16">
@@ -153,12 +153,12 @@ export default function Index({ events, categories }: IndexProps) {
                                     className="group bg-white rounded-2xl shadow-sm hover:shadow-xl p-8 text-center transition-all duration-500 hover:transform hover:-translate-y-4 border border-gray-100 hover:border-primary/20 relative overflow-hidden"
                                 >
                                     {/* Background Gradient */}
-                                    <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-secondary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                                    <div className="absolute inset-0 bg-linear-to-br from-primary/5 to-secondary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
 
                                     {/* Content */}
                                     <div className="relative z-10">
                                         {/* Icon Container */}
-                                        <div className="mb-6 p-4 bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl inline-block group-hover:bg-gradient-to-br group-hover:from-primary/10 group-hover:to-secondary/10 transition-all duration-500 group-hover:scale-110">
+                                        <div className="mb-6 p-4 bg-linear-to-br from-gray-50 to-gray-100 rounded-2xl inline-block group-hover:bg-linear-to-br group-hover:from-primary/10 group-hover:to-secondary/10 transition-all duration-500 group-hover:scale-110">
                                             <img
                                                 src={`/storage/${category.image}`}
                                                 alt={`${category.name} icon`}
@@ -205,7 +205,7 @@ export default function Index({ events, categories }: IndexProps) {
                     <div className="text-center">
                         <Link
                             href={route('courses.index')}
-                            className="group inline-flex items-center gap-4 text-white font-bold py-5 px-10 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2 text-lg font-montserrat bg-gradient-to-r from-primary to-secondary hover:from-primary-dark hover:to-secondary-dark"
+                            className="group inline-flex items-center gap-4 text-white font-bold py-5 px-10 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2 text-lg font-montserrat bg-linear-to-r from-primary to-secondary hover:from-primary-dark hover:to-secondary-dark"
                         >
                             <span>Explore All Categories</span>
                             <i className="fas fa-arrow-right group-hover:translate-x-2 transition-transform duration-300"></i>
@@ -215,7 +215,7 @@ export default function Index({ events, categories }: IndexProps) {
             </section>
 
             {/* What Makes BLI Stand Out Section */}
-            <section className="py-20 bg-gradient-to-b from-gray-50 to-white relative overflow-hidden">
+            <section className="py-20 bg-linear-to-b from-gray-50 to-white relative overflow-hidden">
                 {/* Background Elements */}
                 <div className="absolute inset-0 overflow-hidden">
                     <div className="absolute -top-24 -right-24 w-96 h-96 bg-primary/5 rounded-full"></div>
@@ -241,7 +241,7 @@ export default function Index({ events, categories }: IndexProps) {
                     <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-8">
                         {/* Kingdom-Based Leadership */}
                         <div className="group bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 p-8 border border-gray-100 hover:border-primary/20 relative overflow-hidden">
-                            <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                            <div className="absolute inset-0 bg-linear-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
                             <div className="relative z-10">
                                 <div className="mb-6 p-4 rounded-2xl inline-block group-hover:scale-110 transition-transform duration-500 bg-primary/10">
                                     <i className="fas fa-crown text-4xl group-hover:scale-110 transition-transform duration-300 text-primary"></i>
@@ -258,7 +258,7 @@ export default function Index({ events, categories }: IndexProps) {
 
                         {/* Transformational Mentorship */}
                         <div className="group bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 p-8 border border-gray-100 hover:border-secondary/20 relative overflow-hidden">
-                            <div className="absolute inset-0 bg-gradient-to-br from-secondary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                            <div className="absolute inset-0 bg-linear-to-br from-secondary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
                             <div className="relative z-10">
                                 <div className="mb-6 p-4 rounded-2xl bg-secondary/10 inline-block group-hover:scale-110 transition-transform duration-500">
                                     <i className="fas fa-hands-helping text-4xl text-secondary group-hover:scale-110 transition-transform duration-300"></i>
@@ -275,7 +275,7 @@ export default function Index({ events, categories }: IndexProps) {
 
                         {/* Problem-Solving Curriculum */}
                         <div className="group bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 p-8 border border-gray-100 hover:border-accent/20 relative overflow-hidden lg:col-span-2 xl:col-span-1">
-                            <div className="absolute inset-0 bg-gradient-to-br from-accent/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                            <div className="absolute inset-0 bg-linear-to-br from-accent/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
                             <div className="relative z-10">
                                 <div className="mb-6 p-4 rounded-2xl bg-accent/10 inline-block group-hover:scale-110 transition-transform duration-500">
                                     <i className="fas fa-puzzle-piece text-4xl text-accent group-hover:scale-110 transition-transform duration-300"></i>
@@ -306,7 +306,7 @@ export default function Index({ events, categories }: IndexProps) {
 
                         {/* Prophetic Leadership Integration */}
                         <div className="group bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 p-8 border border-gray-100 hover:border-primary/20 relative overflow-hidden">
-                            <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                            <div className="absolute inset-0 bg-linear-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
                             <div className="relative z-10">
                                 <div className="mb-6 p-4 rounded-2xl bg-primary/10 inline-block group-hover:scale-110 transition-transform duration-500">
                                     <i className="fas fa-eye text-4xl text-primary group-hover:scale-110 transition-transform duration-300"></i>
@@ -323,7 +323,7 @@ export default function Index({ events, categories }: IndexProps) {
 
                         {/* Global Vision, Local Expression */}
                         <div className="group bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 p-8 border border-gray-100 hover:border-secondary/20 relative overflow-hidden">
-                            <div className="absolute inset-0 bg-gradient-to-br from-secondary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                            <div className="absolute inset-0 bg-linear-to-br from-secondary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
                             <div className="relative z-10">
                                 <div className="mb-6 p-4 rounded-2xl bg-secondary/10 inline-block group-hover:scale-110 transition-transform duration-500">
                                     <i className="fas fa-globe-americas text-4xl text-secondary group-hover:scale-110 transition-transform duration-300"></i>
@@ -589,7 +589,7 @@ export default function Index({ events, categories }: IndexProps) {
                             </div>
 
                             {/* CTA Card */}
-                            <div className="bg-gradient-to-r from-primary to-secondary rounded-xl p-6 text-white">
+                            <div className="bg-linear-to-r from-primary to-secondary rounded-xl p-6 text-white">
                                 <h6 className="font-bold text-lg mb-2 font-montserrat">Ready to Transform Your Leadership?</h6>
                                 <p className="text-white/90 text-sm mb-4 font-lato">Join thousands of leaders experiencing transformation</p>
                                 <Link
@@ -626,7 +626,7 @@ export default function Index({ events, categories }: IndexProps) {
             </section>
 
             {/* Learning Section */}
-            <section className="bg-gradient-to-br from-white to-gray-50 py-20">
+            <section className="bg-linear-to-br from-white to-gray-50 py-20">
                 <div className="container mx-auto px-4">
                     <div className="flex flex-col lg:flex-row items-center gap-12">
                         {/* Content Section */}
@@ -650,7 +650,7 @@ export default function Index({ events, categories }: IndexProps) {
                                         'Global community of kingdom-minded leaders'
                                     ].map((feature, index) => (
                                         <div key={index} className="flex items-center gap-3">
-                                            <div className="w-6 h-6 bg-accent rounded-full flex items-center justify-center flex-shrink-0">
+                                            <div className="w-6 h-6 bg-accent rounded-full flex items-center justify-center shrink-0">
                                                 <i className="fas fa-check text-white text-xs"></i>
                                             </div>
                                             <span className="text-gray-700 font-lato">{feature}</span>

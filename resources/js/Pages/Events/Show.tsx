@@ -137,7 +137,7 @@ export default function EventShow({ event, auth, signed_speaker_route }: EventSh
             <Head title={event.title} />
 
             {/* Breadcrumb Navigation */}
-            <section className="py-6 bg-gradient-to-br from-gray-50 to-white border-b border-gray-100">
+            <section className="py-6 bg-linear-to-br from-gray-50 to-white border-b border-gray-100">
                 <div className="container mx-auto px-6">
                     <nav className="breadcrumb">
                         <ul className="flex items-center space-x-3 text-sm font-lato">
@@ -243,7 +243,7 @@ export default function EventShow({ event, auth, signed_speaker_route }: EventSh
                                 />
 
                                 {/* Image Overlay */}
-                                <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                                <div className="absolute inset-0 bg-linear-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
 
                                 {/* Image Caption */}
                                 <div className="absolute bottom-4 left-4 right-4">
@@ -256,7 +256,7 @@ export default function EventShow({ event, auth, signed_speaker_route }: EventSh
                             {/* Event Description */}
                             <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-8 md:p-10">
                                 <div className="flex items-center gap-4 mb-6 md:mb-8">
-                                    <div className="w-12 h-12 rounded-2xl flex items-center justify-center bg-gradient-to-br from-primary to-primary">
+                                    <div className="w-12 h-12 rounded-2xl flex items-center justify-center bg-linear-to-br from-primary to-primary">
                                         <i className="fas fa-info-circle text-white text-xl"></i>
                                     </div>
                                     <h2 className="text-2xl md:text-3xl font-bold font-montserrat text-primary">
@@ -290,7 +290,7 @@ export default function EventShow({ event, auth, signed_speaker_route }: EventSh
                             {event.speakers && event.speakers.length > 0 && (
                                 <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-8 md:p-10">
                                     <div className="flex items-center gap-4 mb-8">
-                                        <div className="w-12 h-12 rounded-2xl flex items-center justify-center bg-gradient-to-br from-accent to-green-700">
+                                        <div className="w-12 h-12 rounded-2xl flex items-center justify-center bg-linear-to-br from-accent to-green-700">
                                             <i className="fas fa-microphone text-white text-xl"></i>
                                         </div>
                                         <h2 className="text-2xl md:text-3xl font-bold font-montserrat text-primary">
@@ -302,11 +302,11 @@ export default function EventShow({ event, auth, signed_speaker_route }: EventSh
                                         {event.speakers.map((speaker) => (
                                             <div
                                                 key={speaker.id}
-                                                className="group bg-gradient-to-br from-gray-50 to-white rounded-2xl border border-gray-200 hover:border-accent/30 hover:shadow-xl transition-all duration-500 p-6"
+                                                className="group bg-linear-to-br from-gray-50 to-white rounded-2xl border border-gray-200 hover:border-accent/30 hover:shadow-xl transition-all duration-500 p-6"
                                             >
                                                 <div className="flex items-start gap-5">
                                                     {/* Speaker Avatar */}
-                                                    <div className="flex-shrink-0 relative">
+                                                    <div className="shrink-0 relative">
                                                         <img
                                                             src={
                                                                 speaker.user.photo
@@ -368,7 +368,7 @@ export default function EventShow({ event, auth, signed_speaker_route }: EventSh
 
                             {/* Event Resources (only for registered users with downloadable resources) */}
                             {auth?.user && isRegistered && event.resources && event.resources.filter(r => r.is_downloadable).length > 0 && (
-                                <div className="bg-gradient-to-br from-white to-green-50 rounded-2xl shadow-lg border-2 border-accent/20 p-6 md:p-8">
+                                <div className="bg-linear-to-br from-white to-green-50 rounded-2xl shadow-lg border-2 border-accent/20 p-6 md:p-8">
                                     <div className="flex items-center gap-3 mb-6">
                                         <div className="w-12 h-12 rounded-xl flex items-center justify-center" style={{ backgroundColor: '#e6f7ed' }}>
                                             <i className="fas fa-download text-2xl" style={{ color: '#00a651' }}></i>
@@ -389,7 +389,7 @@ export default function EventShow({ event, auth, signed_speaker_route }: EventSh
                                                         rel="noopener noreferrer"
                                                         className="flex items-center gap-4 p-4 bg-white rounded-xl border-2 border-gray-200 hover:border-accent hover:shadow-md transition-all duration-300 font-lato group"
                                                     >
-                                                        <div className="w-12 h-12 rounded-lg flex items-center justify-center bg-primary/10 group-hover:bg-accent/10 transition-colors flex-shrink-0">
+                                                        <div className="w-12 h-12 rounded-lg flex items-center justify-center bg-primary/10 group-hover:bg-accent/10 transition-colors shrink-0">
                                                             <i className="fas fa-file-pdf text-xl text-primary group-hover:text-accent transition-colors"></i>
                                                         </div>
                                                         <div className="flex-1 min-w-0">
@@ -398,7 +398,7 @@ export default function EventShow({ event, auth, signed_speaker_route }: EventSh
                                                                 <p className="text-sm text-gray-600 font-lato mt-1 line-clamp-1">{resource.description}</p>
                                                             )}
                                                         </div>
-                                                        <div className="flex items-center gap-2 flex-shrink-0">
+                                                        <div className="flex items-center gap-2 shrink-0">
                                                             <span className="text-xs font-medium text-accent bg-accent/10 px-3 py-1 rounded-full font-lato">File</span>
                                                             <i className="fas fa-download text-accent text-lg group-hover:scale-110 transition-transform"></i>
                                                         </div>
@@ -411,7 +411,7 @@ export default function EventShow({ event, auth, signed_speaker_route }: EventSh
                                                         rel="noopener noreferrer"
                                                         className="flex items-center gap-4 p-4 bg-white rounded-xl border-2 border-gray-200 hover:border-accent hover:shadow-md transition-all duration-300 font-lato group"
                                                     >
-                                                        <div className="w-12 h-12 rounded-lg flex items-center justify-center bg-primary/10 group-hover:bg-accent/10 transition-colors flex-shrink-0">
+                                                        <div className="w-12 h-12 rounded-lg flex items-center justify-center bg-primary/10 group-hover:bg-accent/10 transition-colors shrink-0">
                                                             <i className="fas fa-link text-xl text-primary group-hover:text-accent transition-colors"></i>
                                                         </div>
                                                         <div className="flex-1 min-w-0">
@@ -420,7 +420,7 @@ export default function EventShow({ event, auth, signed_speaker_route }: EventSh
                                                                 <p className="text-sm text-gray-600 font-lato mt-1 line-clamp-1">{resource.description}</p>
                                                             )}
                                                         </div>
-                                                        <div className="flex items-center gap-2 flex-shrink-0">
+                                                        <div className="flex items-center gap-2 shrink-0">
                                                             <span className="text-xs font-medium text-accent bg-accent/10 px-3 py-1 rounded-full font-lato">Link</span>
                                                             <i className="fas fa-external-link-alt text-accent text-lg group-hover:scale-110 transition-transform"></i>
                                                         </div>
@@ -438,7 +438,7 @@ export default function EventShow({ event, auth, signed_speaker_route }: EventSh
                             {/* Registration Card */}
                             <div className="relative overflow-hidden rounded-2xl shadow-2xl">
                                 {/* Gradient Background */}
-                                <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary to-accent"></div>
+                                <div className="absolute inset-0 bg-linear-to-br from-primary via-primary to-accent"></div>
 
                                 {/* Content */}
                                 <div className="relative p-8 text-white">
@@ -457,7 +457,7 @@ export default function EventShow({ event, auth, signed_speaker_route }: EventSh
                                     {isRegistered && (
                                         <div className="mb-6 p-5 bg-white/15 backdrop-blur-sm rounded-xl border-2 border-white/30">
                                             <div className="flex items-center gap-3 mb-3">
-                                                <div className="w-12 h-12 bg-accent rounded-full flex items-center justify-center flex-shrink-0">
+                                                <div className="w-12 h-12 bg-accent rounded-full flex items-center justify-center shrink-0">
                                                     <i className="fas fa-check text-white text-xl"></i>
                                                 </div>
                                                 <div className="flex-1">
@@ -467,7 +467,7 @@ export default function EventShow({ event, auth, signed_speaker_route }: EventSh
                                             </div>
                                             <div className="pt-3 border-t border-white/20">
                                                 <p className="text-white/90 text-sm font-lato flex items-start gap-2">
-                                                    <i className="fas fa-info-circle mt-0.5 flex-shrink-0"></i>
+                                                    <i className="fas fa-info-circle mt-0.5 shrink-0"></i>
                                                     <span>Check your email for confirmation and event details. You'll receive a reminder before the event starts.</span>
                                                 </p>
                                             </div>
@@ -624,7 +624,7 @@ export default function EventShow({ event, auth, signed_speaker_route }: EventSh
                                 <div className="space-y-5">
                                     {/* Start Time */}
                                     <div className="flex items-start gap-4 p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors duration-300">
-                                        <div className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 bg-accent/10">
+                                        <div className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 bg-accent/10">
                                             <i className="fas fa-play-circle text-xl text-accent"></i>
                                         </div>
                                         <div className="flex-1 min-w-0">
@@ -636,7 +636,7 @@ export default function EventShow({ event, auth, signed_speaker_route }: EventSh
 
                                     {/* End Time */}
                                     <div className="flex items-start gap-4 p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors duration-300">
-                                        <div className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 bg-secondary/10">
+                                        <div className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 bg-secondary/10">
                                             <i className="fas fa-flag-checkered text-xl text-secondary"></i>
                                         </div>
                                         <div className="flex-1 min-w-0">
@@ -649,7 +649,7 @@ export default function EventShow({ event, auth, signed_speaker_route }: EventSh
                                     {/* Location (for registered users) */}
                                     {auth?.user && isRegistered && (
                                         <div className="flex items-start gap-3">
-                                            <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                                            <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center shrink-0">
                                                 <i className="fas fa-map-pin text-primary"></i>
                                             </div>
                                             <div className="flex-1 min-w-0">
@@ -714,7 +714,7 @@ export default function EventShow({ event, auth, signed_speaker_route }: EventSh
                             {/* Quick Actions Card */}
                             <div className="relative overflow-hidden rounded-2xl shadow-lg">
                                 {/* Gradient Background */}
-                                <div className="absolute inset-0 bg-gradient-to-br from-accent to-green-700"></div>
+                                <div className="absolute inset-0 bg-linear-to-br from-accent to-green-700"></div>
 
                                 {/* Content */}
                                 <div className="relative p-6 text-white">
@@ -777,7 +777,7 @@ export default function EventShow({ event, auth, signed_speaker_route }: EventSh
                     <div className="relative p-4 w-full max-w-lg max-h-full">
                         <div className="relative bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden">
                             {/* Modal Header with Gradient */}
-                            <div className="relative p-6 text-center bg-gradient-to-br from-primary to-primary">
+                            <div className="relative p-6 text-center bg-linear-to-br from-primary to-primary">
                                 {/* Close Button */}
                                 <button
                                     type="button"

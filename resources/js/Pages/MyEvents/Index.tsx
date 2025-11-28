@@ -96,7 +96,7 @@ export default function MyEvents({ events }: MyEventsProps) {
                             <p className="text-gray-600 font-lato">Looking for more events to join?</p>
                             <Link
                                 href={route('events.index')}
-                                className="inline-flex items-center gap-3 bg-gradient-to-r from-primary to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white font-semibold px-8 py-4 rounded-xl transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-xl font-montserrat"
+                                className="inline-flex items-center gap-3 bg-linear-to-r from-primary to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white font-semibold px-8 py-4 rounded-xl transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-xl font-montserrat"
                             >
                                 <i className="fas fa-sparkles w-5 h-5"></i>
                                 Explore More Events
@@ -209,7 +209,7 @@ function EventCard({
 
 function EmptyState() {
     return (
-        <div className="col-span-3 text-center py-16 px-8 bg-gradient-to-br from-primary-50 to-white rounded-2xl border-2 border-dashed border-primary-100">
+        <div className="col-span-3 text-center py-16 px-8 bg-linear-to-br from-primary-50 to-white rounded-2xl border-2 border-dashed border-primary-100">
             <div className="max-w-md mx-auto space-y-6">
                 <div className="w-20 h-20 mx-auto bg-primary-100 rounded-2xl flex items-center justify-center">
                     <i className="fas fa-calendar-times w-10 h-10 text-primary-400"></i>

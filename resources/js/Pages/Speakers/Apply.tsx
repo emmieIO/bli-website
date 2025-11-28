@@ -128,7 +128,7 @@ export default function Apply({ event, application, auth }: ApplyProps) {
                             data-aos="fade-up"
                         >
                             Apply to Speak at <br />
-                            <span className="bg-gradient-to-r from-yellow-300 to-orange-400 bg-clip-text text-transparent">
+                            <span className="bg-linear-to-r from-yellow-300 to-orange-400 bg-clip-text text-transparent">
                                 {event.title}
                             </span>
                         </h1>
@@ -193,7 +193,7 @@ export default function Apply({ event, application, auth }: ApplyProps) {
             <section className="py-16" style={{ background: 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)' }}>
                 <div className="container mx-auto px-4">
                     <div className="bg-white rounded-3xl shadow-2xl border border-gray-100 overflow-hidden" data-aos="fade-up" data-aos-delay="100">
-                        <div className="bg-gradient-to-r from-primary to-blue-700 p-8 text-white text-center">
+                        <div className="bg-linear-to-r from-primary to-blue-700 p-8 text-white text-center">
                             <div
                                 className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4"
                                 style={{ background: 'rgba(255, 255, 255, 0.2)', backdropFilter: 'blur(10px)' }}
@@ -294,7 +294,7 @@ export default function Apply({ event, application, auth }: ApplyProps) {
                                             Profile Photo
                                         </label>
                                         <div className="mt-4 flex flex-col sm:flex-row items-center gap-6 p-6 bg-gray-50 rounded-xl border border-gray-200">
-                                            <div className="flex-shrink-0">
+                                            <div className="shrink-0">
                                                 <div className="w-20 h-20 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden border-2 border-gray-300">
                                                     {application?.speaker?.photo ? (
                                                         <img
@@ -307,7 +307,7 @@ export default function Apply({ event, application, auth }: ApplyProps) {
                                                     )}
                                                 </div>
                                             </div>
-                                            <div className="flex-grow">
+                                            <div className="grow">
                                                 <input
                                                     type="file"
                                                     id="photo"
@@ -509,7 +509,7 @@ export default function Apply({ event, application, auth }: ApplyProps) {
                                 <div className="bg-gray-50 rounded-2xl p-6 mb-6">
                                     <div className="flex items-start gap-4">
                                         <div
-                                            className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
+                                            className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
                                             style={{ background: 'rgba(0, 166, 81, 0.1)' }}
                                         >
                                             <i className="fas fa-info-circle text-lg" style={{ color: '#00a651' }}></i>

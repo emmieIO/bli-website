@@ -264,7 +264,7 @@ export default function ReviewApplication({ application }: ReviewApplicationProp
                                     Speaker Information
                                 </h3>
                                 <div className="flex flex-col sm:flex-row gap-6">
-                                    <div className="flex-shrink-0">
+                                    <div className="shrink-0">
                                         {speakerPhoto ? (
                                             <img
                                                 className="h-20 w-20 rounded-full object-cover border-2 border-gray-200 shadow-sm"
@@ -279,7 +279,7 @@ export default function ReviewApplication({ application }: ReviewApplicationProp
                                             </div>
                                         )}
                                     </div>
-                                    <div className="flex-grow">
+                                    <div className="grow">
                                         <h4 className="text-xl font-bold text-gray-900 mb-1">
                                             {application.user?.name || 'Unknown Speaker'}
                                         </h4>

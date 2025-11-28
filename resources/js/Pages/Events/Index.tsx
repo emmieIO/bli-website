@@ -79,7 +79,7 @@ export default function EventsIndex({ events, upcomingEvents, ongoingEvents, exp
             <Head title="Upcoming Events" />
 
             {/* Hero Section */}
-            <section className="py-16 md:py-20 bg-gradient-to-br from-white to-gray-50">
+            <section className="py-16 md:py-20 bg-linear-to-br from-white to-gray-50">
                 <div className="container mx-auto px-6 text-center">
                     {/* Badge */}
                     <div className="inline-flex items-center gap-2 border rounded-full px-6 py-3 mb-8 bg-accent/10 border-accent">

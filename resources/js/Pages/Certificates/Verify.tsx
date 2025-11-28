@@ -73,7 +73,7 @@ export default function Verify({ certificate, error }: VerifyProps) {
                     {error && (
                         <div className="bg-red-50 border border-red-200 rounded-md p-4 mb-6">
                             <div className="flex">
-                                <div className="flex-shrink-0">
+                                <div className="shrink-0">
                                     <i className="fas fa-exclamation-circle text-red-400"></i>
                                 </div>
                                 <div className="ml-3">
@@ -216,7 +216,7 @@ export default function Verify({ certificate, error }: VerifyProps) {
                                     required
                                 />
                             </div>
-                            <div className="flex-shrink-0">
+                            <div className="shrink-0">
                                 <button
                                     type="submit"
                                     className="sm:mt-7 w-full sm:w-auto px-6 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors font-montserrat"

@@ -1,6 +1,7 @@
 import { PropsWithChildren, useState, useEffect, useRef } from 'react';
 import { Link, router, usePage } from '@inertiajs/react';
 import { ToastContainer, useToastNotifications } from '@/Components/Toast';
+import { route } from 'ziggy-js';
 import {
     LayoutDashboard,
     BookOpen,
@@ -20,8 +21,6 @@ import {
     User,
     LogOut,
     Bell,
-    Check,
-    Trash2
 } from 'lucide-react';
 import axios from 'axios';
 
@@ -88,7 +87,7 @@ export default function DashboardLayout({ children, sideLinks }: DashboardLayout
     const [isSearching, setIsSearching] = useState(false);
     const [showResults, setShowResults] = useState(false);
     const searchRef = useRef<HTMLDivElement>(null);
-    const searchTimeoutRef = useRef<NodeJS.Timeout>();
+    const searchTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
 
     // Profile dropdown state
     const [showProfileDropdown, setShowProfileDropdown] = useState(false);
@@ -305,9 +304,8 @@ export default function DashboardLayout({ children, sideLinks }: DashboardLayout
 
             {/* Sidebar */}
             <aside
-                className={`fixed top-0 left-0 z-40 w-64 h-screen transition-transform ${
-                    isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
-                } sm:translate-x-0 bg-gradient-to-b from-slate-900 to-slate-800 shadow-2xl`}
+                className={`fixed top-0 left-0 z-40 w-64 h-screen transition-transform ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
+                    } sm:translate-x-0 bg-linear-to-b from-slate-900 to-slate-800 shadow-2xl`}
             >
                 <div className="h-full px-4 py-6 overflow-y-auto">
                     {/* Logo */}
@@ -347,7 +345,7 @@ export default function DashboardLayout({ children, sideLinks }: DashboardLayout
                                                 onClick={() => toggleMenu(link.title)}
                                                 className="flex items-center w-full p-3 text-sm font-medium text-slate-300 transition-all duration-200 rounded-xl group hover:bg-slate-700/50 hover:text-white"
                                             >
-                                                <IconComponent size={18} className="text-slate-400 transition-colors duration-200 group-hover:text-blue-400 mr-3 flex-shrink-0" />
+                                                <IconComponent size={18} className="text-slate-400 transition-colors duration-200 group-hover:text-blue-400 mr-3 shrink-0" />
                                                 <span className="flex-1 text-left whitespace-nowrap">{link.title}</span>
                                                 <ChevronDown size={16} className={`text-slate-400 transition-all duration-200 ${isExpanded ? 'rotate-180' : ''}`} />
                                             </button>
@@ -380,7 +378,7 @@ export default function DashboardLayout({ children, sideLinks }: DashboardLayout
                                             href={route(link.route!)}
                                             className="flex items-center p-3 text-sm font-medium text-slate-300 rounded-xl transition-all duration-200 hover:bg-slate-700/50 hover:text-white group"
                                         >
-                                            <IconComponent size={18} className="text-slate-400 transition-colors duration-200 group-hover:text-blue-400 mr-3 flex-shrink-0" />
+                                            <IconComponent size={18} className="text-slate-400 transition-colors duration-200 group-hover:text-blue-400 mr-3 shrink-0" />
                                             <span className="flex-1 whitespace-nowrap">{link.title}</span>
                                         </Link>
                                     </li>
@@ -488,8 +486,8 @@ export default function DashboardLayout({ children, sideLinks }: DashboardLayout
 
                                     {/* Notification Dropdown */}
                                     {showNotifications && (
-                                        <div className="absolute right-0 mt-2 w-96 max-h-[32rem] bg-white rounded-xl shadow-xl border border-slate-200 overflow-hidden z-50">
-                                            <div className="px-4 py-3 bg-gradient-to-r from-primary-50 to-slate-50 flex items-center justify-between">
+                                        <div className="absolute right-0 mt-2 w-96 max-h-128 bg-white rounded-xl shadow-xl border border-slate-200 overflow-hidden z-50">
+                                            <div className="px-4 py-3 bg-linear-to-r from-primary-50 to-slate-50 flex items-center justify-between">
                                                 <h3 className="text-sm font-semibold text-slate-800">Notifications</h3>
                                                 {unreadCount > 0 && (
                                                     <button
@@ -511,9 +509,8 @@ export default function DashboardLayout({ children, sideLinks }: DashboardLayout
                                                         {notifications.map((notification) => (
                                                             <li
                                                                 key={notification.id}
-                                                                className={`border-b border-slate-100 last:border-b-0 ${
-                                                                    !notification.read_at ? 'bg-blue-50/50' : ''
-                                                                }`}
+                                                                className={`border-b border-slate-100 last:border-b-0 ${!notification.read_at ? 'bg-blue-50/50' : ''
+                                                                    }`}
                                                             >
                                                                 <button
                                                                     onClick={() => handleNotificationClick(notification)}
@@ -529,7 +526,7 @@ export default function DashboardLayout({ children, sideLinks }: DashboardLayout
                                                                             </p>
                                                                         </div>
                                                                         {!notification.read_at && (
-                                                                            <div className="w-2 h-2 bg-blue-500 rounded-full mt-1 flex-shrink-0"></div>
+                                                                            <div className="w-2 h-2 bg-blue-500 rounded-full mt-1 shrink-0"></div>
                                                                         )}
                                                                     </div>
                                                                 </button>
@@ -566,41 +563,41 @@ export default function DashboardLayout({ children, sideLinks }: DashboardLayout
 
                                     {/* Dropdown Menu */}
                                     {showProfileDropdown && (
-                                    <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-xl border border-slate-200 overflow-hidden z-50">
-                                        <div className="px-4 py-3 bg-gradient-to-r from-primary-50 to-slate-50">
-                                            <p className="text-sm font-semibold text-slate-800">{user?.name}</p>
-                                            <p className="text-sm text-slate-600 truncate">{user?.email}</p>
+                                        <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-xl border border-slate-200 overflow-hidden z-50">
+                                            <div className="px-4 py-3 bg-linear-to-r from-primary-50 to-slate-50">
+                                                <p className="text-sm font-semibold text-slate-800">{user?.name}</p>
+                                                <p className="text-sm text-slate-600 truncate">{user?.email}</p>
+                                            </div>
+                                            <ul className="py-2">
+                                                <li>
+                                                    <Link
+                                                        href={route('homepage')}
+                                                        className="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 hover:text-primary-600 transition-colors"
+                                                    >
+                                                        <ExternalLink size={16} className="text-slate-400" />
+                                                        Visit Website
+                                                    </Link>
+                                                </li>
+                                                <li>
+                                                    <Link
+                                                        href={route('profile.edit')}
+                                                        className="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 hover:text-primary-600 transition-colors"
+                                                    >
+                                                        <User size={16} className="text-slate-400" />
+                                                        Profile Settings
+                                                    </Link>
+                                                </li>
+                                                <li className="border-t border-slate-100 mt-1 pt-1">
+                                                    <button
+                                                        onClick={logout}
+                                                        className="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors"
+                                                    >
+                                                        <LogOut size={16} className="text-red-500" />
+                                                        Sign out
+                                                    </button>
+                                                </li>
+                                            </ul>
                                         </div>
-                                        <ul className="py-2">
-                                            <li>
-                                                <Link
-                                                    href={route('homepage')}
-                                                    className="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 hover:text-primary-600 transition-colors"
-                                                >
-                                                    <ExternalLink size={16} className="text-slate-400" />
-                                                    Visit Website
-                                                </Link>
-                                            </li>
-                                            <li>
-                                                <Link
-                                                    href={route('profile.edit')}
-                                                    className="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 hover:text-primary-600 transition-colors"
-                                                >
-                                                    <User size={16} className="text-slate-400" />
-                                                    Profile Settings
-                                                </Link>
-                                            </li>
-                                            <li className="border-t border-slate-100 mt-1 pt-1">
-                                                <button
-                                                    onClick={logout}
-                                                    className="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors"
-                                                >
-                                                    <LogOut size={16} className="text-red-500" />
-                                                    Sign out
-                                                </button>
-                                            </li>
-                                        </ul>
-                                    </div>
                                     )}
                                 </div>
                             </div>
@@ -688,7 +685,7 @@ function SearchResultsDisplay({
                             className="w-full px-4 py-3 hover:bg-slate-50 transition-colors text-left border-b border-slate-100 last:border-0"
                         >
                             <div className="flex items-start gap-3">
-                                <Calendar size={16} className="text-blue-500 mt-1 flex-shrink-0" />
+                                <Calendar size={16} className="text-blue-500 mt-1 shrink-0" />
                                 <div className="flex-1 min-w-0">
                                     <p className="font-medium text-sm text-slate-900 truncate">{event.title}</p>
                                     {event.subtitle && (
@@ -721,10 +718,10 @@ function SearchResultsDisplay({
                                     <img
                                         src={`/storage/${course.thumbnail}`}
                                         alt={course.title}
-                                        className="w-12 h-12 rounded object-cover flex-shrink-0"
+                                        className="w-12 h-12 rounded object-cover shrink-0"
                                     />
                                 ) : (
-                                    <div className="w-12 h-12 rounded bg-gradient-to-br from-green-100 to-green-50 flex items-center justify-center flex-shrink-0">
+                                    <div className="w-12 h-12 rounded bg-linear-to-br from-green-100 to-green-50 flex items-center justify-center shrink-0">
                                         <BookOpen size={20} className="text-green-600" />
                                     </div>
                                 )}
@@ -760,10 +757,10 @@ function SearchResultsDisplay({
                                     <img
                                         src={`/storage/${speaker.thumbnail}`}
                                         alt={speaker.title}
-                                        className="w-12 h-12 rounded-full object-cover flex-shrink-0"
+                                        className="w-12 h-12 rounded-full object-cover shrink-0"
                                     />
                                 ) : (
-                                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-100 to-purple-50 flex items-center justify-center flex-shrink-0">
+                                    <div className="w-12 h-12 rounded-full bg-linear-to-br from-purple-100 to-purple-50 flex items-center justify-center shrink-0">
                                         <Mic size={20} className="text-purple-600" />
                                     </div>
                                 )}

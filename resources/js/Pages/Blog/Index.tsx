@@ -53,7 +53,7 @@ export default function BlogIndex({ posts }: BlogIndexProps) {
             <Head title="Blog" />
 
             {/* Hero Section */}
-            <section className="py-16 md:py-20 bg-gradient-to-br from-white to-gray-50">
+            <section className="py-16 md:py-20 bg-linear-to-br from-white to-gray-50">
                 <div className="container mx-auto px-6 text-center">
                     <div className="inline-flex items-center gap-2 border rounded-full px-6 py-3 mb-8 bg-accent/10 border-accent">
                         <i className="fas fa-blog text-sm text-accent"></i>
@@ -98,7 +98,7 @@ export default function BlogIndex({ posts }: BlogIndexProps) {
                                                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                                                 />
                                             ) : (
-                                                <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-accent/20 to-primary/20">
+                                                <div className="w-full h-full flex items-center justify-center bg-linear-to-br from-accent/20 to-primary/20">
                                                     <i className="fas fa-file-alt text-4xl text-accent/40"></i>
                                                 </div>
                                             )}

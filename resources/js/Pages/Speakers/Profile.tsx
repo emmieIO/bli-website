@@ -93,7 +93,7 @@ export default function SpeakerProfile({ speaker }: SpeakerProfileProps) {
                     </nav>
 
                     <div className="flex flex-col lg:flex-row items-center lg:items-start gap-8">
-                        <div className="flex-shrink-0" data-aos="fade-right">
+                        <div className="shrink-0" data-aos="fade-right">
                             <div className="relative">
                                 <img
                                     src={
@@ -323,7 +323,7 @@ export default function SpeakerProfile({ speaker }: SpeakerProfileProps) {
                                                     style={{ background: 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)' }}
                                                 >
                                                     <div className="flex items-start gap-6">
-                                                        <div className="flex-shrink-0">
+                                                        <div className="shrink-0">
                                                             <img
                                                                 src={`/storage/${event.program_cover}`}
                                                                 alt={event.title}

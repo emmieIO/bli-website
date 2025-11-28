@@ -56,7 +56,7 @@ export default function CoursesIndex({ courses }: CoursesIndexProps) {
             <Head title="Explore Our Courses" />
 
             {/* Hero Section */}
-            <section className="py-16 bg-gradient-to-br from-gray-50 to-white">
+            <section className="py-16 bg-linear-to-br from-gray-50 to-white">
                 <div className="container mx-auto px-6">
                     <div className="text-center max-w-4xl mx-auto">
                         {/* Badge */}
