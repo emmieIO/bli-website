@@ -84,22 +84,11 @@ class InstructorRatingController extends Controller
         $averageRating = $instructor->ratingsReceived()->avg('rating') ?? 0;
         $totalRatings = $instructor->ratingsReceived()->count();
 
-        // Rating distribution
-        $ratingDistribution = [];
-        for ($i = 5; $i >= 1; $i--) {
-            $count = $instructor->ratingsReceived()->where('rating', $i)->count();
-            $percentage = $totalRatings > 0 ? ($count / $totalRatings) * 100 : 0;
-            $ratingDistribution[$i] = [
-                'count' => $count,
-                'percentage' => round($percentage, 1),
-            ];
-        }
-
-        return response()->json([
-            'average_rating' => round($averageRating, 1),
-            'total_ratings' => $totalRatings,
-            'rating_distribution' => $ratingDistribution,
+        return \Inertia\Inertia::render('Instructors/Ratings', [
+            'instructor' => $instructor,
             'ratings' => $ratings,
+            'averageRating' => round($averageRating, 1),
+            'totalRatings' => $totalRatings,
         ]);
     }
 }

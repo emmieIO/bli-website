@@ -2,6 +2,7 @@
 
 namespace App\Services\Payment;
 
+use App\Models\Cart;
 use App\Models\Course;
 use App\Models\Transaction;
 use App\Models\User;
@@ -15,7 +16,7 @@ use Illuminate\Support\Facades\Log;
 class PaymentService
 {
     public function __construct(
-        private FlutterwaveService $flutterwaveService
+        private PaystackService $paystackService
     ) {}
 
     /**
@@ -29,16 +30,16 @@ class PaymentService
     /**
      * Create a new transaction record
      */
-    public function createTransaction(User $user, Course $course, string $txRef): Transaction
+    public function createTransaction(User $user, ?Course $course, string $txRef, float $amount, array $metadata = []): Transaction
     {
         return Transaction::create([
             'user_id' => $user->id,
-            'course_id' => $course->id,
+            'course_id' => $course?->id,
             'transaction_id' => $txRef,
-            'flw_ref' => $txRef,
-            'amount' => $course->price,
-            'currency' => config('services.flutterwave.currency', 'USD'),
+            'amount' => $amount,
+            'currency' => config('services.paystack.currency', 'NGN'),
             'status' => 'pending',
+            'metadata' => $metadata,
         ]);
     }
 
@@ -52,27 +53,18 @@ class PaymentService
         try {
             $txRef = $this->generateTransactionReference($user, $course);
 
-            $transaction = $this->createTransaction($user, $course, $txRef);
+            $transaction = $this->createTransaction($user, $course, $txRef, $course->price);
 
-            $paymentData = $this->flutterwaveService->preparePaymentData([
-                'tx_ref' => $txRef,
-                'amount' => $course->price,
-                'currency' => config('services.flutterwave.currency', 'USD'),
-                'redirect_url' => route('payment.callback'),
-                'customer' => [
-                    'email' => $customerData['email'],
-                    'name' => $user->name,
-                    'phonenumber' => $customerData['phone'] ?? $user->phone ?? '',
-                ],
-                'customizations' => [
-                    'title' => 'Course Purchase',
-                    'description' => "Purchase of {$course->title}",
-                    'logo' => asset('images/logo.png'),
-                ],
-                'meta' => [
+            $paymentData = $this->paystackService->initializePayment([
+                'email' => $customerData['email'],
+                'amount' => $course->price * 100, // Convert to kobo
+                'reference' => $txRef,
+                'callback_url' => route('payment.callback'),
+                'metadata' => [
                     'user_id' => $user->id,
                     'course_id' => $course->id,
                     'transaction_id' => $transaction->id,
+                    'type' => 'course',
                 ],
             ]);
 
@@ -99,7 +91,7 @@ class PaymentService
     /**
      * Verify and process payment
      */
-    public function verifyAndProcessPayment(string $txRef, string $transactionId): array
+    public function verifyAndProcessPayment(string $txRef): array
     {
         $transaction = Transaction::where('transaction_id', $txRef)->first();
 
@@ -107,19 +99,39 @@ class PaymentService
             throw new \Exception('Transaction not found');
         }
 
-        $course = $transaction->course;
+        if (!$transaction->isPending()) {
+            if ($transaction->isSuccessful()) {
+                return [
+                    'success' => true,
+                    'type' => $transaction->metadata['type'] ?? 'course',
+                    'course' => $transaction->course,
+                    'courses' => isset($transaction->metadata['course_ids']) ? Course::whereIn('id', $transaction->metadata['course_ids'])->get() : [],
+                    'transaction' => $transaction,
+                ];
+            } else {
+                throw new \Exception('Payment was not successful.');
+            }
+        }
 
-        // Verify with Flutterwave
-        $result = $this->flutterwaveService->verifyTransaction($transactionId);
+        // Verify with Paystack
+        $result = $this->paystackService->verifyTransaction($txRef);
 
-        if ($result['status'] !== 'success' || $result['data']['status'] !== 'successful') {
+        Log::info('Paystack verification response', [
+            'paystack_response' => $result,
+            'local_transaction' => $transaction,
+        ]);
+
+        if ($result['data']['status'] !== 'success') {
             throw new \Exception('Payment verification failed');
         }
 
         $data = $result['data'];
 
         // Verify amount and currency
-        if ($data['amount'] < $transaction->amount || $data['currency'] !== $transaction->currency) {
+        $paystackAmount = (int) ($data['amount']);
+        $localAmount = (int) ($transaction->amount * 100);
+
+        if ($paystackAmount < $localAmount || $data['currency'] !== $transaction->currency) {
             throw new \Exception('Payment amount mismatch');
         }
 
@@ -129,22 +141,56 @@ class PaymentService
             // Update transaction
             $transaction->update([
                 'status' => 'successful',
-                'flw_ref' => $data['flw_ref'] ?? $txRef,
-                'payment_type' => $data['payment_type'] ?? null,
-                'metadata' => $data,
+                'payment_ref' => $data['reference'] ?? $txRef,
+                'payment_type' => $data['channel'] ?? null,
+                'metadata' => array_merge($transaction->metadata ?? [], ['payment_data' => $data]),
                 'paid_at' => now(),
             ]);
 
-            // Enroll user in course
-            $this->enrollUserInCourse($transaction->user_id, $course);
+            // Check if this is a cart purchase or single course purchase
+            $isCartPurchase = isset($transaction->metadata['type']) && $transaction->metadata['type'] === 'cart';
 
-            DB::commit();
+            if ($isCartPurchase) {
+                // Enroll user in all courses from cart
+                $courseIds = $transaction->metadata['course_ids'] ?? [];
+                foreach ($courseIds as $courseId) {
+                    $course = Course::find($courseId);
+                    if ($course) {
+                        $this->enrollUserInCourse($transaction->user_id, $course);
+                    }
+                }
 
-            return [
-                'success' => true,
-                'course' => $course,
-                'transaction' => $transaction,
-            ];
+                // Clear the cart
+                $cartId = $transaction->metadata['cart_id'] ?? null;
+                if ($cartId) {
+                    $cart = Cart::find($cartId);
+                    if ($cart) {
+                        $cart->clear();
+                    }
+                }
+
+                DB::commit();
+
+                return [
+                    'success' => true,
+                    'type' => 'cart',
+                    'courses' => Course::whereIn('id', $courseIds)->get(),
+                    'transaction' => $transaction,
+                ];
+            } else {
+                // Single course purchase
+                $course = $transaction->course;
+                $this->enrollUserInCourse($transaction->user_id, $course);
+
+                DB::commit();
+
+                return [
+                    'success' => true,
+                    'type' => 'course',
+                    'course' => $course,
+                    'transaction' => $transaction,
+                ];
+            }
 
         } catch (\Exception $e) {
             DB::rollBack();
@@ -161,13 +207,18 @@ class PaymentService
     /**
      * Process webhook payment
      */
-    public function processWebhookPayment(array $payload): void
+    public function processWebhookPayment(array $payload, string $signature): void
     {
-        if ($payload['event'] !== 'charge.completed' || $payload['data']['status'] !== 'successful') {
+        if (!$this->paystackService->verifyWebhookSignature(json_encode($payload), $signature)) {
+            Log::warning('Invalid Paystack webhook signature');
             return;
         }
 
-        $txRef = $payload['data']['tx_ref'];
+        if ($payload['event'] !== 'charge.success') {
+            return;
+        }
+
+        $txRef = $payload['data']['reference'];
         $transaction = Transaction::where('transaction_id', $txRef)->first();
 
         if (!$transaction || !$transaction->isPending()) {
@@ -179,26 +230,36 @@ class PaymentService
         try {
             $transaction->update([
                 'status' => 'successful',
-                'flw_ref' => $payload['data']['flw_ref'] ?? $txRef,
-                'payment_type' => $payload['data']['payment_type'] ?? null,
+                'payment_ref' => $payload['data']['reference'] ?? $txRef,
+                'payment_type' => $payload['data']['channel'] ?? null,
                 'metadata' => $payload['data'],
                 'paid_at' => now(),
             ]);
 
-            $this->enrollUserInCourse($transaction->user_id, $transaction->course);
+            if ($transaction->course) {
+                $this->enrollUserInCourse($transaction->user_id, $transaction->course);
+            } else {
+                // Handle cart purchase
+                $courseIds = $transaction->metadata['course_ids'] ?? [];
+                foreach ($courseIds as $courseId) {
+                    $course = Course::find($courseId);
+                    if ($course) {
+                        $this->enrollUserInCourse($transaction->user_id, $course);
+                    }
+                }
+            }
 
             DB::commit();
 
-            Log::info('Payment processed via webhook', [
+            Log::info('Payment processed via Paystack webhook', [
                 'transaction_id' => $txRef,
                 'user_id' => $transaction->user_id,
-                'course_id' => $transaction->course_id,
             ]);
 
         } catch (\Exception $e) {
             DB::rollBack();
 
-            Log::error('Webhook processing failed', [
+            Log::error('Paystack webhook processing failed', [
                 'error' => $e->getMessage(),
                 'transaction_id' => $txRef,
             ]);
@@ -268,6 +329,64 @@ class PaymentService
 
         if ($transaction) {
             $transaction->markAsFailed();
+        }
+    }
+
+    /**
+     * Initialize cart payment
+     */
+    public function initializeCartPayment(User $user, Cart $cart, array $customerData): array
+    {
+        DB::beginTransaction();
+
+        try {
+            $txRef = 'BLI_CART_' . time() . '_' . $user->id . '_' . $cart->id;
+            $totalAmount = $cart->total;
+            $courseIds = $cart->items->pluck('course_id')->toArray();
+
+            $metadata = [
+                'type' => 'cart',
+                'cart_id' => $cart->id,
+                'course_ids' => $courseIds,
+                'items' => $cart->items->filter(fn($item) => $item->course)->map(fn($item) => [
+                    'course_id' => $item->course_id,
+                    'course_title' => $item->course->title,
+                    'price' => $item->price,
+                ])->values()->toArray(),
+            ];
+
+            $transaction = $this->createTransaction($user, null, $txRef, $totalAmount, $metadata);
+
+            $paymentData = $this->paystackService->initializePayment([
+                'email' => $customerData['email'],
+                'amount' => $totalAmount * 100, // Convert to kobo
+                'reference' => $txRef,
+                'callback_url' => route('payment.callback'),
+                'metadata' => [
+                    'user_id' => $user->id,
+                    'cart_id' => $cart->id,
+                    'transaction_id' => $transaction->id,
+                    'type' => 'cart',
+                ],
+            ]);
+
+            DB::commit();
+
+            return [
+                'success' => true,
+                'payment_data' => $paymentData,
+            ];
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            Log::error('Cart payment initialization failed', [
+                'error' => $e->getMessage(),
+                'user_id' => $user->id,
+                'cart_id' => $cart->id,
+            ]);
+
+            throw $e;
         }
     }
 }

@@ -25,7 +25,7 @@ class LessonProgressRepository implements LessonProgressRepositoryInterface
             [
                 'user_id' => $user->id,
                 'lesson_id' => $lesson->id,
-                'course_id' => $lesson->module->course_id
+                'course_id' => $lesson->courseModule->course_id
             ],
             array_merge($data, [
                 'completed_at' => $data['is_completed'] ?? false ? now() : null

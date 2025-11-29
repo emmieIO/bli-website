@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Middleware\AdminGuestMiddleware;
+use App\Http\Middleware\CheckMentorshipExpirations;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -16,6 +17,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->web(append: [
             \App\Http\Middleware\HandleInertiaRequests::class,
+            CheckMentorshipExpirations::class,
         ]);
 
         $middleware->alias([
@@ -26,5 +28,18 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
+        $exceptions->respond(function (\Symfony\Component\HttpFoundation\Response $response, \Throwable $_, Request $request) {
+            // Only render custom Inertia error pages in production
+            // In development, let Laravel's error handler (Ignition) show detailed errors
+            if (!app()->environment('local', 'development') &&
+                in_array($response->getStatusCode(), [401, 403, 404, 419, 429, 500, 503])) {
+                return inertia('Errors/Error', [
+                    'status' => $response->getStatusCode(),
+                ])
+                    ->toResponse($request)
+                    ->setStatusCode($response->getStatusCode());
+            }
 
+            return $response;
+        });
     })->create();

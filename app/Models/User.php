@@ -152,6 +152,14 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     /**
+     * Alias for ratingsReceived (for instructor context)
+     */
+    public function ratings()
+    {
+        return $this->ratingsReceived();
+    }
+
+    /**
      * Get the average rating for this instructor
      */
     public function getAverageRatingAttribute()
@@ -165,5 +173,21 @@ class User extends Authenticatable implements MustVerifyEmail
     public function getTotalRatingsAttribute()
     {
         return $this->ratingsReceived()->count();
+    }
+
+    /**
+     * Get the user's shopping cart
+     */
+    public function cart()
+    {
+        return $this->hasOne(Cart::class);
+    }
+
+    /**
+     * Get or create the user's cart
+     */
+    public function getOrCreateCart(): Cart
+    {
+        return $this->cart()->firstOrCreate(['user_id' => $this->id]);
     }
 }

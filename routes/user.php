@@ -16,6 +16,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Main dashboard
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('user_dashboard');
 
+    // Transaction history
+    Route::get('/dashboard/transactions', [\App\Http\Controllers\TransactionController::class, 'index'])->name('transactions.index');
+
     // Global search
     Route::get('/search', [SearchController::class, 'search'])->name('search');
 

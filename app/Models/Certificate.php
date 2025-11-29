@@ -31,6 +31,11 @@ class Certificate extends Model
         });
     }
 
+    public function getRouteKeyName()
+    {
+        return 'certificate_number';
+    }
+
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);

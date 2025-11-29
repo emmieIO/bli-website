@@ -50,6 +50,23 @@ return [
             'route' => 'invitations.index',
         ],
         [
+            'title' => 'Transaction History',
+            'icon' => 'receipt',
+            'route' => 'transactions.index',
+        ],
+        [
+            'title' => 'My Mentorship',
+            'icon' => 'user-group',
+            'route' => 'student.mentorship.index',
+            'permission' => ['mentorship-view-own'],
+        ],
+        [
+            'title' => 'Mentorship Requests',
+            'icon' => 'academic-cap',
+            'route' => 'instructor.mentorship.index',
+            'permission' => ['mentorship-view-instructor'],
+        ],
+        [
             'title' => 'Event Manager',
             'icon' => 'calendar',
             'route' => 'admin.events.index',
@@ -95,6 +112,12 @@ return [
             'icon' => 'star',
             'route' => 'admin.ratings.index',
             'permission' => 'manage-ratings',
+        ],
+        [
+            'title' => 'Mentorship Manager',
+            'icon' => 'users-cog',
+            'route' => 'admin.mentorship.index',
+            'permission' => ['mentorship-manage-any'],
         ],
         [
             'title' => 'System Management',

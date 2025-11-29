@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Course;
-use App\Services\Payment\FlutterwaveService;
+use App\Services\Payment\PaystackService;
 use App\Services\Payment\PaymentService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -12,13 +12,13 @@ use Inertia\Inertia;
 /**
  * Controller for handling payment HTTP requests
  * Responsible for: Request validation, response formatting, routing
- * Business logic delegated to: PaymentService, FlutterwaveService
+ * Business logic delegated to: PaymentService, PaystackService
  */
 class PaymentController extends Controller
 {
     public function __construct(
         private PaymentService $paymentService,
-        private FlutterwaveService $flutterwaveService
+        private PaystackService $paystackService
     ) {}
 
     /**
@@ -51,12 +51,12 @@ class PaymentController extends Controller
 
         return Inertia::render('Courses/Checkout', [
             'course' => $course,
-            'flutterwavePublicKey' => $this->flutterwaveService->getPublicKey(),
+            'paystackPublicKey' => $this->paystackService->getPublicKey(),
         ]);
     }
 
     /**
-     * Initialize payment with Flutterwave
+     * Initialize payment with Paystack
      */
     public function initializePayment(Request $request, Course $course)
     {
@@ -87,75 +87,102 @@ class PaymentController extends Controller
     }
 
     /**
-     * Handle payment callback from Flutterwave
+     * Initialize cart payment with Paystack
+     */
+    public function initializeCartPayment(Request $request)
+    {
+        $validated = $request->validate([
+            'email' => 'required|email',
+            'phone' => 'nullable|string',
+        ]);
+
+        $user = auth()->user();
+        $cart = $user->cart()->with('items.course')->first();
+
+        if (!$cart || $cart->items->isEmpty()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Your cart is empty',
+            ], 400);
+        }
+
+        try {
+            $result = $this->paymentService->initializeCartPayment($user, $cart, $validated);
+
+            return response()->json($result);
+
+        } catch (\Exception $e) {
+            Log::error('Cart payment initialization failed', [
+                'error' => $e->getMessage(),
+                'user_id' => $user->id,
+                'cart_id' => $cart->id,
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to initialize payment. Please try again.',
+            ], 500);
+        }
+    }
+
+    /**
+     * Handle payment callback from Paystack
      */
     public function callback(Request $request)
     {
-        $status = $request->query('status');
-        $txRef = $request->query('tx_ref');
-        $transactionId = $request->query('transaction_id');
+        $txRef = $request->query('reference');
 
-        // Handle cancelled payment
-        if ($status === 'cancelled') {
-            $this->paymentService->markTransactionAsFailed($txRef);
-
+        if (!$txRef) {
             return $this->redirectToCoursePage($txRef, [
-                'message' => 'Payment was cancelled',
-                'type' => 'warning'
+                'message' => 'Payment reference not found.',
+                'type' => 'error'
             ]);
         }
 
-        // Handle successful payment
-        if ($status === 'successful') {
-            try {
-                $result = $this->paymentService->verifyAndProcessPayment($txRef, $transactionId);
+        try {
+            $result = $this->paymentService->verifyAndProcessPayment($txRef);
 
+            if ($result['type'] === 'cart') {
+                return redirect()
+                    ->route('dashboard')
+                    ->with([
+                        'message' => 'Payment successful! You are now enrolled in ' . count($result['courses']) . ' course(s).',
+                        'type' => 'success'
+                    ]);
+            } else {
                 return redirect()
                     ->route('courses.learn', $result['course']->slug)
                     ->with([
                         'message' => 'Payment successful! You are now enrolled in the course.',
                         'type' => 'success'
                     ]);
-
-            } catch (\Exception $e) {
-                Log::error('Payment verification failed', [
-                    'error' => $e->getMessage(),
-                    'transaction_id' => $txRef,
-                ]);
-
-                $this->paymentService->markTransactionAsFailed($txRef);
-
-                return $this->redirectToCoursePage($txRef, [
-                    'message' => 'Payment verification failed. Please contact support.',
-                    'type' => 'error'
-                ]);
             }
-        }
 
-        return $this->redirectToCoursePage($txRef, [
-            'message' => 'Payment status unknown. Please contact support.',
-            'type' => 'warning'
-        ]);
+        } catch (\Exception $e) {
+            Log::error('Payment verification failed', [
+                'error' => $e->getMessage(),
+                'transaction_id' => $txRef,
+            ]);
+
+            $this->paymentService->markTransactionAsFailed($txRef);
+
+            return $this->redirectToCoursePage($txRef, [
+                'message' => 'Payment verification failed. Please contact support.',
+                'type' => 'error'
+            ]);
+        }
     }
 
     /**
-     * Handle Flutterwave webhook
+     * Handle Paystack webhook
      */
     public function webhook(Request $request)
     {
-        $signature = $request->header('verif-hash');
-
-        if (!$this->flutterwaveService->verifyWebhookSignature($signature)) {
-            Log::warning('Invalid webhook signature');
-            return response()->json(['message' => 'Invalid signature'], 401);
-        }
-
+        $signature = $request->header('x-paystack-signature');
         $payload = $request->all();
 
-        Log::info('Flutterwave webhook received', $payload);
-
         try {
-            $this->paymentService->processWebhookPayment($payload);
+            $this->paymentService->processWebhookPayment($payload, $signature);
 
             return response()->json(['message' => 'Webhook received'], 200);
 
@@ -166,6 +193,70 @@ class PaymentController extends Controller
             ]);
 
             return response()->json(['message' => 'Webhook processing failed'], 500);
+        }
+    }
+
+    /**
+     * Verify and process a pending payment
+     */
+    public function verifyPayment(string $reference)
+    {
+        try {
+            // Get the transaction by payment reference
+            $transaction = \App\Models\Transaction::where('payment_ref', $reference)
+                ->where('user_id', auth()->id())
+                ->first();
+
+            if (!$transaction) {
+                return redirect()->route('transactions.index')->with([
+                    'message' => 'Transaction not found.',
+                    'type' => 'error'
+                ]);
+            }
+
+            // If already successful, redirect to appropriate page
+            if ($transaction->status === 'successful') {
+                if ($transaction->course) {
+                    return redirect()->route('courses.learn', $transaction->course->slug)->with([
+                        'message' => 'You are already enrolled in this course.',
+                        'type' => 'info'
+                    ]);
+                }
+                return redirect()->route('dashboard')->with([
+                    'message' => 'This payment has already been completed.',
+                    'type' => 'info'
+                ]);
+            }
+
+            // Try to verify the payment with Paystack
+            $result = $this->paymentService->verifyAndProcessPayment($reference);
+
+            if ($result['type'] === 'cart') {
+                return redirect()
+                    ->route('dashboard')
+                    ->with([
+                        'message' => 'Payment successful! You are now enrolled in ' . count($result['courses']) . ' course(s).',
+                        'type' => 'success'
+                    ]);
+            } else {
+                return redirect()
+                    ->route('courses.learn', $result['course']->slug)
+                    ->with([
+                        'message' => 'Payment successful! You are now enrolled in the course.',
+                        'type' => 'success'
+                    ]);
+            }
+
+        } catch (\Exception $e) {
+            Log::error('Payment verification failed', [
+                'error' => $e->getMessage(),
+                'reference' => $reference,
+            ]);
+
+            return redirect()->route('transactions.index')->with([
+                'message' => 'Unable to verify payment. Please contact support if you have been charged.',
+                'type' => 'error'
+            ]);
         }
     }
 

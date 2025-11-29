@@ -1,4 +1,4 @@
-import { Head, Link, usePage } from '@inertiajs/react';
+import { Head, Link, usePage, router } from '@inertiajs/react';
 import DashboardLayout from '@/Layouts/DashboardLayout';
 
 interface Course {
@@ -552,29 +552,43 @@ function CourseCard({ course }: { course: Course }) {
                 </div>
 
                 {/* Action Button */}
-                <Link
-                    href={learnUrl}
-                    className="w-full flex items-center justify-center gap-2 px-4 py-2.5 text-white rounded-lg font-medium font-lato transition-all duration-300 hover:shadow-md"
-                    style={{ backgroundColor: course.status === 'completed' ? '#6b7280' : '#00a651' }}
-                >
-                    {course.status === 'completed' ? (
-                        <>
-                            <i className="fas fa-redo"></i>
-                            Review Course
-                        </>
-                    ) : course.status === 'in_progress' ? (
-                        <>
-                            <i className="fas fa-play"></i>
-                            Continue: {course.next_lesson?.title}
-                        </>
-                    ) : (
-                        <>
-                            <i className="fas fa-play"></i>
-                            Start Course
-                        </>
-                    )}
-                </Link>
-            </div>
+                {course.status === 'completed' ? (
+                    <div className="flex space-x-2">
+                        <button
+                            onClick={() => router.post(route('certificates.generate', { course: course.slug }))}
+                            className="w-full flex items-center justify-center gap-2 px-4 py-2.5 text-white rounded-lg font-medium font-lato transition-all duration-300 hover:shadow-md"
+                            style={{ backgroundColor: '#00a651' }}
+                        >
+                            <i className="fas fa-certificate"></i>
+                            Get Certificate
+                        </button>
+                        <Link
+                            href={route('courses.show', { slug: course.slug })}
+                            className="w-full flex items-center justify-center gap-2 px-4 py-2.5 text-white rounded-lg font-medium font-lato transition-all duration-300 hover:shadow-md"
+                            style={{ backgroundColor: '#6b7280' }}
+                        >
+                            <i className="fas fa-star"></i>
+                            Leave a Review
+                        </Link>
+                    </div>
+                ) : course.status === 'in_progress' ? (                    <Link
+                        href={learnUrl}
+                        className="w-full flex items-center justify-center gap-2 px-4 py-2.5 text-white rounded-lg font-medium font-lato transition-all duration-300 hover:shadow-md"
+                        style={{ backgroundColor: '#00a651' }}
+                    >
+                        <i className="fas fa-play"></i>
+                        Continue: {course.next_lesson?.title}
+                    </Link>
+                ) : (
+                    <Link
+                        href={learnUrl}
+                        className="w-full flex items-center justify-center gap-2 px-4 py-2.5 text-white rounded-lg font-medium font-lato transition-all duration-300 hover:shadow-md"
+                        style={{ backgroundColor: '#00a651' }}
+                    >
+                        <i className="fas fa-play"></i>
+                        Start Course
+                    </Link>
+                )}            </div>
         </div>
     );
 }

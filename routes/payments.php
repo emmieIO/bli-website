@@ -11,8 +11,14 @@ Route::middleware(['auth'])->group(function () {
     // Initialize payment
     Route::post('/courses/{course}/payment/initialize', [PaymentController::class, 'initializePayment'])->name('payment.initialize');
 
+    // Initialize cart payment
+    Route::post('/cart/payment/initialize', [PaymentController::class, 'initializeCartPayment'])->name('payment.cart.initialize');
+
     // Payment callback (after payment on Flutterwave)
     Route::get('/payment/callback', [PaymentController::class, 'callback'])->name('payment.callback');
+
+    // Verify/Resume pending payment
+    Route::get('/payment/verify/{reference}', [PaymentController::class, 'verifyPayment'])->name('payment.verify');
 });
 
 // Webhook endpoint (no auth required - Flutterwave will call this)

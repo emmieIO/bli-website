@@ -59,10 +59,18 @@ class LessonProgressController extends Controller
      */
     public function getProgress(Lesson $lesson): JsonResponse
     {
-        $isCompleted = $this->progressService->isLessonCompleted(auth()->user(), $lesson);
+        $user = auth()->user();
+        $isCompleted = $this->progressService->isLessonCompleted($user, $lesson);
+
+        // Get the lesson progress record if it exists
+        $lessonProgress = $user->lessonProgress()->where('lesson_id', $lesson->id)->first();
 
         return response()->json([
-            'is_completed' => $isCompleted
+            'progress' => [
+                'is_completed' => $isCompleted,
+                'last_position' => $lessonProgress?->last_position ?? 0,
+                'updated_at' => $lessonProgress?->updated_at ?? null,
+            ]
         ]);
     }
 

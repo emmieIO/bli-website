@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
+use Inertia\Inertia;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -18,6 +19,10 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->bind(ProgramRepositoryInterface::class, ProgramRepository::class);
+        $this->app->bind(
+            \App\Contracts\Repositories\MentorshipRepositoryInterface::class,
+            \App\Repositories\MentorshipRepository::class
+        );
     }
 
     /**
@@ -34,5 +39,8 @@ class AppServiceProvider extends ServiceProvider
         //     URL::forceScheme('https');
         // }
 
+        Inertia::share([
+            'sideLinks' => fn () => config('sidebar.links'),
+        ]);
     }
 }

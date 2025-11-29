@@ -8,6 +8,7 @@ Route::prefix('certificates')->name('certificates.')->group(function () {
         Route::get('/', [CertificateController::class, 'index'])->name('index');
         Route::post('/generate/{course}', [CertificateController::class, 'generate'])->name('generate');
         Route::get('/view/{certificate}', [CertificateController::class, 'view'])->name('view');
+        Route::get('/download/{certificate}', [CertificateController::class, 'download'])->name('download');
     });
     
     // Public certificate verification

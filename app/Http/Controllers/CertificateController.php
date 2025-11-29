@@ -30,6 +30,11 @@ class CertificateController extends Controller
         // Generate or retrieve existing certificate
         $certificate = $this->certificateService->generateCertificate($user, $course);
 
+        return redirect()->route('certificates.view', $certificate);
+    }
+
+    public function download(Certificate $certificate)
+    {
         return $this->certificateService->downloadCertificate($certificate);
     }
 
@@ -38,7 +43,7 @@ class CertificateController extends Controller
      */
     public function view(Certificate $certificate)
     {
-        return view('certificates.view', compact('certificate'));
+        return \Inertia\Inertia::render('Certificates/View', compact('certificate'));
     }
 
     /**

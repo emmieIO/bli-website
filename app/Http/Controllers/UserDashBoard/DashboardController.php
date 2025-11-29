@@ -111,7 +111,7 @@ class DashboardController extends Controller
             }
 
             $status = 'not_started';
-            if ($completionPercentage === 100) {
+            if ($completionPercentage == 100) {
                 $completed++;
                 $status = 'completed';
             } elseif ($completionPercentage > 0) {

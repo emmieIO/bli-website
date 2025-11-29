@@ -55,7 +55,7 @@ class UserCourseController extends Controller
         }
 
         $courseWithRelations = $this->courseRepository->getWithRelations($course->id, [
-            'instructor',
+            'instructor.ratings',
             'modules.lessons',
             'outcomes',
             'requirements',
@@ -69,9 +69,19 @@ class UserCourseController extends Controller
             $isEnrolled = $this->courseRepository->isUserEnrolled(auth()->user(), $course);
         }
 
+        // Calculate instructor average rating
+        $instructorRating = $courseWithRelations->instructor->ratings->avg('rating') ?? 0;
+        $instructorRatingCount = $courseWithRelations->instructor->ratings->count();
+
+        // Calculate course rating (based on instructor ratings for courses they teach)
+        $courseRating = round($instructorRating, 1);
+
         return \Inertia\Inertia::render('Courses/CourseDetail', [
             'course' => $courseWithRelations,
             'isEnrolled' => $isEnrolled,
+            'courseRating' => $courseRating,
+            'ratingCount' => $instructorRatingCount,
+            'instructorRating' => round($instructorRating, 1),
         ]);
     }
 
@@ -96,8 +106,23 @@ class UserCourseController extends Controller
             'outcomes',
         ]);
 
+        // If no lesson is specified, redirect to the first lesson
+        if (!$lesson) {
+            $firstLesson = $courseWithLessons->modules->first()->lessons->first();
+            if ($firstLesson) {
+                return redirect()->route('courses.learn', ['course' => $course->slug, 'lesson' => $firstLesson->id]);
+            }
+        }
+
         // Get course progress
         $progressData = $this->progressService->getCourseProgress($user, $courseWithLessons);
+
+        // Add completion status to each lesson
+        foreach ($courseWithLessons->modules as $module) {
+            foreach ($module->lessons as $lessonItem) {
+                $lessonItem->completed = $this->progressService->isLessonCompleted($user, $lessonItem);
+            }
+        }
 
         // Handle lesson navigation logic
         $lessonNavigation = $this->buildLessonNavigation($courseWithLessons, $lesson);
@@ -217,6 +242,50 @@ class UserCourseController extends Controller
             'message' => 'Successfully enrolled! Start learning now.',
             'type' => 'success'
         ]);
+    }
+
+    /**
+     * Mark lesson as completed
+     */
+    public function markLessonComplete(Course $course, $lesson)
+    {
+        $user = auth()->user();
+        $lessonModel = \App\Models\Lesson::with('courseModule')->findOrFail($lesson);
+
+        // Verify enrollment
+        if (!$this->courseRepository->isUserEnrolled($user, $course)) {
+            return back()->with('error', 'You must be enrolled to mark lessons as complete');
+        }
+
+        $this->progressService->markLessonCompleted($user, $lessonModel);
+
+        return back()->with('success', 'Lesson marked as completed');
+    }
+
+    /**
+     * Update lesson progress
+     */
+    public function updateLessonProgress(Request $request, Course $course, $lesson)
+    {
+        $user = auth()->user();
+        $lessonModel = \App\Models\Lesson::findOrFail($lesson);
+
+        // Verify enrollment
+        if (!$this->courseRepository->isUserEnrolled($user, $course)) {
+            return response()->json(['error' => 'Not enrolled'], 403);
+        }
+
+        $request->validate([
+            'current_time' => 'required|numeric|min:0',
+            'duration' => 'nullable|numeric|min:0',
+            'is_completed' => 'boolean'
+        ]);
+
+        $progressData = \App\DTOs\LessonProgressData::fromRequest($request->all());
+
+        $this->progressService->updateLessonProgress($user, $lessonModel, $progressData);
+
+        return response()->json(['success' => true]);
     }
 
     /**

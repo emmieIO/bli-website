@@ -72,9 +72,12 @@ interface Course {
 interface CourseDetailProps {
     course: Course;
     isEnrolled: boolean;
+    courseRating: number;
+    ratingCount: number;
+    instructorRating: number;
 }
 
-export default function CourseDetail({ course, isEnrolled }: CourseDetailProps) {
+export default function CourseDetail({ course, isEnrolled, courseRating, ratingCount, instructorRating }: CourseDetailProps) {
     const { auth } = usePage().props as any;
     const [expandedModules, setExpandedModules] = useState<number[]>([]);
     const [isEnrolling, setIsEnrolling] = useState(false);
@@ -105,6 +108,26 @@ export default function CourseDetail({ course, isEnrolled }: CourseDetailProps) 
                 setIsEnrolling(false);
             },
         });
+    };
+
+    const handleAddToCart = () => {
+        if (!auth.user) {
+            router.visit(route('login'));
+            return;
+        }
+
+        router.post(route('cart.add', course.slug), {}, {
+            preserveScroll: true,
+        });
+    };
+
+    const handleBuyNow = () => {
+        if (!auth.user) {
+            router.visit(route('login'));
+            return;
+        }
+
+        router.visit(route('payment.checkout', course.slug));
     };
 
     const getLessonIcon = (type: string) => {
@@ -168,23 +191,25 @@ export default function CourseDetail({ course, isEnrolled }: CourseDetailProps) 
 
                             {/* Course Meta Information */}
                             <div className="flex flex-wrap items-center gap-4 mb-6 text-sm">
-                                <div className="flex items-center">
-                                    <span className="text-yellow-400 font-bold mr-1">4.6</span>
-                                    <div className="flex mr-2">
-                                        {[1, 2, 3, 4, 5].map((star) => (
-                                            <svg
-                                                key={star}
-                                                className={`w-4 h-4 ${star <= 4 ? 'text-yellow-400' : 'text-gray-400'}`}
-                                                fill="currentColor"
-                                                viewBox="0 0 20 20"
-                                            >
-                                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                                            </svg>
-                                        ))}
+                                {courseRating > 0 && (
+                                    <div className="flex items-center">
+                                        <span className="text-yellow-400 font-bold mr-1">{courseRating.toFixed(1)}</span>
+                                        <div className="flex mr-2">
+                                            {[1, 2, 3, 4, 5].map((star) => (
+                                                <svg
+                                                    key={star}
+                                                    className={`w-4 h-4 ${star <= Math.round(courseRating) ? 'text-yellow-400' : 'text-gray-400'}`}
+                                                    fill="currentColor"
+                                                    viewBox="0 0 20 20"
+                                                >
+                                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                                </svg>
+                                            ))}
+                                        </div>
+                                        <span className="text-purple-300">({ratingCount.toLocaleString()} rating{ratingCount !== 1 ? 's' : ''})</span>
                                     </div>
-                                    <span className="text-purple-300">({totalStudents.toLocaleString()} ratings)</span>
-                                </div>
-                                <span className="text-gray-300">{totalStudents.toLocaleString()} students</span>
+                                )}
+                                <span className="text-gray-300">{totalStudents.toLocaleString()} student{totalStudents !== 1 ? 's' : ''}</span>
                             </div>
 
                             <div className="flex flex-wrap items-center gap-4 text-sm text-gray-300">
@@ -393,17 +418,22 @@ export default function CourseDetail({ course, isEnrolled }: CourseDetailProps) 
                                             )}
 
                                             <div className="flex items-center space-x-4 text-sm text-gray-600 mb-3">
-                                                <div className="flex items-center">
-                                                    <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                                                        <path fillRule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clipRule="evenodd" />
-                                                    </svg>
-                                                    <span>Instructor Rating: 4.6</span>
-                                                </div>
+                                                {instructorRating > 0 && (
+                                                    <div className="flex items-center">
+                                                        <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                                            <path fillRule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clipRule="evenodd" />
+                                                        </svg>
+                                                        <span>Instructor Rating: {instructorRating.toFixed(1)}</span>
+                                                        <Link href={route('instructors.ratings', { instructor: course.instructor.id })} className="ml-2 text-purple-300 hover:text-white underline">
+                                                            (View all ratings)
+                                                        </Link>
+                                                    </div>
+                                                )}
                                                 <div className="flex items-center">
                                                     <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
                                                         <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3z" />
                                                     </svg>
-                                                    <span>{totalStudents.toLocaleString()} Students</span>
+                                                    <span>{totalStudents.toLocaleString()} Student{totalStudents !== 1 ? 's' : ''}</span>
                                                 </div>
                                                 <div className="flex items-center">
                                                     <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
@@ -421,6 +451,69 @@ export default function CourseDetail({ course, isEnrolled }: CourseDetailProps) 
                                     </div>
                                 </div>
                             </div>
+
+                            {/* Review Form */}
+                            {isEnrolled && (
+                                <div className="mt-8">
+                                    <h2 className="text-xl font-bold text-gray-900 mb-4">Leave a Review</h2>
+                                    <div className="bg-gray-50 border border-gray-200 rounded-lg p-6">
+                                        <form onSubmit={(e) => {
+                                            e.preventDefault();
+                                            const formData = new FormData(e.target as HTMLFormElement);
+                                            router.post(route('instructors.rate', { instructor: course.instructor.id }), formData);
+                                        }}>
+                                            <input type="hidden" name="course_id" value={course.id} />
+                                            <div className="mb-4">
+                                                <label htmlFor="rating" className="block text-sm font-medium text-gray-700 mb-2">Your Rating</label>
+                                                <div className="flex items-center star-rating">
+                                                    {[1, 2, 3, 4, 5].map((star) => (
+                                                        <button
+                                                            key={star}
+                                                            type="button"
+                                                            className="text-2xl text-gray-300 hover:text-yellow-400"
+                                                            onClick={() => {
+                                                                const ratingInput = document.getElementById('rating') as HTMLInputElement;
+                                                                if (ratingInput) {
+                                                                    ratingInput.value = star.toString();
+                                                                }
+                                                                // Add visual feedback for selected stars
+                                                                const stars = document.querySelectorAll('.star-rating button');
+                                                                stars.forEach((s, i) => {
+                                                                    if (i < star) {
+                                                                        s.classList.add('text-yellow-400');
+                                                                    } else {
+                                                                        s.classList.remove('text-yellow-400');
+                                                                    }
+                                                                });
+                                                            }}
+                                                        >
+                                                            &#9733;
+                                                        </button>
+                                                    ))}
+                                                </div>
+                                                <input type="hidden" name="rating" id="rating" />
+                                            </div>
+                                            <div className="mb-4">
+                                                <label htmlFor="review" className="block text-sm font-medium text-gray-700 mb-2">Your Review</label>
+                                                <textarea
+                                                    id="review"
+                                                    name="review"
+                                                    rows={4}
+                                                    className="w-full border-gray-300 rounded-md shadow-sm focus:border-primary-500 focus:ring-primary-500"
+                                                ></textarea>
+                                            </div>
+                                            <div>
+                                                <button
+                                                    type="submit"
+                                                    className="w-full bg-primary hover:bg-primary/90 text-white font-bold py-3 px-4 rounded transition-colors"
+                                                >
+                                                    Submit Review
+                                                </button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     </div>
 
@@ -431,21 +524,12 @@ export default function CourseDetail({ course, isEnrolled }: CourseDetailProps) 
                                 {/* Course Price */}
                                 <div className="text-center mb-6">
                                     <div className="flex items-baseline justify-center mb-2">
-                                        <span className="text-3xl font-bold text-gray-900">₦{course.price.toLocaleString()}</span>
-                                        {course.price > 0 && (
-                                            <span className="text-lg text-gray-500 line-through ml-2">
-                                                ₦{(course.price * 1.5).toLocaleString()}
-                                            </span>
+                                        {course.price > 0 ? (
+                                            <span className="text-3xl font-bold text-gray-900">₦{course.price.toLocaleString()}</span>
+                                        ) : (
+                                            <span className="text-3xl font-bold text-green-600">Free</span>
                                         )}
                                     </div>
-                                    {course.price > 0 ? (
-                                        <div className="flex items-center justify-center">
-                                            <span className="bg-yellow-200 text-yellow-800 text-xs font-semibold px-2 py-1 rounded-full">83% off</span>
-                                            <span className="text-red-600 text-sm font-medium ml-2">2 days left at this price!</span>
-                                        </div>
-                                    ) : (
-                                        <span className="text-green-600 font-semibold">Free</span>
-                                    )}
                                 </div>
 
                                 {/* CTA Buttons */}
@@ -478,10 +562,18 @@ export default function CourseDetail({ course, isEnrolled }: CourseDetailProps) 
                                         </button>
                                     ) : (
                                         <>
-                                            <button className="w-full bg-primary hover:bg-primary/90 text-white font-bold py-3 px-4 rounded transition-colors">
+                                            <button
+                                                onClick={handleAddToCart}
+                                                className="w-full bg-primary hover:bg-primary/90 text-white font-bold py-3 px-4 rounded transition-colors flex items-center justify-center gap-2"
+                                            >
+                                                <i className="fas fa-shopping-cart"></i>
                                                 Add to cart
                                             </button>
-                                            <button className="w-full border border-gray-300 hover:bg-gray-50 text-gray-900 font-bold py-3 px-4 rounded transition-colors">
+                                            <button
+                                                onClick={handleBuyNow}
+                                                className="w-full border border-gray-300 hover:bg-gray-50 text-gray-900 font-bold py-3 px-4 rounded transition-colors flex items-center justify-center gap-2"
+                                            >
+                                                <i className="fas fa-bolt"></i>
                                                 Buy now
                                             </button>
                                         </>

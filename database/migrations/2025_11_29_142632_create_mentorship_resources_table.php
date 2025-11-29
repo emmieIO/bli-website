@@ -1,0 +1,35 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::create('mentorship_resources', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('mentorship_request_id')->constrained()->onDelete('cascade');
+            $table->foreignId('uploaded_by')->constrained('users')->onDelete('cascade');
+            $table->string('file_path');
+            $table->string('file_name');
+            $table->string('file_type')->nullable();
+            $table->integer('file_size')->nullable()->comment('File size in bytes');
+            $table->text('description')->nullable();
+            $table->string('category')->default('general')->comment('general, assignment, reference, etc.');
+            $table->timestamps();
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::dropIfExists('mentorship_resources');
+    }
+};

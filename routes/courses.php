@@ -12,12 +12,11 @@ Route::prefix('courses')->name('courses.')->group(function () {
     Route::middleware(['auth'])->group(function () {
         Route::post('/{course}/enroll', [UserCourseController::class, 'enroll'])->name('enroll');
         Route::get('/{course}/learn/{lesson?}', [UserCourseController::class, 'learn'])->name('learn');
-    });
-});
 
-// Course learning interface for enrolled students
-Route::middleware('auth')->group(function () {
-    Route::get('/courses/{course}/learn/{lesson?}', [UserCourseController::class, 'learn'])->name('courses.learn');
+        // Lesson progress routes
+        Route::post('/{course}/lessons/{lesson}/complete', [UserCourseController::class, 'markLessonComplete'])->name('lessons.complete');
+        Route::post('/{course}/lessons/{lesson}/progress', [UserCourseController::class, 'updateLessonProgress'])->name('lessons.progress');
+    });
 });
 
 

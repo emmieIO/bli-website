@@ -7,6 +7,8 @@ import { PageProps } from '@/types';
 
 import { ToastContainer, useToastNotifications } from '@/Components/Toast';
 
+import axios from 'axios';
+
 
 
 export default function GuestLayout({ children }: PropsWithChildren) {
@@ -16,6 +18,8 @@ export default function GuestLayout({ children }: PropsWithChildren) {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
     const [joinUsDropdownOpen, setJoinUsDropdownOpen] = useState(false);
+
+    const [cartCount, setCartCount] = useState(0);
 
     const joinUsDropdownRef = useRef<HTMLLIElement>(null);
 
@@ -46,6 +50,42 @@ export default function GuestLayout({ children }: PropsWithChildren) {
         };
 
     }, [joinUsDropdownRef]);
+
+
+
+    // Fetch cart count
+
+    const fetchCartCount = async () => {
+
+        if (!auth.user) {
+
+            setCartCount(0);
+
+            return;
+
+        }
+
+        try {
+
+            const response = await axios.get(route('cart.count'));
+
+            setCartCount(response.data.count || 0);
+
+        } catch (error) {
+
+            console.error('Failed to fetch cart count:', error);
+
+        }
+
+    };
+
+
+
+    useEffect(() => {
+
+        fetchCartCount();
+
+    }, [auth.user]);
 
 
 
@@ -235,6 +275,26 @@ export default function GuestLayout({ children }: PropsWithChildren) {
 
 
 
+                    {/* Cart Icon */}
+
+                    <Link href={route('cart.index')} className="hidden lg:flex items-center justify-center relative p-2.5 rounded-xl transition-all duration-300 hover:shadow-md transform hover:scale-105" style={{ backgroundColor: 'rgba(0, 166, 81, 0.1)', color: '#002147' }} title="My Cart">
+
+                        <i className="fas fa-shopping-cart text-lg" style={{ color: '#00a651' }}></i>
+
+                        {cartCount > 0 && (
+
+                            <span className="absolute -top-1 -right-1 flex items-center justify-center w-5 h-5 text-xs font-bold text-white rounded-full shadow-md" style={{ backgroundColor: '#ed1c24' }}>
+
+                                {cartCount > 9 ? '9+' : cartCount}
+
+                            </span>
+
+                        )}
+
+                    </Link>
+
+
+
                     {/* Account/Login */}
 
                     <div className="hidden lg:flex items-center space-x-3">
@@ -340,6 +400,28 @@ export default function GuestLayout({ children }: PropsWithChildren) {
                                         <i className="fas fa-blog text-sm" style={{ color: '#00a651' }}></i>
 
                                         <span>Blog</span>
+
+                                    </Link>
+
+                                </li>
+
+                                <li>
+
+                                    <Link href={route('cart.index')} className="flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 relative" style={{ color: '#002147' }} onMouseOver={e => e.currentTarget.style.backgroundColor = 'rgba(0, 166, 81, 0.1)'} onMouseOut={e => e.currentTarget.style.backgroundColor = 'transparent'}>
+
+                                        <i className="fas fa-shopping-cart text-sm" style={{ color: '#00a651' }}></i>
+
+                                        <span>My Cart</span>
+
+                                        {cartCount > 0 && (
+
+                                            <span className="ml-auto flex items-center justify-center w-6 h-6 text-xs font-bold text-white rounded-full" style={{ backgroundColor: '#ed1c24' }}>
+
+                                                {cartCount > 9 ? '9+' : cartCount}
+
+                                            </span>
+
+                                        )}
 
                                     </Link>
 

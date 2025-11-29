@@ -22,10 +22,10 @@ interface Course {
 
 interface CheckoutProps {
     course: Course;
-    flutterwavePublicKey: string;
+    paystackPublicKey: string;
 }
 
-export default function Checkout({ course, flutterwavePublicKey }: CheckoutProps) {
+export default function Checkout({ course, paystackPublicKey }: CheckoutProps) {
     const [email, setEmail] = useState(route().params.email || '');
     const [phone, setPhone] = useState('');
     const [isProcessing, setIsProcessing] = useState(false);
@@ -41,28 +41,12 @@ export default function Checkout({ course, flutterwavePublicKey }: CheckoutProps
                 phone,
             });
 
-            if (response.data.success) {
-                // Use Flutterwave inline payment
-                const paymentData = response.data.payment_data;
-
-                // @ts-ignore - FlutterwaveCheckout is loaded via CDN
-                FlutterwaveCheckout({
-                    public_key: flutterwavePublicKey,
-                    tx_ref: paymentData.tx_ref,
-                    amount: paymentData.amount,
-                    currency: paymentData.currency,
-                    payment_options: 'card,mobilemoney,ussd,banktransfer',
-                    redirect_url: paymentData.redirect_url,
-                    customer: paymentData.customer,
-                    customizations: paymentData.customizations,
-                    meta: paymentData.meta,
-                    callback: function(data: any) {
-                        // Payment callback handled by Flutterwave
-                    },
-                    onclose: function() {
-                        setIsProcessing(false);
-                    },
-                });
+            if (response.data.success && response.data.payment_data.data.authorization_url) {
+                // Redirect to Paystack payment page
+                window.location.href = response.data.payment_data.data.authorization_url;
+            } else {
+                alert(response.data.message || 'Failed to initialize payment');
+                setIsProcessing(false);
             }
         } catch (error: any) {
             // Payment initialization failed
@@ -74,9 +58,6 @@ export default function Checkout({ course, flutterwavePublicKey }: CheckoutProps
     return (
         <GuestLayout>
             <Head title={`Checkout - ${course.title}`} />
-
-            {/* Add Flutterwave Script */}
-            <script src="https://checkout.flutterwave.com/v3.js"></script>
 
             <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
                 <div className="max-w-4xl mx-auto">
@@ -114,7 +95,7 @@ export default function Checkout({ course, flutterwavePublicKey }: CheckoutProps
                                     </div>
                                     <div className="text-right">
                                         <p className="text-2xl font-bold text-primary font-montserrat">
-                                            ${Number(course.price).toFixed(2)}
+                                            ₦{Number(course.price).toLocaleString()}
                                         </p>
                                     </div>
                                 </div>
@@ -159,14 +140,14 @@ export default function Checkout({ course, flutterwavePublicKey }: CheckoutProps
                                         disabled={isProcessing}
                                         className="w-full bg-primary text-white py-3 px-6 rounded-lg font-semibold hover:bg-primary-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-montserrat"
                                     >
-                                        {isProcessing ? 'Processing...' : `Pay $${Number(course.price).toFixed(2)}`}
+                                        {isProcessing ? 'Processing...' : `Pay ₦${Number(course.price).toLocaleString()}`}
                                     </button>
                                 </form>
 
                                 {/* Payment Methods */}
                                 <div className="mt-6 pt-6 border-t border-gray-200">
                                     <p className="text-sm text-gray-600 text-center mb-3 font-lato">
-                                        Secure payment powered by Flutterwave
+                                        Secure payment powered by Paystack
                                     </p>
                                     <div className="flex justify-center gap-4">
                                         <i className="fab fa-cc-visa text-3xl text-gray-400"></i>

@@ -21,6 +21,7 @@ import {
     User,
     LogOut,
     Bell,
+    ShoppingCart,
 } from 'lucide-react';
 import axios from 'axios';
 
@@ -39,7 +40,7 @@ interface SideLink {
 }
 
 interface DashboardLayoutProps extends PropsWithChildren {
-    sideLinks: SideLink[];
+    // sideLinks: SideLink[]; // Removed
 }
 
 interface SearchResult {
@@ -68,8 +69,8 @@ interface Notification {
     data: any;
 }
 
-export default function DashboardLayout({ children, sideLinks }: DashboardLayoutProps) {
-    const { auth } = usePage().props as any;
+export default function DashboardLayout({ children }: PropsWithChildren) {
+    const { auth, sideLinks } = usePage().props as any;
     const user = auth?.user;
 
     // Toast notifications
@@ -98,6 +99,9 @@ export default function DashboardLayout({ children, sideLinks }: DashboardLayout
     const [notifications, setNotifications] = useState<Notification[]>([]);
     const [unreadCount, setUnreadCount] = useState(0);
     const notificationRef = useRef<HTMLDivElement>(null);
+
+    // Cart state
+    const [cartCount, setCartCount] = useState(0);
 
     const toggleMenu = (title: string) => {
         setExpandedMenus(prev =>
@@ -249,9 +253,21 @@ export default function DashboardLayout({ children, sideLinks }: DashboardLayout
         setShowNotifications(false);
     };
 
-    // Fetch notifications on mount
+    // Fetch cart count
+    const fetchCartCount = async () => {
+        try {
+            const response = await axios.get(route('cart.count'));
+            setCartCount(response.data.count || 0);
+        } catch (error) {
+            // Failed to fetch cart count - silently fail
+            setCartCount(0);
+        }
+    };
+
+    // Fetch notifications and cart count on mount
     useEffect(() => {
         fetchNotifications();
+        fetchCartCount();
     }, []);
 
     // Close dropdowns when clicking outside
@@ -464,6 +480,19 @@ export default function DashboardLayout({ children, sideLinks }: DashboardLayout
                                 <button className="lg:hidden p-2 text-slate-600 rounded-lg hover:bg-slate-100" onClick={() => setShowMobileSearch(!showMobileSearch)}>
                                     <Search size={20} />
                                 </button>
+
+                                {/* Shopping Cart */}
+                                <Link
+                                    href={route('cart.index')}
+                                    className="relative p-2 text-slate-600 rounded-lg hover:bg-slate-100 transition-all"
+                                >
+                                    <ShoppingCart size={20} />
+                                    {cartCount > 0 && (
+                                        <span className="absolute top-0 right-0 flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-primary-500 rounded-full">
+                                            {cartCount > 9 ? '9+' : cartCount}
+                                        </span>
+                                    )}
+                                </Link>
 
                                 {/* Notification Bell */}
                                 <div className="relative" ref={notificationRef}>

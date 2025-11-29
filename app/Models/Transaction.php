@@ -11,7 +11,7 @@ class Transaction extends Model
         'user_id',
         'course_id',
         'transaction_id',
-        'flw_ref',
+        'payment_ref',
         'amount',
         'currency',
         'status',
