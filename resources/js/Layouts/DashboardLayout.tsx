@@ -22,6 +22,7 @@ import {
     LogOut,
     Bell,
     ShoppingCart,
+    LifeBuoy,
 } from 'lucide-react';
 import axios from 'axios';
 
@@ -309,6 +310,7 @@ export default function DashboardLayout({ children }: PropsWithChildren) {
             'graduation-cap': GraduationCap,
             'users': Users,
             'settings': Settings,
+            'life-buoy': LifeBuoy,
         };
         return iconMap[iconName] || LayoutDashboard;
     };

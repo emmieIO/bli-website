@@ -45,13 +45,17 @@ Route::middleware('auth')->group(function () {
 });
 
 // Load organized route files
-require __DIR__ . '/auth.php';
-require __DIR__ . '/user.php';
-require __DIR__ . '/admin.php';
-require __DIR__ . '/instructor.php';
-require __DIR__ . '/speakers.php';
-require __DIR__ . '/courses.php';
-require __DIR__ . '/certificates.php';
-require __DIR__ . '/payments.php';
-require __DIR__ . '/mentorship.php';
+Route::middleware('web')->group(function () {
+    require __DIR__ . '/auth.php';
+    require __DIR__ . '/user.php';
+    require __DIR__ . '/admin.php';
+    require __DIR__ . '/instructor.php';
+    require __DIR__ . '/speakers.php';
+    require __DIR__ . '/courses.php';
+    require __DIR__ . '/certificates.php';
+    require __DIR__ . '/payments.php';
+    require __DIR__ . '/mentorship.php';
+    require __DIR__ . '/tickets.php';
+});
+
 

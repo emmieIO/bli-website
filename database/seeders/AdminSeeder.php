@@ -27,17 +27,12 @@ class AdminSeeder extends Seeder
         // Assign 'admin' role (assuming you use spatie/laravel-permission)
         if (method_exists($user, 'assignRole')) {
             $user->assignRole('admin');
-
-            // You can use a factory to create related events for the admin user
-            // $user->eventsCreated()->createMany(
-            //     \App\Models\Event::factory()->count(20)->make()->toArray()
-            // );
-
-            $user->speakers()->createMany(
-                Speaker::factory()->count(10)->make()->toArray()
-            );
         }
 
+        $roles = ['instructor', 'student'];
 
+        User::factory(4)->create()->each(function ($user) use ($roles) {
+            $user->assignRole($roles[array_rand($roles)]);
+        });
     }
 }

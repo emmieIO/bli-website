@@ -190,4 +190,9 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return $this->cart()->firstOrCreate(['user_id' => $this->id]);
     }
+
+    public function tickets()
+    {
+        return $this->hasMany(Ticket::class);
+    }
 }

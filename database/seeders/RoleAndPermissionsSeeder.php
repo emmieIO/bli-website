@@ -21,79 +21,77 @@ class RoleAndPermissionsSeeder extends Seeder
         ];
 
         $rolesPermissions = [
-            'admin' => [
-                // Event management
-                'manage events',
-
-                // Speaker management
-                "create-speaker",
-                'view-speaker',
-                "edit-speaker",
-                'delete-speaker',
-                'assign-speaker',
-                "manage-instructor-applications",
-                'approve-speaker-applications',
-                'track-applications',
-                'manage-activity-log',
-
-                // Blog Management
-                'manage-blog',
-
-                // Instructor Ratings Management
-                'manage-ratings',
-
-                // User Management
-                'create-user',
-                'view-user',
-                'edit-user',
-                'delete-user',
-                'view-user-list',
-
-                // Role Management
-                'assign-role',
-                'remove-role',
-                'create-role',
-                'edit-role',
-                'delete-role',
-                'view-role-list',
-
-                // Permission Management
-                'assign-permission',
-                'remove-permission',
-                'view-permission-list',
-
-                // Categories (Admin only)
-                'category-view',
-                'category-create',
-                'category-update',
-                'category-delete',
-                'category-approve',
-
-                // Course Management (Admin powers)
-                'course-view-any',           // View all courses system-wide
-                'course-update-any',         // Edit any course (override instructor)
-                'course-delete-any',         // Delete any course
-                'course-approve',            // Approve submitted courses
-                'course-reject',             // Reject submitted courses
-                'course-publish',            // Publish approved courses
-                'course-unpublish',          // Unpublish courses
-                'course-assign-instructor',  // Reassign course to different instructor
-
-                // Module Management (Admin override)
-                'module-manage-any',         // Manage modules in any course
-
-                // Lesson Management (Admin override)  
-                'lesson-manage-any',         // Manage lessons in any course
-
-                // Enrollment Management
-                'enrollment-manage-any',     // Manage all enrollments
-                'enrollment-view-progress',  // View all student progress
-
-                // System Analytics
-                'analytics-view-system',     // System-wide course analytics
-            ],
-            
-            "instructor" => [
+                                    'admin' => [
+                                        // Event management
+                                        'manage events',
+                        
+                                        // Speaker management
+                                        "create-speaker",
+                                        'view-speaker',
+                                        "edit-speaker",
+                                        'delete-speaker',
+                                        'assign-speaker',
+                                        "manage-instructor-applications",
+                                        'approve-speaker-applications',
+                                        'track-applications',
+                                        'manage-activity-log',
+                        
+                                        // Blog Management
+                                        'manage-blog',
+                        
+                                        // Instructor Ratings Management
+                                        'manage-ratings',
+                        
+                                        // User Management
+                                        'create-user',
+                                        'view-user',
+                                        'edit-user',
+                                        'delete-user',
+                                        'view-user-list',
+                        
+                                        // Role Management
+                                        'assign-role',
+                                        'remove-role',
+                                        'create-role',
+                                        'edit-role',
+                                        'delete-role',
+                                        'view-role-list',
+                        
+                                        // Permission Management
+                                        'assign-permission',
+                                        'remove-permission',
+                                        'view-permission-list',
+                        
+                                        // Categories (Admin only)
+                                        'category-view',
+                                        'category-create',
+                                        'category-update',
+                                        'category-delete',
+                                        'category-approve',
+                        
+                                        // Course Management (Admin powers)
+                                        'course-view-any',           // View all courses system-wide
+                                        'course-update-any',         // Edit any course (override instructor)
+                                        'course-delete-any',         // Delete any course
+                                        'course-approve',            // Approve submitted courses
+                                        'course-reject',             // Reject submitted courses
+                                        'course-publish',            // Publish approved courses
+                                        'course-unpublish',          // Unpublish courses
+                                        'course-assign-instructor',  // Reassign course to different instructor
+                        
+                                        // Module Management (Admin override)
+                                        'module-manage-any',         // Manage modules in any course
+                        
+                                        // Lesson Management (Admin override)
+                                        'lesson-manage-any',         // Manage lessons in any course
+                        
+                                        // Enrollment Management
+                                        'enrollment-manage-any',     // Manage all enrollments
+                                        'enrollment-view-progress',  // View all student progress
+                        
+                                        // System Analytics
+                                        'analytics-view-system',     // System-wide course analytics
+                                    ],            "instructor" => [
                 // Application tracking
                 'track-applications',
                 

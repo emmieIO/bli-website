@@ -55,6 +55,18 @@ return [
             'route' => 'transactions.index',
         ],
         [
+            'title' => 'My Support Tickets',
+            'icon' => 'life-buoy',
+            'route' => 'user.tickets.index',
+            'exclude_permission' => 'role:admin',
+        ],
+        [
+            'title' => 'Support Manager',
+            'icon' => 'ticket',
+            'route' => 'admin.tickets.index',
+            'permission' => 'manage-tickets',
+        ],
+        [
             'title' => 'My Mentorship',
             'icon' => 'user-group',
             'route' => 'student.mentorship.index',
