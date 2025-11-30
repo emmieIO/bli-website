@@ -89,11 +89,25 @@ class RoleAndPermissionsSeeder extends Seeder
                                         'enrollment-manage-any',     // Manage all enrollments
                                         'enrollment-view-progress',  // View all student progress
                         
-                                        // System Analytics
-                                        'analytics-view-system',     // System-wide course analytics
-                                    ],            "instructor" => [
-                // Application tracking
-                'track-applications',
+                                                        // System Analytics
+                        
+                                                        'analytics-view-system',     // System-wide course analytics
+                        
+                                                        
+                        
+                                                        // Ticket Management
+                        
+                                                        'manage-tickets',
+                        
+                                                    ],
+                        
+                                                    
+                        
+                                                    "instructor" => [
+                        
+                                                        // Application tracking
+                        
+                                                        'track-applications',
                 
                 // Course Creation & Management (Own courses only)
                 'course-create',             // Create new courses (draft state)

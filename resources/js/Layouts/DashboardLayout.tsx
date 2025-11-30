@@ -1,6 +1,7 @@
 import { PropsWithChildren, useState, useEffect, useRef } from 'react';
 import { Link, router, usePage } from '@inertiajs/react';
 import { ToastContainer, useToastNotifications } from '@/Components/Toast';
+import FlashMessage from '@/Components/FlashMessage';
 import { route } from 'ziggy-js';
 import {
     LayoutDashboard,
@@ -319,6 +320,7 @@ export default function DashboardLayout({ children }: PropsWithChildren) {
         <div className="min-h-screen bg-gray-50">
             {/* Toast Notifications */}
             <ToastContainer />
+            <FlashMessage />
 
             {/* Sidebar */}
             <aside
