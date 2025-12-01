@@ -1,7 +1,8 @@
-import { Head, router } from '@inertiajs/react';
+import { Head, usePage, router } from '@inertiajs/react';
 import GuestLayout from '@/Layouts/GuestLayout';
-import { FormEvent, useState } from 'react';
+import { FormEvent, useState, useEffect } from 'react';
 import axios from 'axios';
+import { route } from 'ziggy-js';
 
 interface Course {
     id: number;
@@ -20,15 +21,54 @@ interface Course {
     };
 }
 
+interface AuthUser {
+    name: string;
+    email: string;
+    phone?: string | null;
+}
+
 interface CheckoutProps {
     course: Course;
     paystackPublicKey: string;
 }
 
 export default function Checkout({ course, paystackPublicKey }: CheckoutProps) {
-    const [email, setEmail] = useState(route().params.email || '');
+    const { auth } = usePage().props as { auth?: { user?: AuthUser } };
+    const user = auth?.user;
+
+    // Safe access to route params via Ziggy
+    const initialEmail = route().params?.email as string || '';
+
+    const [name, setName] = useState('');
+    const [email, setEmail] = useState(initialEmail); 
     const [phone, setPhone] = useState('');
     const [isProcessing, setIsProcessing] = useState(false);
+    const [useMyDetails, setUseMyDetails] = useState(false);
+
+    // Initial prefill from authenticated user
+    useEffect(() => {
+        if (user) {
+            setName(user.name || '');
+            setEmail(user.email || '');
+            setPhone(user.phone || '');
+            setUseMyDetails(true); // Automatically check "Use my profile details" if logged in
+        }
+    }, [user]);
+
+    const handleUseMyDetails = (checked: boolean) => {
+        setUseMyDetails(checked);
+        if (checked && user) {
+            setName(user.name || '');
+            setEmail(user.email || '');
+            setPhone(user.phone || '');
+        } else {
+            // If unchecked, optionally clear or make editable without clearing
+            // For now, let's clear to allow fresh input
+            setName('');
+            setEmail('');
+            setPhone('');
+        }
+    };
 
     const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
@@ -37,6 +77,7 @@ export default function Checkout({ course, paystackPublicKey }: CheckoutProps) {
         try {
             // Initialize payment on backend
             const response = await axios.post(route('payment.initialize', course.slug), {
+                name, // Pass name
                 email,
                 phone,
             });
@@ -103,9 +144,38 @@ export default function Checkout({ course, paystackPublicKey }: CheckoutProps) {
 
                             {/* Payment Form */}
                             <div className="bg-white rounded-lg shadow-md p-6">
-                                <h2 className="text-xl font-bold text-gray-900 mb-4 font-montserrat">Payment Details</h2>
+                                <div className="flex justify-between items-center mb-4">
+                                    <h2 className="text-xl font-bold text-gray-900 font-montserrat">Payment Details</h2>
+                                    {user && (
+                                        <label className="flex items-center space-x-2 text-sm text-gray-600 cursor-pointer">
+                                            <input
+                                                type="checkbox"
+                                                checked={useMyDetails}
+                                                onChange={(e) => handleUseMyDetails(e.target.checked)}
+                                                className="rounded text-primary focus:ring-primary border-gray-300"
+                                            />
+                                            <span className="font-lato">Use my profile details</span>
+                                        </label>
+                                    )}
+                                </div>
 
                                 <form onSubmit={handleSubmit} className="space-y-4">
+                                    <div>
+                                        <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1 font-montserrat">
+                                            Full Name
+                                        </label>
+                                        <input
+                                            type="text"
+                                            id="name"
+                                            required
+                                            value={name}
+                                            onChange={(e) => setName(e.target.value)}
+                                            disabled={useMyDetails}
+                                            className={`w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent font-lato ${useMyDetails ? 'bg-gray-100 cursor-not-allowed' : ''}`}
+                                            placeholder="John Doe"
+                                        />
+                                    </div>
+
                                     <div>
                                         <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1 font-montserrat">
                                             Email Address
@@ -116,7 +186,8 @@ export default function Checkout({ course, paystackPublicKey }: CheckoutProps) {
                                             required
                                             value={email}
                                             onChange={(e) => setEmail(e.target.value)}
-                                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent font-lato"
+                                            disabled={useMyDetails}
+                                            className={`w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent font-lato ${useMyDetails ? 'bg-gray-100 cursor-not-allowed' : ''}`}
                                             placeholder="your@email.com"
                                         />
                                     </div>
@@ -130,7 +201,8 @@ export default function Checkout({ course, paystackPublicKey }: CheckoutProps) {
                                             id="phone"
                                             value={phone}
                                             onChange={(e) => setPhone(e.target.value)}
-                                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent font-lato"
+                                            disabled={useMyDetails}
+                                            className={`w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent font-lato ${useMyDetails ? 'bg-gray-100 cursor-not-allowed' : ''}`}
                                             placeholder="+1234567890"
                                         />
                                     </div>
@@ -138,7 +210,7 @@ export default function Checkout({ course, paystackPublicKey }: CheckoutProps) {
                                     <button
                                         type="submit"
                                         disabled={isProcessing}
-                                        className="w-full bg-primary text-white py-3 px-6 rounded-lg font-semibold hover:bg-primary-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-montserrat"
+                                        className="w-full bg-primary text-white py-3 px-6 rounded-lg font-semibold hover:bg-primary-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-montserrat"
                                     >
                                         {isProcessing ? 'Processing...' : `Pay ₦${Number(course.price).toLocaleString()}`}
                                     </button>
@@ -185,7 +257,7 @@ export default function Checkout({ course, paystackPublicKey }: CheckoutProps) {
                                 <div className="mt-6 pt-6 border-t border-gray-200">
                                     <button
                                         onClick={() => router.visit(route('courses.show', course.slug))}
-                                        className="w-full text-primary hover:text-primary-dark font-semibold text-sm font-montserrat"
+                                        className="w-full text-primary hover:text-primary-700 font-semibold text-sm font-montserrat"
                                     >
                                         ← Back to Course
                                     </button>

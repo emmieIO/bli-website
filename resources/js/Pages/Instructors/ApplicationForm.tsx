@@ -267,7 +267,7 @@ export default function ApplicationForm({ user, profile }: ApplicationFormProps)
 
                                     {/* Documents Card */}
                                     <div className="bg-linear-to-br from-white to-gray-50 border-2 border-gray-100 rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300">
-                                        <div className="px-8 py-6 border-b border-gray-200 bg-linear-to-br from-primary to-primary-dark">
+                                        <div className="px-8 py-6 border-b border-gray-200 bg-linear-to-br from-primary to-primary-700">
                                             <h3 className="text-xl font-bold text-white flex items-center font-montserrat">
                                                 <div className="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center mr-4">
                                                     <i className="fas fa-file-upload text-lg"></i>
@@ -366,7 +366,7 @@ export default function ApplicationForm({ user, profile }: ApplicationFormProps)
                                                 <button
                                                     type="submit"
                                                     disabled={documentsForm.processing}
-                                                    className="w-full inline-flex cursor-pointer items-center justify-center px-6 py-3 rounded-xl text-sm font-bold transition-all duration-300 transform hover:scale-105 hover:shadow-lg font-montserrat bg-primary text-white hover:bg-primary-dark disabled:opacity-50"
+                                                    className="w-full inline-flex cursor-pointer items-center justify-center px-6 py-3 rounded-xl text-sm font-bold transition-all duration-300 transform hover:scale-105 hover:shadow-lg font-montserrat bg-primary text-white hover:bg-primary-700 disabled:opacity-50"
                                                 >
                                                     <i className="fas fa-save mr-2"></i>
                                                     {documentsForm.processing ? 'Saving...' : 'Save Documents & Media'}

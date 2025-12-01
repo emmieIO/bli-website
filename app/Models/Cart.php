@@ -15,6 +15,11 @@ class Cart extends Model
         'user_id',
     ];
 
+    protected $appends = [
+        'total',
+        'item_count',
+    ];
+
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);

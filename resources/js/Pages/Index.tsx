@@ -205,9 +205,9 @@ export default function Index({ events, categories }: IndexProps) {
                     <div className="text-center">
                         <Link
                             href={route('courses.index')}
-                            className="group inline-flex items-center gap-4 text-white font-bold py-5 px-10 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2 text-lg font-montserrat bg-linear-to-r from-primary to-secondary hover:from-primary-dark hover:to-secondary-dark"
+                            className="group inline-flex items-center gap-4 text-white font-bold py-5 px-10 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2 text-lg font-montserrat bg-linear-to-r from-primary to-secondary hover:from-primary-700 hover:to-secondary-700"
                         >
-                            <span>Explore All Categories</span>
+                            <span>Start Learning Now</span>
                             <i className="fas fa-arrow-right group-hover:translate-x-2 transition-transform duration-300"></i>
                         </Link>
                     </div>

@@ -170,7 +170,7 @@ export default function Verify({ certificate, error }: VerifyProps) {
                                             href={certificate.certificate_url}
                                             target="_blank"
                                             rel="noopener noreferrer"
-                                            className="inline-flex items-center px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors font-montserrat"
+                                            className="inline-flex items-center px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-700 transition-colors font-montserrat"
                                         >
                                             <svg
                                                 className="w-4 h-4 mr-2"
@@ -219,7 +219,7 @@ export default function Verify({ certificate, error }: VerifyProps) {
                             <div className="shrink-0">
                                 <button
                                     type="submit"
-                                    className="sm:mt-7 w-full sm:w-auto px-6 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors font-montserrat"
+                                    className="sm:mt-7 w-full sm:w-auto px-6 py-2 bg-primary text-white rounded-lg hover:bg-primary-700 transition-colors font-montserrat"
                                 >
                                     Verify
                                 </button>

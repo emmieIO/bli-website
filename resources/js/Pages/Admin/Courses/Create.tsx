@@ -1,6 +1,7 @@
 import { useState, FormEvent, ChangeEvent } from 'react';
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import DashboardLayout from '@/Layouts/DashboardLayout';
+import { PageProps as BasePageProps } from '@/types';
 
 interface Category {
     id: number;
@@ -28,8 +29,14 @@ interface FormData {
     price: string;
 }
 
+interface PageProps extends BasePageProps, CreateCourseProps {
+    errors: Partial<Record<keyof FormData | 'thumbnail' | 'preview_video', string>>;
+    sideLinks: any[]; // Replace with specific type if available
+    [key: string]: any;
+}
+
 export default function CreateCourse({ categories, levels }: CreateCourseProps) {
-    const { sideLinks, errors } = usePage().props as any;
+    const { errors } = usePage<PageProps>().props;
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [formData, setFormData] = useState<FormData>({
         title: '',
@@ -96,7 +103,7 @@ export default function CreateCourse({ categories, levels }: CreateCourseProps) 
     };
 
     return (
-        <DashboardLayout sideLinks={sideLinks}>
+        <DashboardLayout>
             <Head title="Create New Course" />
 
             <div>
@@ -330,7 +337,7 @@ export default function CreateCourse({ categories, levels }: CreateCourseProps) 
                                 {!formData.is_free && (
                                     <div>
                                         <label htmlFor="price" className="block text-sm font-medium text-gray-700 mb-2">
-                                            Price (USD) *
+                                            Price (NGN) *
                                         </label>
                                         <input
                                             type="number"
@@ -340,7 +347,7 @@ export default function CreateCourse({ categories, levels }: CreateCourseProps) 
                                             onChange={handleInputChange}
                                             step="0.01"
                                             min="0"
-                                            max="9999.99"
+                                            max="9999999.99"
                                             className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-[#002147] focus:border-[#002147]"
                                             required
                                         />

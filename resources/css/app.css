@@ -164,7 +164,7 @@
     font-weight: 400;
     outline: none;
 
-    /* color-scheme: light dark; */
+    color-scheme: light;
     /* color: rgba(255, 255, 255, 0.87); */
     /* background-color: #242424; */
 
@@ -173,6 +173,8 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
 }
+
+@variant dark (&:where(.dark, .dark *));
 
 body,
 html {

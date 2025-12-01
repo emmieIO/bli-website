@@ -61,6 +61,7 @@ class PaymentController extends Controller
     public function initializePayment(Request $request, Course $course)
     {
         $validated = $request->validate([
+            'name' => 'required|string',
             'email' => 'required|email',
             'phone' => 'nullable|string',
         ]);
@@ -133,10 +134,12 @@ class PaymentController extends Controller
         $txRef = $request->query('reference');
 
         if (!$txRef) {
-            return $this->redirectToCoursePage($txRef, [
-                'message' => 'Payment reference not found.',
-                'type' => 'error'
-            ]);
+            return redirect()
+                ->route('dashboard')
+                ->with([
+                    'message' => 'Payment reference not found.',
+                    'type' => 'error'
+                ]);
         }
 
         try {

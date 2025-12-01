@@ -18,6 +18,16 @@ class CreateCourseRequest extends FormRequest
     }
 
     /**
+     * Prepare the data for validation.
+     */
+    protected function prepareForValidation()
+    {
+        $this->merge([
+            'is_free' => filter_var($this->is_free, FILTER_VALIDATE_BOOLEAN) ? 1 : 0,
+        ]);
+    }
+
+    /**
      * Get the validation rules that apply to the request.
      *
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
@@ -36,7 +46,7 @@ class CreateCourseRequest extends FormRequest
             "level" => ["required", "string", "in:" . implode(',', array_column(CourseLevel::cases(), 'value'))],
             "category_id" => ["required", "exists:categories,id"],
             "is_free" => ["required", "boolean"],
-            "price" => ["required_if:is_free,false", "numeric", "min:0", "max:9999.99"],
+            "price" => ["required_if:is_free,0", "numeric", "min:0", "max:9999.99"],
         ];
     }
 

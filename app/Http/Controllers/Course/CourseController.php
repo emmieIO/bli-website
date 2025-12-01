@@ -62,7 +62,16 @@ class CourseController extends Controller
     public function store(CreateCourseRequest $request)
     {
         $this->authorize('create', Course::class);
-        $course = $this->courseService->createCourse($request->all(), $request->file('thumbnail'));
+        
+        $data = $request->validated();
+        $data['is_free'] = filter_var($data['is_free'] ?? false, FILTER_VALIDATE_BOOLEAN);
+
+        $course = $this->courseService->createCourse(
+            $data, 
+            $request->file('thumbnail'),
+            $request->file('preview_video')
+        );
+
         if ($course) {
             return to_route('admin.courses.builder', $course)->with([
                 "message" => "Course created successfully. Now add modules and lessons!",

@@ -107,63 +107,62 @@ export default function InstructorCoursesIndex({ auth, courses, instructorStats,
                     <h1 className="text-2xl font-bold text-primary font-montserrat">My Dashboard</h1>
                     <p className="text-sm text-gray-500 font-lato">Welcome back, {auth.user.name}!</p>
                 </div>
-                <Link
-                    href={route('instructor.courses.create')}
-                    className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg text-sm font-medium hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
-                >
-                    <i className="fas fa-plus"></i>
-                    <span>Create New Course</span>
-                </Link>
-            </div>
-
-            {/* Stats Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                <StatCard icon="fas fa-book" title="Total Courses" value={instructorStats.total_courses} />
-                <StatCard icon="fas fa-users" title="Total Students" value={instructorStats.total_students} />
-                <StatCard icon="fas fa-dollar-sign" title="Total Earnings" value={`$${instructorStats.total_earnings.toFixed(2)}`} />
-                <StatCard icon="fas fa-star" title="Average Rating" value={instructorStats.average_rating.toFixed(1)} />
-            </div>
-
-            {/* Courses Table */}
-            <div className="bg-white rounded-lg shadow border border-primary-100 overflow-x-auto">
-                <h2 className="text-lg font-bold text-primary p-4 font-montserrat">My Courses</h2>
-                <table className="min-w-full divide-y divide-primary-100">
-                    <thead className="bg-primary-50">
-                        <tr>
-                            <th className="px-6 py-3 text-left text-xs font-semibold text-primary uppercase tracking-wider font-montserrat">Course</th>
-                            <th className="px-6 py-3 text-left text-xs font-semibold text-primary uppercase tracking-wider font-montserrat">Students</th>
-                            <th className="px-6 py-3 text-left text-xs font-semibold text-primary uppercase tracking-wider font-montserrat">Status</th>
-                            <th className="px-6 py-3 text-left text-xs font-semibold text-primary uppercase tracking-wider font-montserrat">Date Created</th>
-                            <th className="px-6 py-3 text-right text-xs font-semibold text-primary uppercase tracking-wider font-montserrat">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody className="bg-white divide-y divide-primary-100">
-                        {coursesList.length > 0 ? (
-                            coursesList.map((course) => {
-                                const badge = getStatusBadge(course.status);
-                                return (
-                                    <tr key={course.id} className="hover:bg-primary-50 transition-colors">
-                                        <td className="px-6 py-4">
-                                            <div className="font-bold text-sm text-primary font-montserrat">{course.title}</div>
-                                            <div className="text-sm text-gray-500 font-lato">{course.category.name}</div>
-                                        </td>
-                                        <td className="px-6 py-4">
-                                            <div className="text-sm text-gray-700 font-lato">{course.students.length}</div>
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap">
-                                            <span className={`px-2 py-1 inline-flex text-xs font-semibold rounded-full ${badge.className} font-montserrat`}>
-                                                {badge.label}
-                                            </span>
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 font-lato">
-                                            {formatDate(course.created_at)}
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                            <div className="flex items-center justify-end gap-3">
-                                                <Link href={route('instructor.courses.builder', course.slug)} className="text-primary hover:text-primary-dark" title="Edit Content">
-                                                    <i className="fas fa-layer-group"></i>
-                                                </Link>
-                                                {course.status === 'draft' && (
+                                    <Link
+                                        href={route('instructor.courses.create')}
+                                        className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg text-sm font-medium hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
+                                    >
+                                        <i className="fas fa-plus"></i>
+                                        <span>Create New Course</span>
+                                    </Link>
+                                </div>
+                
+                                {/* Stats Cards */}
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                                    <StatCard icon="fas fa-book" title="Total Courses" value={instructorStats.total_courses} />
+                                    <StatCard icon="fas fa-users" title="Total Students" value={instructorStats.total_students} />
+                                    <StatCard icon="fas fa-dollar-sign" title="Total Earnings" value={`$${instructorStats.total_earnings.toFixed(2)}`} />
+                                    <StatCard icon="fas fa-star" title="Average Rating" value={instructorStats.average_rating.toFixed(1)} />
+                                </div>
+                
+                                {/* Courses Table */}
+                                <div className="bg-white rounded-lg shadow border border-primary-100 overflow-x-auto">
+                                    <h2 className="text-lg font-bold text-primary p-4 font-montserrat">My Courses</h2>
+                                    <table className="min-w-full divide-y divide-primary-100">
+                                        <thead className="bg-primary-50">
+                                            <tr>
+                                                <th className="px-6 py-3 text-left text-xs font-semibold text-primary uppercase tracking-wider font-montserrat">Course</th>
+                                                <th className="px-6 py-3 text-left text-xs font-semibold text-primary uppercase tracking-wider font-montserrat">Students</th>
+                                                <th className="px-6 py-3 text-left text-xs font-semibold text-primary uppercase tracking-wider font-montserrat">Status</th>
+                                                <th className="px-6 py-3 text-left text-xs font-semibold text-primary uppercase tracking-wider font-montserrat">Date Created</th>
+                                                <th className="px-6 py-3 text-right text-xs font-semibold text-primary uppercase tracking-wider font-montserrat">Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody className="bg-white divide-y divide-primary-100">
+                                            {coursesList.length > 0 ? (
+                                                coursesList.map((course) => {
+                                                    const badge = getStatusBadge(course.status);
+                                                    return (
+                                                        <tr key={course.id} className="hover:bg-primary-50 transition-colors">
+                                                            <td className="px-6 py-4">
+                                                                <div className="font-bold text-sm text-primary font-montserrat">{course.title}</div>
+                                                                <div className="text-sm text-gray-500 font-lato">{course.category.name}</div>
+                                                            </td>
+                                                            <td className="px-6 py-4">
+                                                                <div className="text-sm text-gray-700 font-lato">{course.students.length}</div>
+                                                            </td>
+                                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                                <span className={`px-2 py-1 inline-flex text-xs font-semibold rounded-full ${badge.className} font-montserrat`}>
+                                                                    {badge.label}
+                                                                </span>
+                                                            </td>
+                                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 font-lato">
+                                                                {formatDate(course.created_at)}
+                                                            </td>
+                                                            <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                                                <div className="flex items-center justify-end gap-3">
+                                                                    <Link href={route('instructor.courses.builder', course.slug)} className="text-primary hover:text-primary-700" title="Edit Content">
+                                                                        <i className="fas fa-layer-group"></i>
+                                                                    </Link>                                                {course.status === 'draft' && (
                                                     <>
                                                         <Link href={route('instructor.courses.edit', course.slug)} className="text-blue-600 hover:text-blue-800" title="Edit Settings">
                                                             <i className="fas fa-cog"></i>

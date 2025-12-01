@@ -8,8 +8,6 @@ module.exports = {
         './resources/js/**/*.tsx',
     ],
 
-    darkMode: 'class',
-
     theme: {
         extend: {
             colors: {

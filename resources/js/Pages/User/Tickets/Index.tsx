@@ -78,7 +78,7 @@ export default function Index({ tickets }: TicketsProps) {
                                                     {new Date(ticket.created_at).toLocaleDateString()}
                                                 </td>
                                                 <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                                    <Link href={route('user.tickets.show', ticket.id)} className="text-primary hover:text-primary-dark">
+                                                    <Link href={route('user.tickets.show', ticket.id)} className="text-primary hover:text-primary-700">
                                                         View
                                                     </Link>
                                                 </td>

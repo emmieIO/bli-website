@@ -60,6 +60,8 @@ class PaymentService
                 'amount' => $course->price * 100, // Convert to kobo
                 'reference' => $txRef,
                 'callback_url' => route('payment.callback'),
+                'first_name' => $customerData['name'] ?? null, // Added name
+                'phone' => $customerData['phone'] ?? null, // Added phone for consistency, though it's already validated as nullable
                 'metadata' => [
                     'user_id' => $user->id,
                     'course_id' => $course->id,
