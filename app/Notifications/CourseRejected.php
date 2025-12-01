@@ -35,6 +35,11 @@ class CourseRejected extends Notification
      */
     public function toMail(object $notifiable): MailMessage
     {
+        // Generate action URL based on user's role
+        $actionUrl = $notifiable->hasRole('admin')
+            ? route('admin.courses.edit', $this->course)
+            : route('instructor.courses.edit', $this->course);
+
         $message = (new MailMessage)
             ->subject('Course Review Update - ' . $this->course->title)
             ->greeting('Hello ' . $notifiable->name . ',')
@@ -47,7 +52,7 @@ class CourseRejected extends Notification
         }
 
         $message->line('You can make the necessary changes and resubmit your course for review.')
-            ->action('Edit Course', route('instructor.courses.edit', $this->course))
+            ->action('Edit Course', $actionUrl)
             ->line('If you have any questions, please contact our support team.');
 
         return $message;
@@ -60,13 +65,18 @@ class CourseRejected extends Notification
      */
     public function toArray(object $notifiable): array
     {
+        // Generate action URL based on user's role
+        $actionUrl = $notifiable->hasRole('admin')
+            ? route('admin.courses.edit', $this->course)
+            : route('instructor.courses.edit', $this->course);
+
         return [
             'course_id' => $this->course->id,
             'course_title' => $this->course->title,
             'course_slug' => $this->course->slug,
             'rejection_reason' => $this->rejectionReason,
             'message' => "Your course '{$this->course->title}' was not approved",
-            'action_url' => route('instructor.courses.edit', $this->course),
+            'action_url' => $actionUrl,
             'type' => 'course_rejected',
         ];
     }

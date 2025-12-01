@@ -34,13 +34,18 @@ class CourseApproved extends Notification
      */
     public function toMail(object $notifiable): MailMessage
     {
+        // Generate action URL based on user's role
+        $actionUrl = $notifiable->hasRole('admin')
+            ? route('admin.courses.index')
+            : route('instructor.courses.index');
+
         return (new MailMessage)
             ->subject('Course Approved - ' . $this->course->title)
             ->greeting('Hello ' . $notifiable->name . ',')
             ->line('Congratulations! Your course has been approved.')
             ->line("**Course Title:** {$this->course->title}")
             ->line('Your course is now live and available for students to enroll.')
-            ->action('View My Courses', route('instructor.courses.index'))
+            ->action('View My Courses', $actionUrl)
             ->line('Thank you for contributing quality content to our platform!');
     }
 
@@ -51,12 +56,17 @@ class CourseApproved extends Notification
      */
     public function toArray(object $notifiable): array
     {
+        // Generate action URL based on user's role
+        $actionUrl = $notifiable->hasRole('admin')
+            ? route('admin.courses.index')
+            : route('instructor.courses.index');
+
         return [
             'course_id' => $this->course->id,
             'course_title' => $this->course->title,
             'course_slug' => $this->course->slug,
             'message' => "Congratulations! Your course '{$this->course->title}' has been approved and is now live.",
-            'action_url' => route('instructor.courses.index'),
+            'action_url' => $actionUrl,
             'type' => 'course_approved',
         ];
     }
