@@ -58,7 +58,7 @@ return [
             'title' => 'My Support Tickets',
             'icon' => 'life-buoy',
             'route' => 'user.tickets.index',
-            'exclude_permission' => 'role:admin',
+            'exclude_permission' => 'manage-tickets', // Hide from admins who manage tickets
         ],
         [
             'title' => 'Support Manager',
