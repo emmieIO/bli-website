@@ -29,7 +29,8 @@ class User extends Authenticatable implements MustVerifyEmail
         'website',
         'headline',
         'photo',
-        'email_verified_at',
+        // Security: email_verified_at should NOT be mass-assignable
+        // It must only be set through Laravel's email verification process
     ];
 
     /**

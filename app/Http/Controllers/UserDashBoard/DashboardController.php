@@ -27,6 +27,14 @@ class DashboardController extends Controller
 
         $totalCourses = $enrolledCourses->count();
 
+        // Performance: Pre-fetch all lesson progress data to avoid N+1 queries
+        $courseIds = $enrolledCourses->pluck('id');
+        $allLessonProgress = $user->lessonProgress()
+            ->whereIn('course_id', $courseIds)
+            ->with('lesson')
+            ->get()
+            ->groupBy('course_id');
+
         // Calculate course statistics
         $inProgress = 0;
         $completed = 0;
@@ -64,19 +72,15 @@ class DashboardController extends Controller
                 continue;
             }
 
-            // Get completed lessons for this course
-            $courseCompletedLessons = $user->lessonProgress()
-                ->where('course_id', $course->id)
-                ->where('is_completed', true)
-                ->count();
+            // Get progress data for this course from pre-fetched collection
+            $courseProgress = $allLessonProgress->get($course->id, collect());
 
+            // Get completed lessons count
+            $courseCompletedLessons = $courseProgress->where('is_completed', true)->count();
             $completedLessons += $courseCompletedLessons;
 
             // Get watch duration for this course
-            $courseWatchDuration = $user->lessonProgress()
-                ->where('course_id', $course->id)
-                ->sum('watch_duration');
-
+            $courseWatchDuration = $courseProgress->sum('watch_duration');
             $totalWatchDuration += $courseWatchDuration;
 
             // Determine course status
@@ -86,23 +90,19 @@ class DashboardController extends Controller
 
             // Get the next lesson to continue from
             $nextLesson = null;
-            $lastProgressedLesson = $user->lessonProgress()
-                ->where('course_id', $course->id)
-                ->with('lesson')
-                ->latest('updated_at')
+            $lastProgressedLesson = $courseProgress
+                ->sortByDesc('updated_at')
                 ->first();
 
             if ($lastProgressedLesson && !$lastProgressedLesson->is_completed && $lastProgressedLesson->lesson) {
                 $nextLesson = $lastProgressedLesson->lesson;
             } else {
                 // Find the first incomplete lesson
+                $completedLessonIds = $courseProgress->where('is_completed', true)->pluck('lesson_id')->toArray();
+
                 foreach ($course->modules as $module) {
                     foreach ($module->lessons as $lesson) {
-                        $lessonProgress = $user->lessonProgress()
-                            ->where('lesson_id', $lesson->id)
-                            ->first();
-
-                        if (!$lessonProgress || !$lessonProgress->is_completed) {
+                        if (!in_array($lesson->id, $completedLessonIds)) {
                             $nextLesson = $lesson;
                             break 2;
                         }

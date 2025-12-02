@@ -7,12 +7,14 @@ use App\Models\Ticket;
 use App\Models\TicketReply;
 use App\Models\User;
 use App\Notifications\NewTicketCreatedNotification;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Notification;
 use Inertia\Inertia;
 
 class TicketController extends Controller
 {
+    use AuthorizesRequests;
     public function index(Request $request)
     {
         $search = $request->input('search');
@@ -72,9 +74,8 @@ class TicketController extends Controller
 
     public function show(Ticket $ticket)
     {
-        if ($ticket->user_id !== auth()->id()) {
-            abort(403);
-        }
+        // Security: Use policy-based authorization instead of manual checks
+        $this->authorize('view', $ticket);
 
         $ticket->load(['replies.user', 'members']);
 
@@ -83,9 +84,8 @@ class TicketController extends Controller
 
     public function reply(Request $request, Ticket $ticket)
     {
-        if ($ticket->user_id !== auth()->id()) {
-            abort(403);
-        }
+        // Security: Use policy-based authorization instead of manual checks
+        $this->authorize('reply', $ticket);
 
         $request->validate([
             'message' => 'required|string',

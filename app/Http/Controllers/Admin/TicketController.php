@@ -5,11 +5,14 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Ticket;
 use App\Notifications\TicketUpdatedNotification;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
 class TicketController extends Controller
 {
+    use AuthorizesRequests;
+
     public function index(Request $request)
     {
         $search = $request->input('search');
@@ -44,6 +47,9 @@ class TicketController extends Controller
 
     public function reply(Request $request, Ticket $ticket)
     {
+        // Security: Use policy-based authorization
+        $this->authorize('reply', $ticket);
+
         if ($ticket->status === 'closed') {
             return redirect()->route('admin.tickets.show', $ticket)->with('danger', 'This ticket is closed and cannot be updated.');
         }
@@ -66,10 +72,13 @@ class TicketController extends Controller
 
     public function status(Request $request, Ticket $ticket)
     {
+        // Security: Use policy-based authorization
+        $this->authorize('updateStatus', $ticket);
+
         if ($ticket->status === 'closed') {
             return redirect()->route('admin.tickets.show', $ticket)->with('danger', 'This ticket is closed and cannot be updated.');
         }
-        
+
         $request->validate([
             'status' => 'required|string',
         ]);
