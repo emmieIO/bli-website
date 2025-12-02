@@ -9,6 +9,14 @@ interface Category {
     courses?: any[];
 }
 
+interface Stats {
+    total_courses: number;
+    total_students: number;
+    total_instructors: number;
+    total_enrollments: number;
+    active_events: number;
+}
+
 interface Event {
     id: number;
     slug: string;
@@ -28,9 +36,10 @@ interface Event {
 interface IndexProps {
     events: Event[];
     categories: Category[];
+    stats: Stats;
 }
 
-export default function Index({ events, categories }: IndexProps) {
+export default function Index({ events, categories, stats }: IndexProps) {
     const formatDate = (dateString: string) => {
         const date = new Date(dateString);
         return date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
@@ -65,8 +74,8 @@ export default function Index({ events, categories }: IndexProps) {
                             </h1>
 
                             <p className="text-lg md:text-xl text-gray-600 mb-8 leading-relaxed font-lato">
-                                Developing visionary leaders to drive positive change in organizations and communities through
-                                kingdom-based principles.
+                                Building Kingdom-minded leaders who integrate biblical principles with excellence in
+                                business, education, ministry, and marketplace spheres worldwide.
                             </p>
 
                             {/* CTA Buttons */}
@@ -111,16 +120,16 @@ export default function Index({ events, categories }: IndexProps) {
                 <div className="container mx-auto px-4">
                     <div className="flex flex-col md:flex-row items-center justify-center gap-8 md:gap-16 text-center">
                         <div className="flex items-center gap-3">
-                            <div className="text-2xl font-bold font-montserrat text-primary">1,300+</div>
-                            <div className="text-gray-600 font-lato">Organizations Trust BLI</div>
+                            <div className="text-2xl font-bold font-montserrat text-primary">{stats.total_students}+</div>
+                            <div className="text-gray-600 font-lato">Active Students</div>
                         </div>
                         <div className="flex items-center gap-3">
-                            <div className="text-2xl font-bold font-montserrat text-secondary">50+</div>
-                            <div className="text-gray-600 font-lato">Countries Worldwide</div>
+                            <div className="text-2xl font-bold font-montserrat text-secondary">{stats.total_courses}+</div>
+                            <div className="text-gray-600 font-lato">Published Courses</div>
                         </div>
                         <div className="flex items-center gap-3">
-                            <div className="text-2xl font-bold font-montserrat text-accent">15+</div>
-                            <div className="text-gray-600 font-lato">Years of Excellence</div>
+                            <div className="text-2xl font-bold font-montserrat text-accent">{stats.total_instructors}+</div>
+                            <div className="text-gray-600 font-lato">Expert Instructors</div>
                         </div>
                     </div>
                 </div>
@@ -483,7 +492,7 @@ export default function Index({ events, categories }: IndexProps) {
                             Trusted by Leading Organizations
                         </h2>
                         <p className="text-lg text-gray-600 max-w-2xl mx-auto font-lato leading-relaxed">
-                            Join over 1,300 organizations worldwide who trust BLI for leadership development and transformation
+                            Experience transformational leadership education trusted by students and professionals across the globe
                         </p>
                     </div>
 
@@ -500,7 +509,7 @@ export default function Index({ events, categories }: IndexProps) {
                             </div>
                             <div className="text-center">
                                 <div className="text-4xl font-bold text-accent mb-2 font-montserrat">15+</div>
-                                <div className="text-gray-600 font-lato">Years of Excellence</div>
+                            <div className="text-gray-600 font-lato">Expert Instructors</div>
                             </div>
                         </div>
                     </div>
@@ -606,20 +615,20 @@ export default function Index({ events, categories }: IndexProps) {
                     {/* Stats Row */}
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-4xl mx-auto mt-16">
                         <div className="text-center">
-                            <div className="text-3xl font-bold text-primary mb-1 font-montserrat">98%</div>
-                            <div className="text-gray-600 text-sm font-lato">Satisfaction Rate</div>
+                            <div className="text-3xl font-bold text-primary mb-1 font-montserrat">{stats.total_courses}+</div>
+                            <div className="text-gray-600 text-sm font-lato">Published Courses</div>
                         </div>
                         <div className="text-center">
-                            <div className="text-3xl font-bold text-secondary mb-1 font-montserrat">4.9/5</div>
-                            <div className="text-gray-600 text-sm font-lato">Average Rating</div>
+                            <div className="text-3xl font-bold text-secondary mb-1 font-montserrat">{stats.total_students}+</div>
+                            <div className="text-gray-600 text-sm font-lato">Active Students</div>
                         </div>
                         <div className="text-center">
-                            <div className="text-3xl font-bold text-accent mb-1 font-montserrat">2K+</div>
-                            <div className="text-gray-600 text-sm font-lato">Leaders Trained</div>
+                            <div className="text-3xl font-bold text-accent mb-1 font-montserrat">{stats.total_enrollments}+</div>
+                            <div className="text-gray-600 text-sm font-lato">Course Enrollments</div>
                         </div>
                         <div className="text-center">
-                            <div className="text-3xl font-bold text-primary mb-1 font-montserrat">50+</div>
-                            <div className="text-gray-600 text-sm font-lato">Countries Reached</div>
+                            <div className="text-3xl font-bold text-primary mb-1 font-montserrat">{stats.total_instructors}+</div>
+                            <div className="text-gray-600 text-sm font-lato">Expert Instructors</div>
                         </div>
                     </div>
                 </div>
@@ -691,15 +700,15 @@ export default function Index({ events, categories }: IndexProps) {
                                 {/* Floating Elements */}
                                 <div className="absolute -top-4 -left-4 bg-accent text-white p-4 rounded-xl shadow-lg">
                                     <div className="text-center">
-                                        <div className="font-bold text-2xl font-montserrat">2K+</div>
-                                        <div className="text-sm font-lato">Leaders Trained</div>
+                                        <div className="font-bold text-2xl font-montserrat">{stats.total_enrollments}+</div>
+                                        <div className="text-sm font-lato">Enrollments</div>
                                     </div>
                                 </div>
 
                                 <div className="absolute -bottom-4 -right-4 bg-primary text-white p-4 rounded-xl shadow-lg">
                                     <div className="text-center">
-                                        <div className="font-bold text-2xl font-montserrat">98%</div>
-                                        <div className="text-sm font-lato">Success Rate</div>
+                                        <div className="font-bold text-2xl font-montserrat">{stats.total_students}+</div>
+                                        <div className="text-sm font-lato">Students</div>
                                     </div>
                                 </div>
 
@@ -716,12 +725,12 @@ export default function Index({ events, categories }: IndexProps) {
                             <div className="text-gray-600 font-lato">Course Access</div>
                         </div>
                         <div className="text-center">
-                            <div className="text-3xl font-bold text-secondary mb-2 font-montserrat">50+</div>
-                            <div className="text-gray-600 font-lato">Countries</div>
+                            <div className="text-3xl font-bold text-secondary mb-2 font-montserrat">{stats.active_events}+</div>
+                            <div className="text-gray-600 font-lato">Upcoming Events</div>
                         </div>
                         <div className="text-center">
-                            <div className="text-3xl font-bold text-accent mb-2 font-montserrat">15+</div>
-                            <div className="text-gray-600 font-lato">Years Experience</div>
+                            <div className="text-3xl font-bold text-accent mb-2 font-montserrat">{stats.total_courses}+</div>
+                            <div className="text-gray-600 font-lato">Published Courses</div>
                         </div>
                         <div className="text-center">
                             <div className="text-3xl font-bold text-primary mb-2 font-montserrat">100%</div>
