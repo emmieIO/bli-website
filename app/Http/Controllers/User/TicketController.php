@@ -5,7 +5,10 @@ namespace App\Http\Controllers\User;
 use App\Http\Controllers\Controller;
 use App\Models\Ticket;
 use App\Models\TicketReply;
+use App\Models\User;
+use App\Notifications\NewTicketCreatedNotification;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Notification;
 use Inertia\Inertia;
 
 class TicketController extends Controller
@@ -39,6 +42,10 @@ class TicketController extends Controller
             'user_id' => auth()->id(),
             'message' => $request->message,
         ]);
+
+        // Notify all admins about the new ticket
+        $admins = User::role('admin')->get();
+        Notification::send($admins, new NewTicketCreatedNotification($ticket));
 
         return redirect()->route('user.tickets.show', $ticket);
     }
