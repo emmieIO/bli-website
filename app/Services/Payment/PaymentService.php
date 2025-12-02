@@ -6,6 +6,7 @@ use App\Models\Cart;
 use App\Models\Course;
 use App\Models\Transaction;
 use App\Models\User;
+use App\Services\Instructor\InstructorEarningsService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -16,7 +17,8 @@ use Illuminate\Support\Facades\Log;
 class PaymentService
 {
     public function __construct(
-        private PaystackService $paystackService
+        private PaystackService $paystackService,
+        private InstructorEarningsService $earningsService
     ) {}
 
     /**
@@ -162,6 +164,11 @@ class PaymentService
                     }
                 }
 
+                // Note: For cart purchases with multiple instructors, earnings are recorded
+                // individually per course through a separate process or manual distribution
+                // This requires splitting the transaction amount based on course prices
+                // TODO: Implement cart earnings distribution if needed
+
                 // Clear the cart
                 $cartId = $transaction->metadata['cart_id'] ?? null;
                 if ($cartId) {
@@ -183,6 +190,9 @@ class PaymentService
                 // Single course purchase
                 $course = $transaction->course;
                 $this->enrollUserInCourse($transaction->user_id, $course);
+
+                // Record instructor earnings
+                $this->earningsService->recordEarningFromTransaction($transaction);
 
                 DB::commit();
 

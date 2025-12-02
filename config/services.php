@@ -42,4 +42,19 @@ return [
         'currency' => env('PAYSTACK_CURRENCY', 'NGN'),
     ],
 
+    'instructor_payouts' => [
+        // Platform commission percentage (e.g., 20 means platform takes 20%, instructor gets 80%)
+        'platform_commission' => env('PLATFORM_COMMISSION_PERCENTAGE', 20.0),
+
+        // Number of days to hold funds before they're available for payout
+        // This protects against refunds and chargebacks
+        'holding_period_days' => env('PAYOUT_HOLDING_PERIOD_DAYS', 7),
+
+        // Minimum payout amount
+        'minimum_payout' => env('MINIMUM_PAYOUT_AMOUNT', 5000), // 5000 NGN
+
+        // Default payout method
+        'default_method' => env('DEFAULT_PAYOUT_METHOD', 'bank_transfer'),
+    ],
+
 ];
