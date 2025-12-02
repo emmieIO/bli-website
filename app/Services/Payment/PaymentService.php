@@ -157,6 +157,7 @@ class PaymentService
             if ($isCartPurchase) {
                 // Enroll user in all courses from cart
                 $courseIds = $transaction->metadata['course_ids'] ?? [];
+
                 foreach ($courseIds as $courseId) {
                     $course = Course::find($courseId);
                     if ($course) {
@@ -164,10 +165,12 @@ class PaymentService
                     }
                 }
 
-                // Note: For cart purchases with multiple instructors, earnings are recorded
-                // individually per course through a separate process or manual distribution
-                // This requires splitting the transaction amount based on course prices
-                // TODO: Implement cart earnings distribution if needed
+                // Record earnings for each course in the cart
+                // Each instructor gets earnings only for their courses
+                $cartItems = $transaction->metadata['items'] ?? [];
+                if (!empty($cartItems)) {
+                    $this->earningsService->recordEarningsFromCart($transaction, $cartItems);
+                }
 
                 // Clear the cart
                 $cartId = $transaction->metadata['cart_id'] ?? null;
@@ -244,20 +247,29 @@ class PaymentService
                 'status' => 'successful',
                 'payment_ref' => $payload['data']['reference'] ?? $txRef,
                 'payment_type' => $payload['data']['channel'] ?? null,
-                'metadata' => $payload['data'],
+                'metadata' => array_merge($transaction->metadata ?? [], ['webhook_data' => $payload['data']]),
                 'paid_at' => now(),
             ]);
 
             if ($transaction->course) {
+                // Single course purchase
                 $this->enrollUserInCourse($transaction->user_id, $transaction->course);
+                $this->earningsService->recordEarningFromTransaction($transaction);
             } else {
-                // Handle cart purchase
+                // Handle cart purchase - enroll in all courses
                 $courseIds = $transaction->metadata['course_ids'] ?? [];
+
                 foreach ($courseIds as $courseId) {
                     $course = Course::find($courseId);
                     if ($course) {
                         $this->enrollUserInCourse($transaction->user_id, $course);
                     }
+                }
+
+                // Record earnings for each course in the cart
+                $cartItems = $transaction->metadata['items'] ?? [];
+                if (!empty($cartItems)) {
+                    $this->earningsService->recordEarningsFromCart($transaction, $cartItems);
                 }
             }
 

@@ -96,9 +96,12 @@ class RoleAndPermissionsSeeder extends Seeder
                                                         
                         
                                                         // Ticket Management
-                        
+
                                                         'manage-tickets',
-                        
+
+                                                        // Earnings Management
+                                                        'earnings-manage-any',   // Manage all instructor earnings and payouts
+
                                                     ],
                         
                                                     
@@ -133,6 +136,9 @@ class RoleAndPermissionsSeeder extends Seeder
                 
                 // Analytics (Own courses only)
                 'analytics-view-own',        // View analytics for own courses
+
+                // Earnings & Payouts
+                'earnings-view-own',         // View own earnings and request payouts
             ],
             
             'student' => [

@@ -53,5 +53,10 @@ Route::prefix('instructor')->name('instructor.')->middleware(['auth', 'role:inst
     Route::put('/courses/{course}/modules/{module}/lessons/{lesson}', [InstructorCourseController::class, 'updateLesson'])->name('courses.lessons.update');
     Route::delete('/courses/{course}/modules/{module}/lessons/{lesson}', [InstructorCourseController::class, 'deleteLesson'])->name('courses.lessons.delete');
     Route::post('/courses/{course}/modules/{module}/lessons/reorder', [InstructorCourseController::class, 'reorderLessons'])->name('courses.lessons.reorder');
+
+    // Earnings & Payouts
+    Route::get('/earnings', [\App\Http\Controllers\Instructor\InstructorEarningsController::class, 'index'])->name('earnings.index');
+    Route::get('/earnings/payout', [\App\Http\Controllers\Instructor\InstructorEarningsController::class, 'createPayout'])->name('earnings.payout.create');
+    Route::post('/earnings/payout', [\App\Http\Controllers\Instructor\InstructorEarningsController::class, 'storePayout'])->name('earnings.payout.store');
 });
 

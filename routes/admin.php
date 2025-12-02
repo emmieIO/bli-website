@@ -125,4 +125,14 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
     Route::resource('{course}/outcomes', CourseOutcomeController::class);
     Route::resource('{course}/modules', CourseModuleController::class);
     Route::resource('{module}/lessons', LessonController::class);
+
+    // Instructor Payout Management
+    Route::middleware(['permission:earnings-manage-any'])->group(function () {
+        Route::get('/payouts', [\App\Http\Controllers\Admin\InstructorPayoutController::class, 'index'])->name('payouts.index');
+        Route::get('/payouts/{payout}', [\App\Http\Controllers\Admin\InstructorPayoutController::class, 'show'])->name('payouts.show');
+        Route::post('/payouts/{payout}/mark-processing', [\App\Http\Controllers\Admin\InstructorPayoutController::class, 'markAsProcessing'])->name('payouts.mark-processing');
+        Route::post('/payouts/{payout}/mark-completed', [\App\Http\Controllers\Admin\InstructorPayoutController::class, 'markAsCompleted'])->name('payouts.mark-completed');
+        Route::post('/payouts/{payout}/mark-failed', [\App\Http\Controllers\Admin\InstructorPayoutController::class, 'markAsFailed'])->name('payouts.mark-failed');
+        Route::post('/payouts/{payout}/cancel', [\App\Http\Controllers\Admin\InstructorPayoutController::class, 'cancel'])->name('payouts.cancel');
+    });
 });

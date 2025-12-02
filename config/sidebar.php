@@ -40,6 +40,12 @@ return [
             ],
         ],
         [
+            'title' => 'Earnings & Payouts',
+            'icon' => 'wallet',
+            'route' => 'instructor.earnings.index',
+            'permission' => 'earnings-view-own',
+        ],
+        [
             'title' => 'My Events',
             'icon' => 'calendar-heart',
             'route' => 'user.events',
@@ -130,6 +136,12 @@ return [
             'icon' => 'users-cog',
             'route' => 'admin.mentorship.index',
             'permission' => ['mentorship-manage-any'],
+        ],
+        [
+            'title' => 'Instructor Payouts',
+            'icon' => 'wallet',
+            'route' => 'admin.payouts.index',
+            'permission' => 'earnings-manage-any',
         ],
         [
             'title' => 'System Management',

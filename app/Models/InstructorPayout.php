@@ -108,7 +108,7 @@ class InstructorPayout extends Model
     /**
      * Mark payout as completed
      */
-    public function markAsCompleted(string $externalReference = null): void
+    public function markAsCompleted(?string $externalReference = null): void
     {
         $this->update([
             'status' => 'completed',
