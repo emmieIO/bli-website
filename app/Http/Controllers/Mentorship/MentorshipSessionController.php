@@ -31,6 +31,12 @@ class MentorshipSessionController extends Controller
 
     public function store(Request $request, MentorshipRequest $mentorshipRequest)
     {
+        // Security: Verify user is either student or instructor
+        if (auth()->id() !== $mentorshipRequest->student_id &&
+            auth()->id() !== $mentorshipRequest->instructor_id) {
+            abort(403, 'Unauthorized to create sessions for this mentorship');
+        }
+
         $validated = $request->validate([
             'session_date' => 'required|date',
             'duration' => 'required|integer|min:1|max:480',
@@ -64,6 +70,12 @@ class MentorshipSessionController extends Controller
             abort(404);
         }
 
+        // Security: Verify user is either student or instructor
+        if (auth()->id() !== $mentorshipRequest->student_id &&
+            auth()->id() !== $mentorshipRequest->instructor_id) {
+            abort(403, 'Unauthorized to update sessions for this mentorship');
+        }
+
         $validated = $request->validate([
             'session_date' => 'required|date',
             'duration' => 'required|integer|min:1|max:480',
@@ -85,6 +97,12 @@ class MentorshipSessionController extends Controller
             abort(404);
         }
 
+        // Security: Verify user is either student or instructor
+        if (auth()->id() !== $mentorshipRequest->student_id &&
+            auth()->id() !== $mentorshipRequest->instructor_id) {
+            abort(403, 'Unauthorized to mark sessions complete for this mentorship');
+        }
+
         $session->markAsCompleted();
 
         return back()->with('success', 'Session marked as completed');
@@ -94,6 +112,12 @@ class MentorshipSessionController extends Controller
     {
         if ($session->mentorship_request_id !== $mentorshipRequest->id) {
             abort(404);
+        }
+
+        // Security: Verify user is either student or instructor
+        if (auth()->id() !== $mentorshipRequest->student_id &&
+            auth()->id() !== $mentorshipRequest->instructor_id) {
+            abort(403, 'Unauthorized to delete sessions for this mentorship');
         }
 
         $session->delete();

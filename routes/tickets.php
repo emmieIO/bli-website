@@ -8,9 +8,13 @@ use App\Http\Controllers\Admin\TicketController as AdminTicketController;
 Route::middleware(['auth', 'verified'])->prefix('user')->name('user.')->group(function () {
     Route::get('/support', [TicketController::class, 'index'])->name('tickets.index');
     Route::get('/support/create', [TicketController::class, 'create'])->name('tickets.create');
-    Route::post('/support', [TicketController::class, 'store'])->name('tickets.store');
     Route::get('/support/{ticket}', [TicketController::class, 'show'])->name('tickets.show');
-    Route::post('/support/{ticket}/reply', [TicketController::class, 'reply'])->name('tickets.reply');
+
+    // Rate-limited ticket creation and replies (5 requests per minute to prevent spam)
+    Route::middleware(['throttle:5,1'])->group(function () {
+        Route::post('/support', [TicketController::class, 'store'])->name('tickets.store');
+        Route::post('/support/{ticket}/reply', [TicketController::class, 'reply'])->name('tickets.reply');
+    });
 });
 
 // Admin routes

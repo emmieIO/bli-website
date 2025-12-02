@@ -142,6 +142,20 @@ class PaymentController extends Controller
                 ]);
         }
 
+        // Security: Verify transaction belongs to authenticated user
+        $transaction = \App\Models\Transaction::where('transaction_id', $txRef)
+            ->where('user_id', auth()->id())
+            ->first();
+
+        if (!$transaction) {
+            return redirect()
+                ->route('dashboard')
+                ->with([
+                    'message' => 'Transaction not found or unauthorized.',
+                    'type' => 'error'
+                ]);
+        }
+
         try {
             $result = $this->paymentService->verifyAndProcessPayment($txRef);
 
