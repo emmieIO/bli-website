@@ -17,6 +17,11 @@ class TicketController extends Controller
     {
         $search = $request->input('search');
 
+        // Security: Escape special LIKE wildcards to prevent SQL wildcard injection
+        if ($search) {
+            $search = addcslashes($search, '%_');
+        }
+
         $tickets = auth()->user()->tickets()
             ->when($search, function ($query, $search) {
                 $query->where(function ($q) use ($search) {

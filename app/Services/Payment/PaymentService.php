@@ -129,12 +129,12 @@ class PaymentService
 
         $data = $result['data'];
 
-        // Verify amount and currency
+        // Security: Verify exact amount and currency match (prevents overpayment attacks)
         $paystackAmount = (int) ($data['amount']);
         $localAmount = (int) ($transaction->amount * 100);
 
-        if ($paystackAmount < $localAmount || $data['currency'] !== $transaction->currency) {
-            throw new \Exception('Payment amount mismatch');
+        if ($paystackAmount !== $localAmount || $data['currency'] !== $transaction->currency) {
+            throw new \Exception('Payment amount or currency mismatch. Expected: ' . $localAmount . ' ' . $transaction->currency . ', Got: ' . $paystackAmount . ' ' . $data['currency']);
         }
 
         DB::beginTransaction();

@@ -62,12 +62,25 @@ class CourseController extends Controller
     public function store(CreateCourseRequest $request)
     {
         $this->authorize('create', Course::class);
-        
+
         $data = $request->validated();
         $data['is_free'] = filter_var($data['is_free'] ?? false, FILTER_VALIDATE_BOOLEAN);
 
+        // Security: Enforce price consistency
+        if (!$data['is_free'] && (!isset($data['price']) || $data['price'] <= 0)) {
+            return redirect()->back()->with([
+                "message" => "Paid courses must have a price greater than 0",
+                "type" => "error"
+            ])->withInput();
+        }
+
+        // Force price to 0 for free courses
+        if ($data['is_free']) {
+            $data['price'] = 0;
+        }
+
         $course = $this->courseService->createCourse(
-            $data, 
+            $data,
             $request->file('thumbnail'),
             $request->file('preview_video')
         );
