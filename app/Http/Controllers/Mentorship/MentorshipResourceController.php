@@ -54,7 +54,13 @@ class MentorshipResourceController extends Controller
             abort(404);
         }
 
-        return Storage::disk('public')->download($resource->file_path, $resource->file_name);
+        $filePath = Storage::disk('public')->path($resource->file_path);
+
+        if (!file_exists($filePath)) {
+            abort(404, 'File not found');
+        }
+
+        return response()->download($filePath, $resource->file_name);
     }
 
     public function destroy(MentorshipRequest $mentorshipRequest, MentorshipResource $resource)
