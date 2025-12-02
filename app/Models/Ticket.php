@@ -17,7 +17,34 @@ class Ticket extends Model
         'subject',
         'status',
         'priority',
+        'reference_code',
     ];
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($ticket) {
+            $ticket->reference_code = self::generateReferenceCode();
+        });
+    }
+
+    protected static function generateReferenceCode(): string
+    {
+        $prefix = 'TKT';
+        $date = now()->format('Ymd');
+
+        // Query existing reference codes for today to find the highest sequence
+        // Use lockForUpdate to prevent race conditions when creating tickets simultaneously
+        $lastTicket = self::where('reference_code', 'like', "{$prefix}-{$date}-%")
+            ->orderByRaw('CAST(SUBSTRING(reference_code, -3) AS UNSIGNED) DESC')
+            ->lockForUpdate()
+            ->first();
+
+        $sequence = $lastTicket ? (intval(substr($lastTicket->reference_code, -3)) + 1) : 1;
+
+        return sprintf('%s-%s-%03d', $prefix, $date, $sequence);
+    }
 
     public function user(): BelongsTo
     {

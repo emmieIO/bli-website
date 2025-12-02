@@ -13,9 +13,21 @@ use Inertia\Inertia;
 
 class TicketController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $tickets = auth()->user()->tickets()->latest()->paginate(10);
+        $search = $request->input('search');
+
+        $tickets = auth()->user()->tickets()
+            ->when($search, function ($query, $search) {
+                $query->where(function ($q) use ($search) {
+                    $q->where('reference_code', 'like', "%{$search}%")
+                      ->orWhere('subject', 'like', "%{$search}%");
+                });
+            })
+            ->latest()
+            ->paginate(10)
+            ->withQueryString();
+
         return Inertia::render('User/Tickets/Index', compact('tickets'));
     }
 
@@ -47,7 +59,10 @@ class TicketController extends Controller
         $admins = User::role('admin')->get();
         Notification::send($admins, new NewTicketCreatedNotification($ticket));
 
-        return redirect()->route('user.tickets.show', $ticket);
+        return redirect()->route('user.tickets.show', $ticket)->with([
+            'message' => "Ticket #{$ticket->reference_code} created successfully! We'll respond as soon as possible.",
+            'type' => 'success'
+        ]);
     }
 
     public function show(Ticket $ticket)

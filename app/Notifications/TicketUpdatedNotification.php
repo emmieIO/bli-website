@@ -31,7 +31,30 @@ class TicketUpdatedNotification extends Notification implements ShouldQueue
      */
     public function via(object $notifiable): array
     {
-        return ['database'];
+        return ['database', 'mail'];
+    }
+
+    /**
+     * Get the mail representation of the notification.
+     */
+    public function toMail(object $notifiable): MailMessage
+    {
+        $statusText = match($this->status) {
+            'open' => 'opened',
+            'in_progress' => 'in progress',
+            'closed' => 'closed',
+            default => $this->status
+        };
+
+        return (new MailMessage)
+            ->subject("Support Ticket #{$this->ticket->reference_code} Updated")
+            ->greeting("Hello {$notifiable->name},")
+            ->line("Your support ticket has been updated.")
+            ->line("**Ticket:** #{$this->ticket->reference_code}")
+            ->line("**Subject:** {$this->ticket->subject}")
+            ->line("**New Status:** " . ucfirst($statusText))
+            ->action('View Ticket', route('user.tickets.show', $this->ticket->id))
+            ->line('Thank you for your patience!');
     }
 
     /**
@@ -43,8 +66,9 @@ class TicketUpdatedNotification extends Notification implements ShouldQueue
     {
         return [
             'ticket_id' => $this->ticket->id,
+            'ticket_reference' => $this->ticket->reference_code,
             'ticket_subject' => $this->ticket->subject,
-            'message' => 'Your support ticket has been updated.',
+            'message' => "Your support ticket #{$this->ticket->reference_code} has been updated.",
             'link' => route('user.tickets.show', $this->ticket->id),
             'status' => $this->status,
         ];

@@ -1,8 +1,11 @@
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, router } from '@inertiajs/react';
 import DashboardLayout from '@/Layouts/DashboardLayout';
+import { Search } from 'lucide-react';
+import { useState } from 'react';
 
 interface Ticket {
     id: number;
+    reference_code: string;
     subject: string;
     status: string;
     priority: string;
@@ -20,6 +23,13 @@ interface TicketsProps {
 }
 
 export default function Index({ tickets }: TicketsProps) {
+    const [search, setSearch] = useState('');
+
+    const handleSearch = (e: React.FormEvent) => {
+        e.preventDefault();
+        router.get(route('admin.tickets.index'), { search }, { preserveState: true });
+    };
+
     return (
         <DashboardLayout>
             <Head title="Support Tickets" />
@@ -31,10 +41,25 @@ export default function Index({ tickets }: TicketsProps) {
                             <div className="flex justify-between items-center mb-4">
                                 <h1 className="text-2xl font-bold">Support Tickets</h1>
                             </div>
+                            <form onSubmit={handleSearch} className="mb-4">
+                                <div className="relative">
+                                    <input
+                                        type="text"
+                                        value={search}
+                                        onChange={(e) => setSearch(e.target.value)}
+                                        placeholder="Search by reference code, subject, or user..."
+                                        className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                                    />
+                                    <Search className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
+                                </div>
+                            </form>
                             <div className="overflow-x-auto">
                                 <table className="min-w-full divide-y divide-gray-200">
                                     <thead className="bg-gray-50">
                                         <tr>
+                                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                Reference
+                                            </th>
                                             <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                                 Subject
                                             </th>
@@ -58,6 +83,11 @@ export default function Index({ tickets }: TicketsProps) {
                                     <tbody className="bg-white divide-y divide-gray-200">
                                         {tickets.data.map(ticket => (
                                             <tr key={ticket.id}>
+                                                <td className="px-6 py-4 whitespace-nowrap">
+                                                    <span className="text-sm font-mono text-gray-900">
+                                                        {ticket.reference_code}
+                                                    </span>
+                                                </td>
                                                 <td className="px-6 py-4 whitespace-nowrap">
                                                     <Link href={route('admin.tickets.show', ticket.id)} className="text-sm font-medium text-primary hover:underline">
                                                         {ticket.subject}

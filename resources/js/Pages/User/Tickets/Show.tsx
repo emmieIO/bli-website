@@ -4,6 +4,7 @@ import { ArrowLeft, Send } from 'lucide-react';
 
 interface Ticket {
     id: number;
+    reference_code: string;
     subject: string;
     status: string;
     priority: string;
@@ -45,7 +46,10 @@ export default function Show({ ticket }: ShowTicketProps) {
                     <div className="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                         <div className="p-6 bg-white border-b border-gray-200">
                             <div className="flex justify-between items-center mb-4">
-                                <h1 className="text-2xl font-bold">{ticket.subject}</h1>
+                                <div>
+                                    <div className="text-sm text-gray-500 mb-1">Ticket #{ticket.reference_code}</div>
+                                    <h1 className="text-2xl font-bold">{ticket.subject}</h1>
+                                </div>
                                 <Link href={route('user.tickets.index')} className="inline-flex items-center px-4 py-2 bg-gray-200 text-gray-700 rounded-md">
                                     <ArrowLeft className="w-4 h-4 mr-2" />
                                     Back to Tickets
