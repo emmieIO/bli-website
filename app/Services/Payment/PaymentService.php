@@ -53,7 +53,7 @@ class PaymentService
         try {
             $txRef = $this->generateTransactionReference($user, $course);
 
-            $transaction = $this->createTransaction($user, $course, $txRef, $course->price);
+            $transaction = $this->createTransaction($user, $course, $txRef, (float) $course->price);
 
             $paymentData = $this->paystackService->initializePayment([
                 'email' => $customerData['email'],
@@ -343,7 +343,7 @@ class PaymentService
 
         try {
             $txRef = 'BLI_CART_' . time() . '_' . $user->id . '_' . $cart->id;
-            $totalAmount = $cart->total;
+            $totalAmount = (float) $cart->total;
             $courseIds = $cart->items->pluck('course_id')->toArray();
 
             $metadata = [
