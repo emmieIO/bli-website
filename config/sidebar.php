@@ -132,16 +132,16 @@ return [
             'permission' => 'manage-ratings',
         ],
         [
+            'title' => 'Payout Manager',
+            'icon' => 'banknote',
+            'route' => 'admin.payouts.index',
+            'permission' => 'earnings-manage-any',
+        ],
+        [
             'title' => 'Mentorship Manager',
             'icon' => 'users-cog',
             'route' => 'admin.mentorship.index',
             'permission' => ['mentorship-manage-any'],
-        ],
-        [
-            'title' => 'Instructor Payouts',
-            'icon' => 'wallet',
-            'route' => 'admin.payouts.index',
-            'permission' => 'earnings-manage-any',
         ],
         [
             'title' => 'System Management',

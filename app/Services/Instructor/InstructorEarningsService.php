@@ -221,6 +221,18 @@ class InstructorEarningsService
                 'amount' => $totalAvailable,
             ]);
 
+            // Notify Admins
+            try {
+                $admins = User::role('admin')->get();
+                if ($admins->count() > 0) {
+                    \Illuminate\Support\Facades\Notification::send($admins, new \App\Notifications\InstructorPayoutRequestedNotification($payout));
+                    Log::info('Payout notification sent to admins', ['count' => $admins->count()]);
+                }
+            } catch (\Exception $e) {
+                Log::error('Failed to send payout notification to admins', ['error' => $e->getMessage()]);
+                // Don't fail the request if notification fails
+            }
+
             return [
                 'success' => true,
                 'payout' => $payout,

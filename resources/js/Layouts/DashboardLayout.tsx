@@ -24,6 +24,7 @@ import {
     Bell,
     ShoppingCart,
     LifeBuoy,
+    Banknote,
 } from 'lucide-react';
 import axios from 'axios';
 
@@ -312,6 +313,7 @@ export default function DashboardLayout({ children }: PropsWithChildren) {
             'users': Users,
             'settings': Settings,
             'life-buoy': LifeBuoy,
+            'banknote': Banknote,
         };
         return iconMap[iconName] || LayoutDashboard;
     };
