@@ -39,7 +39,7 @@ class InstructorPayoutRequestedNotification extends Notification implements Shou
             ->greeting("Hello Admin,")
             ->line("An instructor has requested a payout.")
             ->line("**Instructor:** {$this->payout->instructor->name}")
-            ->line("**Amount:** " . number_format($this->payout->amount, 2) . " {$this->payout->currency}")
+            ->line("**Amount:** " . number_format((float) $this->payout->amount, 2) . " {$this->payout->currency}")
             ->line("**Method:** " . ucfirst(str_replace('_', ' ', $this->payout->payout_method)))
             ->action('View Payout Request', route('admin.payouts.show', $this->payout->id))
             ->line('Please review and process this request.');
@@ -59,7 +59,7 @@ class InstructorPayoutRequestedNotification extends Notification implements Shou
             'currency' => $this->payout->currency,
             'instructor_name' => $this->payout->instructor->name,
             'instructor_id' => $this->payout->instructor_id,
-            'message' => "New payout request of {$this->payout->currency} " . number_format($this->payout->amount, 2) . " from {$this->payout->instructor->name}",
+            'message' => "New payout request of {$this->payout->currency} " . number_format((float) $this->payout->amount, 2) . " from {$this->payout->instructor->name}",
             'action_url' => route('admin.payouts.show', $this->payout->id),
             'type' => 'payout_request',
         ];

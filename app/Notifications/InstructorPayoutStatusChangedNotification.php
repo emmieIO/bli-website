@@ -44,13 +44,13 @@ class InstructorPayoutStatusChangedNotification extends Notification implements 
             $message->greeting("Hello {$notifiable->name},")
                 ->line("Your payout request is now being processed.")
                 ->line("**Reference:** {$this->payout->payout_reference}")
-                ->line("**Amount:** " . number_format($this->payout->amount, 2) . " {$this->payout->currency}")
+                ->line("**Amount:** " . number_format((float) $this->payout->amount, 2) . " {$this->payout->currency}")
                 ->line("We'll notify you once the payout is completed.");
         } elseif ($this->newStatus === 'completed') {
             $message->greeting("Hello {$notifiable->name},")
                 ->line("Great news! Your payout has been completed.")
                 ->line("**Reference:** {$this->payout->payout_reference}")
-                ->line("**Amount:** " . number_format($this->payout->amount, 2) . " {$this->payout->currency}")
+                ->line("**Amount:** " . number_format((float) $this->payout->amount, 2) . " {$this->payout->currency}")
                 ->line("The funds should arrive in your account shortly.");
 
             if ($this->additionalInfo) {
@@ -60,7 +60,7 @@ class InstructorPayoutStatusChangedNotification extends Notification implements 
             $message->greeting("Hello {$notifiable->name},")
                 ->line("Unfortunately, your payout request could not be processed.")
                 ->line("**Reference:** {$this->payout->payout_reference}")
-                ->line("**Amount:** " . number_format($this->payout->amount, 2) . " {$this->payout->currency}");
+                ->line("**Amount:** " . number_format((float) $this->payout->amount, 2) . " {$this->payout->currency}");
 
             if ($this->additionalInfo) {
                 $message->line("**Reason:** {$this->additionalInfo}");
@@ -72,7 +72,7 @@ class InstructorPayoutStatusChangedNotification extends Notification implements 
             $message->greeting("Hello {$notifiable->name},")
                 ->line("Your payout request has been cancelled.")
                 ->line("**Reference:** {$this->payout->payout_reference}")
-                ->line("**Amount:** " . number_format($this->payout->amount, 2) . " {$this->payout->currency}")
+                ->line("**Amount:** " . number_format((float) $this->payout->amount, 2) . " {$this->payout->currency}")
                 ->line("Your earnings have been returned to your available balance.");
         }
 
@@ -102,7 +102,7 @@ class InstructorPayoutStatusChangedNotification extends Notification implements 
             'currency' => $this->payout->currency,
             'old_status' => $this->oldStatus,
             'new_status' => $this->newStatus,
-            'message' => "Your payout request of {$this->payout->currency} " . number_format($this->payout->amount, 2) . " is now " . ($statusLabels[$this->newStatus] ?? $this->newStatus),
+            'message' => "Your payout request of {$this->payout->currency} " . number_format((float) $this->payout->amount, 2) . " is now " . ($statusLabels[$this->newStatus] ?? $this->newStatus),
             'action_url' => route('instructor.earnings.index'),
             'type' => 'payout_status_changed',
             'additional_info' => $this->additionalInfo,
