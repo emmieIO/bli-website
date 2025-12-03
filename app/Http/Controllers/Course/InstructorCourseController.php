@@ -341,33 +341,42 @@ class InstructorCourseController extends Controller
             $videoStatus = null;
             $videoUploadedAt = null;
 
-            // Handle video upload to Vimeo
+            // Handle video upload to Vimeo (ASYNC)
             if ($validated['type'] === 'video' && $request->hasFile('video_field')) {
                 $videoFile = $request->file('video_field');
-                $vimeoService = app(VimeoService::class);
 
-                $result = $vimeoService->uploadVideo(
-                    $videoFile->getRealPath(),
-                    [
-                        'name' => $validated['title'],
-                        'description' => $validated['description'] ?? '',
-                    ]
+                // Store video temporarily in storage/app/temp-videos
+                $tempPath = $videoFile->store('temp-videos', 'local');
+
+                // Create lesson with pending status first
+                $lesson = $module->lessons()->create([
+                    'title' => $validated['title'],
+                    'type' => $validated['type'],
+                    'description' => $validated['description'] ?? '',
+                    'content_path' => null,
+                    'vimeo_id' => null,
+                    'video_status' => 'pending', // Will be updated by job
+                    'video_uploaded_at' => null,
+                    'is_preview' => $validated['is_preview'] ?? false,
+                    'assignment_instructions' => $validated['assignment_instructions'] ?? null,
+                    'order' => $order
+                ]);
+
+                // Dispatch background job for Vimeo upload
+                \App\Jobs\ProcessVideoUpload::dispatch(
+                    $lesson->id,
+                    $tempPath,
+                    $validated['title'],
+                    $validated['description'] ?? null
                 );
 
-                if ($result['success']) {
-                    $vimeoId = $result['video_id'];
-                    $contentPath = $result['uri'];
-                    $videoStatus = 'processing'; // Video uploaded, now processing
-                    $videoUploadedAt = now();
+                \Log::info('Video upload job dispatched', [
+                    'lesson_id' => $lesson->id,
+                    'temp_path' => $tempPath,
+                ]);
 
-                    // Check the actual video status from Vimeo
-                    $statusCheck = $vimeoService->getVideoStatus($vimeoId);
-                    if ($statusCheck['is_ready']) {
-                        $videoStatus = 'ready';
-                    }
-                } else {
-                    throw new \Exception('Video upload failed: ' . $result['error']);
-                }
+                return to_route('instructor.courses.builder', $course->slug)
+                    ->with('message', 'Lesson created successfully! Video is being uploaded in the background and will be available shortly.');
             }
 
             // Handle PDF upload
@@ -394,13 +403,8 @@ class InstructorCourseController extends Controller
                 'order' => $order
             ]);
 
-            $message = 'Lesson created successfully';
-            if ($videoStatus === 'processing') {
-                $message .= '. Video is being processed by Vimeo and will be available shortly.';
-            }
-
             return to_route('instructor.courses.builder', $course->slug)
-                ->with('message', $message);
+                ->with('message', 'Lesson created successfully');
 
         } catch (\Exception $e) {
             return back()
