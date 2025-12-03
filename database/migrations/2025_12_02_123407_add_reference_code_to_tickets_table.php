@@ -12,25 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('tickets', function (Blueprint $table) {
-            $table->string('reference_code')->nullable()->after('id');
-        });
-
-        // Generate reference codes for existing tickets
-        $tickets = \App\Models\Ticket::all();
-        foreach ($tickets as $ticket) {
-            $prefix = 'TKT';
-            $date = $ticket->created_at->format('Ymd');
-            $lastTicket = \App\Models\Ticket::where('reference_code', 'like', "{$prefix}-{$date}-%")->latest('id')->first();
-            $sequence = $lastTicket ? (intval(substr($lastTicket->reference_code, -3)) + 1) : ($ticket->id);
-
-            $ticket->update([
-                'reference_code' => sprintf('%s-%s-%03d', $prefix, $date, $sequence)
-            ]);
-        }
-
-        // Make the column unique after populating
-        Schema::table('tickets', function (Blueprint $table) {
-            $table->string('reference_code')->unique()->change();
+            $table->string('reference_code')->unique()->after('id');
         });
     }
 

@@ -57,6 +57,8 @@ Route::prefix('instructor')->name('instructor.')->middleware(['auth', 'role:inst
     // Earnings & Payouts
     Route::get('/earnings', [\App\Http\Controllers\Instructor\InstructorEarningsController::class, 'index'])->name('earnings.index');
     Route::get('/earnings/payout', [\App\Http\Controllers\Instructor\InstructorEarningsController::class, 'createPayout'])->name('earnings.payout.create');
-    Route::post('/earnings/payout', [\App\Http\Controllers\Instructor\InstructorEarningsController::class, 'storePayout'])->name('earnings.payout.store');
+    Route::post('/earnings/payout', [\App\Http\Controllers\Instructor\InstructorEarningsController::class, 'storePayout'])
+        ->middleware('throttle:5,60') // Max 5 payout requests per hour
+        ->name('earnings.payout.store');
 });
 

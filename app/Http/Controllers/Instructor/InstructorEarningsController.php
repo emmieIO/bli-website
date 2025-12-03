@@ -67,12 +67,46 @@ class InstructorEarningsController extends Controller
     {
         $validated = $request->validate([
             'payout_method' => 'required|in:bank_transfer,payoneer,manual',
-            'bank_name' => 'required_if:payout_method,bank_transfer|nullable|string',
-            'account_number' => 'required_if:payout_method,bank_transfer|nullable|string',
-            'account_name' => 'required_if:payout_method,bank_transfer|nullable|string',
-            'bank_code' => 'required_if:payout_method,bank_transfer|nullable|string',
-            'payout_email' => 'required_if:payout_method,payoneer|nullable|email',
-            'additional_details' => 'nullable|string',
+
+            // Bank transfer validation (Nigerian banks)
+            'bank_name' => [
+                'required_if:payout_method,bank_transfer',
+                'nullable',
+                'string',
+                'max:255',
+                'regex:/^[a-zA-Z0-9\s\-\&\.]+$/', // Only allow alphanumeric, spaces, hyphens, ampersands, dots
+            ],
+            'account_number' => [
+                'required_if:payout_method,bank_transfer',
+                'nullable',
+                'regex:/^[0-9]{10}$/', // Nigerian bank accounts are exactly 10 digits
+            ],
+            'account_name' => [
+                'required_if:payout_method,bank_transfer',
+                'nullable',
+                'string',
+                'max:255',
+                'regex:/^[a-zA-Z\s\.\-\']+$/', // Only allow letters, spaces, dots, hyphens, apostrophes
+            ],
+            'bank_code' => [
+                'nullable',
+                'regex:/^[0-9]{3}$/', // Nigerian bank codes are 3 digits
+            ],
+
+            // Payoneer validation
+            'payout_email' => [
+                'required_if:payout_method,payoneer',
+                'nullable',
+                'email:rfc,dns', // Strict email validation with DNS check
+                'max:255',
+            ],
+
+            // Additional details
+            'additional_details' => [
+                'nullable',
+                'string',
+                'max:1000', // Limit length
+            ],
         ]);
 
         $result = $this->earningsService->requestPayout($request->user(), [

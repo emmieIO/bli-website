@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, memo } from 'react';
 import Player from '@vimeo/player';
 
 interface VimeoPlayerProps {
@@ -10,7 +10,7 @@ interface VimeoPlayerProps {
     className?: string;
 }
 
-export default function VimeoPlayer({ 
+function VimeoPlayer({ 
     videoUrl, 
     videoId, 
     onEnded, 
@@ -20,6 +20,15 @@ export default function VimeoPlayer({
 }: VimeoPlayerProps) {
     const containerRef = useRef<HTMLDivElement>(null);
     const playerRef = useRef<Player | null>(null);
+    
+    // Refs to store latest callbacks to avoid re-initializing player on callback change
+    const onEndedRef = useRef(onEnded);
+    const onProgressRef = useRef(onProgress);
+
+    useEffect(() => {
+        onEndedRef.current = onEnded;
+        onProgressRef.current = onProgress;
+    }, [onEnded, onProgress]);
 
     useEffect(() => {
         if (!containerRef.current) return;
@@ -42,16 +51,14 @@ export default function VimeoPlayer({
         // Initialize Vimeo Player
         playerRef.current = new Player(containerRef.current, options);
 
-        // Attach Event Listeners
-        if (onEnded) {
-            playerRef.current.on('ended', onEnded);
-        }
+        // Attach Event Listeners using refs
+        playerRef.current.on('ended', () => {
+            onEndedRef.current?.();
+        });
 
-        if (onProgress) {
-            playerRef.current.on('timeupdate', (data) => {
-                onProgress(data.seconds);
-            });
-        }
+        playerRef.current.on('timeupdate', (data) => {
+            onProgressRef.current?.(data.seconds);
+        });
 
         // Cleanup
         return () => {
@@ -60,7 +67,7 @@ export default function VimeoPlayer({
                 playerRef.current = null;
             }
         };
-    }, [videoUrl, videoId, autoplay, onEnded, onProgress]);
+    }, [videoUrl, videoId, autoplay]); // Removed callbacks from dependencies
 
     return (
         <div 
@@ -69,3 +76,5 @@ export default function VimeoPlayer({
         />
     );
 }
+
+export default memo(VimeoPlayer);

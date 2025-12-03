@@ -5,15 +5,15 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Str;
 
 class InstructorPayout extends Model
 {
+    // Only allow fields that instructors/admins should be able to set
     protected $fillable = [
         'instructor_id',
-        'payout_reference',
         'amount',
         'currency',
-        'status',
         'payout_method',
         'bank_name',
         'account_number',
@@ -21,12 +21,19 @@ class InstructorPayout extends Model
         'bank_code',
         'payout_email',
         'payout_details',
-        'notes',
-        'external_reference',
-        'failure_reason',
-        'requested_at',
-        'processed_at',
-        'completed_at',
+    ];
+
+    // Protect sensitive fields from mass assignment
+    protected $guarded = [
+        'id',
+        'payout_reference',  // Auto-generated
+        'status',            // Controlled by workflow methods
+        'notes',             // Admin only
+        'external_reference', // Admin only
+        'failure_reason',    // Admin only
+        'requested_at',      // Auto-set on creation
+        'processed_at',      // Auto-set by markAsProcessing()
+        'completed_at',      // Auto-set by markAsCompleted()
     ];
 
     protected $casts = [
@@ -46,7 +53,9 @@ class InstructorPayout extends Model
 
         static::creating(function ($payout) {
             if (empty($payout->payout_reference)) {
-                $payout->payout_reference = 'PO_' . strtoupper(uniqid());
+                // Generate cryptographically secure reference
+                // Format: PO_<16 random chars>_<timestamp>
+                $payout->payout_reference = 'PO_' . strtoupper(Str::random(16)) . '_' . time();
             }
             if (empty($payout->requested_at)) {
                 $payout->requested_at = now();

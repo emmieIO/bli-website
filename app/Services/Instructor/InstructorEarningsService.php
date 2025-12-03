@@ -16,6 +16,39 @@ use Illuminate\Support\Facades\Log;
 class InstructorEarningsService
 {
     /**
+     * Sanitize sensitive data for logging
+     * Masks account numbers, emails, and other PII
+     */
+    private function sanitizeForLog(array $data): array
+    {
+        $sanitized = $data;
+
+        // Mask account number (show only last 4 digits)
+        if (isset($sanitized['account_number']) && $sanitized['account_number']) {
+            $sanitized['account_number'] = '******' . substr($sanitized['account_number'], -4);
+        }
+
+        // Mask email (show only first char and domain)
+        if (isset($sanitized['payout_email']) && $sanitized['payout_email']) {
+            $parts = explode('@', $sanitized['payout_email']);
+            if (count($parts) === 2) {
+                $sanitized['payout_email'] = substr($parts[0], 0, 1) . '***@' . $parts[1];
+            }
+        }
+
+        // Mask bank code
+        if (isset($sanitized['bank_code']) && $sanitized['bank_code']) {
+            $sanitized['bank_code'] = '***';
+        }
+
+        // Remove or mask additional sensitive details
+        if (isset($sanitized['payout_details']) && is_array($sanitized['payout_details'])) {
+            $sanitized['payout_details'] = '[REDACTED]';
+        }
+
+        return $sanitized;
+    }
+    /**
      * Record earnings from a successful transaction
      * Supports both single course transactions and cart items
      */
@@ -170,88 +203,156 @@ class InstructorEarningsService
 
     /**
      * Request a payout for available earnings
+     * Includes retry logic for database deadlocks
      */
     public function requestPayout(User $instructor, array $payoutDetails): array
     {
         $minimumPayout = config('services.instructor_payouts.minimum_payout', 5000);
+        $maxRetries = 3;
+        $retryCount = 0;
 
-        DB::beginTransaction();
+        while ($retryCount < $maxRetries) {
+            DB::beginTransaction();
 
-        try {
-            // Get available earnings
-            $availableEarnings = InstructorEarning::where('instructor_id', $instructor->id)
-                ->where('status', 'available')
-                ->where('available_at', '<=', now())
-                ->get();
+            try {
+                // Check for duplicate recent requests (idempotency)
+                $recentDuplicate = InstructorPayout::where('instructor_id', $instructor->id)
+                    ->where('status', 'pending')
+                    ->where('created_at', '>', now()->subMinutes(5))
+                    ->exists();
 
-            $totalAvailable = $availableEarnings->sum('net_amount');
+                if ($recentDuplicate) {
+                    DB::rollBack();
+                    return [
+                        'success' => false,
+                        'message' => 'You have a recent pending payout request. Please wait before requesting again.',
+                    ];
+                }
 
-            if ($totalAvailable < $minimumPayout) {
+                // Get available earnings with pessimistic locking to prevent race conditions
+                $availableEarnings = InstructorEarning::where('instructor_id', $instructor->id)
+                    ->where('status', 'available')
+                    ->where('available_at', '<=', now())
+                    ->lockForUpdate() // Prevents concurrent modifications
+                    ->get();
+
+                $totalAvailable = $availableEarnings->sum('net_amount');
+
+                if ($totalAvailable < $minimumPayout) {
+                    DB::rollBack();
+                    return [
+                        'success' => false,
+                        'message' => "Minimum payout amount is " . number_format($minimumPayout, 2),
+                    ];
+                }
+
+                // Create payout request
+                $payout = InstructorPayout::create([
+                    'instructor_id' => $instructor->id,
+                    'amount' => $totalAvailable,
+                    'currency' => $availableEarnings->first()->currency ?? 'NGN',
+                    'status' => 'pending',
+                    'payout_method' => $payoutDetails['method'] ?? 'bank_transfer',
+                    'bank_name' => $payoutDetails['bank_name'] ?? null,
+                    'account_number' => $payoutDetails['account_number'] ?? null,
+                    'account_name' => $payoutDetails['account_name'] ?? null,
+                    'bank_code' => $payoutDetails['bank_code'] ?? null,
+                    'payout_email' => $payoutDetails['email'] ?? null,
+                    'payout_details' => $payoutDetails['additional_details'] ?? null,
+                ]);
+
+                // Mark earnings as part of this payout
+                foreach ($availableEarnings as $earning) {
+                    $earning->markAsPaid($payout);
+                }
+
+                DB::commit();
+
+                // Log with sanitized sensitive data
+                $sanitizedDetails = $this->sanitizeForLog($payoutDetails);
+                Log::info('Payout requested', [
+                    'payout_id' => $payout->id,
+                    'instructor_id' => $instructor->id,
+                    'amount' => $totalAvailable,
+                    'payout_method' => $payout->payout_method,
+                    'sanitized_details' => $sanitizedDetails,
+                    'retry_count' => $retryCount,
+                ]);
+
+                // Notify Admins
+                try {
+                    $admins = User::role('admin')->get();
+                    if ($admins->count() > 0) {
+                        \Illuminate\Support\Facades\Notification::send($admins, new \App\Notifications\InstructorPayoutRequestedNotification($payout));
+                        Log::info('Payout notification sent to admins', ['count' => $admins->count()]);
+                    }
+                } catch (\Exception $e) {
+                    Log::error('Failed to send payout notification to admins', ['error' => $e->getMessage()]);
+                    // Don't fail the request if notification fails
+                }
+
+                return [
+                    'success' => true,
+                    'payout' => $payout,
+                    'message' => 'Payout request submitted successfully',
+                ];
+
+            } catch (\Illuminate\Database\QueryException $e) {
+                DB::rollBack();
+
+                // Check if it's a deadlock error (MySQL: 1213, PostgreSQL: 40P01)
+                $isDeadlock = in_array($e->getCode(), ['40001', '40P01']) ||
+                             str_contains($e->getMessage(), 'Deadlock') ||
+                             str_contains($e->getMessage(), '1213');
+
+                if ($isDeadlock && $retryCount < $maxRetries - 1) {
+                    $retryCount++;
+                    $waitTime = min(100 * pow(2, $retryCount - 1), 1000); // Exponential backoff: 100ms, 200ms, 400ms (max 1s)
+
+                    Log::warning('Deadlock detected, retrying payout request', [
+                        'instructor_id' => $instructor->id,
+                        'retry_count' => $retryCount,
+                        'wait_time_ms' => $waitTime,
+                    ]);
+
+                    usleep($waitTime * 1000); // Convert to microseconds
+                    continue; // Retry the transaction
+                }
+
+                // Not a deadlock or max retries reached
+                Log::error('Payout request failed with database error', [
+                    'error' => $e->getMessage(),
+                    'code' => $e->getCode(),
+                    'instructor_id' => $instructor->id,
+                    'retry_count' => $retryCount,
+                ]);
+
                 return [
                     'success' => false,
-                    'message' => "Minimum payout amount is " . number_format($minimumPayout, 2),
+                    'message' => 'Failed to process payout request. Please try again.',
+                ];
+
+            } catch (\Exception $e) {
+                DB::rollBack();
+
+                Log::error('Payout request failed', [
+                    'error' => $e->getMessage(),
+                    'instructor_id' => $instructor->id,
+                    'retry_count' => $retryCount,
+                ]);
+
+                return [
+                    'success' => false,
+                    'message' => 'Failed to process payout request. Please try again.',
                 ];
             }
-
-            // Create payout request
-            $payout = InstructorPayout::create([
-                'instructor_id' => $instructor->id,
-                'amount' => $totalAvailable,
-                'currency' => $availableEarnings->first()->currency ?? 'NGN',
-                'status' => 'pending',
-                'payout_method' => $payoutDetails['method'] ?? 'bank_transfer',
-                'bank_name' => $payoutDetails['bank_name'] ?? null,
-                'account_number' => $payoutDetails['account_number'] ?? null,
-                'account_name' => $payoutDetails['account_name'] ?? null,
-                'bank_code' => $payoutDetails['bank_code'] ?? null,
-                'payout_email' => $payoutDetails['email'] ?? null,
-                'payout_details' => $payoutDetails['additional_details'] ?? null,
-            ]);
-
-            // Mark earnings as part of this payout
-            foreach ($availableEarnings as $earning) {
-                $earning->markAsPaid($payout);
-            }
-
-            DB::commit();
-
-            Log::info('Payout requested', [
-                'payout_id' => $payout->id,
-                'instructor_id' => $instructor->id,
-                'amount' => $totalAvailable,
-            ]);
-
-            // Notify Admins
-            try {
-                $admins = User::role('admin')->get();
-                if ($admins->count() > 0) {
-                    \Illuminate\Support\Facades\Notification::send($admins, new \App\Notifications\InstructorPayoutRequestedNotification($payout));
-                    Log::info('Payout notification sent to admins', ['count' => $admins->count()]);
-                }
-            } catch (\Exception $e) {
-                Log::error('Failed to send payout notification to admins', ['error' => $e->getMessage()]);
-                // Don't fail the request if notification fails
-            }
-
-            return [
-                'success' => true,
-                'payout' => $payout,
-                'message' => 'Payout request submitted successfully',
-            ];
-
-        } catch (\Exception $e) {
-            DB::rollBack();
-
-            Log::error('Payout request failed', [
-                'error' => $e->getMessage(),
-                'instructor_id' => $instructor->id,
-            ]);
-
-            return [
-                'success' => false,
-                'message' => 'Failed to process payout request: ' . $e->getMessage(),
-            ];
         }
+
+        // Should never reach here, but just in case
+        return [
+            'success' => false,
+            'message' => 'Failed to process payout request after multiple attempts.',
+        ];
     }
 
     /**
