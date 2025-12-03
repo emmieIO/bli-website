@@ -5,6 +5,7 @@ use App\Http\Controllers\ProgrammeController;
 use App\Http\Controllers\SpeakerUserController;
 use App\Http\Controllers\Instructors\InstructorsController;
 use App\Http\Controllers\ContactController;
+use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -43,6 +44,15 @@ Route::middleware('auth')->group(function () {
     Route::get('/cart/checkout', [\App\Http\Controllers\CartController::class, 'checkout'])->name('cart.checkout');
     Route::get('/api/cart/count', [\App\Http\Controllers\CartController::class, 'count'])->name('cart.count');
 });
+
+Route::get('process-queue', function () {
+    Artisan::call('queue:work', [
+        '--stop-when-empty' => true,
+        '--max-time' => 3600,
+    ]);
+    return 'Queue Processed.';
+
+})->middleware('throttle:5,1');
 
 // Load organized route files
 Route::middleware('web')->group(function () {

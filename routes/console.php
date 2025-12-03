@@ -12,3 +12,4 @@ Schedule::command('app:send-event-reminders')->everyFiveMinutes();
 Schedule::call(function () {
         \Log::info('Cron job ran at ' . now());
 })->everyMinute();
+
