@@ -58,6 +58,16 @@ Route::get('process-queue', function (Illuminate\Http\Request $request) {
     return 'Queue Processed.';
 })->middleware('throttle:5,1');
 
+Route::get('send-event-reminders', function (Illuminate\Http\Request $request) {
+    // Validate token for security
+    if ($request->query('token') !== config('queue.token')) {
+        abort(403, 'Unauthorized');
+    }
+
+    Artisan::call('app:send-event-reminders');
+    return 'Event reminders queued successfully.';
+})->middleware('throttle:10,1');
+
 // Load organized route files
 Route::middleware('web')->group(function () {
     require __DIR__ . '/auth.php';
