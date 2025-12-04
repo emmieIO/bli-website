@@ -7,7 +7,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-class ContactFormSubmitted extends Notification
+class ContactFormSubmitted extends Notification implements ShouldQueue
 {
     use Queueable;
 
@@ -27,7 +27,7 @@ class ContactFormSubmitted extends Notification
      */
     public function via(object $notifiable): array
     {
-        return ['mail'];
+        return ['database', 'mail'];
     }
 
     /**
@@ -61,6 +61,8 @@ class ContactFormSubmitted extends Notification
             'name' => $this->name,
             'email' => $this->email,
             'message' => $this->message,
+            'notification_message' => "New contact form submission from {$this->name}",
+            'type' => 'contact_form',
         ];
     }
 }

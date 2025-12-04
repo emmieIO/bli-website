@@ -31,15 +31,32 @@ class CourseService
         try {
             return DB::transaction(function () use ($data, $thumbnail, $previewVideo) {
                 $thumbnailPath = null;
-                $previewVideoId = null;
 
                 // Upload thumbnail
                 if ($thumbnail) {
                     $thumbnailPath = $this->uploadFile($thumbnail, 'courses/thumbnails');
                 }
 
-                // Upload preview video to Vimeo
+                // Create course first
+                $course = Course::create([
+                    'title' => $data['title'],
+                    'subtitle' => $data['subtitle'] ?? null,
+                    'description' => $data['description'],
+                    'language' => $data['language'],
+                    'thumbnail_path' => $thumbnailPath,
+                    'preview_video_id' => null, // Will be set by background job
+                    'level' => $data['level'],
+                    'category_id' => $data['category_id'],
+                    'is_free' => (bool) $data['is_free'],
+                    'price' => $data['is_free'] ? 0 : $data['price'],
+                    'instructor_id' => auth()->id(),
+                    'status' => ApplicationStatus::DRAFT->value,
+                ]);
+
+                // Upload preview video to Vimeo asynchronously if provided
                 if ($previewVideo) {
+                    $tempPath = $previewVideo->store('temp-videos', 'local');
+
                     $videoMetadata = [
                         'name' => $data['title'] . ' - Preview',
                         'description' => $data['subtitle'] ?? $data['description'] ?? 'Course preview video',
@@ -53,48 +70,23 @@ class CourseService
                         'comments' => 'nobody',
                     ];
 
-                    $uploadResult = $this->vimeoService->uploadVideo(
-                        $previewVideo->getRealPath(),
+                    \App\Jobs\ProcessCoursePreviewVideoUpload::dispatch(
+                        $course->id,
+                        $tempPath,
                         $videoMetadata,
                         $privacySettings
                     );
 
-                    if ($uploadResult['success']) {
-                        $previewVideoId = $uploadResult['video_id'];
-                    } else {
-                        throw new \Exception("Failed to upload preview video to Vimeo: " . $uploadResult['error']);
-                    }
+                    Log::info('Course preview video upload job dispatched', [
+                        'course_id' => $course->id,
+                        'temp_path' => $tempPath,
+                    ]);
                 }
-
-                $course = Course::create([
-                    'title' => $data['title'],
-                    'subtitle' => $data['subtitle'] ?? null,
-                    'description' => $data['description'],
-                    'language' => $data['language'],
-                    'thumbnail_path' => $thumbnailPath,
-                    'preview_video_id' => $previewVideoId,
-                    'level' => $data['level'],
-                    'category_id' => $data['category_id'],
-                    'is_free' => (bool) $data['is_free'],
-                    'price' => $data['is_free'] ? 0 : $data['price'],
-                    'instructor_id' => auth()->id(),
-                    'status' => ApplicationStatus::DRAFT->value,
-                ]);
 
                 return $course;
             });
         } catch (\Throwable $th) {
             Log::error("Error creating course", ['error' => $th->getMessage()]);
-
-            // Clean up uploaded files on error
-            if (!empty($thumbnailPath)) {
-                $this->deleteFile($thumbnailPath);
-            }
-            if (!empty($previewVideoId)) {
-                // Delete from Vimeo
-                $this->vimeoService->deleteVideo($previewVideoId);
-            }
-
             throw $th;
         }
     }
@@ -187,14 +179,17 @@ class CourseService
                     $updateData['thumbnail_path'] = $this->uploadFile($thumbnailFile, 'courses/thumbnails');
                 }
 
-                // Handle preview video upload to Vimeo if provided
+                // Handle preview video upload to Vimeo asynchronously if provided
                 if ($previewVideoFile) {
                     // Delete old preview video from Vimeo if exists
                     if ($course->preview_video_id) {
                         $this->vimeoService->deleteVideo($course->preview_video_id);
+                        $updateData['preview_video_id'] = null; // Will be set by background job
                     }
 
-                    // Upload new video to Vimeo
+                    // Store temporarily and dispatch background job
+                    $tempPath = $previewVideoFile->store('temp-videos', 'local');
+
                     $videoMetadata = [
                         'name' => $data['title'] . ' - Preview',
                         'description' => $data['subtitle'] ?? $data['description'] ?? 'Course preview video',
@@ -208,17 +203,23 @@ class CourseService
                         'comments' => 'nobody',
                     ];
 
-                    $uploadResult = $this->vimeoService->uploadVideo(
-                        $previewVideoFile->getRealPath(),
+                    // Update course first
+                    $course->update($updateData);
+
+                    // Dispatch background job
+                    \App\Jobs\ProcessCoursePreviewVideoUpload::dispatch(
+                        $course->id,
+                        $tempPath,
                         $videoMetadata,
                         $privacySettings
                     );
 
-                    if ($uploadResult['success']) {
-                        $updateData['preview_video_id'] = $uploadResult['video_id'];
-                    } else {
-                        throw new \Exception("Failed to upload preview video to Vimeo: " . $uploadResult['error']);
-                    }
+                    Log::info('Course preview video update job dispatched', [
+                        'course_id' => $course->id,
+                        'temp_path' => $tempPath,
+                    ]);
+
+                    return $course;
                 } elseif ($course->preview_video_id) {
                     // Update existing Vimeo video metadata if title or description changed
                     $titleChanged = $course->title !== $data['title'];

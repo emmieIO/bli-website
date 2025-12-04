@@ -143,64 +143,35 @@ class CourseModuleService
 
     public function saveVideo(CourseModule $module, array $data, UploadedFile $file)
     {
-        // Create lesson with pending status first (before upload)
+        // Store video temporarily
+        $tempPath = $file->store('temp-videos', 'local');
+
+        // Create lesson with pending status first
         $lesson = $module->lessons()->create([
             'title' => $data['title'],
             'type' => 'video',
             'description' => $data['description'] ?? null,
             'order' => $module->lessons()->max('order') + 1,
-            'video_status' => 'uploading',
+            'video_status' => 'pending',
+            'content_path' => null,
+            'vimeo_id' => null,
+            'video_uploaded_at' => null,
         ]);
 
-        try {
-            // Upload video to Vimeo (outside of any transaction)
-            $uploadResult = $this->vimeoService->uploadVideo(
-                $file->getRealPath(),
-                [
-                    'name' => $data['title'],
-                    'description' => $data['description'] ?? '',
-                ]
-            );
+        // Dispatch background job for Vimeo upload
+        \App\Jobs\ProcessVideoUpload::dispatch(
+            $lesson->id,
+            $tempPath,
+            $data['title'],
+            $data['description'] ?? null
+        );
 
-            if (!$uploadResult['success']) {
-                // Upload failed, update lesson status
-                $lesson->update([
-                    'video_status' => 'failed',
-                    'video_error' => $uploadResult['error'],
-                ]);
+        Log::info('Video upload job dispatched from CourseModuleService', [
+            'lesson_id' => $lesson->id,
+            'temp_path' => $tempPath,
+        ]);
 
-                throw new \Exception($uploadResult['error']);
-            }
-
-            // Upload successful, update lesson with video info
-            $lesson->update([
-                'vimeo_id' => $uploadResult['video_id'],
-                'content_path' => $uploadResult['uri'],
-                'video_status' => 'processing',
-                'video_uploaded_at' => now(),
-            ]);
-
-            Log::info("Lesson video uploaded successfully", [
-                'lesson_id' => $lesson->id,
-                'vimeo_id' => $uploadResult['video_id'],
-            ]);
-
-            return $lesson;
-
-        } catch (\Exception $e) {
-            // Ensure lesson is marked as failed
-            $lesson->update([
-                'video_status' => 'failed',
-                'video_error' => $e->getMessage(),
-            ]);
-
-            Log::error("Failed to save video lesson", [
-                'lesson_id' => $lesson->id,
-                'error' => $e->getMessage(),
-            ]);
-
-            throw $e;
-        }
+        return $lesson;
     }
 
 }

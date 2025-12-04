@@ -10,7 +10,7 @@ use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 use Illuminate\Support\Facades\URL;
 
-class InstructorApplicationRejection extends Notification
+class InstructorApplicationRejection extends Notification implements ShouldQueue
 {
     use Queueable;
 
@@ -29,7 +29,7 @@ class InstructorApplicationRejection extends Notification
      */
     public function via(object $notifiable): array
     {
-        return ['mail'];
+        return ['database', 'mail'];
     }
 
     /**
@@ -60,7 +60,11 @@ class InstructorApplicationRejection extends Notification
     public function toArray(object $notifiable): array
     {
         return [
-            //
+            'application_id' => $this->application->application_id,
+            'reason' => $this->reason,
+            'message' => 'Your instructor application has been rejected.',
+            'action_url' => URL::signedRoute('instructors.application.resume', $this->application->application_id),
+            'type' => 'instructor_application_rejected',
         ];
     }
 }

@@ -72,64 +72,35 @@ class LessonService
             throw new \Exception('Video file is required for video lessons');
         }
 
-        // Create lesson with uploading status first
+        // Store video temporarily
+        $tempPath = $videoFile->store('temp-videos', 'local');
+
+        // Create lesson with pending status first
         $lesson = $module->lessons()->create([
             'title' => $data['title'],
             'type' => 'video',
             'description' => $data['description'] ?? null,
             'order' => $this->getNextOrder($module),
-            'video_status' => 'uploading',
+            'video_status' => 'pending',
+            'content_path' => null,
+            'vimeo_id' => null,
+            'video_uploaded_at' => null,
         ]);
 
-        try {
-            // Upload video to Vimeo (outside of transaction)
-            $uploadResult = $this->vimeoService->uploadVideo(
-                $videoFile->getRealPath(),
-                [
-                    'name' => $data['title'],
-                    'description' => $data['description'] ?? '',
-                ]
-            );
+        // Dispatch background job for Vimeo upload
+        \App\Jobs\ProcessVideoUpload::dispatch(
+            $lesson->id,
+            $tempPath,
+            $data['title'],
+            $data['description'] ?? null
+        );
 
-            if (!$uploadResult['success']) {
-                // Upload failed
-                $lesson->update([
-                    'video_status' => 'failed',
-                    'video_error' => $uploadResult['error'],
-                ]);
+        Log::info('Video upload job dispatched from LessonService', [
+            'lesson_id' => $lesson->id,
+            'temp_path' => $tempPath,
+        ]);
 
-                throw new \Exception($uploadResult['error']);
-            }
-
-            // Upload successful
-            $lesson->update([
-                'vimeo_id' => $uploadResult['video_id'],
-                'content_path' => $uploadResult['uri'],
-                'video_status' => 'processing',
-                'video_uploaded_at' => now(),
-            ]);
-
-            Log::info('Video lesson uploaded successfully', [
-                'lesson_id' => $lesson->id,
-                'vimeo_id' => $uploadResult['video_id'],
-            ]);
-
-            return $lesson->fresh();
-
-        } catch (\Exception $e) {
-            // Mark lesson as failed
-            $lesson->update([
-                'video_status' => 'failed',
-                'video_error' => $e->getMessage(),
-            ]);
-
-            Log::error('Failed to create video lesson', [
-                'lesson_id' => $lesson->id,
-                'error' => $e->getMessage(),
-            ]);
-
-            throw $e;
-        }
+        return $lesson->fresh();
     }
 
     /**
@@ -230,32 +201,29 @@ class LessonService
                         $this->vimeoService->deleteVideo($lesson->vimeo_id);
                     }
 
-                    // Upload new video (this should be done async in production)
-                    $lesson->video_status = 'uploading';
-                    $lesson->save();
+                    // Store video temporarily
+                    $tempPath = $videoFile->store('temp-videos', 'local');
 
-                    // Upload to Vimeo
-                    $uploadResult = $this->vimeoService->uploadVideo(
-                        $videoFile->getRealPath(),
-                        [
-                            'name' => $lesson->title,
-                            'description' => $lesson->description ?? '',
-                        ]
+                    // Update lesson to pending status
+                    $lesson->update([
+                        'video_status' => 'pending',
+                        'vimeo_id' => null,
+                        'content_path' => null,
+                        'video_uploaded_at' => null,
+                    ]);
+
+                    // Dispatch background job for Vimeo upload
+                    \App\Jobs\ProcessVideoUpload::dispatch(
+                        $lesson->id,
+                        $tempPath,
+                        $lesson->title,
+                        $lesson->description ?? null
                     );
 
-                    if ($uploadResult['success']) {
-                        $lesson->update([
-                            'vimeo_id' => $uploadResult['video_id'],
-                            'content_path' => $uploadResult['uri'],
-                            'video_status' => 'processing',
-                            'video_uploaded_at' => now(),
-                        ]);
-                    } else {
-                        $lesson->update([
-                            'video_status' => 'failed',
-                            'video_error' => $uploadResult['error'],
-                        ]);
-                    }
+                    Log::info('Video upload job dispatched from LessonService (update)', [
+                        'lesson_id' => $lesson->id,
+                        'temp_path' => $tempPath,
+                    ]);
                 }
 
                 if ($lesson->type === 'link' && isset($data['link_url'])) {

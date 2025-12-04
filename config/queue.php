@@ -109,4 +109,16 @@ return [
         'table' => 'failed_jobs',
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Queue Processing Token
+    |--------------------------------------------------------------------------
+    |
+    | This token is used to authenticate external cron services that trigger
+    | queue processing via the /process-queue route. Keep this secure.
+    |
+    */
+
+    'token' => env('QUEUE_TOKEN'),
+
 ];

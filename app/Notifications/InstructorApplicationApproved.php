@@ -8,7 +8,7 @@ use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 use Illuminate\Support\Facades\URL;
 
-class InstructorApplicationApproved extends Notification
+class InstructorApplicationApproved extends Notification implements ShouldQueue
 {
     use Queueable;
 
@@ -27,7 +27,7 @@ class InstructorApplicationApproved extends Notification
      */
     public function via(object $notifiable): array
     {
-        return ['mail'];
+        return ['database', 'mail'];
     }
 
     /**
@@ -51,7 +51,9 @@ class InstructorApplicationApproved extends Notification
     public function toArray(object $notifiable): array
     {
         return [
-            //
+            'message' => 'Congratulations! Your instructor application has been approved.',
+            'action_url' => $this->resetUrl,
+            'type' => 'instructor_application_approved',
         ];
     }
 }

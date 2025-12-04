@@ -36,34 +36,52 @@ class SendEventReminders extends Command
 
         // Send reminders for events starting in approximately 24 hours (23h 55m to 24h 5m window)
         // This 10-minute window accommodates two 5-minute cron runs
-        $events24h = Event::with('attendees')
+        $events24h = Event::with(['attendees' => function ($query) {
+                $query->where('status', 'registered');
+            }])
             ->where('start_date', '>', $now->copy()->addHours(23)->addMinutes(55))
             ->where('start_date', '<=', $now->copy()->addHours(24)->addMinutes(5))
             ->get();
 
         foreach ($events24h as $event) {
-            foreach ($event->attendees()->where('status', 'registered')->get() as $attendee) {
-                Notification::send($attendee, new UpcomingEventReminder($event));
-                $reminderCount++;
+            if ($event->attendees->isNotEmpty()) {
+                // Queue notification for all registered attendees
+                Notification::send($event->attendees, new UpcomingEventReminder($event));
+                $reminderCount += $event->attendees->count();
+
+                Log::info('24-hour event reminders queued', [
+                    'event_id' => $event->id,
+                    'event_title' => $event->title,
+                    'attendee_count' => $event->attendees->count(),
+                ]);
             }
         }
 
         // Send reminders for events starting in approximately 2 hours (1h 55m to 2h 5m window)
         // This 10-minute window accommodates two 5-minute cron runs
-        $events2h = Event::with('attendees')
+        $events2h = Event::with(['attendees' => function ($query) {
+                $query->where('status', 'registered');
+            }])
             ->where('start_date', '>', $now->copy()->addHours(1)->addMinutes(55))
             ->where('start_date', '<=', $now->copy()->addHours(2)->addMinutes(5))
             ->get();
 
         foreach ($events2h as $event) {
-            foreach ($event->attendees()->where('status', 'registered')->get() as $attendee) {
-                Notification::send($attendee, new UpcomingEventReminder($event));
-                $reminderCount++;
+            if ($event->attendees->isNotEmpty()) {
+                // Queue notification for all registered attendees
+                Notification::send($event->attendees, new UpcomingEventReminder($event));
+                $reminderCount += $event->attendees->count();
+
+                Log::info('2-hour event reminders queued', [
+                    'event_id' => $event->id,
+                    'event_title' => $event->title,
+                    'attendee_count' => $event->attendees->count(),
+                ]);
             }
         }
 
-        $this->info("Sent {$reminderCount} event reminders.");
-        Log::info("Event reminders sent: {$reminderCount} notifications");
+        $this->info("Queued {$reminderCount} event reminder notifications.");
+        Log::info("Event reminders queued: {$reminderCount} notifications");
 
         return Command::SUCCESS;
     }

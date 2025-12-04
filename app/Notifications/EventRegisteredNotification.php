@@ -10,7 +10,7 @@ use Illuminate\Notifications\Notification;
 use App\Models\Event;
 use Illuminate\Support\Carbon;
 
-class EventRegisteredNotification extends Notification
+class EventRegisteredNotification extends Notification implements ShouldQueue
 {
     use Queueable;
 
@@ -23,7 +23,7 @@ class EventRegisteredNotification extends Notification
 
     public function via(object $notifiable): array
     {
-        return ['mail'];
+        return ['database', 'mail'];
     }
 
     public function toMail(object $notifiable): MailMessage
@@ -111,10 +111,27 @@ The ' . config('app.name') . ' Team')
 
     public function toArray(object $notifiable): array
     {
+        $startDate = Carbon::parse($this->event->start_date);
+        $endDate = Carbon::parse($this->event->end_date);
+
+        $dateRange = $startDate->isSameDay($endDate)
+            ? $startDate->format('l, F j, Y')
+            : $startDate->format('F j') . ' - ' . $endDate->format('F j, Y');
+
+        $timeRange = $startDate->format('g:i A') . ' - ' . $endDate->format('g:i A');
+
         return [
             'event_id' => $this->event->id,
             'event_title' => $this->event->title,
             'event_slug' => $this->event->slug,
+            'start_date' => $this->event->start_date,
+            'end_date' => $this->event->end_date,
+            'date_range' => $dateRange,
+            'time_range' => $timeRange,
+            'mode' => $this->event->mode ?? 'Hybrid',
+            'message' => "Your registration for '{$this->event->title}' has been confirmed!",
+            'action_url' => route('events.show', $this->event->slug),
+            'type' => 'event_registration',
         ];
     }
 }

@@ -9,7 +9,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-class SpeakerApplicationApprovedNotification extends Notification
+class SpeakerApplicationApprovedNotification extends Notification implements ShouldQueue
 {
     use Queueable;
 
@@ -32,7 +32,7 @@ class SpeakerApplicationApprovedNotification extends Notification
      */
     public function via(object $notifiable): array
     {
-        return ['mail'];
+        return ['database', 'mail'];
     }
 
     /**
@@ -69,7 +69,13 @@ class SpeakerApplicationApprovedNotification extends Notification
     public function toArray(object $notifiable): array
     {
         return [
-            //
+            'application_id' => $this->application->id,
+            'event_id' => $this->event->id,
+            'event_title' => $this->event->title,
+            'event_slug' => $this->event->slug,
+            'message' => "Your application to speak at '{$this->event->title}' has been approved!",
+            'action_url' => route('events.show', $this->event->slug),
+            'type' => 'speaker_application_approved',
         ];
     }
 }

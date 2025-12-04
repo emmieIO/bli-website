@@ -8,7 +8,7 @@ use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 use Illuminate\Support\Facades\URL;
 
-class InstructorApplicationSubmitted extends Notification
+class InstructorApplicationSubmitted extends Notification implements ShouldQueue
 {
     use Queueable;
 
@@ -27,7 +27,7 @@ class InstructorApplicationSubmitted extends Notification
      */
     public function via(object $notifiable): array
     {
-        return ['mail'];
+        return ['database', 'mail'];
     }
 
     /**
@@ -54,7 +54,9 @@ class InstructorApplicationSubmitted extends Notification
     public function toArray(object $notifiable): array
     {
         return [
-            //
+            'message' => 'Your instructor application has been submitted and is under review.',
+            'action_url' => URL::signedRoute('instructors.view-application', ['user' => $notifiable->id]),
+            'type' => 'instructor_application_submitted',
         ];
     }
 }

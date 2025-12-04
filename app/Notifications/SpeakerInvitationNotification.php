@@ -10,7 +10,7 @@ use Illuminate\Notifications\Notification;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\URL;
 
-class SpeakerInvitationNotification extends Notification
+class SpeakerInvitationNotification extends Notification implements ShouldQueue
 {
     use Queueable;
 
@@ -38,7 +38,7 @@ class SpeakerInvitationNotification extends Notification
      */
     public function via(object $notifiable): array
     {
-        return ['mail'];
+        return ['database', 'mail'];
     }
 
     /**
@@ -104,6 +104,10 @@ class SpeakerInvitationNotification extends Notification
             'invitation_id' => $this->invitation->id,
             'event_id' => $this->invitation->event_id,
             'event_title' => $this->invitation->event->title,
+            'event_slug' => $this->invitation->event->slug,
+            'message' => "You've been invited to speak at '{$this->invitation->event->title}'",
+            'action_url' => $this->url,
+            'type' => 'speaker_invitation',
         ];
     }
 }

@@ -7,7 +7,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-class SpeakerAccountCreatedNotification extends Notification
+class SpeakerAccountCreatedNotification extends Notification implements ShouldQueue
 {
     use Queueable;
 
@@ -21,7 +21,7 @@ class SpeakerAccountCreatedNotification extends Notification
      */
     public function via(object $notifiable): array
     {
-        return ['mail'];
+        return ['database', 'mail'];
     }
 
     /**
@@ -57,6 +57,9 @@ class SpeakerAccountCreatedNotification extends Notification
     public function toArray(object $notifiable): array
     {
         return [
+            'message' => $this->isAdminCreated
+                ? 'Your speaker account has been created by admin. Please set your password to activate your account.'
+                : 'Your speaker account has been created and is pending approval.',
             'type' => 'speaker_account_created',
             'created_by_admin' => $this->isAdminCreated,
         ];

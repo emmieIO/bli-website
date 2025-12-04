@@ -45,13 +45,17 @@ Route::middleware('auth')->group(function () {
     Route::get('/api/cart/count', [\App\Http\Controllers\CartController::class, 'count'])->name('cart.count');
 });
 
-Route::get('process-queue', function () {
+Route::get('process-queue', function (Illuminate\Http\Request $request) {
+    // Validate token for security
+    if ($request->query('token') !== config('queue.token')) {
+        abort(403, 'Unauthorized');
+    }
+
     Artisan::call('queue:work', [
         '--stop-when-empty' => true,
         '--max-time' => 3600,
     ]);
     return 'Queue Processed.';
-
 })->middleware('throttle:5,1');
 
 // Load organized route files

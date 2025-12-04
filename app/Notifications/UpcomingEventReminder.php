@@ -8,7 +8,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-class UpcomingEventReminder extends Notification
+class UpcomingEventReminder extends Notification implements ShouldQueue
 {
     use Queueable;
 
@@ -27,7 +27,7 @@ class UpcomingEventReminder extends Notification
      */
     public function via(object $notifiable): array
     {
-        return ['mail'];
+        return ['database', 'mail'];
     }
 
     /**
@@ -115,8 +115,31 @@ The " . config('app.name') . " Team");
      */
     public function toArray(object $notifiable): array
     {
+        $startDate = \Carbon\Carbon::parse($this->event->start_date);
+        $now = \Carbon\Carbon::now();
+
+        // Calculate time until event
+        $hoursUntil = $now->diffInHours($startDate);
+        $daysUntil = $now->diffInDays($startDate);
+
+        $timeUntil = match(true) {
+            $hoursUntil < 2 => 'in less than 2 hours',
+            $hoursUntil < 24 => "in {$hoursUntil} hours",
+            $daysUntil === 1 => 'tomorrow',
+            default => "in {$daysUntil} days"
+        };
+
         return [
-            //
+            'event_id' => $this->event->id,
+            'event_title' => $this->event->title,
+            'event_slug' => $this->event->slug,
+            'start_date' => $this->event->start_date,
+            'time_until' => $timeUntil,
+            'mode' => $this->event->mode,
+            'location' => $this->formatLocation(),
+            'message' => "Reminder: {$this->event->title} is starting {$timeUntil}!",
+            'action_url' => route('events.show', $this->event->slug),
+            'type' => 'event_reminder',
         ];
     }
 

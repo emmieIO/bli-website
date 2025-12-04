@@ -9,7 +9,7 @@ use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 use Illuminate\Support\Facades\URL;
 
-class SendInstructorApplicationLink extends Notification
+class SendInstructorApplicationLink extends Notification implements ShouldQueue
 {
     use Queueable;
 
@@ -34,7 +34,7 @@ class SendInstructorApplicationLink extends Notification
      */
     public function via(object $notifiable): array
     {
-        return ['mail'];
+        return ['database', 'mail'];
     }
 
     /**
@@ -57,7 +57,9 @@ class SendInstructorApplicationLink extends Notification
     public function toArray(object $notifiable): array
     {
         return [
-            //
+            'message' => 'Complete your instructor application.',
+            'action_url' => $this->applicationUrl,
+            'type' => 'instructor_application_link',
         ];
     }
 }

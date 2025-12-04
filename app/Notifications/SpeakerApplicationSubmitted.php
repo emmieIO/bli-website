@@ -7,7 +7,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-class SpeakerApplicationSubmitted extends Notification
+class SpeakerApplicationSubmitted extends Notification implements ShouldQueue
 {
     use Queueable;
 
@@ -26,7 +26,7 @@ class SpeakerApplicationSubmitted extends Notification
      */
     public function via(object $notifiable): array
     {
-        return ['mail'];
+        return ['database', 'mail'];
     }
 
     /**
@@ -48,7 +48,8 @@ class SpeakerApplicationSubmitted extends Notification
     public function toArray(object $notifiable): array
     {
         return [
-            //
+            'message' => 'Your speaker application has been submitted and is under review.',
+            'type' => 'speaker_application_submitted',
         ];
     }
 }
