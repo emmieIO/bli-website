@@ -486,7 +486,9 @@ export default function EventShow({ event, auth, signed_speaker_route }: EventSh
                                                     <i className="fas fa-users text-base"></i>
                                                     Available Slots
                                                 </span>
-                                                <span className="font-bold text-2xl text-white font-montserrat">{slotsRemaining}</span>
+                                                <span className="font-bold text-2xl text-white font-montserrat">
+                                                    {event.slots_remaining === null ? 'Unlimited' : slotsRemaining}
+                                                </span>
                                             </div>
                                             {slotsRemaining <= 10 && slotsRemaining > 0 && (
                                                 <p className="text-white/80 text-xs font-lato mt-2">
@@ -539,33 +541,40 @@ export default function EventShow({ event, auth, signed_speaker_route }: EventSh
 
                                     {/* Registration Button */}
                                     {!isRegistered ? (
-                                        <button
-                                            onClick={() => setShowModal(true)}
-                                            disabled={revokeCount === 4 || slotsRemaining === 0 || !auth?.user}
-                                            className="w-full bg-white text-primary py-4 px-6 rounded-xl font-bold text-lg hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl flex items-center justify-center gap-3 font-montserrat mb-4"
-                                        >
-                                            {revokeCount === 4 ? (
-                                                <>
-                                                    <i className="fas fa-ban text-xl text-gray-500"></i>
-                                                    <span>Maximum Registrations Reached</span>
-                                                </>
-                                            ) : slotsRemaining === 0 ? (
-                                                <>
-                                                    <i className="fas fa-users-slash text-xl text-gray-500"></i>
-                                                    <span>Event Full</span>
-                                                </>
-                                            ) : !auth?.user ? (
-                                                <>
-                                                    <i className="fas fa-sign-in-alt text-xl text-primary"></i>
-                                                    <span>Login to Register</span>
-                                                </>
-                                            ) : (
-                                                <>
-                                                    <i className="fas fa-hand-paper text-xl text-primary"></i>
-                                                    <span>Register Now</span>
-                                                </>
-                                            )}
-                                        </button>
+                                        isPast ? (
+                                            <div className="w-full bg-gray-500 text-white py-4 px-6 rounded-xl font-bold text-lg cursor-not-allowed shadow-lg flex items-center justify-center gap-3 font-montserrat mb-4 opacity-80">
+                                                <i className="fas fa-history text-xl"></i>
+                                                <span>Event has Ended</span>
+                                            </div>
+                                        ) : (
+                                            <button
+                                                onClick={() => setShowModal(true)}
+                                                disabled={revokeCount === 4 || slotsRemaining === 0 || !auth?.user}
+                                                className="w-full bg-white text-primary py-4 px-6 rounded-xl font-bold text-lg hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl flex items-center justify-center gap-3 font-montserrat mb-4"
+                                            >
+                                                {revokeCount === 4 ? (
+                                                    <>
+                                                        <i className="fas fa-ban text-xl text-gray-500"></i>
+                                                        <span>Maximum Registrations Reached</span>
+                                                    </>
+                                                ) : slotsRemaining === 0 ? (
+                                                    <>
+                                                        <i className="fas fa-users-slash text-xl text-gray-500"></i>
+                                                        <span>Event Full</span>
+                                                    </>
+                                                ) : !auth?.user ? (
+                                                    <>
+                                                        <i className="fas fa-sign-in-alt text-xl text-primary"></i>
+                                                        <span>Login to Register</span>
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <i className="fas fa-hand-paper text-xl text-primary"></i>
+                                                        <span>Register Now</span>
+                                                    </>
+                                                )}
+                                            </button>
+                                        )
                                     ) : (
                                         <div className="w-full bg-white/20 backdrop-blur-sm border-2 border-white/40 text-white py-4 px-6 rounded-xl font-bold text-lg cursor-default shadow-lg flex items-center justify-center gap-3 font-montserrat mb-4">
                                             <i className="fas fa-check-circle text-2xl text-accent"></i>
