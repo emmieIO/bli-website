@@ -33,7 +33,19 @@ class UpdateEventRequest extends FormRequest
             'attendee_slots' => 'nullable|integer|min:1',
             'program_cover' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
             'mode' => 'sometimes|required|string|in:' . implode(',', array_column(\App\Enums\EventModeEnum::cases(), 'value')),
-            'start_date' => 'sometimes|required|date|after_or_equal:today',
+            'start_date' => [
+                'sometimes',
+                'required',
+                'date',
+                function ($attribute, $value, $fail) {
+                    if ($this->event && \Illuminate\Support\Carbon::parse($this->event->start_date)->isSameDay(\Illuminate\Support\Carbon::parse($value))) {
+                        return;
+                    }
+                    if (\Illuminate\Support\Carbon::parse($value)->startOfDay()->lt(\Illuminate\Support\Carbon::today())) {
+                         $fail('The start date must be today or later.');
+                    }
+                }
+            ],
             'end_date' => 'sometimes|required|date|after_or_equal:start_date',
             'physical_address' => 'nullable|string|max:255|required_if:mode,offline,hybrid',
             'creator_id' => 'sometimes|required|exists:users,id',
