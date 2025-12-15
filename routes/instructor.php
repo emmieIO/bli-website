@@ -15,7 +15,16 @@ Route::get('/instructors/view-application/{user}', [InstructorApplicationControl
     ->name('instructors.view-application')
     ->middleware('signed');
 
-Route::post('/instructors/apply/{user}', [InstructorsController::class, 'submitApplication'])
+Route::post('/instructors/apply/{user}/personal', [InstructorsController::class, 'savePersonalInformation'])
+    ->name('instructors.save-personal-info');
+
+Route::post('/instructors/apply/{user}/experience', [InstructorsController::class, 'saveExperienceData'])
+    ->name('instructors.save-experience');
+
+Route::post('/instructors/apply/{user}/documents', [InstructorsController::class, 'saveInstructorsDocuments'])
+    ->name('instructors.save-documents');
+
+Route::post('/instructors/apply/{user}', [InstructorsController::class, 'finalizeApplication'])
     ->name('instructors.submit-application');
 
 Route::post('/instructors/start-application', [InstructorsController::class, 'startApplication'])

@@ -320,13 +320,14 @@ export default function GuestLayout({ children }: PropsWithChildren) {
                             </>
 
                         ) : (
-
-                            <Link href={route('login')} className="font-semibold px-6 py-2.5 rounded-xl transition-all duration-300 shadow-md hover:shadow-lg transform hover:scale-105" style={{ backgroundColor: '#00a651', color: 'white' }} onMouseOver={e => e.currentTarget.style.backgroundColor = '#15803d'} onMouseOut={e => e.currentTarget.style.backgroundColor = '#00a651'}>
-
-                                Login
-
-                            </Link>
-
+                            <div className="flex items-center gap-3">
+                                <Link href={route('login')} className="font-semibold px-6 py-2.5 rounded-xl transition-all duration-300 shadow-md hover:shadow-lg transform hover:scale-105" style={{ backgroundColor: '#00a651', color: 'white' }} onMouseOver={e => e.currentTarget.style.backgroundColor = '#15803d'} onMouseOut={e => e.currentTarget.style.backgroundColor = '#00a651'}>
+                                    Login
+                                </Link>
+                                <Link href={route('register')} className="font-semibold px-6 py-2.5 rounded-xl transition-all duration-300 shadow-md hover:shadow-lg transform hover:scale-105" style={{ backgroundColor: '#002147', color: 'white' }} onMouseOver={e => e.currentTarget.style.backgroundColor = '#1e3a8a'} onMouseOut={e => e.currentTarget.style.backgroundColor = '#002147'}>
+                                    Register
+                                </Link>
+                            </div>
                         )}
 
                     </div>
@@ -478,15 +479,16 @@ export default function GuestLayout({ children }: PropsWithChildren) {
                                         </div>
 
                                     ) : (
-
-                                        <Link href={route('login')} className="flex items-center justify-center gap-2 font-semibold px-4 py-3 rounded-xl transition-all duration-300 shadow-md w-full" style={{ backgroundColor: '#00a651', color: 'white' }}>
-
-                                            <i className="fas fa-sign-in-alt"></i>
-
-                                            <span>Login</span>
-
-                                        </Link>
-
+                                        <div className="flex flex-col gap-3">
+                                            <Link href={route('login')} className="flex items-center justify-center gap-2 font-semibold px-4 py-3 rounded-xl transition-all duration-300 shadow-md w-full" style={{ backgroundColor: '#00a651', color: 'white' }}>
+                                                <i className="fas fa-sign-in-alt"></i>
+                                                <span>Login</span>
+                                            </Link>
+                                            <Link href={route('register')} className="flex items-center justify-center gap-2 font-semibold px-4 py-3 rounded-xl transition-all duration-300 shadow-md w-full" style={{ backgroundColor: '#002147', color: 'white' }}>
+                                                <i className="fas fa-user-plus"></i>
+                                                <span>Register</span>
+                                            </Link>
+                                        </div>
                                     )}
 
                                 </li>

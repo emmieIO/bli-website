@@ -73,7 +73,8 @@ export default function ApplicationForm({ user, profile }: ApplicationFormProps)
         experienceForm.transform((data) => ({
             ...data,
             expertise: expertiseTags.join(','),
-        })).post(route('instructors.save-experience', user.id));
+        }));
+        experienceForm.post(route('instructors.save-experience', user.id));
     };
 
     const handleDocumentsSubmit = (e: FormEvent) => {

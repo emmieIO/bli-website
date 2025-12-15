@@ -62,7 +62,7 @@ export default function Register() {
                     <Input
                         type="text"
                         name="phone"
-                        label="Phone Number (Optional)"
+                        label="Phone Number"
                         icon="fas fa-phone"
                         placeholder="+234 801 234 5678"
                         value={data.phone}

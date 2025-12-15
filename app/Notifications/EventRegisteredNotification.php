@@ -14,11 +14,8 @@ class EventRegisteredNotification extends Notification implements ShouldQueue
 {
     use Queueable;
 
-    public Event $event;
-
-    public function __construct(Event $event, public EventCalendarService $calendarService)
+    public function __construct(public Event $event)
     {
-        $this->event = $event;
     }
 
     public function via(object $notifiable): array
@@ -28,7 +25,8 @@ class EventRegisteredNotification extends Notification implements ShouldQueue
 
     public function toMail(object $notifiable): MailMessage
     {
-        $ics = $this->calendarService->downloadEventCalendar($this->event);
+        $calendarService = app(EventCalendarService::class);
+        $ics = $calendarService->downloadEventCalendar($this->event);
 
         $startDate = Carbon::parse($this->event->start_date);
         $endDate = Carbon::parse($this->event->end_date);
