@@ -308,6 +308,9 @@ export default function EditEvent({ event }: Props) {
                                                 src={`/storage/${event.program_cover}`}
                                                 alt="Event Cover"
                                                 className="h-16 w-24 object-cover rounded border"
+                                                onError={(e) => {
+                                                    (e.target as HTMLImageElement).src = 'https://placehold.co/600x400?text=Cover+Image+Missing';
+                                                }}
                                             />
                                             <a
                                                 href={`/storage/${event.program_cover}`}
