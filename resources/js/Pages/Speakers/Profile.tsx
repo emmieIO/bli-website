@@ -328,6 +328,9 @@ export default function SpeakerProfile({ speaker }: SpeakerProfileProps) {
                                                                 src={`/storage/${event.program_cover}`}
                                                                 alt={event.title}
                                                                 className="w-20 h-20 rounded-2xl object-cover shadow-lg group-hover:scale-105 transition-transform duration-300"
+                                                                onError={(e) => {
+                                                                    (e.target as HTMLImageElement).src = 'https://placehold.co/600x400?text=Cover+Image+Missing';
+                                                                }}
                                                             />
                                                         </div>
                                                         <div className="flex-1">

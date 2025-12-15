@@ -118,6 +118,9 @@ export default function ViewEvent({ event, speakers }: ViewEventProps) {
                                             src={`/storage/${event.program_cover}`}
                                             alt={event.title}
                                             className="w-full h-full object-cover"
+                                            onError={(e) => {
+                                                (e.target as HTMLImageElement).src = 'https://placehold.co/600x400?text=Cover+Image+Missing';
+                                            }}
                                         />
                                     </div>
                                 )}

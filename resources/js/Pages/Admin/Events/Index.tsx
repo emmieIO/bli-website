@@ -181,6 +181,9 @@ export default function EventsIndex({ events }: EventsProps) {
                                                         className="h-10 w-10 rounded-md object-cover"
                                                         src={`/storage/${event.program_cover}`}
                                                         alt={event.title}
+                                                        onError={(e) => {
+                                                            (e.target as HTMLImageElement).src = 'https://placehold.co/600x400?text=Cover+Image+Missing';
+                                                        }}
                                                     />
                                                 )}
                                                 <div>

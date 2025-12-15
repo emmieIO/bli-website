@@ -236,11 +236,14 @@ export default function EventShow({ event, auth, signed_speaker_route }: EventSh
 
                             {/* Event Cover Image */}
                             <div className="relative rounded-2xl overflow-hidden shadow-2xl border border-gray-200 group">
-                                <img
-                                    src={`/storage/${event.program_cover}`}
-                                    alt={event.title}
-                                    className="w-full h-64 sm:h-96 lg:h-[32rem] object-cover group-hover:scale-105 transition-transform duration-700"
-                                />
+                            <img
+                                src={`/storage/${event.program_cover}`}
+                                alt={event.title}
+                                className="w-full h-full object-cover"
+                                onError={(e) => {
+                                    (e.target as HTMLImageElement).src = 'https://placehold.co/600x400?text=Cover+Image+Missing';
+                                }}
+                            />
 
                                 {/* Image Overlay */}
                                 <div className="absolute inset-0 bg-linear-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>

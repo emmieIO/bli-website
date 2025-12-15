@@ -178,6 +178,9 @@ export default function EventsIndex({ events, upcomingEvents, ongoingEvents, exp
                                                 src={`/storage/${event.program_cover}`}
                                                 alt={event.title}
                                                 className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                                                onError={(e) => {
+                                                    (e.target as HTMLImageElement).src = 'https://placehold.co/600x400?text=Cover+Image+Missing';
+                                                }}
                                             />
 
                                             {/* Event Status Badge */}
