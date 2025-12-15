@@ -59,13 +59,6 @@ class ProgrammeController extends Controller
             // Calculate slots remaining
             $slotsRemaining = $event->slotsRemaining();
 
-            // Handle non-numeric slots remaining (Unlimited, Full)
-            if ($slotsRemaining === 'Unlimited') {
-                $slotsRemaining = 999; // Large number to indicate unlimited
-            } elseif ($slotsRemaining === 'Full') {
-                $slotsRemaining = 0;
-            }
-
             // Check if user is registered
             $isRegistered = false;
             $revokeCount = 0;
