@@ -1,6 +1,7 @@
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import DashboardLayout from '@/Layouts/DashboardLayout';
 import { useState } from 'react';
+import ConfirmModal from '@/Components/ConfirmModal';
 
 interface Event {
     id: number;
@@ -25,6 +26,10 @@ interface EventsProps {
 export default function EventsIndex({ events }: EventsProps) {
     const { sideLinks } = usePage().props as any;
     const [selectedEvents, setSelectedEvents] = useState<number[]>([]);
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [eventToDelete, setEventToDelete] = useState<Event | null>(null);
+    const [isDeleting, setIsDeleting] = useState(false);
+
     const currentStatus = new URLSearchParams(window.location.search).get('status') || 'all';
 
     const eventsList = events.data || [];
@@ -42,6 +47,30 @@ export default function EventsIndex({ events }: EventsProps) {
             setSelectedEvents([...selectedEvents, eventId]);
         } else {
             setSelectedEvents(selectedEvents.filter((id) => id !== eventId));
+        }
+    };
+
+    const confirmDelete = (event: Event) => {
+        setEventToDelete(event);
+        setShowDeleteModal(true);
+    };
+
+    const handleDelete = () => {
+        if (eventToDelete) {
+            setIsDeleting(true);
+            router.delete(route('admin.events.destroy', eventToDelete.slug), {
+                onSuccess: () => {
+                    setShowDeleteModal(false);
+                    setEventToDelete(null);
+                    setIsDeleting(false);
+                },
+                onError: () => {
+                    setIsDeleting(false);
+                },
+                onFinish: () => {
+                    setIsDeleting(false);
+                }
+            });
         }
     };
 
@@ -233,11 +262,7 @@ export default function EventsIndex({ events }: EventsProps) {
                                                     <i className="fas fa-edit w-4 h-4"></i>
                                                 </Link>
                                                 <button
-                                                    onClick={() => {
-                                                        if (confirm(`Delete event "${event.title}"?`)) {
-                                                            router.delete(route('admin.events.destroy', event.id));
-                                                        }
-                                                    }}
+                                                    onClick={() => confirmDelete(event)}
                                                     className="text-red-600 hover:text-red-700 transition-colors"
                                                     title="Delete"
                                                 >
@@ -261,6 +286,22 @@ export default function EventsIndex({ events }: EventsProps) {
                     </tbody>
                 </table>
             </div>
+
+            <ConfirmModal
+                show={showDeleteModal}
+                onClose={() => setShowDeleteModal(false)}
+                onConfirm={handleDelete}
+                title="Delete Event"
+                message={
+                    <span>
+                        Are you sure you want to delete the event <strong>{eventToDelete?.title}</strong>? This action cannot be undone.
+                    </span>
+                }
+                confirmText="Delete Event"
+                confirmButtonClass="bg-red-600 hover:bg-red-700 text-white"
+                icon={<i className="fas fa-exclamation-circle text-4xl text-red-500 mb-2"></i>}
+                isProcessing={isDeleting}
+            />
         </DashboardLayout>
     );
 }
