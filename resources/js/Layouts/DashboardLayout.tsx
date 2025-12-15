@@ -584,6 +584,9 @@ export default function DashboardLayout({ children }: PropsWithChildren) {
                                             className="w-8 h-8 rounded-lg object-cover border border-slate-200"
                                             src={getAvatarUrl()}
                                             alt={user?.name}
+                                            onError={(e) => {
+                                                (e.target as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.name || '')}&background=002147&color=fff`;
+                                            }}
                                         />
                                         <div className="hidden md:block text-left">
                                             <p className="text-sm font-semibold text-slate-700 leading-tight">
@@ -754,6 +757,9 @@ function SearchResultsDisplay({
                                         src={`/storage/${course.thumbnail}`}
                                         alt={course.title}
                                         className="w-12 h-12 rounded object-cover shrink-0"
+                                        onError={(e) => {
+                                            (e.target as HTMLImageElement).src = 'https://placehold.co/100x100?text=No+Img';
+                                        }}
                                     />
                                 ) : (
                                     <div className="w-12 h-12 rounded bg-linear-to-br from-green-100 to-green-50 flex items-center justify-center shrink-0">
@@ -793,6 +799,9 @@ function SearchResultsDisplay({
                                         src={`/storage/${speaker.thumbnail}`}
                                         alt={speaker.title}
                                         className="w-12 h-12 rounded-full object-cover shrink-0"
+                                        onError={(e) => {
+                                            (e.target as HTMLImageElement).src = 'https://placehold.co/100x100?text=No+Img';
+                                        }}
                                     />
                                 ) : (
                                     <div className="w-12 h-12 rounded-full bg-linear-to-br from-purple-100 to-purple-50 flex items-center justify-center shrink-0">

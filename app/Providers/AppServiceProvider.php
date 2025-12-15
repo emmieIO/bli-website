@@ -35,9 +35,9 @@ class AppServiceProvider extends ServiceProvider
             $view->with('sideLinks', $sideLinks);
         });
         Schema::defaultStringLength(191);
-        // if (config('app.env') === 'production') {
-        //     URL::forceScheme('https');
-        // }
+        if (config('app.env') === 'production') {
+            URL::forceScheme('https');
+        }
 
         Inertia::share([
             'sideLinks' => fn () => config('sidebar.links'),
