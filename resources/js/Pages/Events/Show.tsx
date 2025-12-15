@@ -540,41 +540,39 @@ export default function EventShow({ event, auth, signed_speaker_route }: EventSh
                                     </div>
 
                                     {/* Registration Button */}
-                                    {!isRegistered ? (
-                                        isPast ? (
-                                            <div className="w-full bg-gray-500 text-white py-4 px-6 rounded-xl font-bold text-lg cursor-not-allowed shadow-lg flex items-center justify-center gap-3 font-montserrat mb-4 opacity-80">
-                                                <i className="fas fa-history text-xl"></i>
-                                                <span>Event has Ended</span>
-                                            </div>
-                                        ) : (
-                                            <button
-                                                onClick={() => setShowModal(true)}
-                                                disabled={revokeCount === 4 || slotsRemaining === 0 || !auth?.user}
-                                                className="w-full bg-white text-primary py-4 px-6 rounded-xl font-bold text-lg hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl flex items-center justify-center gap-3 font-montserrat mb-4"
-                                            >
-                                                {revokeCount === 4 ? (
-                                                    <>
-                                                        <i className="fas fa-ban text-xl text-gray-500"></i>
-                                                        <span>Maximum Registrations Reached</span>
-                                                    </>
-                                                ) : slotsRemaining === 0 ? (
-                                                    <>
-                                                        <i className="fas fa-users-slash text-xl text-gray-500"></i>
-                                                        <span>Event Full</span>
-                                                    </>
-                                                ) : !auth?.user ? (
-                                                    <>
-                                                        <i className="fas fa-sign-in-alt text-xl text-primary"></i>
-                                                        <span>Login to Register</span>
-                                                    </>
-                                                ) : (
-                                                    <>
-                                                        <i className="fas fa-hand-paper text-xl text-primary"></i>
-                                                        <span>Register Now</span>
-                                                    </>
-                                                )}
-                                            </button>
-                                        )
+                                    {isPast ? (
+                                        <div className="w-full bg-gray-500 text-white py-4 px-6 rounded-xl font-bold text-lg cursor-not-allowed shadow-lg flex items-center justify-center gap-3 font-montserrat mb-4 opacity-80">
+                                            <i className="fas fa-history text-xl"></i>
+                                            <span>Event has Ended</span>
+                                        </div>
+                                    ) : !isRegistered ? (
+                                        <button
+                                            onClick={() => setShowModal(true)}
+                                            disabled={revokeCount === 4 || slotsRemaining === 0 || !auth?.user}
+                                            className="w-full bg-white text-primary py-4 px-6 rounded-xl font-bold text-lg hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl flex items-center justify-center gap-3 font-montserrat mb-4"
+                                        >
+                                            {revokeCount === 4 ? (
+                                                <>
+                                                    <i className="fas fa-ban text-xl text-gray-500"></i>
+                                                    <span>Maximum Registrations Reached</span>
+                                                </>
+                                            ) : slotsRemaining === 0 ? (
+                                                <>
+                                                    <i className="fas fa-users-slash text-xl text-gray-500"></i>
+                                                    <span>Event Full</span>
+                                                </>
+                                            ) : !auth?.user ? (
+                                                <>
+                                                    <i className="fas fa-sign-in-alt text-xl text-primary"></i>
+                                                    <span>Login to Register</span>
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <i className="fas fa-hand-paper text-xl text-primary"></i>
+                                                    <span>Register Now</span>
+                                                </>
+                                            )}
+                                        </button>
                                     ) : (
                                         <div className="w-full bg-white/20 backdrop-blur-sm border-2 border-white/40 text-white py-4 px-6 rounded-xl font-bold text-lg cursor-default shadow-lg flex items-center justify-center gap-3 font-montserrat mb-4">
                                             <i className="fas fa-check-circle text-2xl text-accent"></i>
@@ -670,50 +668,34 @@ export default function EventShow({ event, auth, signed_speaker_route }: EventSh
                                                         ? 'Venue Address'
                                                         : event.mode === 'online'
                                                             ? 'Meeting Link'
-                                                            : 'Location'}
+                                                            : 'Location & Link'}
                                                 </p>
-                                                {event.mode === 'offline' && event.physical_address && (
-                                                    <p className="text-gray-700 text-sm break-words font-lato">{event.physical_address}</p>
+                                                {/* Physical Address for Offline and Hybrid */}
+                                                {(event.mode === 'offline' || event.mode === 'hybrid') && event.physical_address && (
+                                                    <p className="text-gray-700 text-sm break-words font-lato mb-2">{event.physical_address}</p>
                                                 )}
-                                                {event.mode === 'online' && event.location && (
+                                                
+                                                {/* Meeting Link for Online and Hybrid */}
+                                                {(event.mode === 'online' || event.mode === 'hybrid') && event.location && (
                                                     <>
                                                         {isPast ? (
-                                                            <span className="text-red-600 font-semibold text-sm font-lato">
+                                                            <span className="text-red-600 font-semibold text-sm font-lato block">
                                                                 Meeting link has expired.
                                                             </span>
                                                         ) : startDate <= now ? (
                                                             <a
                                                                 href={event.location}
-                                                                className="text-secondary font-semibold hover:underline break-all text-sm font-lato"
+                                                                className="text-secondary font-semibold hover:underline break-all text-sm font-lato block"
                                                                 target="_blank"
                                                                 rel="noopener noreferrer"
                                                             >
                                                                 Click to Join Meeting
                                                             </a>
                                                         ) : (
-                                                            <span className="text-gray-600 text-sm font-lato">
+                                                            <span className="text-gray-600 text-sm font-lato block">
                                                                 Meeting link will be available on {formatDate(event.start_date)} at{' '}
                                                                 {formatTime(event.start_date)}.
                                                             </span>
-                                                        )}
-                                                    </>
-                                                )}
-                                                {event.mode === 'hybrid' && (
-                                                    <>
-                                                        {event.physical_address && (
-                                                            <p className="text-gray-700 text-sm break-words font-lato mb-2">
-                                                                {event.physical_address}
-                                                            </p>
-                                                        )}
-                                                        {event.location && startDate <= now && (
-                                                            <a
-                                                                href={event.location}
-                                                                className="text-secondary font-semibold hover:underline break-all text-sm font-lato"
-                                                                target="_blank"
-                                                                rel="noopener noreferrer"
-                                                            >
-                                                                Click to Join Meeting
-                                                            </a>
                                                         )}
                                                     </>
                                                 )}

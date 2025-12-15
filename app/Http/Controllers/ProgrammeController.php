@@ -75,7 +75,15 @@ class ProgrammeController extends Controller
             }
 
             // Append calculated values to event
-            $event->slots_remaining = $slotsRemaining;
+            // Transform 'Unlimited' to null for frontend to interpret as truly unlimited
+            // Transform 'Full' to 0 for frontend to interpret as no slots
+            if ($slotsRemaining === 'Unlimited') {
+                $event->slots_remaining = null;
+            } elseif ($slotsRemaining === 'Full') {
+                $event->slots_remaining = 0;
+            } else {
+                $event->slots_remaining = $slotsRemaining; // It's already a number
+            }
             $event->is_registered = $isRegistered;
             $event->revoke_count = $revokeCount;
 
