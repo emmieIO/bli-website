@@ -22,6 +22,9 @@ class RoleAndPermissionsSeeder extends Seeder
 
         $rolesPermissions = [
                                     'admin' => [
+                                        // Dashboard & System
+                                        'analytics-view-system',     // System-wide course analytics
+
                                         // Event management
                                         'manage events',
                         
@@ -31,11 +34,14 @@ class RoleAndPermissionsSeeder extends Seeder
                                         "edit-speaker",
                                         'delete-speaker',
                                         'assign-speaker',
-                                        "manage-instructor-applications",
                                         'approve-speaker-applications',
-                                        'track-applications',
-                                        'manage-activity-log',
-                        
+                                        
+                                        // Instructor Management
+                                        "manage-instructor-applications",
+                                        
+                                        // Mentorship Management
+                                        'mentorship-manage-any',
+
                                         // Blog Management
                                         'manage-blog',
                         
@@ -61,6 +67,8 @@ class RoleAndPermissionsSeeder extends Seeder
                                         'assign-permission',
                                         'remove-permission',
                                         'view-permission-list',
+                                        'track-applications',
+                                        'manage-activity-log',
                         
                                         // Categories (Admin only)
                                         'category-view',
@@ -89,66 +97,154 @@ class RoleAndPermissionsSeeder extends Seeder
                                         'enrollment-manage-any',     // Manage all enrollments
                                         'enrollment-view-progress',  // View all student progress
                         
-                                                        // System Analytics
-                        
-                                                        'analytics-view-system',     // System-wide course analytics
-                        
-                                                        
-                        
-                                                        // Ticket Management
+                                        // Ticket Management
+                                        'manage-tickets',
 
-                                                        'manage-tickets',
+                                        // Earnings Management
+                                        'earnings-manage-any',   // Manage all instructor earnings and payouts
+                                        
+                                        // Transaction Audit
+                                        'view-transaction-audit',
 
-                                                        // Earnings Management
-                                                        'earnings-manage-any',   // Manage all instructor earnings and payouts
-
-                                                    ],
+                                    ],
                         
-                                                    
-                        
-                                                    "instructor" => [
-                        
-                                                        // Application tracking
-                        
-                                                        'track-applications',
-                
-                // Course Creation & Management (Own courses only)
-                'course-create',             // Create new courses (draft state)
-                'course-view-own',           // View own courses
-                'course-update-own',         // Edit own courses (draft/rejected only)
-                'course-submit-review',      // Submit course for admin approval
-                'course-delete-own',         // Delete own courses (draft only)
-                
-                // Course Building (Own courses only)
-                'module-create',             // Create modules in own courses
-                'module-update',             // Update modules in own courses
-                'module-delete',             // Delete modules in own courses
-                'module-reorder',            // Reorder modules in own courses
-                
-                'lesson-create',             // Create lessons in own courses
-                'lesson-update',             // Update lessons in own courses
-                'lesson-delete',             // Delete lessons in own courses
-                'lesson-reorder',            // Reorder lessons in own courses
-                
-                // Student Management (Own courses only)
-                'enrollment-view-own',       // View enrollments in own courses
-                'student-progress-view',     // View student progress in own courses
-                
-                // Analytics (Own courses only)
-                'analytics-view-own',        // View analytics for own courses
-
-                // Earnings & Payouts
-                'earnings-view-own',         // View own earnings and request payouts
-            ],
             
-            'student' => [
-                'track-applications',
-                'course-enroll',             // Enroll in courses
-                'course-view-enrolled',      // View enrolled courses
-                'lesson-view-enrolled',      // View lessons in enrolled courses
-                'progress-track-own',        // Track own learning progress
-            ]
+                        'student' => [
+                        
+            
+                            'track-applications',
+                        
+            
+                            'course-enroll',             // Enroll in courses
+                        
+            
+                            'course-view-enrolled',      // View enrolled courses
+                        
+            
+                            'lesson-view-enrolled',      // View lessons in enrolled courses
+                        
+            
+                            'progress-track-own',        // Track own learning progress
+                        
+            
+                            'view-own-transaction-history', // View own transaction history
+                        
+            
+                            'view-own-invitations',      // View own invitations
+                        
+            
+                        ],
+                        
+            
+                        
+                        
+            
+                        'instructor' => [
+                        
+            
+                            // Application tracking
+                        
+            
+                            'track-applications',
+                        
+            
+                            
+                        
+            
+                            // Course Creation & Management (Own courses only)
+                        
+            
+                            'course-create',             // Create new courses (draft state)
+                        
+            
+                            'course-view-own',           // View own courses
+                        
+            
+                            'course-update-own',         // Edit own courses (draft/rejected only)
+                        
+            
+                            'course-submit-review',      // Submit course for admin approval
+                        
+            
+                            'course-delete-own',         // Delete own courses (draft only)
+                        
+            
+                            
+                        
+            
+                            // Course Building (Own courses only)
+                        
+            
+                            'module-create',             // Create modules in own courses
+                        
+            
+                            'module-update',             // Update modules in own courses
+                        
+            
+                            'module-delete',             // Delete modules in own courses
+                        
+            
+                            'module-reorder',            // Reorder modules in own courses
+                        
+            
+                            
+                        
+            
+                            'lesson-create',             // Create lessons in own courses
+                        
+            
+                            'lesson-update',             // Update lessons in own courses
+                        
+            
+                            'lesson-delete',             // Delete lessons in own courses
+                        
+            
+                            'lesson-reorder',            // Reorder lessons in own courses
+                        
+            
+                            
+                        
+            
+                            // Student Management (Own courses only)
+                        
+            
+                            'enrollment-view-own',       // View enrollments in own courses
+                        
+            
+                            'student-progress-view',     // View student progress in own courses
+                        
+            
+                            
+                        
+            
+                            // Analytics (Own courses only)
+                        
+            
+                            'analytics-view-own',        // View analytics for own courses
+                        
+            
+            
+                        
+            
+                            // Earnings & Payouts
+                        
+            
+                            'earnings-view-own',         // View own earnings and request payouts
+                        
+            
+                            'view-own-transaction-history', // View own transaction history
+                        
+            
+                            'view-own-invitations',      // View own invitations
+                        
+            
+                        ]
+                        
+            
+            
         ];
+
+
 
         // Create permissions
         $allPermissions = collect($rolesPermissions)->flatten()->unique();

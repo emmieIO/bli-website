@@ -54,11 +54,13 @@ return [
             'title' => 'My Invitations',
             'icon' => 'send',
             'route' => 'invitations.index',
+            'permission' => 'view-own-invitations',
         ],
         [
             'title' => 'Transaction History',
             'icon' => 'receipt',
             'route' => 'transactions.index',
+            'permission' => 'view-own-transaction-history',
         ],
         [
             'title' => 'My Support Tickets',
@@ -136,6 +138,12 @@ return [
             'icon' => 'banknote',
             'route' => 'admin.payouts.index',
             'permission' => 'earnings-manage-any',
+        ],
+        [
+            'title' => 'Transaction Audit',
+            'icon' => 'receipt', // Using 'receipt' icon for transaction audit
+            'route' => 'admin.transactions-audit.index',
+            'permission' => 'view-transaction-audit',
         ],
         [
             'title' => 'Mentorship Manager',

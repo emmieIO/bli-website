@@ -135,4 +135,9 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
         Route::post('/payouts/{payout}/mark-failed', [\App\Http\Controllers\Admin\InstructorPayoutController::class, 'markAsFailed'])->name('payouts.mark-failed');
         Route::post('/payouts/{payout}/cancel', [\App\Http\Controllers\Admin\InstructorPayoutController::class, 'cancel'])->name('payouts.cancel');
     });
+
+    // Transaction Audit
+    Route::middleware(['permission:view-transaction-audit'])->group(function () {
+        Route::get('/transactions-audit', [\App\Http\Controllers\Admin\TransactionAuditController::class, 'index'])->name('transactions-audit.index');
+    });
 });

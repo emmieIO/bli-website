@@ -104,6 +104,13 @@ export default function SpeakersIndex({ speakers }: SpeakersProps) {
                         </p>
                     </div>
                 </div>
+                <Link
+                    href={route('admin.speakers.create')}
+                    className="inline-flex items-center px-4 py-2 bg-primary text-white text-sm font-medium rounded-lg hover:bg-primary-600 focus:ring-4 focus:ring-primary-300 transition shadow-sm font-montserrat"
+                >
+                    <i className="fas fa-plus w-4 h-4 mr-2"></i>
+                    Create Speaker
+                </Link>
             </div>
 
             {/* Status Tabs */}
@@ -315,7 +322,7 @@ export default function SpeakersIndex({ speakers }: SpeakersProps) {
                                                     className="inline-flex items-center px-4 py-2 bg-primary text-white text-sm font-medium rounded-lg hover:bg-primary-600 focus:ring-4 focus:ring-primary-300 transition shadow-sm font-montserrat"
                                                 >
                                                     <i className="fas fa-plus w-4 h-4 mr-2"></i>
-                                                    Add Speaker
+                                                    Create Speaker
                                                 </Link>
                                             </div>
                                         </div>
@@ -438,3 +445,4 @@ function Pagination({ links }: { links: Array<{ url: string | null; label: strin
         </nav>
     );
 }
+

@@ -45,6 +45,11 @@ Route::middleware('auth')->group(function () {
     Route::get('/api/cart/count', [\App\Http\Controllers\CartController::class, 'count'])->name('cart.count');
 });
 
+// Transaction receipt route (User-specific)
+Route::middleware('auth')->group(function () {
+    Route::get('/transactions/{transaction}/receipt', [\App\Http\Controllers\TransactionController::class, 'showReceipt'])->name('transactions.show-receipt');
+});
+
 Route::get('process-queue', function (Illuminate\Http\Request $request) {
     // Validate token for security
     if ($request->query('token') !== config('queue.token')) {
