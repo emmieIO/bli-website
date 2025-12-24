@@ -35,7 +35,7 @@ class EventController extends Controller
 
     public function show(Event $event)
     {
-        $event->load('speakers.user', "resources");
+        $event->load('speakers.user', "resources", "attendees");
         $speakers = $this->speakerService->fetchSpeakers();
 
         return \Inertia\Inertia::render('Admin/Events/View', compact('event', 'speakers'));

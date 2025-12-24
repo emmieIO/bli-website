@@ -2,21 +2,14 @@ import { Head, Link, router, usePage } from '@inertiajs/react';
 import DashboardLayout from '@/Layouts/DashboardLayout';
 import { useState } from 'react';
 
-interface Speaker {
+interface Attendee {
     id: number;
     name: string;
-    user: {
-        name: string;
-        email: string;
+    email: string;
+    pivot: {
+        status: string;
+        created_at: string;
     };
-}
-
-interface Resource {
-    id: number;
-    title: string;
-    description?: string;
-    file_path: string;
-    file_type: string;
 }
 
 interface Event {
@@ -35,6 +28,7 @@ interface Event {
     max_attendees?: number;
     speakers: Speaker[];
     resources: Resource[];
+    attendees?: Attendee[];
 }
 
 interface ViewEventProps {
@@ -304,7 +298,7 @@ export default function ViewEvent({ event, speakers }: ViewEventProps) {
                             </div>
                         </div>
 
-                        {/* Right column - Speakers */}
+                        {/* Right column - Speakers and Attendees */}
                         <div className="space-y-6">
                             <div className="bg-white shadow rounded-lg border border-gray-200 p-6">
                                 <h2 className="text-lg font-semibold text-gray-900 mb-4 font-montserrat">
@@ -333,6 +327,48 @@ export default function ViewEvent({ event, speakers }: ViewEventProps) {
                                 ) : (
                                     <p className="text-sm text-gray-500 text-center py-4 font-lato">
                                         No speakers assigned yet
+                                    </p>
+                                )}
+                            </div>
+
+                            {/* Registered Users Section */}
+                            <div className="bg-white shadow rounded-lg border border-gray-200 p-6">
+                                <h2 className="text-lg font-semibold text-gray-900 mb-4 font-montserrat">
+                                    Registered Users ({event.attendees ? event.attendees.length : 0})
+                                </h2>
+                                {event.attendees && event.attendees.length > 0 ? (
+                                    <div className="space-y-3 max-h-96 overflow-y-auto pr-2 custom-scrollbar">
+                                        {event.attendees.map((attendee) => (
+                                            <div key={attendee.id} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                                                <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center shrink-0">
+                                                    <span className="text-sm font-semibold text-green-700 font-montserrat">
+                                                        {attendee.name.charAt(0).toUpperCase()}
+                                                    </span>
+                                                </div>
+                                                <div className="flex-1 min-w-0">
+                                                    <p className="text-sm font-medium text-gray-900 truncate font-montserrat">
+                                                        {attendee.name}
+                                                    </p>
+                                                    <p className="text-xs text-gray-500 truncate font-lato">
+                                                        {attendee.email}
+                                                    </p>
+                                                    <div className="flex items-center gap-2 mt-1">
+                                                        <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium capitalize ${
+                                                            attendee.pivot.status === 'registered' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                                                        }`}>
+                                                            {attendee.pivot.status}
+                                                        </span>
+                                                        <span className="text-[10px] text-gray-400">
+                                                            {new Date(attendee.pivot.created_at).toLocaleDateString()}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <p className="text-sm text-gray-500 text-center py-4 font-lato">
+                                        No users registered yet
                                     </p>
                                 )}
                             </div>
