@@ -66,10 +66,14 @@ class EventService
     {
         $user = Auth::user();
         if ($user) {
-            $query = $user->eventsCreated();
+            if ($user->hasRole('admin') || $user->hasRole('super-admin')) {
+                $query = Event::query();
+            } else {
+                $query = $user->eventsCreated();
+            }
 
             if ($filter === 'past') {
-                $query->where('start_date', '<', now());
+                $query->where('end_date', '<', now());
             } elseif ($filter === 'ongoing') {
                 $query->where('start_date', '<=', now())
                     ->where('end_date', '>=', now());
