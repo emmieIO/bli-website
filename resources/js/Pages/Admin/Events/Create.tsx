@@ -72,8 +72,7 @@ export default function CreateEvent() {
         Object.entries(formData).forEach(([key, value]) => {
             if (typeof value === 'boolean') {
                 if (value) data.append(key, '1');
-            } else if (value !== '') {
-                // Only append non-empty values
+            } else {
                 data.append(key, value);
             }
         });

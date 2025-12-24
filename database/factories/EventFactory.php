@@ -23,7 +23,7 @@ class EventFactory extends Factory
             'slug' => Str::slug($theme),
             'description' => $this->faker->paragraph,
             'program_cover' => $this->faker->imageUrl(640, 480, 'church', true, 'cover'), // optional
-            'mode' => $this->faker->randomElement(['online', 'onsite', 'hybrid']),
+            'mode' => $this->faker->randomElement(['online', 'offline', 'hybrid']),
             'start_date' => $this->faker->dateTimeBetween('now', '+1 week'),
             'end_date' => $this->faker->optional()->dateTimeBetween('+1 week', '+1 month'),
             "location" => $this->faker->url(),

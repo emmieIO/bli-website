@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Event;
 use App\Models\Course;
 use App\Services\Payment\PaystackService;
 use App\Services\Payment\PaymentService;
@@ -127,6 +128,63 @@ class PaymentController extends Controller
     }
 
     /**
+     * Show checkout page for an event
+     */
+    public function checkoutEvent(Event $event)
+    {
+        if (!auth()->check()) {
+            return redirect()->route('login')->with([
+                'message' => 'Please login to register for this event',
+                'type' => 'info'
+            ]);
+        }
+
+        if ($event->isRegistered()) {
+            return redirect()->route('events.show', $event->slug)->with([
+                'message' => 'You are already registered.',
+                'type' => 'info'
+            ]);
+        }
+
+        return Inertia::render('Events/Checkout', [
+            'event' => $event,
+            'paystackPublicKey' => $this->paystackService->getPublicKey(),
+        ]);
+    }
+
+    /**
+     * Initialize event payment with Paystack
+     */
+    public function initializeEventPayment(Request $request, Event $event)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string',
+            'email' => 'required|email',
+            'phone' => 'nullable|string',
+        ]);
+
+        $user = auth()->user();
+
+        try {
+            $result = $this->paymentService->initializeEventPayment($user, $event, $validated);
+
+            return response()->json($result);
+
+        } catch (\Exception $e) {
+            Log::error('Event payment initialization failed', [
+                'error' => $e->getMessage(),
+                'user_id' => $user->id,
+                'event_id' => $event->id,
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to initialize payment. Please try again.',
+            ], 500);
+        }
+    }
+
+    /**
      * Handle payment callback from Paystack
      */
     public function callback(Request $request)
@@ -164,6 +222,13 @@ class PaymentController extends Controller
                     ->route('dashboard')
                     ->with([
                         'message' => 'Payment successful! You are now enrolled in ' . count($result['courses']) . ' course(s).',
+                        'type' => 'success'
+                    ]);
+            } elseif ($result['type'] === 'event') {
+                return redirect()
+                    ->route('events.show', $result['event']->slug)
+                    ->with([
+                        'message' => 'Payment successful! You are now registered for the event.',
                         'type' => 'success'
                     ]);
             } else {
@@ -233,6 +298,12 @@ class PaymentController extends Controller
 
             // If already successful, redirect to appropriate page
             if ($transaction->status === 'successful') {
+                if ($transaction->payable_type === Event::class) {
+                    return redirect()->route('events.show', $transaction->payable->slug)->with([
+                        'message' => 'You are already registered for this event.',
+                        'type' => 'info'
+                    ]);
+                }
                 if ($transaction->course) {
                     return redirect()->route('courses.learn', $transaction->course->slug)->with([
                         'message' => 'You are already enrolled in this course.',
@@ -253,6 +324,13 @@ class PaymentController extends Controller
                     ->route('dashboard')
                     ->with([
                         'message' => 'Payment successful! You are now enrolled in ' . count($result['courses']) . ' course(s).',
+                        'type' => 'success'
+                    ]);
+            } elseif ($result['type'] === 'event') {
+                return redirect()
+                    ->route('events.show', $result['event']->slug)
+                    ->with([
+                        'message' => 'Payment successful! You are now registered for the event.',
                         'type' => 'success'
                     ]);
             } else {
@@ -283,6 +361,10 @@ class PaymentController extends Controller
     private function redirectToCoursePage(string $txRef, array $flashData)
     {
         $transaction = \App\Models\Transaction::where('transaction_id', $txRef)->first();
+
+        if ($transaction && $transaction->payable_type === Event::class) {
+            return redirect()->route('events.show', $transaction->payable->slug)->with($flashData);
+        }
 
         $route = $transaction && $transaction->course
             ? route('courses.show', $transaction->course->slug)

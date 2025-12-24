@@ -12,6 +12,7 @@ use App\Models\SpeakerInvite;
 use App\Notifications\SpeakerInvitationNotification;
 use App\Services\Speakers\SpeakerApplicationService;
 use App\Traits\HasFileUpload;
+use App\Models\User;
 use DB;
 
 use Illuminate\Http\UploadedFile;
@@ -83,9 +84,9 @@ class EventService
         return collect([]);
     }
 
-    public function registerForEvent(int $eventId): bool
+    public function registerForEvent(int $eventId, ?int $userId = null): bool
     {
-        $userId = auth()->id();
+        $userId = $userId ?? auth()->id();
         $event = Event::findOrFail($eventId);
         $existing = $event->attendees()->where('user_id', $userId)->first();
 
@@ -122,7 +123,7 @@ class EventService
             'created_at' => now(),
             'updated_at' => now(),
         ]);
-        event(new EventRegisterEvent($event, auth()->user()));
+        event(new EventRegisterEvent($event, User::find($userId)));
 
         return true;
     }
@@ -162,7 +163,6 @@ class EventService
         try {
             DB::beginTransaction();
             $filepath = null;
-            $user = Auth::user();
 
             $validated['slug'] = (string) Str::uuid();
 
@@ -171,7 +171,7 @@ class EventService
                 $validated['program_cover'] = $filepath;
             }
 
-            $event = $user->eventsCreated()->create($validated);
+            $event = Event::create($validated);
             DB::commit();
             event(new EventCreated($event));
 

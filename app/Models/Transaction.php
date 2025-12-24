@@ -9,7 +9,9 @@ class Transaction extends Model
 {
     protected $fillable = [
         'user_id',
-        'course_id',
+        'course_id', // Kept for backward compatibility, but prefer payable_id/type
+        'payable_id',
+        'payable_type',
         'transaction_id',
         'payment_ref',
         'amount',
@@ -34,6 +36,14 @@ class Transaction extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    /**
+     * Get the parent payable model (course, event, etc.).
+     */
+    public function payable()
+    {
+        return $this->morphTo();
     }
 
     /**

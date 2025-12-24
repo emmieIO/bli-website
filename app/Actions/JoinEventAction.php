@@ -71,6 +71,11 @@ class JoinEventAction
             ]);
         }
 
+        // Check if event is paid
+        if ($event->entry_fee > 0) {
+            return redirect()->route('events.checkout', $event->slug);
+        }
+
         if ($this->eventService->registerForEvent($event->id)) {
             return back()->with([
                 "type" => "success",

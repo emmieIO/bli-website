@@ -7,6 +7,9 @@ use Illuminate\Support\Facades\Route;
 Route::middleware(['auth'])->group(function () {
     // Checkout page for a course
     Route::get('/courses/{course}/checkout', [PaymentController::class, 'checkout'])->name('payment.checkout');
+    
+    // Checkout page for an event
+    Route::get('/events/{event}/checkout', [PaymentController::class, 'checkoutEvent'])->name('events.checkout');
 
     // Payment callback (after payment on Flutterwave)
     Route::get('/payment/callback', [PaymentController::class, 'callback'])->name('payment.callback');
@@ -19,6 +22,9 @@ Route::middleware(['auth'])->group(function () {
 Route::middleware(['auth', 'throttle:10,1'])->group(function () {
     // Initialize payment
     Route::post('/courses/{course}/payment/initialize', [PaymentController::class, 'initializePayment'])->name('payment.initialize');
+    
+    // Initialize event payment
+    Route::post('/events/{event}/payment/initialize', [PaymentController::class, 'initializeEventPayment'])->name('payment.event.initialize');
 
     // Initialize cart payment
     Route::post('/cart/payment/initialize', [PaymentController::class, 'initializeCartPayment'])->name('payment.cart.initialize');

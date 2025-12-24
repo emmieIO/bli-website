@@ -49,7 +49,7 @@ interface FormData {
 }
 
 export default function EditEvent({ event }: Props) {
-    const { sideLinks } = usePage().props as any;
+    const { sideLinks, errors } = usePage().props as any;
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [formData, setFormData] = useState<FormData>({
         title: event.title || '',
@@ -97,8 +97,7 @@ export default function EditEvent({ event }: Props) {
         Object.entries(formData).forEach(([key, value]) => {
             if (typeof value === 'boolean') {
                 if (value) data.append(key, '1');
-            } else if (value !== '') {
-                // Only append non-empty values
+            } else {
                 data.append(key, value);
             }
         });

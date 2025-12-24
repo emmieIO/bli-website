@@ -26,7 +26,7 @@ class DatabaseSeeder extends Seeder
         $this->call([
             RoleAndPermissionsSeeder::class,
             BackFillApplicationIdsSeeder::class,
-            // AdminSeeder::class
+            AdminSeeder::class
         ]);
     }
 }

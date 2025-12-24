@@ -68,6 +68,7 @@ export default function EventsIndex({ events, upcomingEvents, ongoingEvents, exp
             case 'online':
                 return <i className="fas fa-globe text-sm text-accent"></i>;
             case 'offline':
+            case 'onsite':
                 return <i className="fas fa-map-marker-alt text-sm text-accent"></i>;
             default:
                 return <i className="fas fa-laptop text-sm text-accent"></i>;

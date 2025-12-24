@@ -39,7 +39,7 @@ interface Event {
     physical_address?: string;
     location?: string;
     entry_fee: number;
-    slots_remaining?: number;
+    slots_remaining?: number | null;
     is_allowing_application: boolean;
     speakers?: Speaker[];
     resources?: Resource[];
@@ -110,6 +110,7 @@ export default function EventShow({ event, auth, signed_speaker_route }: EventSh
             case 'online':
                 return <i className="fas fa-globe text-xs mr-1"></i>;
             case 'offline':
+            case 'onsite':
                 return <i className="fas fa-map-marker-alt text-xs mr-1"></i>;
             default:
                 return <i className="fas fa-laptop text-xs mr-1"></i>;
@@ -128,7 +129,7 @@ export default function EventShow({ event, auth, signed_speaker_route }: EventSh
         });
     };
 
-    const slotsRemaining = event.slots_remaining ?? 0;
+    const slotsRemaining = event.slots_remaining;
     const isRegistered = event.is_registered ?? false;
     const revokeCount = event.revoke_count ?? 0;
 

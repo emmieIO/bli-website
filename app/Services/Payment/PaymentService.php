@@ -4,9 +4,12 @@ namespace App\Services\Payment;
 
 use App\Models\Cart;
 use App\Models\Course;
+use App\Models\Event;
 use App\Models\Transaction;
 use App\Models\User;
+use App\Services\Event\EventService;
 use App\Services\Instructor\InstructorEarningsService;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -18,25 +21,29 @@ class PaymentService
 {
     public function __construct(
         private PaystackService $paystackService,
-        private InstructorEarningsService $earningsService
+        private InstructorEarningsService $earningsService,
+        private EventService $eventService
     ) {}
 
     /**
      * Generate unique transaction reference
      */
-    public function generateTransactionReference(User $user, Course $course): string
+    public function generateTransactionReference(User $user, Model $payable): string
     {
-        return 'BLI_' . time() . '_' . $user->id . '_' . $course->id;
+        $type = class_basename($payable);
+        return 'BLI_' . strtoupper($type) . '_' . time() . '_' . $user->id . '_' . $payable->id;
     }
 
     /**
      * Create a new transaction record
      */
-    public function createTransaction(User $user, ?Course $course, string $txRef, float $amount, array $metadata = []): Transaction
+    public function createTransaction(User $user, ?Model $payable, string $txRef, float $amount, array $metadata = []): Transaction
     {
         return Transaction::create([
             'user_id' => $user->id,
-            'course_id' => $course?->id,
+            'payable_id' => $payable?->id,
+            'payable_type' => $payable ? get_class($payable) : null,
+            'course_id' => ($payable instanceof Course) ? $payable->id : null,
             'transaction_id' => $txRef,
             'amount' => $amount,
             'currency' => config('services.paystack.currency', 'NGN'),
@@ -67,6 +74,8 @@ class PaymentService
                 'metadata' => [
                     'user_id' => $user->id,
                     'course_id' => $course->id,
+                    'payable_id' => $course->id,
+                    'payable_type' => Course::class,
                     'transaction_id' => $transaction->id,
                     'type' => 'course',
                 ],
@@ -93,6 +102,55 @@ class PaymentService
     }
 
     /**
+     * Initialize event payment
+     */
+    public function initializeEventPayment(User $user, Event $event, array $customerData): array
+    {
+        DB::beginTransaction();
+
+        try {
+            $txRef = $this->generateTransactionReference($user, $event);
+
+            $transaction = $this->createTransaction($user, $event, $txRef, (float) $event->entry_fee);
+
+            $paymentData = $this->paystackService->initializePayment([
+                'email' => $customerData['email'],
+                'amount' => $event->entry_fee * 100, // Convert to kobo
+                'reference' => $txRef,
+                'callback_url' => route('payment.callback'),
+                'first_name' => $customerData['name'] ?? null,
+                'phone' => $customerData['phone'] ?? null,
+                'metadata' => [
+                    'user_id' => $user->id,
+                    'event_id' => $event->id,
+                    'payable_id' => $event->id,
+                    'payable_type' => Event::class,
+                    'transaction_id' => $transaction->id,
+                    'type' => 'event',
+                ],
+            ]);
+
+            DB::commit();
+
+            return [
+                'success' => true,
+                'payment_data' => $paymentData,
+            ];
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            Log::error('Event payment initialization failed', [
+                'error' => $e->getMessage(),
+                'user_id' => $user->id,
+                'event_id' => $event->id,
+            ]);
+
+            throw $e;
+        }
+    }
+
+    /**
      * Verify and process payment
      */
     public function verifyAndProcessPayment(string $txRef): array
@@ -105,6 +163,15 @@ class PaymentService
 
         if (!$transaction->isPending()) {
             if ($transaction->isSuccessful()) {
+                if ($transaction->payable_type === Event::class || ($transaction->metadata['type'] ?? '') === 'event') {
+                    return [
+                        'success' => true,
+                        'type' => 'event',
+                        'event' => $transaction->payable,
+                        'transaction' => $transaction,
+                    ];
+                }
+
                 return [
                     'success' => true,
                     'type' => $transaction->metadata['type'] ?? 'course',
@@ -150,6 +217,26 @@ class PaymentService
                 'metadata' => array_merge($transaction->metadata ?? [], ['payment_data' => $data]),
                 'paid_at' => now(),
             ]);
+
+            // Handle Event Payment
+            if ($transaction->payable_type === Event::class || ($transaction->metadata['type'] ?? '') === 'event') {
+                $event = $transaction->payable;
+                if (!$event && isset($transaction->metadata['event_id'])) {
+                    $event = Event::find($transaction->metadata['event_id']);
+                }
+
+                if ($event) {
+                    $this->eventService->registerForEvent($event->id, $transaction->user_id);
+                }
+
+                DB::commit();
+                return [
+                    'success' => true,
+                    'type' => 'event',
+                    'event' => $event,
+                    'transaction' => $transaction,
+                ];
+            }
 
             // Check if this is a cart purchase or single course purchase
             $isCartPurchase = isset($transaction->metadata['type']) && $transaction->metadata['type'] === 'cart';
@@ -251,7 +338,17 @@ class PaymentService
                 'paid_at' => now(),
             ]);
 
-            if ($transaction->course) {
+            // Handle Event Payment
+            if ($transaction->payable_type === Event::class || ($transaction->metadata['type'] ?? '') === 'event') {
+                $event = $transaction->payable;
+                if (!$event && isset($transaction->metadata['event_id'])) {
+                    $event = Event::find($transaction->metadata['event_id']);
+                }
+
+                if ($event) {
+                    $this->eventService->registerForEvent($event->id, $transaction->user_id);
+                }
+            } elseif ($transaction->course) {
                 // Single course purchase
                 $this->enrollUserInCourse($transaction->user_id, $transaction->course);
                 $this->earningsService->recordEarningFromTransaction($transaction);
