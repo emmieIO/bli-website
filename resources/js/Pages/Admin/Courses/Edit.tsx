@@ -157,7 +157,7 @@ export default function EditCourse({ course, categories, levels }: EditCoursePro
                             value={formData.title}
                             onChange={handleInputChange}
                             className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-primary focus:border-primary"
-                            placeholder="e.g., Complete Web Development with Laravel"
+                            placeholder="e.g., Kingdom Leadership Principles"
                             maxLength={255}
                             required
                         />

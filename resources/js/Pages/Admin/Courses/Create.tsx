@@ -147,7 +147,7 @@ export default function CreateCourse({ categories, levels }: CreateCourseProps) 
                                     value={formData.title}
                                     onChange={handleInputChange}
                                     className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-[#002147] focus:border-[#002147] transition-colors"
-                                    placeholder="e.g., Complete Web Development with Laravel"
+                                    placeholder="e.g., Kingdom Leadership Principles"
                                     maxLength={255}
                                     required
                                 />
