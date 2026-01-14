@@ -491,7 +491,7 @@ export default function EventShow({ event, auth, signed_speaker_route }: EventSh
                                                     {event.slots_remaining === null ? 'Unlimited' : slotsRemaining}
                                                 </span>
                                             </div>
-                                            {slotsRemaining <= 10 && slotsRemaining > 0 && (
+                                            {typeof slotsRemaining === 'number' && slotsRemaining <= 10 && slotsRemaining > 0 && (
                                                 <p className="text-white/80 text-xs font-lato mt-2">
                                                     <i className="fas fa-exclamation-circle mr-1"></i>
                                                     Limited slots available - Register soon!
@@ -679,7 +679,7 @@ export default function EventShow({ event, auth, signed_speaker_route }: EventSh
                                                 </p>
                                                 {/* Physical Address for Offline and Hybrid */}
                                                 {(event.mode === 'offline' || event.mode === 'hybrid') && event.physical_address && (
-                                                    <p className="text-gray-700 text-sm break-words font-lato mb-2">{event.physical_address}</p>
+                                                    <p className="text-gray-700 text-sm wrap-break-words font-lato mb-2">{event.physical_address}</p>
                                                 )}
                                                 
                                                 {/* Meeting Link for Online and Hybrid */}
@@ -818,7 +818,7 @@ export default function EventShow({ event, auth, signed_speaker_route }: EventSh
                                         <button
                                             type="submit"
                                             disabled={isSubmitting}
-                                            className="text-white font-semibold rounded-xl text-sm px-6 py-3 text-center transition-all duration-300 font-montserrat flex items-center justify-center gap-2 min-w-[160px] shadow-lg hover:shadow-xl transform hover:scale-105 bg-accent hover:bg-green-700"
+                                            className="text-white font-semibold rounded-xl text-sm px-6 py-3 text-center transition-all duration-300 font-montserrat flex items-center justify-center gap-2 min-w-40 shadow-lg hover:shadow-xl transform hover:scale-105 bg-accent hover:bg-green-700"
                                         >
                                             {isSubmitting ? (
                                                 <>
