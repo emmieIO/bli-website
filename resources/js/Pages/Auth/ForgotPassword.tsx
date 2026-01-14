@@ -19,7 +19,7 @@ export default function ForgotPassword({ status }: { status?: string }) {
             title="Forgot Password?"
             description="No worries! We'll help you reset your password in just a few steps."
         >
-            <Head title="Forgot Password - Beacon Leadership Institute" />
+            <Head title="Forgot Password" />
 
             {status && (
                 <div className="bg-green-50 border border-green-200 text-green-800 text-sm rounded-xl p-4 mb-6 flex items-start gap-3">

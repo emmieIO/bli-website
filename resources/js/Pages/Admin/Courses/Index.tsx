@@ -131,7 +131,7 @@ export default function CoursesIndex({ courses, categories }: CoursesProps) {
 
     return (
         <DashboardLayout sideLinks={sideLinks}>
-            <Head title="Course Management - Beacon Leadership Institute" />
+            <Head title="Course Management" />
 
             {/* Header */}
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">

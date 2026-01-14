@@ -105,7 +105,7 @@ export default function InviteResponse({ event, invite }: InviteResponseProps) {
 
     return (
         <DashboardLayout sideLinks={sideLinks}>
-            <Head title={`Invitation: ${event.title} - Beacon Leadership Institute`} />
+            <Head title={`Invitation: ${event.title}`} />
 
             <div className="py-10">
                 {/* Event Card */}

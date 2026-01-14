@@ -15,7 +15,7 @@ export default function Edit({ mustVerifyEmail, status }: ProfileEditProps) {
 
     return (
         <DashboardLayout sideLinks={sideLinks}>
-            <Head title="Edit Profile - Beacon Leadership Institute" />
+            <Head title="Edit Profile" />
 
             <section className="min-h-screen bg-linear-to-br from-gray-50 to-primary-50/30">
                 <div className="max-w-4xl space-y-6">

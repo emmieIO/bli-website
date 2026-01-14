@@ -35,7 +35,7 @@ export default function MyInvitations({ invitations }: MyInvitationsProps) {
 
     return (
         <DashboardLayout sideLinks={sideLinks}>
-            <Head title="My Invitations - Beacon Leadership Institute" />
+            <Head title="My Invitations" />
 
             <div className="max-w-7xl mx-auto py-10">
                 {/* Header Section */}

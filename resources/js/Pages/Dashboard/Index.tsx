@@ -70,7 +70,7 @@ export default function Dashboard({ stats, courses, adminStats, instructorStats 
 
     return (
         <DashboardLayout sideLinks={sideLinks}>
-            <Head title="Dashboard - Beacon Leadership Institute" />
+            <Head title="Dashboard" />
 
             <section className="min-h-screen bg-linear-to-br from-gray-50 to-primary-50/30">
                 <div className="space-y-8">

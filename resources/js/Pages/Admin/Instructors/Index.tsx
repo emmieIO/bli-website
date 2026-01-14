@@ -123,7 +123,7 @@ export default function InstructorsIndex({ instructors }: InstructorsProps) {
 
     return (
         <DashboardLayout sideLinks={sideLinks}>
-            <Head title="Instructor Management - Beacon Leadership Institute" />
+            <Head title="Instructor Management" />
 
             {/* Header and Controls */}
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">

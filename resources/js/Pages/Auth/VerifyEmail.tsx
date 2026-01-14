@@ -38,7 +38,7 @@ export default function VerifyEmail({ status }: { status?: string }) {
             title="Verify Your Email"
             description="We've sent you a verification link. Check your inbox to activate your account."
         >
-            <Head title="Email Verification - Beacon Leadership Institute" />
+            <Head title="Email Verification" />
 
             {status === 'verification-link-sent' && (
                 <div className="bg-green-50 border border-green-200 text-green-800 text-sm rounded-xl p-4 mb-6 flex items-start gap-3">

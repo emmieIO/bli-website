@@ -52,7 +52,7 @@ export default function Profile({ user }: ProfileProps) {
 
     return (
         <DashboardLayout sideLinks={sideLinks}>
-            <Head title="Profile - Beacon Leadership Institute" />
+            <Head title="Profile" />
 
             <section className="max-w-5xl mx-auto">
                 {/* Profile Header */}

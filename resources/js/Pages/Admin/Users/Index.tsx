@@ -117,7 +117,7 @@ export default function UserManagement({ users, roles }: UserManagementProps) {
 
     return (
         <DashboardLayout sideLinks={sideLinks}>
-            <Head title="User Management - Beacon Leadership Institute" />
+            <Head title="User Management" />
 
             {/* Header */}
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">

@@ -62,7 +62,7 @@ export default function MyEvents({ events }: MyEventsProps) {
 
     return (
         <DashboardLayout sideLinks={sideLinks}>
-            <Head title="My Events - Beacon Leadership Institute" />
+            <Head title="My Events" />
 
             <div className="space-y-8">
                 {/* Header Section */}

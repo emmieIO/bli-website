@@ -92,7 +92,7 @@ export default function SpeakersIndex({ speakers }: SpeakersProps) {
 
     return (
         <DashboardLayout sideLinks={sideLinks}>
-            <Head title="Active Speakers - Beacon Leadership Institute" />
+            <Head title="Active Speakers" />
 
             {/* Header Section */}
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">

@@ -54,7 +54,7 @@ export default function PendingApplications({ applications }: PendingApplication
 
     return (
         <DashboardLayout sideLinks={sideLinks}>
-            <Head title="Pending Speaker Applications - Beacon Leadership Institute" />
+            <Head title="Pending Speaker Applications" />
 
             <div className="px-4 mx-auto max-w-7xl py-8">
                 {/* Header Section */}

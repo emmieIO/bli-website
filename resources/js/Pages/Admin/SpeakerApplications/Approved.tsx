@@ -91,7 +91,7 @@ export default function ApprovedApplications({ applications }: ApprovedApplicati
 
     return (
         <DashboardLayout sideLinks={sideLinks}>
-            <Head title="Approved Speaker Applications - Beacon Leadership Institute" />
+            <Head title="Approved Speaker Applications" />
 
             <div className="px-4 mx-auto max-w-7xl py-8">
                 {/* Header Section */}

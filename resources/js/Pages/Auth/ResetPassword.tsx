@@ -66,7 +66,7 @@ export default function ResetPassword({ token, email }: { token: string; email: 
             title="Reset Password"
             description="Almost there! Set your new password to regain access."
         >
-            <Head title="Password Reset - Beacon Leadership Institute" />
+            <Head title="Password Reset" />
 
             {/* Progress Steps */}
             <div className="mb-6 flex items-center justify-center gap-2">

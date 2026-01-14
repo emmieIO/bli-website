@@ -111,7 +111,7 @@ export default function EventsIndex({ events }: EventsProps) {
 
     return (
         <DashboardLayout sideLinks={sideLinks}>
-            <Head title="Events Management - Beacon Leadership Institute" />
+            <Head title="Events Management" />
 
             {/* Page Header */}
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">

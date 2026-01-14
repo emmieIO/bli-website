@@ -112,7 +112,7 @@ export default function RolesManagement({ roles, permissions }: RolesProps) {
 
     return (
         <DashboardLayout sideLinks={sideLinks}>
-            <Head title="Roles & Permissions - Beacon Leadership Institute" />
+            <Head title="Roles & Permissions" />
 
             {/* Header */}
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">

@@ -23,7 +23,7 @@ export default function Login({ status }: { status?: string }) {
             title="Welcome Back"
             description="Sign in to your account to continue"
         >
-            <Head title="Login - Beacon Leadership Institute" />
+            <Head title="Login" />
 
             {status && (
                 <div className="mb-4 text-sm font-medium text-green-600">

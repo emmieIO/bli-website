@@ -110,7 +110,7 @@ export default function PendingSpeakers({ speakers }: SpeakersProps) {
 
     return (
         <DashboardLayout sideLinks={sideLinks}>
-            <Head title="Pending Speakers - Beacon Leadership Institute" />
+            <Head title="Pending Speakers" />
 
             {/* Header Section */}
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">

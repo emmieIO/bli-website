@@ -4,7 +4,7 @@ import GuestLayout from '@/Layouts/GuestLayout';
 export default function Privacy() {
     return (
         <GuestLayout>
-            <Head title="Privacy Policy - Beacon Leadership Institute" />
+            <Head title="Privacy Policy" />
 
             <div className="max-w-5xl mx-auto py-12">
                 <div className="bg-white rounded-2xl shadow-xl p-8 lg:p-12">

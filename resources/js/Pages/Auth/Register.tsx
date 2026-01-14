@@ -28,7 +28,7 @@ export default function Register() {
             title="Create Account"
             description="Start your leadership journey with us today"
         >
-            <Head title="Register - Beacon Leadership Institute" />
+            <Head title="Register" />
 
             <form onSubmit={submit} className="space-y-7">
                 {/* Full Name */}
