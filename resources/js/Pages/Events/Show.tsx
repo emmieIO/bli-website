@@ -548,8 +548,14 @@ export default function EventShow({ event, auth, signed_speaker_route }: EventSh
                                         </div>
                                     ) : !isRegistered ? (
                                         <button
-                                            onClick={() => setShowModal(true)}
-                                            disabled={revokeCount === 4 || slotsRemaining === 0 || !auth?.user}
+                                            onClick={() => {
+                                                if (!auth?.user) {
+                                                    router.get(route('login'));
+                                                    return;
+                                                }
+                                                setShowModal(true);
+                                            }}
+                                            disabled={revokeCount === 4 || slotsRemaining === 0}
                                             className="w-full bg-white text-primary py-4 px-6 rounded-xl font-bold text-lg hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl flex items-center justify-center gap-3 font-montserrat mb-4"
                                         >
                                             {revokeCount === 4 ? (
