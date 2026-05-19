@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ProgrammeController;
+use App\Http\Controllers\Events\OpenEventLinkController;
 use App\Http\Controllers\SpeakerUserController;
 use App\Http\Controllers\Instructors\InstructorsController;
 use App\Http\Controllers\ContactController;
@@ -19,6 +20,7 @@ Route::post('/contact', [ContactController::class, 'submit'])->name('contact.sub
 // Public events browsing
 Route::get('/events', [ProgrammeController::class, 'index'])->name('events.index');
 Route::get('/events/{slug}/show', [ProgrammeController::class, 'show'])->name('events.show');
+Route::get('/events/{event}/open', OpenEventLinkController::class)->name('events.open');
 
 // Public blog
 Route::get('/blog', [\App\Http\Controllers\BlogController::class, 'index'])->name('blog.index');
@@ -86,5 +88,4 @@ Route::middleware('web')->group(function () {
     require __DIR__ . '/mentorship.php';
     require __DIR__ . '/tickets.php';
 });
-
 

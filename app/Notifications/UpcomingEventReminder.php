@@ -60,7 +60,7 @@ class UpcomingEventReminder extends Notification implements ShouldQueue
         $mail = (new MailMessage)
             ->subject("⏰ Reminder: {$this->event->title} is {$timeUntil}!")
             ->greeting("Hello {$notifiable->name}!")
-            ->line("**Your registered event is starting {$timeUntil}!**")
+            ->line("**Your confirmed event is starting {$timeUntil}!**")
             ->line("Don't forget about **{$this->event->title}** - we're excited to see you there!")
             ->line('---')
             ->line('### Event Details')

@@ -3,20 +3,14 @@
 namespace App\Services\Speakers;
 
 use App\Enums\ApplicationStatus;
-use App\Enums\EntryPath;
-use App\Events\SpeakerApplicationApprovedEvent;
 use App\Events\SpeakerAppliedToEvent;
-use App\Http\Requests\SpeakerApplicationRequest;
 use App\Models\Event;
-use App\Models\EventSpeaker;
 use App\Models\Speaker;
 use App\Models\SpeakerApplication;
-use App\Models\User;
-use App\Services\Event\EventService;
 use App\Traits\HasFileUpload;
 use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
 
 class SpeakerApplicationService
 {
@@ -24,7 +18,9 @@ class SpeakerApplicationService
     /**
      * Create a new class instance.
      */
-    public function __construct()
+    public function __construct(
+        protected SpeakerTransitionService $speakerTransitionService
+    )
     {
     }
 
@@ -89,15 +85,16 @@ class SpeakerApplicationService
     {
         $user = auth()->user();
 
-        SpeakerApplication::updateOrCreate(
+        $application = SpeakerApplication::updateOrCreate(
             ['user_id' => $user->id, 'event_id' => $event->id],
             array_merge($applicationInfo, [
                 'user_id' => $user->id,
                 'event_id' => $event->id,
                 'speaker_id' => $speaker->id,
-                'status' => ApplicationStatus::PENDING->value,
             ])
         );
+
+        $this->speakerTransitionService->submitApplication($application);
     }
 
     private function handleSpeakerPhoto(Speaker $speaker, UploadedFile $file): void
@@ -140,31 +137,8 @@ class SpeakerApplicationService
     public function approveSpeakerApplication(SpeakerApplication $application)
     {
         try {
-            // transaction block
-            DB::beginTransaction();
-            // update application status to approved
-
-            $application->update([
-                'status' => ApplicationStatus::APPROVED->value,
-                "approved_at" => now(),
-                "reviewed_at" => now(),
-            ]);
-
-            // change speaker status to active
-            $application->speaker->update([
-                "status" => 'active',
-            ]);
-            // add speaker to event speaker list
-            $application->event->speakers()->syncWithoutDetaching([
-                $application->speaker->id,
-            ]);
-            DB::commit();
-            // then send mail to speaker on approval success event
-            event(new SpeakerApplicationApprovedEvent($application));
-
-            return $application;
+            return $this->speakerTransitionService->approveApplication($application);
         } catch (\Throwable $th) {
-            DB::rollBack();
             Log::error("Speaker application approval failed: " . $th->getMessage(), ['exception' => $th]);
             return null;
         }
@@ -173,26 +147,9 @@ class SpeakerApplicationService
     public function rejectSpeakerApplication(SpeakerApplication $application, string $feedback, string|null $status = null)
     {
         try {
-            DB::beginTransaction();
-            $speaker = $application->speaker;
-            $event = $application->event;
-
-            $application->update([
-                "status" => ApplicationStatus::REJECTED->value,
-                "feedback" => $feedback,
-                'rejected_at' => now(),
-                "reviewed_at" => now(),
-
-            ]);
-
-            $event->speakers()->detach($speaker->id);
-
-            // code to reject application
-
-            DB::commit();
-            return $application;
+            return $this->speakerTransitionService->rejectApplication($application, $feedback);
         } catch (\Exception $th) {
-            DB::rollBack();
+            Log::error("Speaker application rejection failed: " . $th->getMessage(), ['exception' => $th]);
             return null;
         }
     }

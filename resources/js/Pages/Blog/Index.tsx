@@ -53,32 +53,32 @@ export default function BlogIndex({ posts }: BlogIndexProps) {
             <Head title="Blog" />
 
             {/* Hero Section */}
-            <section className="py-16 md:py-20 bg-linear-to-br from-white to-gray-50">
-                <div className="container mx-auto px-6 text-center">
-                    <div className="inline-flex items-center gap-2 border rounded-full px-6 py-3 mb-8 bg-accent/10 border-accent">
+            <section className="public-hero">
+                <div className="section-shell text-center">
+                    <div className="inline-flex items-center gap-2 rounded-full border border-accent/15 bg-accent/5 px-6 py-3 mb-8">
                         <i className="fas fa-blog text-sm text-accent"></i>
-                        <span className="font-medium font-montserrat text-sm tracking-wide text-primary">
+                        <span className="text-sm font-medium tracking-wide text-primary">
                             Insights & Stories
                         </span>
                     </div>
 
-                    <h1 className="font-bold font-montserrat text-4xl md:text-5xl lg:text-6xl mb-6 leading-tight text-primary">
+                    <h1 className="public-hero-title mb-6">
                         Our <span className="text-accent">Blog</span>
                     </h1>
 
-                    <p className="text-xl text-gray-600 mb-12 max-w-3xl mx-auto leading-relaxed font-lato">
+                    <p className="public-hero-copy mx-auto mb-12">
                         Discover insights, stories, and perspectives from our community of learners and educators.
                     </p>
                 </div>
             </section>
 
             {/* Blog Posts Grid */}
-            <section className="py-16 bg-white">
-                <div className="container mx-auto px-6">
+            <section className="public-section bg-white">
+                <div className="section-shell">
                     {posts.data.length === 0 ? (
                         <div className="text-center py-12">
                             <i className="fas fa-inbox text-6xl text-gray-300 mb-4"></i>
-                            <p className="text-xl text-gray-600 font-lato">No blog posts available yet. Check back soon!</p>
+                            <p className="text-xl text-gray-600">No blog posts available yet. Check back soon!</p>
                         </div>
                     ) : (
                         <>
@@ -87,7 +87,7 @@ export default function BlogIndex({ posts }: BlogIndexProps) {
                                     <Link
                                         key={post.id}
                                         href={route('blog.show', post.slug)}
-                                        className="group bg-white rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 border border-gray-100"
+                                        className="public-card group overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
                                     >
                                         {/* Featured Image */}
                                         <div className="relative h-48 bg-gray-200 overflow-hidden">
@@ -98,19 +98,19 @@ export default function BlogIndex({ posts }: BlogIndexProps) {
                                                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                                                 />
                                             ) : (
-                                                <div className="w-full h-full flex items-center justify-center bg-linear-to-br from-accent/20 to-primary/20">
-                                                    <i className="fas fa-file-alt text-4xl text-accent/40"></i>
+                                                <div className="flex h-full w-full items-center justify-center bg-gray-100">
+                                                    <i className="fas fa-file-alt text-4xl text-primary/30"></i>
                                                 </div>
                                             )}
                                         </div>
 
                                         {/* Content */}
                                         <div className="p-6">
-                                            <h2 className="font-bold font-montserrat text-xl mb-3 text-primary group-hover:text-accent transition-colors line-clamp-2">
+                                            <h2 className="mb-3 line-clamp-2 text-xl font-bold text-primary transition-colors group-hover:text-accent">
                                                 {post.title}
                                             </h2>
 
-                                            <p className="text-gray-600 font-lato mb-4 line-clamp-3">
+                                            <p className="mb-4 line-clamp-3 text-gray-600">
                                                 {post.excerpt || post.content.substring(0, 150) + '...'}
                                             </p>
 

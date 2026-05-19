@@ -25,7 +25,7 @@ interface Invite {
     expected_format?: string;
     special_instructions?: string;
     expires_at: string;
-    status: 'pending' | 'accepted' | 'declined';
+    status: 'pending' | 'accepted' | 'rejected';
 }
 
 interface InviteResponseProps {
@@ -72,7 +72,7 @@ export default function InviteResponse({ event, invite }: InviteResponseProps) {
         e.preventDefault();
         setIsProcessing(true);
         router.post(
-            route('invitations.accept', { event: event.id, invite: invite.id }),
+            route('invitations.accept', { event: event.slug, invite: invite.id }),
             {},
             {
                 preserveScroll: true,
@@ -90,7 +90,7 @@ export default function InviteResponse({ event, invite }: InviteResponseProps) {
 
         setIsProcessing(true);
         router.patch(
-            route('invitations.accept', { event: event.id, invite: invite.id }),
+            route('invitations.accept', { event: event.slug, invite: invite.id }),
             { feedback: declineFeedback },
             {
                 preserveScroll: true,

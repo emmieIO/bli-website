@@ -13,15 +13,15 @@ return new class extends Migration
     {
         Schema::create('speakers', function (Blueprint $table) {
             $table->id();
-            $table->string("name");
+            $table->foreignId('user_id')->nullable()->constrained('users')->cascadeOnDelete();
+            $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
             $table->string('title')->nullable();
             $table->string('organization')->nullable();
-            $table->string('email')->unique();
-            $table->string('phone')->nullable();
             $table->text('bio')->nullable();
             $table->string('photo')->nullable();
             $table->string('linkedin')->nullable();
             $table->string('website')->nullable();
+            $table->string('status')->default('pending');
             $table->timestamps();
         });
     }

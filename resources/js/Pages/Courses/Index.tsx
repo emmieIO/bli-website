@@ -56,29 +56,29 @@ export default function CoursesIndex({ courses }: CoursesIndexProps) {
             <Head title="Explore Our Courses" />
 
             {/* Hero Section */}
-            <section className="py-16 bg-linear-to-br from-gray-50 to-white">
-                <div className="container mx-auto px-6">
+            <section className="public-hero">
+                <div className="section-shell">
                     <div className="text-center max-w-4xl mx-auto">
                         {/* Badge */}
-                        <div className="inline-flex items-center gap-2 border rounded-full px-6 py-3 mb-8 bg-accent/10 border-accent">
+                        <div className="mb-8 inline-flex items-center gap-2 rounded-full border border-accent/15 bg-accent/5 px-6 py-3">
                             <i className="fas fa-graduation-cap text-sm text-accent"></i>
-                            <span className="font-medium font-montserrat text-sm tracking-wide text-primary">
+                            <span className="text-sm font-medium tracking-wide text-primary">
                                 Professional Development
                             </span>
                         </div>
 
                         {/* Main Heading */}
-                        <h1 className="font-bold font-montserrat text-4xl md:text-5xl lg:text-6xl mb-6 leading-tight text-primary">
+                        <h1 className="public-hero-title mb-6">
                             Explore Our <span className="text-accent">Courses</span>
                         </h1>
 
-                        <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto leading-relaxed font-lato">
+                        <p className="public-hero-copy mx-auto mb-8">
                             Browse our curated selection of courses designed to upskill, learn new technologies, and advance
                             your leadership career. New courses added regularly.
                         </p>
 
                         {/* Search and Filter Section */}
-                        <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100 max-w-2xl mx-auto">
+                        <div className="public-card mx-auto max-w-2xl p-6">
                             <div className="flex flex-col md:flex-row gap-4">
                                 <div className="flex-1 relative">
                                     <i className="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
@@ -87,13 +87,13 @@ export default function CoursesIndex({ courses }: CoursesIndexProps) {
                                         placeholder="Search courses..."
                                         value={searchQuery}
                                         onChange={(e) => setSearchQuery(e.target.value)}
-                                        className="w-full pl-12 pr-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent font-lato"
+                                        className="public-input pl-12"
                                     />
                                 </div>
                                 <select
                                     value={selectedCategory}
                                     onChange={(e) => setSelectedCategory(e.target.value)}
-                                    className="px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent font-lato md:w-48"
+                                    className="public-input md:w-48"
                                 >
                                     <option value="">All Categories</option>
                                     {categories.map((category, index) => (
@@ -109,15 +109,15 @@ export default function CoursesIndex({ courses }: CoursesIndexProps) {
             </section>
 
             {/* Courses Grid Section */}
-            <section className="py-20 bg-white">
-                <div className="container mx-auto px-6">
+            <section className="public-section bg-white">
+                <div className="section-shell">
                     {filteredCourses.length > 0 ? (
                         <>
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
                                 {filteredCourses.map((course, index) => (
                                     <div
                                         key={course.id}
-                                        className="group bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 overflow-hidden border border-gray-100 hover:border-accent/20"
+                                        className="public-card group overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:border-accent/20 hover:shadow-xl"
                                     >
                                         {/* Course Image */}
                                         <div className="relative h-48 overflow-hidden">
@@ -129,14 +129,14 @@ export default function CoursesIndex({ courses }: CoursesIndexProps) {
 
                                             {/* Category Badge */}
                                             <div className="absolute top-4 left-4">
-                                                <span className="px-3 py-1.5 text-xs font-semibold rounded-full text-white font-montserrat bg-accent">
+                                                <span className="rounded-full bg-accent px-3 py-1.5 text-xs font-semibold text-white">
                                                     {course.category.name}
                                                 </span>
                                             </div>
 
                                             {/* Price Badge */}
                                             <div className="absolute top-4 right-4">
-                                                <span className="px-3 py-1.5 text-sm font-bold rounded-full bg-white shadow-md font-montserrat text-primary">
+                                                <span className="rounded-full bg-white px-3 py-1.5 text-sm font-bold text-primary shadow-sm">
                                                     ₦{course.price.toLocaleString()}
                                                 </span>
                                             </div>
@@ -145,7 +145,7 @@ export default function CoursesIndex({ courses }: CoursesIndexProps) {
                                         {/* Course Content */}
                                         <div className="p-6">
                                             {/* Course Title */}
-                                            <h3 className="text-xl font-bold mb-3 font-montserrat line-clamp-2 group-hover:text-accent transition-colors duration-300 text-primary">
+                                            <h3 className="mb-3 line-clamp-2 text-xl font-bold text-primary transition-colors duration-300 group-hover:text-accent">
                                                 <Link href={route('courses.show', course.slug)}>
                                                     {course.title}
                                                 </Link>
@@ -186,7 +186,7 @@ export default function CoursesIndex({ courses }: CoursesIndexProps) {
                                             {/* Enroll Button */}
                                             <Link
                                                 href={route('courses.show', course.slug)}
-                                                className="w-full flex items-center justify-center gap-2 font-semibold py-3 px-4 rounded-xl transition-all duration-300 shadow-md hover:shadow-lg transform hover:scale-105 text-white font-montserrat bg-accent hover:bg-accent-700"
+                                                className="enterprise-button enterprise-button-primary w-full"
                                             >
                                                 <span>Enroll Now</span>
                                                 <i className="fas fa-arrow-right text-sm group-hover:translate-x-1 transition-transform"></i>
@@ -212,7 +212,7 @@ export default function CoursesIndex({ courses }: CoursesIndexProps) {
                             </p>
                             <Link
                                 href={route('homepage')}
-                                className="inline-flex items-center gap-2 font-semibold px-6 py-3 rounded-xl transition-all duration-300 shadow-md hover:shadow-lg text-white font-montserrat bg-accent"
+                                className="enterprise-button enterprise-button-primary"
                             >
                                 <i className="fas fa-home"></i>
                                 <span>Back to Home</span>

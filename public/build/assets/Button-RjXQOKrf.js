@@ -1,0 +1,21 @@
+import{j as e,H as x,L as i}from"./app-B-w3HmAc.js";import{u as h,T as u}from"./Toast-DKVq-BBx.js";import{A as f}from"./arrow-left-DEzYZCJ6.js";function j({title:s,description:t,wide:a=!1,children:r}){return h(),e.jsxs(e.Fragment,{children:[e.jsx(x,{title:s||"Authentication"}),e.jsx(u,{}),e.jsxs("div",{className:"flex min-h-screen",children:[e.jsxs("div",{className:"relative hidden w-1/2 flex-col justify-between bg-primary p-12 lg:flex",children:[e.jsx("div",{className:"absolute inset-0 bg-cover bg-center opacity-15",style:{backgroundImage:"url(/images/auth.jpg)"}}),e.jsx("div",{className:"absolute inset-0 bg-gradient-to-br from-primary via-primary-800 to-primary-900"}),e.jsx("div",{className:"absolute -right-20 -top-20 h-72 w-72 rounded-full bg-accent/40 blur-3xl"}),e.jsx("div",{className:"absolute -bottom-32 -left-20 h-60 w-60 rounded-full bg-accent/30 blur-3xl"}),e.jsx("div",{className:"absolute left-1/2 top-1/3 h-40 w-40 -translate-x-1/2 -translate-y-1/2 rounded-full bg-accent/10 blur-3xl"}),e.jsx("div",{className:"relative z-10",children:e.jsxs(i,{href:route("homepage"),className:"flex items-center gap-3",children:[e.jsx("img",{src:"/images/logo.jpg",alt:"BLI",className:"h-11 w-11 rounded-md object-cover ring-2 ring-accent-400/60"}),e.jsx("p",{className:"text-base font-bold text-white",children:"Beacon Leadership Institute"})]})}),e.jsxs("div",{className:"relative z-10",children:[e.jsx("div",{className:"mb-6 inline-flex h-10 w-10 items-center justify-center rounded-full bg-accent",children:e.jsx("span",{className:"text-sm font-extrabold text-white",children:"BLI"})}),e.jsx("h2",{className:"text-4xl font-bold leading-tight text-white",children:"Shape the next generation of leaders."}),e.jsx("div",{className:"my-5 h-1 w-16 rounded-full bg-accent"}),e.jsx("p",{className:"mt-4 text-base leading-relaxed text-white/80",children:"Access structured courses, live events, and a community focused on developing leaders with spiritual depth and practical clarity."})]}),e.jsx("div",{className:"relative z-10 border-t border-white/10 pt-6",children:e.jsxs("p",{className:"text-sm text-white/50",children:["© ",new Date().getFullYear()," Beacon Leadership Institute"]})})]}),e.jsxs("div",{className:"flex w-full flex-col bg-gradient-to-br from-accent-50 via-white to-primary-50 lg:w-1/2",children:[e.jsx("header",{className:"flex items-center justify-end border-b border-accent-100 bg-white/80 px-8 py-4 backdrop-blur-sm",children:e.jsxs(i,{href:route("homepage"),className:"inline-flex items-center gap-1.5 text-sm font-medium text-primary transition hover:text-accent",children:[e.jsx(f,{className:"h-4 w-4"}),"Back to site"]})}),e.jsx("main",{className:"flex flex-1 items-center justify-center px-8 py-12",children:e.jsxs("div",{className:`w-full ${a?"max-w-xl":"max-w-sm"}`,children:[s&&e.jsxs("div",{className:"mb-8",children:[e.jsx("h1",{className:"text-2xl font-bold tracking-tight text-primary",children:s}),t&&e.jsx("p",{className:"mt-2 text-sm leading-6 text-primary-400",children:t}),e.jsx("div",{className:"mt-4 h-1 w-10 rounded-full bg-accent"})]}),r]})})]})]})]})}function v({variant:s="primary",isLoading:t=!1,icon:a,fullWidth:r=!1,children:l,className:n="",disabled:c,...o}){const d=`
+        inline-flex items-center justify-center gap-2
+        min-h-11 px-5 py-3 rounded-lg font-semibold font-sans
+        transition-all duration-200
+        focus:outline-none focus:ring-2 focus:ring-offset-2
+        disabled:opacity-50 disabled:cursor-not-allowed
+        ${r?"w-full":""}
+        ${n}
+    `,m={primary:`
+            bg-primary text-white hover:bg-primary-700 hover:shadow-md
+            focus:ring-primary
+        `,secondary:`
+            bg-accent text-white hover:bg-accent-700 hover:shadow-md
+            focus:ring-accent
+        `,outline:`
+            border border-gray-300 text-primary hover:bg-gray-50
+            focus:ring-primary
+        `,danger:`
+            bg-red-600 text-white hover:bg-red-700 hover:shadow-md
+            focus:ring-red-500
+        `};return e.jsx("button",{...o,disabled:c||t,className:`${d} ${m[s]}`,children:t?e.jsxs(e.Fragment,{children:[e.jsx("i",{className:"fas fa-spinner fa-spin"}),e.jsx("span",{children:"Processing..."})]}):e.jsxs(e.Fragment,{children:[a&&e.jsx("i",{className:a}),l]})})}export{j as A,v as B};

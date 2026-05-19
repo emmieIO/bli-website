@@ -13,7 +13,7 @@ interface Event {
 
 interface Invitation {
     id: number;
-    status: 'pending' | 'accepted' | 'declined';
+    status: 'pending' | 'accepted' | 'rejected';
     expires_at: string;
     suggested_topic?: string;
     event: Event;
@@ -29,7 +29,7 @@ export default function MyInvitations({ invitations }: MyInvitationsProps) {
     const stats = {
         total: invitations.length,
         accepted: invitations.filter((inv) => inv.status === 'accepted').length,
-        declined: invitations.filter((inv) => inv.status === 'declined').length,
+        declined: invitations.filter((inv) => inv.status === 'rejected').length,
         pending: invitations.filter((inv) => inv.status === 'pending').length,
     };
 
@@ -115,7 +115,7 @@ function InvitationCard({ invitation, delay }: { invitation: Invitation; delay: 
                     border: 'border-accent/20',
                     icon: 'check-circle',
                 };
-            case 'declined':
+            case 'rejected':
                 return {
                     bg: 'bg-red-100',
                     text: 'text-red-700',
@@ -210,11 +210,11 @@ function InvitationCard({ invitation, delay }: { invitation: Invitation; delay: 
             {/* Action Button */}
             <div className="px-6 pb-6 pt-4 border-t border-primary-100 bg-gray-50/50">
                 <Link
-                    href={route('invitations.show', invitation.id)}
+                    href={route('speaker.events.show', invitation.event.slug)}
                     className="w-full inline-flex items-center justify-center px-5 py-3 rounded-xl bg-primary hover:bg-primary-600 text-white font-semibold text-sm shadow-md hover:shadow-lg transition-all duration-300 transform hover:scale-105 font-montserrat group/btn"
                 >
                     <i className="fas fa-eye w-4 h-4 mr-2 group-hover/btn:scale-110 transition-transform"></i>
-                    View Invitation Details
+                    Open Speaker Workspace
                 </Link>
             </div>
         </div>

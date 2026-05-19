@@ -31,6 +31,9 @@ return new class extends Migration
             $table->foreignId('rejected_by')->nullable()->constrained('users')->onDelete('set null');
             $table->timestamp('started_at')->nullable();
             $table->timestamp('ended_at')->nullable();
+            $table->string('meeting_link')->nullable();
+            $table->json('meeting_schedule')->nullable();
+            $table->timestamp('next_session_at')->nullable();
             $table->timestamps();
 
             // Indexes for performance

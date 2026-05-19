@@ -8,7 +8,10 @@ use App\Http\Controllers\SearchController;
 use App\Http\Controllers\SpeakerApplicationController;
 use App\Http\Controllers\SpeakerInvitationController;
 use App\Http\Controllers\UserDashBoard\DashboardController;
+use App\Http\Controllers\UserDashBoard\RequestEventRefundAction;
 use App\Http\Controllers\UserDashBoard\RevokeRsvpAction;
+use App\Http\Controllers\UserDashBoard\ShowEventRefundPageController;
+use App\Http\Controllers\UserDashBoard\ShowMyEventController;
 use App\Http\Controllers\UserDashBoard\ShowMyEventsController;
 use Illuminate\Support\Facades\Route;
 
@@ -31,13 +34,19 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // User's events management
     Route::get('/user/events', ShowMyEventsController::class)->name('user.events');
+    Route::get('/user/events/{slug}', ShowMyEventController::class)->name('user.events.show');
+    Route::get('/user/events/{slug}/refund', ShowEventRefundPageController::class)->name('user.events.refund');
     Route::post('/events/{slug}/join', JoinEventAction::class)->name('events.join');
     Route::delete('/events/user/{slug}/revoke-rsvp', RevokeRsvpAction::class)->name('user.revoke.event');
+    Route::post('/events/user/{slug}/request-refund', RequestEventRefundAction::class)->name('user.request-event-refund');
 
     // Event utilities
     Route::get('/events/{event}/calendar', [EventCalenderController::class, 'download'])->name('events.calendar');
 
     // Speaker invitations and applications
+    Route::get('/user/speaking/{slug}', [\App\Http\Controllers\UserDashBoard\ShowSpeakerWorkspaceController::class, '__invoke'])->name('speaker.events.show');
+    Route::get('/user/speaking/{event}/application', [SpeakerApplicationController::class, 'apply'])->name('speaker.events.apply');
+    Route::post('/user/speaking/{event}/application', [SpeakerApplicationController::class, 'store'])->name('speaker.events.store');
     Route::get('/events/invitations', [SpeakerInvitationController::class, 'index'])->name('invitations.index');
     Route::get('/events/invitations/{invite}/show', [SpeakerInvitationController::class, 'show'])
         ->name('invitations.show')
@@ -58,6 +67,6 @@ Route::middleware('signed')->group(function () {
         ->name('event.speakers.store');
     Route::get('/events/{event}/invitations/{invite}/respond', [SpeakerApplicationController::class, 'inviteRespondView'])
         ->name('invitations.respond');
-    Route::post('/events/{event}/invitations/{invite}/respond', [SpeakerInvitationController::class, 'acceptInvitation'])
+    Route::match(['post', 'patch'], '/events/{event}/invitations/{invite}/respond', [SpeakerInvitationController::class, 'acceptInvitation'])
         ->name('invitations.accept');
 });

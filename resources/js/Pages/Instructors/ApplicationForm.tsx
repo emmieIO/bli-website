@@ -110,16 +110,15 @@ export default function ApplicationForm({ user, profile }: ApplicationFormProps)
         <GuestLayout>
             <Head title="Instructor Application" />
 
-            {/* Enhanced Application Form Section */}
-            <section className="min-h-screen py-12 bg-linear-to-br from-gray-50 via-white to-gray-100 font-lato">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <section className="public-section min-h-screen bg-gray-50 font-lato">
+                <div className="section-shell">
                     {/* Header */}
                     <div className="text-center mb-12">
-                        <div className="inline-flex items-center px-4 py-2 rounded-full mb-6 bg-primary/10">
+                        <div className="mb-6 inline-flex items-center rounded-full bg-primary/10 px-4 py-2">
                             <i className="fas fa-file-alt mr-2 text-primary"></i>
                             <span className="text-sm font-semibold font-montserrat text-primary">Application Form</span>
                         </div>
-                        <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4 font-montserrat text-primary">
+                        <h1 className="mb-4 text-3xl font-bold font-montserrat text-primary md:text-4xl">
                             Instructor Application
                         </h1>
                         <p className="text-gray-600 text-lg max-w-2xl mx-auto font-lato">
@@ -127,49 +126,46 @@ export default function ApplicationForm({ user, profile }: ApplicationFormProps)
                         </p>
 
                         {/* Progress Indicator */}
-                        <div className="flex items-center justify-center mt-8 space-x-4">
-                            <div className="flex items-center space-x-2">
-                                <div className="w-3 h-3 rounded-full bg-accent"></div>
+                        <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+                            <div className="flex items-center space-x-2 rounded-full bg-white px-3 py-2 shadow-sm border border-gray-200">
+                                <div className="h-3 w-3 rounded-full bg-accent"></div>
                                 <span className="text-sm font-medium text-accent">Personal Info</span>
                             </div>
-                            <div className="w-8 h-0.5 bg-gray-300"></div>
-                            <div className="flex items-center space-x-2">
-                                <div className="w-3 h-3 rounded-full bg-secondary"></div>
+                            <div className="flex items-center space-x-2 rounded-full bg-white px-3 py-2 shadow-sm border border-gray-200">
+                                <div className="h-3 w-3 rounded-full bg-secondary"></div>
                                 <span className="text-sm font-medium text-secondary">Experience</span>
                             </div>
-                            <div className="w-8 h-0.5 bg-gray-300"></div>
-                            <div className="flex items-center space-x-2">
-                                <div className="w-3 h-3 rounded-full bg-primary"></div>
+                            <div className="flex items-center space-x-2 rounded-full bg-white px-3 py-2 shadow-sm border border-gray-200">
+                                <div className="h-3 w-3 rounded-full bg-primary"></div>
                                 <span className="text-sm font-medium text-primary">Documents</span>
                             </div>
-                            <div className="w-8 h-0.5 bg-gray-300"></div>
-                            <div className="flex items-center space-x-2">
-                                <div className="w-3 h-3 rounded-full bg-accent"></div>
+                            <div className="flex items-center space-x-2 rounded-full bg-white px-3 py-2 shadow-sm border border-gray-200">
+                                <div className="h-3 w-3 rounded-full bg-accent"></div>
                                 <span className="text-sm font-medium text-accent">Submit</span>
                             </div>
                         </div>
                     </div>
 
                     {/* Main Form Container */}
-                    <div className="bg-white rounded-3xl shadow-2xl overflow-hidden border border-gray-100">
-                        <div className="p-8 md:p-12">
+                    <div className="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm">
+                        <div className="p-6 md:p-8 lg:p-10">
                             <div className="grid lg:grid-cols-2 gap-12">
                                 {/* Left Column */}
                                 <div className="space-y-8">
                                     {/* Personal Information Card */}
-                                    <div className="bg-linear-to-br from-white to-gray-50 border-2 border-gray-100 rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300">
-                                        <div className="px-8 py-6 border-b border-gray-200 bg-linear-to-br from-accent to-green-700">
+                                    <div className="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm">
+                                        <div className="border-b border-gray-200 bg-primary px-6 py-5">
                                             <h3 className="text-xl font-bold text-white flex items-center font-montserrat">
-                                                <div className="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center mr-4">
+                                                <div className="mr-4 flex h-10 w-10 items-center justify-center rounded-lg bg-white/10">
                                                     <i className="fas fa-user text-lg"></i>
                                                 </div>
                                                 Personal Information
-                                                <span className="ml-auto bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full text-sm">
+                                                <span className="ml-auto rounded-full bg-white/10 px-3 py-1 text-sm">
                                                     Step 1
                                                 </span>
                                             </h3>
                                         </div>
-                                        <form onSubmit={handlePersonalSubmit} className="p-8 space-y-6">
+                                        <form onSubmit={handlePersonalSubmit} className="space-y-6 p-6">
                                             {/* Full Name Field */}
                                             <div>
                                                 <label htmlFor="name" className="block text-sm font-semibold mb-2 font-montserrat text-primary">
@@ -180,7 +176,7 @@ export default function ApplicationForm({ user, profile }: ApplicationFormProps)
                                                         type="text"
                                                         id="name"
                                                         readOnly
-                                                        className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl bg-gray-50 font-lato"
+                                                        className="public-input bg-gray-50"
                                                         value={personalForm.data.name}
                                                     />
                                                     <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
@@ -199,7 +195,7 @@ export default function ApplicationForm({ user, profile }: ApplicationFormProps)
                                                     id="phone"
                                                     value={personalForm.data.phone}
                                                     onChange={(e) => personalForm.setData('phone', e.target.value)}
-                                                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-secondary focus:outline-none transition-all duration-300 font-lato"
+                                                    className="public-input"
                                                     placeholder="e.g. +234 803 123 4567"
                                                 />
                                                 {personalForm.errors.phone && (
@@ -220,7 +216,7 @@ export default function ApplicationForm({ user, profile }: ApplicationFormProps)
                                                     id="headline"
                                                     value={personalForm.data.headline}
                                                     onChange={(e) => personalForm.setData('headline', e.target.value)}
-                                                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-accent focus:outline-none transition-all duration-300 font-lato"
+                                                    className="public-input"
                                                     placeholder="e.g. Senior Web Developer & Tech Educator"
                                                 />
                                                 {personalForm.errors.headline && (
@@ -241,7 +237,7 @@ export default function ApplicationForm({ user, profile }: ApplicationFormProps)
                                                     rows={4}
                                                     value={personalForm.data.bio}
                                                     onChange={(e) => personalForm.setData('bio', e.target.value)}
-                                                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-primary focus:outline-none transition-all duration-300 font-lato resize-none"
+                                                    className="public-input resize-none"
                                                     placeholder="Share your professional background, achievements, and what makes you a great instructor..."
                                                 />
                                                 {personalForm.errors.bio && (
@@ -257,7 +253,7 @@ export default function ApplicationForm({ user, profile }: ApplicationFormProps)
                                                 <button
                                                     type="submit"
                                                     disabled={personalForm.processing}
-                                                    className="w-full inline-flex cursor-pointer items-center justify-center px-6 py-3 rounded-xl text-sm font-bold transition-all duration-300 transform hover:scale-105 hover:shadow-lg font-montserrat bg-accent text-white hover:bg-green-700 disabled:opacity-50"
+                                                    className="enterprise-button enterprise-button-primary w-full justify-center py-3 text-sm disabled:opacity-50"
                                                 >
                                                     <i className="fas fa-save mr-2"></i>
                                                     {personalForm.processing ? 'Saving...' : 'Save Personal Information'}
@@ -267,25 +263,25 @@ export default function ApplicationForm({ user, profile }: ApplicationFormProps)
                                     </div>
 
                                     {/* Documents Card */}
-                                    <div className="bg-linear-to-br from-white to-gray-50 border-2 border-gray-100 rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300">
-                                        <div className="px-8 py-6 border-b border-gray-200 bg-linear-to-br from-primary to-primary-700">
+                                    <div className="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm">
+                                        <div className="border-b border-gray-200 bg-primary px-6 py-5">
                                             <h3 className="text-xl font-bold text-white flex items-center font-montserrat">
-                                                <div className="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center mr-4">
+                                                <div className="mr-4 flex h-10 w-10 items-center justify-center rounded-lg bg-white/10">
                                                     <i className="fas fa-file-upload text-lg"></i>
                                                 </div>
                                                 Documents & Media
-                                                <span className="ml-auto bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full text-sm">
+                                                <span className="ml-auto rounded-full bg-white/10 px-3 py-1 text-sm">
                                                     Step 3
                                                 </span>
                                             </h3>
                                         </div>
-                                        <form onSubmit={handleDocumentsSubmit} className="p-8 space-y-6">
+                                        <form onSubmit={handleDocumentsSubmit} className="space-y-6 p-6">
                                             {/* Resume/CV Upload */}
                                             <div>
                                                 <label htmlFor="resume" className="block text-sm font-semibold mb-2 font-montserrat text-primary">
                                                     <i className="fas fa-file-alt mr-2 text-secondary"></i>Resume/CV *
                                                 </label>
-                                                <div className="border-2 border-dashed border-gray-300 rounded-xl p-6 hover:border-gray-400 transition-all duration-300">
+                                                <div className="rounded-lg border-2 border-dashed border-gray-300 p-6 transition-all duration-300">
                                                     <input
                                                         type="file"
                                                         id="resume"
@@ -294,12 +290,12 @@ export default function ApplicationForm({ user, profile }: ApplicationFormProps)
                                                         onChange={(e) => documentsForm.setData('resume', e.target.files?.[0] || null)}
                                                     />
                                                     <div className="text-center">
-                                                        <div className="w-16 h-16 rounded-xl flex items-center justify-center mx-auto mb-4 bg-secondary/10">
+                                                        <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-lg bg-secondary/10">
                                                             <i className="fas fa-cloud-upload-alt text-2xl text-secondary"></i>
                                                         </div>
                                                         <label
                                                             htmlFor="resume"
-                                                            className="cursor-pointer inline-flex items-center px-6 py-3 rounded-xl font-bold text-white transition-all duration-300 hover:shadow-lg font-montserrat bg-secondary hover:bg-red-700"
+                                                            className="enterprise-button enterprise-button-outline cursor-pointer px-6 py-3"
                                                         >
                                                             <i className="fas fa-upload mr-2"></i>
                                                             Choose File
@@ -308,7 +304,7 @@ export default function ApplicationForm({ user, profile }: ApplicationFormProps)
                                                     </div>
                                                     {documentsForm.data.resume && (
                                                         <div className="mt-4">
-                                                            <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                                            <div className="flex items-center justify-between rounded-lg bg-gray-50 p-3">
                                                                 <div className="flex items-center">
                                                                     <i className="fas fa-file text-gray-600 mr-2"></i>
                                                                     <span className="text-sm font-medium">{documentsForm.data.resume.name}</span>
@@ -319,7 +315,7 @@ export default function ApplicationForm({ user, profile }: ApplicationFormProps)
                                                     )}
                                                 </div>
                                                 {profile.resume_path && (
-                                                    <div className="mt-3 p-3 rounded-lg bg-accent/10">
+                                                    <div className="mt-3 rounded-lg bg-accent/10 p-3">
                                                         <p className="text-sm font-medium text-accent">
                                                             <i className="fas fa-file-check mr-2"></i>
                                                             Current file: {profile.resume_path.split('/').pop()}
@@ -344,10 +340,10 @@ export default function ApplicationForm({ user, profile }: ApplicationFormProps)
                                                     id="video_url"
                                                     value={documentsForm.data.video_url}
                                                     onChange={(e) => documentsForm.setData('video_url', e.target.value)}
-                                                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-accent focus:outline-none transition-all duration-300 font-lato"
+                                                    className="public-input"
                                                     placeholder="https://youtube.com/watch?v=your-video"
                                                 />
-                                                <div className="mt-3 p-4 rounded-lg bg-accent/10">
+                                                <div className="mt-3 rounded-lg bg-accent/10 p-4">
                                                     <p className="text-sm font-lato text-primary">
                                                         <i className="fas fa-lightbulb mr-2 text-accent"></i>
                                                         <strong>Pro Tip:</strong> Create a 1-2 minute introduction video on YouTube, Vimeo, or Loom.
@@ -367,7 +363,7 @@ export default function ApplicationForm({ user, profile }: ApplicationFormProps)
                                                 <button
                                                     type="submit"
                                                     disabled={documentsForm.processing}
-                                                    className="w-full inline-flex cursor-pointer items-center justify-center px-6 py-3 rounded-xl text-sm font-bold transition-all duration-300 transform hover:scale-105 hover:shadow-lg font-montserrat bg-primary text-white hover:bg-primary-700 disabled:opacity-50"
+                                                    className="enterprise-button enterprise-button-primary w-full justify-center py-3 text-sm disabled:opacity-50"
                                                 >
                                                     <i className="fas fa-save mr-2"></i>
                                                     {documentsForm.processing ? 'Saving...' : 'Save Documents & Media'}
@@ -380,19 +376,19 @@ export default function ApplicationForm({ user, profile }: ApplicationFormProps)
                                 {/* Right Column */}
                                 <div className="space-y-8">
                                     {/* Experience Card */}
-                                    <div className="bg-linear-to-br from-white to-gray-50 border-2 border-gray-100 rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300">
-                                        <div className="px-8 py-6 border-b border-gray-200 bg-linear-to-br from-secondary to-red-700">
+                                    <div className="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm">
+                                        <div className="border-b border-gray-200 bg-secondary px-6 py-5">
                                             <h3 className="text-xl font-bold text-white flex items-center font-montserrat">
-                                                <div className="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center mr-4">
+                                                <div className="mr-4 flex h-10 w-10 items-center justify-center rounded-lg bg-white/10">
                                                     <i className="fas fa-graduation-cap text-lg"></i>
                                                 </div>
                                                 Experience & Expertise
-                                                <span className="ml-auto bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full text-sm">
+                                                <span className="ml-auto rounded-full bg-white/10 px-3 py-1 text-sm">
                                                     Step 2
                                                 </span>
                                             </h3>
                                         </div>
-                                        <form onSubmit={handleExperienceSubmit} className="p-8 space-y-6">
+                                        <form onSubmit={handleExperienceSubmit} className="space-y-6 p-6">
                                             {/* Teaching Experience */}
                                             <div>
                                                 <label htmlFor="experience" className="block text-sm font-semibold mb-2 font-montserrat text-primary">
@@ -403,7 +399,7 @@ export default function ApplicationForm({ user, profile }: ApplicationFormProps)
                                                     rows={4}
                                                     value={experienceForm.data.experience}
                                                     onChange={(e) => experienceForm.setData('experience', e.target.value)}
-                                                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-secondary focus:outline-none transition-all duration-300 font-lato resize-none"
+                                                    className="public-input resize-none"
                                                     placeholder="Describe your teaching or mentorship background. Include courses taught, institutions, duration, or informal mentoring roles..."
                                                 />
                                                 {experienceForm.errors.experience && (
@@ -423,7 +419,7 @@ export default function ApplicationForm({ user, profile }: ApplicationFormProps)
                                                     id="experience_years"
                                                     value={experienceForm.data.experience_years}
                                                     onChange={(e) => experienceForm.setData('experience_years', e.target.value)}
-                                                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-accent focus:outline-none transition-all duration-300 font-lato"
+                                                    className="public-input"
                                                     required
                                                 >
                                                     <option value="">Select your years of experience</option>
@@ -452,13 +448,13 @@ export default function ApplicationForm({ user, profile }: ApplicationFormProps)
                                                     {expertiseTags.map((tag, index) => (
                                                         <div
                                                             key={index}
-                                                            className="group flex items-center px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300 hover:shadow-lg transform hover:scale-105 bg-linear-to-br from-primary/10 to-accent/10 text-primary border-2 border-accent/30"
+                                                            className="group flex items-center rounded-lg border border-accent/30 bg-accent/5 px-4 py-2 text-sm font-medium text-primary"
                                                         >
                                                             <span className="font-montserrat">{tag}</span>
                                                             <button
                                                                 type="button"
                                                                 onClick={() => removeExpertiseTag(index)}
-                                                                className="ml-2 w-5 h-5 rounded-full flex items-center justify-center font-bold text-xs transition-all duration-300 hover:scale-110 bg-secondary text-white"
+                                                                className="ml-2 flex h-5 w-5 items-center justify-center rounded-full bg-secondary text-xs font-bold text-white"
                                                             >
                                                                 ×
                                                             </button>
@@ -473,7 +469,7 @@ export default function ApplicationForm({ user, profile }: ApplicationFormProps)
                                                         value={expertiseInput}
                                                         onChange={(e) => setExpertiseInput(e.target.value)}
                                                         onKeyDown={handleExpertiseKeyDown}
-                                                        className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-primary focus:outline-none transition-all duration-300 font-lato"
+                                                        className="public-input"
                                                         placeholder="Type an expertise area and press Enter or comma..."
                                                     />
                                                     <div className="absolute right-4 top-1/2 transform -translate-y-1/2 pointer-events-none">
@@ -481,7 +477,7 @@ export default function ApplicationForm({ user, profile }: ApplicationFormProps)
                                                     </div>
                                                 </div>
 
-                                                <div className="mt-3 p-4 rounded-lg bg-primary/10">
+                                                <div className="mt-3 rounded-lg bg-primary/10 p-4">
                                                     <p className="text-sm font-lato text-primary">
                                                         <i className="fas fa-lightbulb mr-2 text-accent"></i>
                                                         <strong>Examples:</strong> Web Development, Data Science, Digital Marketing, UI/UX Design,
@@ -508,7 +504,7 @@ export default function ApplicationForm({ user, profile }: ApplicationFormProps)
                                                         id="linkedin"
                                                         value={experienceForm.data.linkedin}
                                                         onChange={(e) => experienceForm.setData('linkedin', e.target.value)}
-                                                        className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blue-600 focus:outline-none transition-all duration-300 font-lato"
+                                                        className="public-input"
                                                         placeholder="https://linkedin.com/in/yourprofile"
                                                     />
                                                 </div>
@@ -522,7 +518,7 @@ export default function ApplicationForm({ user, profile }: ApplicationFormProps)
                                                         id="website"
                                                         value={experienceForm.data.website}
                                                         onChange={(e) => experienceForm.setData('website', e.target.value)}
-                                                        className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-accent focus:outline-none transition-all duration-300 font-lato"
+                                                        className="public-input"
                                                         placeholder="https://yourwebsite.com"
                                                     />
                                                     {experienceForm.errors.website && (
@@ -539,7 +535,7 @@ export default function ApplicationForm({ user, profile }: ApplicationFormProps)
                                                 <button
                                                     type="submit"
                                                     disabled={experienceForm.processing}
-                                                    className="w-full inline-flex cursor-pointer items-center justify-center px-6 py-3 rounded-xl text-sm font-bold transition-all duration-300 transform hover:scale-105 hover:shadow-lg font-montserrat bg-secondary text-white hover:bg-red-700 disabled:opacity-50"
+                                                    className="enterprise-button enterprise-button-primary w-full justify-center py-3 text-sm disabled:opacity-50"
                                                 >
                                                     <i className="fas fa-save mr-2"></i>
                                                     {experienceForm.processing ? 'Saving...' : 'Save Experience & Expertise'}
@@ -549,21 +545,21 @@ export default function ApplicationForm({ user, profile }: ApplicationFormProps)
                                     </div>
 
                                     {/* Enhanced Submission Card */}
-                                    <div className="bg-linear-to-br from-white to-gray-50 border-2 border-gray-100 rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300">
-                                        <div className="px-8 py-6 border-b border-gray-200 bg-linear-to-br from-accent to-green-700">
+                                    <div className="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm">
+                                        <div className="border-b border-gray-200 bg-secondary px-6 py-5">
                                             <h3 className="text-xl font-bold text-white flex items-center font-montserrat">
-                                                <div className="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center mr-4">
+                                                <div className="mr-4 flex h-10 w-10 items-center justify-center rounded-lg bg-white/10">
                                                     <i className="fas fa-paper-plane text-lg"></i>
                                                 </div>
                                                 Submit Application
-                                                <span className="ml-auto bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full text-sm">
+                                                <span className="ml-auto rounded-full bg-white/10 px-3 py-1 text-sm">
                                                     Final Step
                                                 </span>
                                             </h3>
                                         </div>
-                                        <form onSubmit={handleFinalSubmit} className="p-8 space-y-6">
+                                        <form onSubmit={handleFinalSubmit} className="space-y-6 p-6">
                                             {/* Terms & Conditions */}
-                                            <div className="p-6 rounded-xl border-2 border-dashed border-gray-300">
+                                            <div className="rounded-lg border border-gray-200 bg-gray-50 p-6">
                                                 <div className="flex items-start space-x-4">
                                                     <div className="flex items-center h-6">
                                                         <input
@@ -604,7 +600,7 @@ export default function ApplicationForm({ user, profile }: ApplicationFormProps)
                                             </div>
 
                                             {/* Application Summary */}
-                                            <div className="p-6 rounded-xl bg-accent/10">
+                                            <div className="rounded-lg bg-accent/10 p-6">
                                                 <h4 className="font-bold mb-3 font-montserrat flex items-center text-primary">
                                                     <i className="fas fa-clipboard-list mr-2 text-accent"></i>
                                                     Application Review Process
@@ -630,7 +626,7 @@ export default function ApplicationForm({ user, profile }: ApplicationFormProps)
                                                 <button
                                                     type="submit"
                                                     disabled={!finalForm.data.terms || finalForm.processing}
-                                                    className="w-full py-4 px-6 rounded-xl text-lg font-bold transition-all duration-300 font-montserrat disabled:opacity-50 disabled:cursor-not-allowed bg-linear-to-br from-accent to-green-700 text-white hover:shadow-lg"
+                                                    className="enterprise-button enterprise-button-primary w-full justify-center py-4 text-lg disabled:cursor-not-allowed disabled:opacity-50"
                                                 >
                                                     <i className="fas fa-rocket mr-2"></i>
                                                     {finalForm.processing ? 'Submitting...' : 'Submit My Application'}

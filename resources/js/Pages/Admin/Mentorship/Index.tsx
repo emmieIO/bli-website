@@ -57,7 +57,7 @@ interface Props {
     };
 }
 
-export default function Index({ requests, pending, statistics, filters }: Props) {
+export default function Index({ requests, statistics }: Props) {
     const { sideLinks } = usePage().props as any;
 
     const getStatusBadgeClass = (color: string) => {
@@ -75,106 +75,90 @@ export default function Index({ requests, pending, statistics, filters }: Props)
         <DashboardLayout sideLinks={sideLinks}>
             <Head title="Mentorship Manager" />
 
-            <div className="py-12">
-                <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
-                    {/* Header */}
-                    <div className="mb-8">
-                        <div>
-                            <h1 className="text-3xl font-bold text-gray-900">Mentorship Manager</h1>
-                            <p className="mt-2 text-sm text-gray-600">
-                                Manage and approve mentorship requests across the platform
-                            </p>
-                        </div>
+            <div className="workspace-stack">
+                <section className="workspace-header-card px-6 py-6 lg:px-8">
+                    <div className="max-w-3xl">
+                        <p className="workspace-muted-label">Mentorship Operations</p>
+                        <h1 className="mt-3 text-3xl font-semibold tracking-tight text-slate-900">Mentorship Manager</h1>
+                        <p className="mt-3 text-sm leading-7 text-slate-600">
+                            Manage approvals, supervise active pairings, and keep the mentorship pipeline easy to review.
+                        </p>
                     </div>
+                </section>
 
-                    {/* Statistics Cards */}
-                    <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
-                        <div className="bg-white rounded-lg shadow p-4">
-                            <p className="text-sm text-gray-600">Total</p>
-                            <p className="text-2xl font-bold text-gray-900">{statistics.total}</p>
-                        </div>
-                        <div className="bg-white rounded-lg shadow p-4">
-                            <p className="text-sm text-gray-600">Pending</p>
-                            <p className="text-2xl font-bold text-yellow-600">{statistics.pending}</p>
-                        </div>
-                        <div className="bg-white rounded-lg shadow p-4">
-                            <p className="text-sm text-gray-600">Instructor Approved</p>
-                            <p className="text-2xl font-bold text-blue-600">{statistics.instructor_approved}</p>
-                        </div>
-                        <div className="bg-white rounded-lg shadow p-4">
-                            <p className="text-sm text-gray-600">Admin Approved</p>
-                            <p className="text-2xl font-bold text-green-600">{statistics.admin_approved}</p>
-                        </div>
-                        <div className="bg-white rounded-lg shadow p-4">
-                            <p className="text-sm text-gray-600">Active</p>
-                            <p className="text-2xl font-bold text-green-700">{statistics.active}</p>
-                        </div>
-                        <div className="bg-white rounded-lg shadow p-4">
-                            <p className="text-sm text-gray-600">Rejected</p>
-                            <p className="text-2xl font-bold text-red-600">{statistics.rejected}</p>
-                        </div>
-                    </div>
-
-                    {/* Requests List */}
-                    <div className="bg-white shadow rounded-lg overflow-hidden">
-                        {requests.data.length === 0 ? (
-                            <div className="text-center py-12">
-                                <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                                </svg>
-                                <h3 className="mt-2 text-sm font-medium text-gray-900">No mentorship requests</h3>
-                                <p className="mt-1 text-sm text-gray-500">All mentorship requests will appear here.</p>
-                            </div>
-                        ) : (
-                            <table className="min-w-full divide-y divide-gray-200">
-                                <thead className="bg-gray-50">
-                                    <tr>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Student</th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Instructor</th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Duration</th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Requested</th>
-                                        <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody className="bg-white divide-y divide-gray-200">
-                                    {requests.data.map((request) => (
-                                        <tr key={request.id} className="hover:bg-gray-50">
-                                            <td className="px-6 py-4 whitespace-nowrap">
-                                                <div className="text-sm font-medium text-gray-900">{request.student.name}</div>
-                                                <div className="text-sm text-gray-500">{request.student.email}</div>
-                                            </td>
-                                            <td className="px-6 py-4 whitespace-nowrap">
-                                                <div className="text-sm font-medium text-gray-900">{request.instructor.name}</div>
-                                                <div className="text-sm text-gray-500">{request.instructor.email}</div>
-                                            </td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                                {request.formatted_duration}
-                                            </td>
-                                            <td className="px-6 py-4 whitespace-nowrap">
-                                                <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusBadgeClass(request.status_color)}`}>
-                                                    {request.status_label}
-                                                </span>
-                                            </td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                {new Date(request.created_at).toLocaleDateString()}
-                                            </td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                                <Link
-                                                    href={route('admin.mentorship.show', request.id)}
-                                                    className="text-primary hover:text-primary/90"
-                                                >
-                                                    View Details
-                                                </Link>
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        )}
-                    </div>
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-3 xl:grid-cols-6">
+                    <MetricCard label="Total" value={statistics.total} tone="text-slate-900" />
+                    <MetricCard label="Pending" value={statistics.pending} tone="text-yellow-600" />
+                    <MetricCard label="Instructor Approved" value={statistics.instructor_approved} tone="text-blue-600" />
+                    <MetricCard label="Admin Approved" value={statistics.admin_approved} tone="text-green-600" />
+                    <MetricCard label="Active" value={statistics.active} tone="text-emerald-700" />
+                    <MetricCard label="Rejected" value={statistics.rejected} tone="text-red-600" />
                 </div>
+
+                <section className="workspace-card overflow-hidden">
+                    {requests.data.length === 0 ? (
+                        <div className="px-6 py-14 text-center">
+                            <h3 className="text-sm font-medium text-slate-900">No mentorship requests</h3>
+                            <p className="mt-1 text-sm text-slate-500">All mentorship requests will appear here.</p>
+                        </div>
+                    ) : (
+                        <table className="min-w-full divide-y divide-slate-200">
+                            <thead className="bg-slate-50/90">
+                                <tr>
+                                    <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Student</th>
+                                    <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Instructor</th>
+                                    <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Duration</th>
+                                    <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Status</th>
+                                    <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Requested</th>
+                                    <th className="px-6 py-3 text-right text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-slate-100 bg-white">
+                                {requests.data.map((request) => (
+                                    <tr key={request.id}>
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                            <div className="text-sm font-medium text-slate-900">{request.student.name}</div>
+                                            <div className="text-sm text-slate-500">{request.student.email}</div>
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                            <div className="text-sm font-medium text-slate-900">{request.instructor.name}</div>
+                                            <div className="text-sm text-slate-500">{request.instructor.email}</div>
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-900">
+                                            {request.formatted_duration}
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                            <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ${getStatusBadgeClass(request.status_color)}`}>
+                                                {request.status_label}
+                                            </span>
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
+                                            {new Date(request.created_at).toLocaleDateString()}
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                            <Link
+                                                href={route('admin.mentorship.show', request.id)}
+                                                className="text-primary hover:text-primary/90"
+                                            >
+                                                View Details
+                                            </Link>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    )}
+                </section>
             </div>
         </DashboardLayout>
+    );
+}
+
+function MetricCard({ label, value, tone }: { label: string; value: number; tone: string }) {
+    return (
+        <div className="workspace-card p-4">
+            <p className="text-sm text-slate-500">{label}</p>
+            <p className={`mt-2 text-2xl font-bold ${tone}`}>{value}</p>
+        </div>
     );
 }

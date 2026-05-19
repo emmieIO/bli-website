@@ -6,14 +6,14 @@ export default function Privacy() {
         <GuestLayout>
             <Head title="Privacy Policy" />
 
-            <div className="max-w-5xl mx-auto py-12">
-                <div className="bg-white rounded-2xl shadow-xl p-8 lg:p-12">
+            <div className="legal-shell">
+                <div className="legal-card">
                     {/* Title Section */}
                     <div className="text-center mb-12 pb-8 border-b border-gray-200">
-                        <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl mb-4" style={{ backgroundColor: '#f0f9ff' }}>
-                            <i className="fas fa-shield-alt text-3xl" style={{ color: '#002147' }}></i>
+                        <div className="mb-4 inline-flex h-16 w-16 items-center justify-center rounded-lg bg-primary/10">
+                            <i className="fas fa-shield-alt text-3xl text-primary"></i>
                         </div>
-                        <h1 className="text-4xl font-bold font-montserrat mb-3" style={{ color: '#002147' }}>Privacy Policy</h1>
+                        <h1 className="mb-3 text-4xl font-bold text-primary">Privacy Policy</h1>
                         <p className="text-gray-600 text-lg">Last Updated: {new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
                     </div>
 
@@ -125,7 +125,7 @@ export default function Privacy() {
                                 <li><strong>Objection:</strong> Object to processing of your information for certain purposes</li>
                             </ul>
                             <p className="text-gray-700 leading-relaxed mt-4">
-                                To exercise these rights, please contact us at <a href="mailto:privacy@beaconleadership.org" className="font-semibold underline hover:no-underline" style={{ color: '#002147' }}>privacy@beaconleadership.org</a>
+                                To exercise these rights, please contact us at <a href="mailto:privacy@beaconleadership.org" className="font-semibold text-primary underline hover:no-underline">privacy@beaconleadership.org</a>
                             </p>
                         </section>
 
@@ -154,16 +154,16 @@ export default function Privacy() {
                             </p>
                             <div className="bg-gray-50 p-6 rounded-xl border border-gray-200">
                                 <p className="text-gray-700 mb-2"><strong>Beacon Leadership Institute</strong></p>
-                                <p className="text-gray-700 mb-2"><i className="fas fa-envelope mr-2" style={{ color: '#00a651' }}></i> Email: <a href="mailto:privacy@beaconleadership.org" className="underline hover:no-underline" style={{ color: '#002147' }}>privacy@beaconleadership.org</a></p>
-                                <p className="text-gray-700 mb-2"><i className="fas fa-phone mr-2" style={{ color: '#00a651' }}></i> Phone: +234 (XXX) XXX-XXXX</p>
-                                <p className="text-gray-700"><i className="fas fa-globe mr-2" style={{ color: '#00a651' }}></i> Website: <Link href={route('homepage')} className="underline hover:no-underline" style={{ color: '#002147' }}>www.beaconleadership.org</Link></p>
+                                <p className="text-gray-700 mb-2"><i className="fas fa-envelope mr-2 text-accent"></i> Email: <a href="mailto:privacy@beaconleadership.org" className="text-primary underline hover:no-underline">privacy@beaconleadership.org</a></p>
+                                <p className="text-gray-700 mb-2"><i className="fas fa-phone mr-2 text-accent"></i> Phone: +234 (XXX) XXX-XXXX</p>
+                                <p className="text-gray-700"><i className="fas fa-globe mr-2 text-accent"></i> Website: <Link href={route('homepage')} className="text-primary underline hover:no-underline">www.beaconleadership.org</Link></p>
                             </div>
                         </section>
                     </div>
 
                     {/* Back to Home Button */}
                     <div className="mt-12 pt-8 border-t border-gray-200 text-center">
-                        <Link href={route('homepage')} className="inline-flex items-center gap-2 px-8 py-3 rounded-xl font-semibold text-white transition-all duration-300 hover:shadow-lg" style={{ backgroundColor: '#002147' }}>
+                        <Link href={route('homepage')} className="enterprise-button enterprise-button-primary">
                             <i className="fas fa-home"></i>
                             <span>Return to Homepage</span>
                         </Link>

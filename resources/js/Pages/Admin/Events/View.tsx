@@ -1,6 +1,27 @@
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import DashboardLayout from '@/Layouts/DashboardLayout';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
+import type { ReactNode } from 'react';
+
+interface Speaker {
+    id: number;
+    organization?: string | null;
+    user: {
+        id: number;
+        name: string;
+        email: string;
+    };
+}
+
+interface Resource {
+    id: number;
+    title: string;
+    description?: string | null;
+    file_path?: string | null;
+    external_link?: string | null;
+    type: string;
+    is_downloadable: boolean;
+}
 
 interface Attendee {
     id: number;
@@ -12,38 +33,191 @@ interface Attendee {
     };
 }
 
+interface SpeakerApplication {
+    id: number;
+    topic_title: string;
+    status: string;
+    created_at: string;
+    user?: {
+        id: number;
+        name: string;
+        email: string;
+    } | null;
+    speaker?: {
+        id: number;
+        user?: {
+            id: number;
+            name: string;
+            email: string;
+        } | null;
+    } | null;
+}
+
+interface Transaction {
+    id: number;
+    amount: string;
+    currency: string;
+    status: string;
+    created_at: string;
+    paid_at?: string | null;
+    payment_ref?: string | null;
+    transaction_id?: string | null;
+    user?: {
+        id: number;
+        name: string;
+        email: string;
+    } | null;
+}
+
+interface RefundRequest {
+    id: number;
+    status: 'pending' | 'approved' | 'declined';
+    reason?: string | null;
+    admin_note?: string | null;
+    requested_at?: string | null;
+    reviewed_at?: string | null;
+    user?: {
+        id: number;
+        name: string;
+        email: string;
+    } | null;
+    transaction?: {
+        id: number;
+        amount: string;
+        currency: string;
+        status: string;
+    } | null;
+}
+
 interface Event {
     id: number;
     title: string;
     slug: string;
     description: string;
+    theme: string;
+    status: 'draft' | 'review' | 'published' | 'registration_open' | 'registration_closed' | 'live' | 'completed' | 'cancelled' | 'archived';
     mode: 'online' | 'offline' | 'hybrid';
-    location?: string;
-    physical_address?: string;
+    location?: string | null;
+    physical_address?: string | null;
+    attendee_slots?: number | null;
     start_date: string;
     end_date: string;
-    is_active: boolean;
-    program_cover?: string;
-    contact_email?: string;
-    max_attendees?: number;
+    contact_email?: string | null;
+    program_cover?: string | null;
+    entry_fee: string;
+    is_allowing_application: boolean;
+    is_featured: boolean;
     speakers: Speaker[];
     resources: Resource[];
-    attendees?: Attendee[];
+    attendees: Attendee[];
+    speaker_applications: SpeakerApplication[];
+    transactions: Transaction[];
+    refund_requests: RefundRequest[];
+    program_profile?: {
+        program_type: 'general_event' | 'discipleship_track';
+        program_code?: string | null;
+        registration_mode: 'open' | 'selective';
+        requires_screening: boolean;
+        screening_note?: string | null;
+        cohort_duration_weeks?: number | null;
+        group_model?: string | null;
+        central_teaching_schedule?: string | null;
+        group_meeting_schedule?: string | null;
+        weekly_prayer_target_minutes?: number | null;
+        weekly_evangelism_target_min?: number | null;
+        weekly_evangelism_target_max?: number | null;
+        weekly_discipleship_target_min?: number | null;
+        weekly_discipleship_target_max?: number | null;
+        meeting_link?: string | null;
+        access_notes?: string | null;
+    };
 }
 
 interface ViewEventProps {
     event: Event;
-    speakers: Speaker[];
+    capabilities: {
+        canUpdate: boolean;
+        canDelete: boolean;
+        canManageSpeakers: boolean;
+        canManageAttendees: boolean;
+        canManageWaitlist: boolean;
+        canManageResources: boolean;
+        canViewPayments: boolean;
+    };
 }
 
-export default function ViewEvent({ event, speakers }: ViewEventProps) {
+const statusStyles: Record<Event['status'], string> = {
+    draft: 'bg-slate-100 text-slate-700',
+    review: 'bg-violet-100 text-violet-700',
+    published: 'bg-blue-100 text-blue-700',
+    registration_open: 'bg-green-100 text-green-700',
+    registration_closed: 'bg-amber-100 text-amber-700',
+    live: 'bg-red-100 text-red-700',
+    completed: 'bg-emerald-100 text-emerald-700',
+    cancelled: 'bg-rose-100 text-rose-700',
+    archived: 'bg-zinc-100 text-zinc-700',
+};
+
+const statusLabels: Record<Event['status'], string> = {
+    draft: 'Draft',
+    review: 'Review',
+    published: 'Published',
+    registration_open: 'Registration Open',
+    registration_closed: 'Registration Closed',
+    live: 'Live',
+    completed: 'Completed',
+    cancelled: 'Cancelled',
+    archived: 'Archived',
+};
+
+export default function ViewEvent({ event, capabilities }: ViewEventProps) {
     const { sideLinks } = usePage().props as any;
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
+    const [activeTab, setActiveTab] = useState<'overview' | 'speakers' | 'registrations' | 'resources' | 'payments'>('overview');
+    const [declineNotes, setDeclineNotes] = useState<Record<number, string>>({});
+
+    const registrationStats = useMemo(() => {
+        const registered = event.attendees.filter((attendee) => attendee.pivot.status === 'registered').length;
+        const cancelled = event.attendees.filter((attendee) => attendee.pivot.status === 'cancelled').length;
+        const waitlisted = event.attendees.filter((attendee) => attendee.pivot.status === 'waitlisted').length;
+
+        return { registered, cancelled, waitlisted };
+    }, [event.attendees]);
+    const refundStats = useMemo(() => ({
+        pending: event.refund_requests.filter((request) => request.status === 'pending').length,
+        approved: event.refund_requests.filter((request) => request.status === 'approved').length,
+        declined: event.refund_requests.filter((request) => request.status === 'declined').length,
+    }), [event.refund_requests]);
+    const registrationLabel = (status: string) => status === 'registered' ? 'confirmed' : status.replace('_', ' ');
+
+    const successfulPayments = event.transactions.filter((transaction) => transaction.status === 'successful');
+    const refundedPayments = event.transactions.filter((transaction) => transaction.status === 'refunded');
+    const pendingPayments = event.transactions.filter((transaction) => transaction.status === 'pending');
+    const revenue = successfulPayments.reduce((total, transaction) => total + Number(transaction.amount || 0), 0);
+    const refundedAmount = refundedPayments.reduce((total, transaction) => total + Number(transaction.amount || 0), 0);
+    const pendingAmount = pendingPayments.reduce((total, transaction) => total + Number(transaction.amount || 0), 0);
+    const tabs = [
+        ['overview', 'Overview'],
+        ['speakers', 'Speakers'],
+        ['registrations', 'Registrations'],
+        ['resources', 'Resources'],
+        ...(capabilities.canViewPayments ? [['payments', 'Payments']] : []),
+    ] as const;
+    const programProfile = event.program_profile;
+    const prayerTargetLabel = programProfile?.weekly_prayer_target_minutes
+        ? `${Math.floor(programProfile.weekly_prayer_target_minutes / 60)}h ${programProfile.weekly_prayer_target_minutes % 60}m weekly`
+        : 'Not set';
+    const evangelismTargetLabel = programProfile?.weekly_evangelism_target_min
+        ? `${programProfile.weekly_evangelism_target_min}-${programProfile.weekly_evangelism_target_max ?? programProfile.weekly_evangelism_target_min} weekly`
+        : 'Not set';
+    const discipleshipTargetLabel = programProfile?.weekly_discipleship_target_min
+        ? `${programProfile.weekly_discipleship_target_min}-${programProfile.weekly_discipleship_target_max ?? programProfile.weekly_discipleship_target_min} weekly`
+        : 'Not set';
 
     const handleDelete = () => {
         setIsDeleting(true);
-        router.delete(route('admin.events.destroy', event.id), {
+        router.delete(route('admin.events.destroy', event.slug), {
             onFinish: () => {
                 setIsDeleting(false);
                 setShowDeleteModal(false);
@@ -51,382 +225,643 @@ export default function ViewEvent({ event, speakers }: ViewEventProps) {
         });
     };
 
-    const formatDate = (dateString: string) => {
-        const date = new Date(dateString);
-        return date.toLocaleDateString('en-US', {
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric',
-            hour: 'numeric',
-            minute: '2-digit',
-        });
-    };
-
     return (
         <DashboardLayout sideLinks={sideLinks}>
-            <Head title={`${event.title} - Event Details`} />
+            <Head title={`${event.title} - Event Workspace`} />
 
-            <div className="py-8">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    {/* Header */}
-                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-                        <div className="flex items-center gap-4">
-                            <Link
-                                href={route('admin.events.index')}
-                                className="text-primary hover:text-primary-600 transition-colors"
-                            >
-                                <i className="fas fa-arrow-left w-5 h-5"></i>
-                            </Link>
-                            <h1 className="text-xl font-bold text-primary font-montserrat">{event.title}</h1>
-                        </div>
-
-                        <div className="flex items-center gap-3">
-                            <Link
-                                href={route('admin.events.edit', event.slug)}
-                                className="flex items-center whitespace-nowrap px-4 py-2 bg-white border border-gray-300 rounded-lg shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors font-montserrat"
-                            >
-                                <i className="fas fa-edit w-4 h-4 mr-2"></i>
-                                Edit Event
-                            </Link>
-                            <button
-                                type="button"
-                                onClick={() => setShowDeleteModal(true)}
-                                className="flex whitespace-nowrap items-center px-4 py-2 bg-red-600 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors font-montserrat"
-                            >
-                                <i className="fas fa-trash w-4 h-4 mr-2"></i>
-                                Delete Event
-                            </button>
+            <div className="space-y-6">
+                <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
+                    <div className="space-y-3">
+                        <Link href={route('admin.events.index')} className="inline-flex items-center gap-2 text-sm font-medium text-slate-500 hover:text-primary">
+                            <i className="fas fa-arrow-left w-4 h-4"></i>
+                            Back to events
+                        </Link>
+                        <div className="space-y-2">
+                            <div className="flex flex-wrap items-center gap-2">
+                                <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ${statusStyles[event.status]}`}>
+                                    {statusLabels[event.status]}
+                                </span>
+                                {event.is_featured && (
+                                    <span className="inline-flex rounded-full bg-amber-100 px-2.5 py-1 text-xs font-semibold text-amber-700">
+                                        Featured
+                                    </span>
+                                )}
+                                {event.is_allowing_application && (
+                                    <span className="inline-flex rounded-full bg-primary-100 px-2.5 py-1 text-xs font-semibold text-primary">
+                                        Speaker applications enabled
+                                    </span>
+                                )}
+                            </div>
+                            <div>
+                                <h1 className="text-3xl font-bold text-primary font-montserrat">{event.title}</h1>
+                                <p className="text-sm text-slate-600 font-lato">{event.theme}</p>
+                            </div>
                         </div>
                     </div>
 
-                    {/* Main content */}
-                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                        {/* Left column - Event details */}
-                        <div className="lg:col-span-2 space-y-8">
-                            {/* Event card */}
-                            <div className="bg-white shadow rounded-lg overflow-hidden border border-gray-200">
-                                {/* Event cover image */}
-                                {event.program_cover && (
-                                    <div className="h-48 bg-gray-100 overflow-hidden">
-                                        <img
-                                            src={`/storage/${event.program_cover}`}
-                                            alt={event.title}
-                                            className="w-full h-full object-cover"
-                                            onError={(e) => {
-                                                (e.target as HTMLImageElement).src = 'https://placehold.co/600x400?text=Cover+Image+Missing';
-                                            }}
-                                        />
-                                    </div>
-                                )}
+                    <div className="flex flex-wrap gap-3">
+                        {capabilities.canUpdate && (
+                            <Link
+                                href={route('admin.events.edit', event.slug)}
+                                className="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 font-montserrat"
+                            >
+                                <i className="fas fa-pen w-4 h-4"></i>
+                                Edit Event
+                            </Link>
+                        )}
+                        {capabilities.canManageResources && (
+                            <Link
+                                href={route('admin.events.resources.create', event.slug)}
+                                className="inline-flex items-center gap-2 rounded-lg border border-primary bg-white px-4 py-2.5 text-sm font-semibold text-primary transition hover:bg-primary-50 font-montserrat"
+                            >
+                                <i className="fas fa-folder-plus w-4 h-4"></i>
+                                Add Resource
+                            </Link>
+                        )}
+                        {capabilities.canDelete && (
+                            <button
+                                type="button"
+                                onClick={() => setShowDeleteModal(true)}
+                                className="inline-flex items-center gap-2 rounded-lg bg-red-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-red-700 font-montserrat"
+                            >
+                                <i className="fas fa-trash w-4 h-4"></i>
+                                Delete
+                            </button>
+                        )}
+                    </div>
+                </div>
 
-                                <div className="p-6">
-                                    {/* Event status badges */}
-                                    <div className="flex justify-between items-start mb-6">
-                                        <span
-                                            className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium font-montserrat ${
-                                                event.is_active
-                                                    ? 'bg-green-100 text-green-800 border border-green-200'
-                                                    : 'bg-gray-100 text-gray-800 border border-gray-200'
-                                            }`}
-                                        >
-                                            {event.is_active ? 'Published' : 'Not Published'}
-                                        </span>
+                <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+                    <MetricCard label="Confirmed" value={registrationStats.registered} hint={`${registrationStats.cancelled} cancelled`} />
+                    <MetricCard label="Speakers" value={event.speakers.length} hint={`${event.speaker_applications.length} applications`} />
+                    <MetricCard label={capabilities.canViewPayments ? 'Paid Orders' : 'Waitlist'} value={capabilities.canViewPayments ? successfulPayments.length : registrationStats.waitlisted} hint={capabilities.canViewPayments ? (event.entry_fee === '0.00' || Number(event.entry_fee) === 0 ? 'Free event' : `₦${revenue.toLocaleString()}`) : 'Attendees awaiting promotion'} />
+                    <MetricCard label="Capacity" value={event.attendee_slots ?? 0} hint={event.attendee_slots ? 'Configured seats' : 'Unlimited'} />
+                </div>
 
-                                        <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-primary-100 text-primary-800 border border-primary-200 font-montserrat">
-                                            {event.mode.charAt(0).toUpperCase() + event.mode.slice(1)}
-                                        </span>
-                                    </div>
+                <div className="flex flex-wrap gap-2 rounded-lg border border-primary-100 bg-white p-2">
+                    {tabs.map(([key, label]) => (
+                        <button
+                            key={key}
+                            type="button"
+                            onClick={() => setActiveTab(key as typeof activeTab)}
+                            className={`rounded-md px-3 py-2 text-sm font-medium transition font-montserrat ${
+                                activeTab === key ? 'bg-primary text-white' : 'text-slate-600 hover:bg-slate-100'
+                            }`}
+                        >
+                            {label}
+                        </button>
+                    ))}
+                </div>
 
-                                    {/* Description */}
+                <div className="grid gap-6 xl:grid-cols-[1.4fr_0.9fr]">
+                    <div className="space-y-6">
+                        {activeTab === 'overview' && (
+                            <>
+                                <WorkspacePanel title="Event Brief">
+                                    {event.program_cover && (
+                                        <div className="mb-5 overflow-hidden rounded-lg border border-slate-200">
+                                            <img src={`/storage/${event.program_cover}`} alt={event.title} className="h-64 w-full object-cover" />
+                                        </div>
+                                    )}
                                     <div
-                                        className="prose prose-lg max-w-none text-gray-700 mb-6 font-lato prose-headings:font-montserrat prose-headings:text-primary prose-p:leading-relaxed prose-a:text-accent prose-a:no-underline hover:prose-a:underline prose-strong:text-primary prose-ul:list-disc prose-ol:list-decimal prose-li:marker:text-accent"
+                                        className="prose max-w-none text-slate-700 prose-headings:text-primary prose-headings:font-montserrat prose-p:font-lato"
                                         dangerouslySetInnerHTML={{ __html: event.description }}
                                     />
+                                </WorkspacePanel>
 
+                                <WorkspacePanel title="Operations Snapshot">
+                                    <dl className="grid gap-4 sm:grid-cols-2">
+                                        <MetaItem label="Mode" value={event.mode} />
+                                        <MetaItem label="Entry fee" value={Number(event.entry_fee) > 0 ? `₦${Number(event.entry_fee).toLocaleString()}` : 'Free'} />
+                                        <MetaItem label="Starts" value={formatDate(event.start_date)} />
+                                        <MetaItem label="Ends" value={formatDate(event.end_date)} />
+                                        <MetaItem label="Meeting link" value={event.location || 'Not set'} />
+                                        <MetaItem label="Physical address" value={event.physical_address || 'Not set'} />
+                                        <MetaItem label="Contact email" value={event.contact_email || 'Not set'} />
+                                        <MetaItem label="Capacity" value={event.attendee_slots ? event.attendee_slots.toString() : 'Unlimited'} />
+                                        <MetaItem label="Refund requests" value={event.refund_requests.length.toString()} />
+                                    </dl>
+                                </WorkspacePanel>
 
-                                    {/* Details grid */}
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 border-t border-gray-200 pt-6 mt-6">
-                                        <div className="flex items-start gap-3">
-                                            <i className="fas fa-calendar w-5 h-5 text-primary mt-0.5 shrink-0"></i>
-                                            <div>
-                                                <h3 className="text-sm font-medium text-gray-500 font-montserrat">
-                                                    Dates
-                                                </h3>
-                                                <p className="text-sm text-gray-900 font-lato">
-                                                    {formatDate(event.start_date)}
-                                                    <span className="text-gray-500"> to</span>
-                                                    <br />
-                                                    {formatDate(event.end_date)}
+                                {programProfile && (
+                                    <WorkspacePanel title="Program Readiness Snapshot">
+                                        <dl className="grid gap-4 sm:grid-cols-2">
+                                            <MetaItem label="Program type" value={programProfile.program_type === 'discipleship_track' ? 'Discipleship Track' : 'General Event'} />
+                                            <MetaItem label="Program code" value={programProfile.program_code || 'Not set'} />
+                                            <MetaItem label="Admission" value={programProfile.registration_mode === 'selective' || programProfile.requires_screening ? 'Selective screening' : 'Open registration'} />
+                                            <MetaItem label="Duration" value={programProfile.cohort_duration_weeks ? `${programProfile.cohort_duration_weeks} weeks` : 'Not set'} />
+                                            <MetaItem label="Central teaching" value={programProfile.central_teaching_schedule || 'Not set'} />
+                                            <MetaItem label="Group meetings" value={programProfile.group_meeting_schedule || 'Not set'} />
+                                            <MetaItem label="Group model" value={programProfile.group_model || 'Not set'} />
+                                            <MetaItem label="Prayer target" value={prayerTargetLabel} />
+                                            <MetaItem label="Evangelism target" value={evangelismTargetLabel} />
+                                            <MetaItem label="Multiplication target" value={discipleshipTargetLabel} />
+                                            <MetaItem label="Meeting link" value={programProfile.meeting_link ? 'Configured' : 'Not set'} />
+                                            <MetaItem label="Access notes" value={programProfile.access_notes ? 'Configured' : 'Not set'} />
+                                        </dl>
+
+                                        {programProfile.screening_note && (
+                                            <div className="mt-5 rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm leading-6 text-amber-900">
+                                                <span className="font-semibold">Screening note:</span> {programProfile.screening_note}
+                                            </div>
+                                        )}
+                                    </WorkspacePanel>
+                                )}
+                            </>
+                        )}
+
+                        {activeTab === 'speakers' && (
+                            <WorkspacePanel title={`Speakers (${event.speakers.length})`}>
+                                <div className="space-y-3">
+                                    {event.speakers.length > 0 ? (
+                                        event.speakers.map((speaker) => (
+                                            <div key={speaker.id} className="flex items-center justify-between rounded-lg border border-slate-200 px-4 py-3">
+                                                <div>
+                                                    <p className="text-sm font-semibold text-primary font-montserrat">{speaker.user.name}</p>
+                                                    <p className="text-xs text-slate-500 font-lato">{speaker.user.email}</p>
+                                                </div>
+                                                <p className="text-xs text-slate-500 font-lato">{speaker.organization || 'Independent speaker'}</p>
+                                            </div>
+                                        ))
+                                    ) : (
+                                        <EmptyText text="No speakers assigned yet." />
+                                    )}
+                                </div>
+
+                                <div className="mt-6 border-t border-slate-200 pt-6">
+                                    <div className="mb-3 flex items-center justify-between">
+                                        <h3 className="text-sm font-semibold text-slate-900 font-montserrat">Applications</h3>
+                                        <span className="text-xs text-slate-500 font-lato">{event.speaker_applications.length} total</span>
+                                    </div>
+                                    <div className="space-y-3">
+                                        {event.speaker_applications.length > 0 ? (
+                                            event.speaker_applications.map((application) => (
+                                                <div key={application.id} className="rounded-lg border border-slate-200 px-4 py-3">
+                                                    <div className="flex flex-wrap items-center justify-between gap-2">
+                                                        <div>
+                                                            <p className="text-sm font-semibold text-primary font-montserrat">{application.topic_title}</p>
+                                                            <p className="text-xs text-slate-500 font-lato">
+                                                                {application.user?.name || application.speaker?.user?.name || 'Applicant'}
+                                                            </p>
+                                                        </div>
+                                                        <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold capitalize text-slate-700">
+                                                            {application.status}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            ))
+                                        ) : (
+                                            <EmptyText text="No speaker applications yet." />
+                                        )}
+                                    </div>
+                                </div>
+                            </WorkspacePanel>
+                        )}
+
+                        {activeTab === 'registrations' && (
+                            <WorkspacePanel title={`Registrations (${event.attendees.length})`}>
+                                <div className="space-y-3">
+                                    {event.attendees.length > 0 ? (
+                                        event.attendees.map((attendee) => (
+                                            <div key={attendee.id} className="flex items-center justify-between rounded-lg border border-slate-200 px-4 py-3">
+                                                <div>
+                                                    <p className="text-sm font-semibold text-primary font-montserrat">{attendee.name}</p>
+                                                    <p className="text-xs text-slate-500 font-lato">{attendee.email}</p>
+                                                </div>
+                                                <div className="flex items-center gap-3">
+                                                    {attendee.pivot.status === 'waitlisted' && capabilities.canManageWaitlist && (
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => router.post(route('admin.events.attendees.promote-waitlist', [event.slug, attendee.id]))}
+                                                            className="inline-flex items-center gap-2 rounded-md border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs font-semibold text-emerald-700 transition hover:bg-emerald-100"
+                                                        >
+                                                            <i className="fas fa-arrow-up w-3 h-3"></i>
+                                                            Promote
+                                                        </button>
+                                                    )}
+                                                    <div className="text-right">
+                                                    <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold capitalize ${
+                                                        attendee.pivot.status === 'registered'
+                                                            ? 'bg-green-100 text-green-700'
+                                                            : attendee.pivot.status === 'waitlisted'
+                                                                ? 'bg-amber-100 text-amber-700'
+                                                                : 'bg-rose-100 text-rose-700'
+                                                    }`}>
+                                                        {registrationLabel(attendee.pivot.status)}
+                                                    </span>
+                                                    <p className="mt-1 text-xs text-slate-500 font-lato">{formatShortDate(attendee.pivot.created_at)}</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ))
+                                    ) : (
+                                        <EmptyText text="No attendees yet." />
+                                    )}
+                                </div>
+                            </WorkspacePanel>
+                        )}
+
+                        {activeTab === 'resources' && (
+                            <WorkspacePanel title={`Resources (${event.resources.length})`}>
+                                <div className="space-y-3">
+                                    {event.resources.length > 0 ? (
+                                        event.resources.map((resource) => (
+                                            <div key={resource.id} className="flex items-center justify-between rounded-lg border border-slate-200 px-4 py-3">
+                                                <div>
+                                                    <p className="text-sm font-semibold text-primary font-montserrat">{resource.title}</p>
+                                                    <p className="text-xs text-slate-500 font-lato">
+                                                        {resource.description || resource.type}
+                                                    </p>
+                                                </div>
+                                                <div className="flex items-center gap-3 text-sm">
+                                                    {resource.external_link ? (
+                                                        <a href={resource.external_link} target="_blank" rel="noreferrer" className="font-medium text-primary hover:text-primary-600">
+                                                            Open
+                                                        </a>
+                                                    ) : resource.file_path ? (
+                                                        <a href={`/storage/${resource.file_path}`} target="_blank" rel="noreferrer" className="font-medium text-primary hover:text-primary-600">
+                                                            Download
+                                                        </a>
+                                                    ) : null}
+                                                    {capabilities.canManageResources && (
+                                                        <button
+                                                            onClick={() => {
+                                                                if (confirm('Delete this resource?')) {
+                                                                    router.delete(route('admin.events.resources.destroy', [event.slug, resource.id]));
+                                                                }
+                                                            }}
+                                                            className="font-medium text-red-600 hover:text-red-700"
+                                                        >
+                                                            Delete
+                                                        </button>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        ))
+                                    ) : (
+                                        <EmptyText text="No resources uploaded yet." />
+                                    )}
+                                </div>
+                            </WorkspacePanel>
+                        )}
+
+                        {activeTab === 'payments' && (
+                            <WorkspacePanel title={`Payments (${event.transactions.length})`}>
+                                <div className="space-y-6">
+                                    <div className="rounded-2xl border border-slate-200 bg-slate-50/70 p-5">
+                                        <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
+                                            <div className="max-w-2xl">
+                                                <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">Payment Summary</p>
+                                                <p className="mt-2 text-sm leading-6 text-slate-600 font-lato">
+                                                    This view is for quick operational review: what has been collected, what is still pending, and which refund requests need a decision.
                                                 </p>
+                                            </div>
+                                            <div className="text-sm text-slate-600 font-lato">
+                                                <span className="font-semibold text-slate-900">{event.transactions.length}</span> transaction records
                                             </div>
                                         </div>
 
-                                        {(event.mode === 'hybrid' || event.mode === 'offline') && (
-                                            <div className="flex items-start gap-3">
-                                                <i className="fas fa-map-marker-alt w-5 h-5 text-primary mt-0.5 shrink-0"></i>
-                                                <div>
-                                                    <h3 className="text-sm font-medium text-gray-700 font-montserrat">
-                                                        Location
-                                                    </h3>
-                                                    <p className="text-sm text-gray-900 font-lato">
-                                                        {event.location || 'N/A'}
-                                                        <br />
-                                                        <span className="text-gray-500">
-                                                            {event.physical_address || 'N/A'}
-                                                        </span>
-                                                    </p>
-                                                </div>
-                                            </div>
-                                        )}
-
-                                        {(event.mode === 'online' || event.mode === 'hybrid') && event.location && (
-                                            <div className="flex items-start gap-3">
-                                                <i className="fas fa-link w-5 h-5 text-primary mt-0.5 shrink-0"></i>
-                                                <div>
-                                                    <h3 className="text-sm font-medium text-gray-700 font-montserrat">
-                                                        Meeting Link
-                                                    </h3>
-                                                    <a
-                                                        href={event.location}
-                                                        target="_blank"
-                                                        rel="noopener noreferrer"
-                                                        className="text-sm text-primary hover:text-primary-600 transition-colors font-lato"
-                                                    >
-                                                        Event Link
-                                                    </a>
-                                                </div>
-                                            </div>
-                                        )}
-
-                                        {event.contact_email && (
-                                            <div className="flex items-start gap-3">
-                                                <i className="fas fa-envelope w-5 h-5 text-primary mt-0.5 shrink-0"></i>
-                                                <div>
-                                                    <h3 className="text-sm font-medium text-gray-700 font-montserrat">
-                                                        Contact Email
-                                                    </h3>
-                                                    <p className="text-sm text-gray-900 font-lato">
-                                                        {event.contact_email}
-                                                    </p>
-                                                </div>
-                                            </div>
-                                        )}
-
-                                        {event.max_attendees && (
-                                            <div className="flex items-start gap-3">
-                                                <i className="fas fa-users w-5 h-5 text-primary mt-0.5 shrink-0"></i>
-                                                <div>
-                                                    <h3 className="text-sm font-medium text-gray-700 font-montserrat">
-                                                        Max Attendees
-                                                    </h3>
-                                                    <p className="text-sm text-gray-900 font-lato">
-                                                        {event.max_attendees}
-                                                    </p>
-                                                </div>
-                                            </div>
-                                        )}
+                                        <div className="mt-5 space-y-3">
+                                            <SummaryStrip
+                                                label="Successful payments"
+                                                primary={`${successfulPayments.length} records`}
+                                                secondary={`₦${revenue.toLocaleString()} collected`}
+                                                tone="emerald"
+                                            />
+                                            <SummaryStrip
+                                                label="Pending payments"
+                                                primary={`${pendingPayments.length} records`}
+                                                secondary={`₦${pendingAmount.toLocaleString()} awaiting verification`}
+                                                tone="amber"
+                                            />
+                                            <SummaryStrip
+                                                label="Refunded payments"
+                                                primary={`${refundedPayments.length} records`}
+                                                secondary={`₦${refundedAmount.toLocaleString()} returned`}
+                                                tone="rose"
+                                            />
+                                            <SummaryStrip
+                                                label="Refund requests"
+                                                primary={`${refundStats.pending} pending`}
+                                                secondary={`${refundStats.approved} approved • ${refundStats.declined} declined`}
+                                                tone="slate"
+                                            />
+                                        </div>
                                     </div>
-                                </div>
-                            </div>
 
-                            {/* Resources Section */}
-                            <div className="bg-white shadow rounded-lg border border-gray-200 p-6">
-                                <div className="flex items-center justify-between mb-4">
-                                    <h2 className="text-lg font-semibold text-gray-900 font-montserrat">
-                                        Event Resources
-                                    </h2>
-                                    <Link
-                                        href={route('admin.events.resources.create', event.slug)}
-                                        className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white rounded-lg transition-all duration-200 hover:shadow-lg font-montserrat"
-                                        style={{ backgroundColor: '#00a651' }}
-                                    >
-                                        <i className="fas fa-plus w-4 h-4"></i>
-                                        Add Resource
-                                    </Link>
-                                </div>
-                                {event.resources && event.resources.length > 0 ? (
                                     <div className="space-y-3">
-                                        {event.resources.map((resource) => (
-                                            <div
-                                                key={resource.id}
-                                                className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
-                                            >
-                                                <div className="flex items-center gap-3">
-                                                    <i className="fas fa-file w-4 h-4 text-gray-500"></i>
-                                                    <div>
-                                                        <p className="text-sm font-medium text-gray-900 font-montserrat">
-                                                            {resource.title}
-                                                        </p>
-                                                        {resource.description && (
-                                                            <p className="text-xs text-gray-500 font-lato">
-                                                                {resource.description}
+                                        <div>
+                                            <h3 className="text-sm font-semibold text-slate-900 font-montserrat">Refund requests</h3>
+                                            <p className="mt-1 text-xs text-slate-500 font-lato">
+                                                Review attendee refund requests only after remittance and policy checks are complete.
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    {event.refund_requests.length > 0 ? (
+                                        event.refund_requests.map((refundRequest) => (
+                                            <div key={refundRequest.id} className="rounded-2xl border border-slate-200 bg-slate-50/60 p-5">
+                                                <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
+                                                    <div className="space-y-3">
+                                                        <p className="text-sm font-semibold text-primary font-montserrat">{refundRequest.user?.name || 'Attendee'}</p>
+                                                        <p className="text-xs text-slate-500 font-lato">{refundRequest.user?.email}</p>
+                                                        <div className="flex flex-wrap gap-2">
+                                                            <span className="rounded-full bg-white px-2.5 py-1 text-xs font-semibold text-slate-600">
+                                                                {refundRequest.transaction ? `${refundRequest.transaction.currency} ${Number(refundRequest.transaction.amount).toLocaleString()}` : 'No transaction linked'}
+                                                            </span>
+                                                            {refundRequest.requested_at && (
+                                                                <span className="rounded-full bg-white px-2.5 py-1 text-xs font-semibold text-slate-600">
+                                                                    Requested {formatShortDate(refundRequest.requested_at)}
+                                                                </span>
+                                                            )}
+                                                        </div>
+                                                        {refundRequest.reason && (
+                                                            <div className="rounded-xl border border-slate-200 bg-white p-3">
+                                                                <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">Attendee reason</p>
+                                                                <p className="mt-2 text-xs leading-6 text-slate-600 font-lato">{refundRequest.reason}</p>
+                                                            </div>
+                                                        )}
+                                                        {refundRequest.admin_note && (
+                                                            <div className="rounded-xl border border-slate-200 bg-white p-3">
+                                                                <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">Admin note</p>
+                                                                <p className="mt-2 text-xs leading-6 text-slate-600 font-lato">{refundRequest.admin_note}</p>
+                                                            </div>
+                                                        )}
+                                                    </div>
+
+                                                    <div className="min-w-[280px] space-y-3 rounded-2xl border border-white bg-white p-4">
+                                                        <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold capitalize ${
+                                                            refundRequest.status === 'approved'
+                                                                ? 'bg-emerald-100 text-emerald-700'
+                                                                : refundRequest.status === 'declined'
+                                                                    ? 'bg-rose-100 text-rose-700'
+                                                                    : 'bg-amber-100 text-amber-700'
+                                                        }`}>
+                                                            {refundRequest.status}
+                                                        </span>
+                                                        {refundRequest.status === 'pending' && capabilities.canManageAttendees && (
+                                                            <div className="space-y-3">
+                                                                <div>
+                                                                    <label className="mb-2 block text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
+                                                                        Review note
+                                                                    </label>
+                                                                    <textarea
+                                                                        value={declineNotes[refundRequest.id] ?? ''}
+                                                                        onChange={(event) => setDeclineNotes((current) => ({
+                                                                            ...current,
+                                                                            [refundRequest.id]: event.target.value,
+                                                                        }))}
+                                                                        rows={4}
+                                                                        placeholder="Add the remittance note, approval context, or decline reason."
+                                                                        className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-primary focus:bg-white focus:ring-2 focus:ring-primary/10"
+                                                                    />
+                                                                </div>
+                                                                <div className="flex flex-wrap gap-2">
+                                                                    <button
+                                                                        type="button"
+                                                                        onClick={() => router.post(route('admin.events.refund-requests.approve', refundRequest.id))}
+                                                                        className="rounded-md bg-emerald-600 px-3 py-2 text-xs font-semibold text-white transition hover:bg-emerald-700"
+                                                                    >
+                                                                        Approve
+                                                                    </button>
+                                                                    <button
+                                                                        type="button"
+                                                                        onClick={() => router.patch(route('admin.events.refund-requests.decline', refundRequest.id), {
+                                                                            admin_note: declineNotes[refundRequest.id] ?? '',
+                                                                        })}
+                                                                        className="rounded-md border border-rose-200 bg-rose-50 px-3 py-2 text-xs font-semibold text-rose-700 transition hover:bg-rose-100"
+                                                                    >
+                                                                        Decline
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+                                                        )}
+                                                        {refundRequest.reviewed_at && (
+                                                            <p className="text-xs text-slate-500 font-lato">
+                                                                Reviewed {formatShortDate(refundRequest.reviewed_at)}
                                                             </p>
                                                         )}
                                                     </div>
                                                 </div>
-                                                <div className="flex items-center gap-2">
-                                                    <a
-                                                        href={`/storage/${resource.file_path}`}
-                                                        target="_blank"
-                                                        rel="noopener noreferrer"
-                                                        className="text-primary hover:text-primary-600 text-sm font-medium font-montserrat"
-                                                    >
-                                                        Download
-                                                    </a>
-                                                    <button
-                                                        onClick={() => {
-                                                            if (confirm('Are you sure you want to delete this resource?')) {
-                                                                router.delete(route('admin.events.resources.destroy', [event.slug, resource.id]));
-                                                            }
-                                                        }}
-                                                        className="text-red-600 hover:text-red-700 text-sm font-medium font-montserrat ml-3"
-                                                    >
-                                                        <i className="fas fa-trash w-4 h-4"></i>
-                                                    </button>
-                                                </div>
                                             </div>
-                                        ))}
-                                    </div>
-                                ) : (
-                                    <div className="text-center py-8">
-                                        <i className="fas fa-folder-open w-12 h-12 text-gray-400 mb-3"></i>
-                                        <p className="text-sm text-gray-500 font-lato">
-                                            No resources added yet. Add resources to share materials with attendees.
-                                        </p>
-                                    </div>
-                                )}
-                            </div>
-                        </div>
+                                        ))
+                                    ) : (
+                                        <EmptyText text="No refund requests yet." />
+                                    )}
+                                </div>
 
-                        {/* Right column - Speakers and Attendees */}
-                        <div className="space-y-6">
-                            <div className="bg-white shadow rounded-lg border border-gray-200 p-6">
-                                <h2 className="text-lg font-semibold text-gray-900 mb-4 font-montserrat">
-                                    Event Speakers ({event.speakers.length})
-                                </h2>
-                                {event.speakers.length > 0 ? (
-                                    <div className="space-y-3">
-                                        {event.speakers.map((speaker) => (
-                                            <div key={speaker.id} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-                                                <div className="w-10 h-10 bg-primary-100 rounded-full flex items-center justify-center shrink-0">
-                                                    <span className="text-sm font-semibold text-primary-700 font-montserrat">
-                                                        {speaker.user.name.charAt(0).toUpperCase()}
-                                                    </span>
-                                                </div>
-                                                <div className="flex-1 min-w-0">
-                                                    <p className="text-sm font-medium text-gray-900 truncate font-montserrat">
-                                                        {speaker.user.name}
-                                                    </p>
-                                                    <p className="text-xs text-gray-500 truncate font-lato">
-                                                        {speaker.user.email}
-                                                    </p>
-                                                </div>
-                                            </div>
-                                        ))}
+                                <div className="space-y-3 border-t border-slate-200 pt-6">
+                                    <div className="flex items-center justify-between gap-3">
+                                        <div>
+                                            <h3 className="text-sm font-semibold text-slate-900 font-montserrat">Transaction ledger</h3>
+                                            <p className="mt-1 text-xs text-slate-500 font-lato">
+                                                Latest payment activity for this event, including refunds and pending checkouts.
+                                            </p>
+                                        </div>
+                                        <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600">
+                                            {event.transactions.length} records
+                                        </span>
                                     </div>
-                                ) : (
-                                    <p className="text-sm text-gray-500 text-center py-4 font-lato">
-                                        No speakers assigned yet
-                                    </p>
-                                )}
-                            </div>
-
-                            {/* Registered Users Section */}
-                            <div className="bg-white shadow rounded-lg border border-gray-200 p-6">
-                                <h2 className="text-lg font-semibold text-gray-900 mb-4 font-montserrat">
-                                    Registered Users ({event.attendees ? event.attendees.length : 0})
-                                </h2>
-                                {event.attendees && event.attendees.length > 0 ? (
-                                    <div className="space-y-3 max-h-96 overflow-y-auto pr-2 custom-scrollbar">
-                                        {event.attendees.map((attendee) => (
-                                            <div key={attendee.id} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-                                                <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center shrink-0">
-                                                    <span className="text-sm font-semibold text-green-700 font-montserrat">
-                                                        {attendee.name.charAt(0).toUpperCase()}
-                                                    </span>
-                                                </div>
-                                                <div className="flex-1 min-w-0">
-                                                    <p className="text-sm font-medium text-gray-900 truncate font-montserrat">
-                                                        {attendee.name}
-                                                    </p>
-                                                    <p className="text-xs text-gray-500 truncate font-lato">
-                                                        {attendee.email}
-                                                    </p>
-                                                    <div className="flex items-center gap-2 mt-1">
-                                                        <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium capitalize ${
-                                                            attendee.pivot.status === 'registered' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                                    {event.transactions.length > 0 ? (
+                                        event.transactions.map((transaction) => (
+                                            <div key={transaction.id} className="rounded-2xl border border-slate-200 bg-white p-4">
+                                                <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                                                    <div className="space-y-2">
+                                                        <p className="text-sm font-semibold text-primary font-montserrat">
+                                                            {transaction.user?.name || 'User'} • {transaction.currency} {Number(transaction.amount).toLocaleString()}
+                                                        </p>
+                                                        <p className="text-xs text-slate-500 font-lato">{transaction.user?.email || 'No email available'}</p>
+                                                        <div className="flex flex-wrap gap-2">
+                                                            {transaction.payment_ref && (
+                                                                <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-600">
+                                                                    Ref {transaction.payment_ref}
+                                                                </span>
+                                                            )}
+                                                            {transaction.transaction_id && (
+                                                                <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-600">
+                                                                    Txn {transaction.transaction_id}
+                                                                </span>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                    <div className="space-y-2 text-left lg:text-right">
+                                                        <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold capitalize ${
+                                                            transaction.status === 'successful'
+                                                                ? 'bg-green-100 text-green-700'
+                                                                : transaction.status === 'pending'
+                                                                    ? 'bg-amber-100 text-amber-700'
+                                                                    : transaction.status === 'refunded'
+                                                                        ? 'bg-rose-100 text-rose-700'
+                                                                        : 'bg-slate-100 text-slate-700'
                                                         }`}>
-                                                            {attendee.pivot.status}
+                                                            {transaction.status}
                                                         </span>
-                                                        <span className="text-[10px] text-gray-400">
-                                                            {new Date(attendee.pivot.created_at).toLocaleDateString()}
-                                                        </span>
+                                                        <p className="text-xs text-slate-500 font-lato">
+                                                            Created {formatShortDate(transaction.created_at)}
+                                                        </p>
+                                                        <p className="text-xs text-slate-500 font-lato">
+                                                            {transaction.paid_at ? `Paid ${formatShortDate(transaction.paid_at)}` : 'Not paid yet'}
+                                                        </p>
                                                     </div>
                                                 </div>
                                             </div>
-                                        ))}
-                                    </div>
-                                ) : (
-                                    <p className="text-sm text-gray-500 text-center py-4 font-lato">
-                                        No users registered yet
-                                    </p>
-                                )}
+                                        ))
+                                    ) : (
+                                        <EmptyText text="No payments recorded for this event yet." />
+                                    )}
+                                </div>
+                            </WorkspacePanel>
+                        )}
+                    </div>
+
+                    <div className="space-y-6">
+                        <WorkspacePanel title="Control Notes">
+                            <div className="space-y-4 text-sm text-slate-600 font-lato">
+                                <p>The status should tell operators exactly what the public can do right now.</p>
+                                <ul className="space-y-2">
+                                    <li><strong className="text-primary">Draft:</strong> internal only</li>
+                                    <li><strong className="text-primary">Published:</strong> visible, not yet in active intake</li>
+                                    <li><strong className="text-primary">Registration Open:</strong> accepting attendees</li>
+                                    <li><strong className="text-primary">Live:</strong> event in delivery window</li>
+                                    <li><strong className="text-primary">Completed:</strong> post-event access and reporting</li>
+                                </ul>
                             </div>
-                        </div>
+                        </WorkspacePanel>
+
+                        <WorkspacePanel title="Quick Links">
+                            <div className="space-y-3">
+                                {capabilities.canUpdate && <QuickLink href={route('admin.events.edit', event.slug)} icon="fa-pen" label="Update schedule and status" />}
+                                {capabilities.canManageResources && <QuickLink href={route('admin.events.resources.create', event.slug)} icon="fa-folder-plus" label="Upload attendee resources" />}
+                                {capabilities.canManageSpeakers && <QuickLink href={route('admin.events.assign-speakers', event.slug)} icon="fa-user-plus" label="Manage speaker assignments" />}
+                                {capabilities.canViewPayments && <QuickLink href={route('admin.transactions-audit.index')} icon="fa-receipt" label="Open transaction audit" />}
+                            </div>
+                        </WorkspacePanel>
                     </div>
                 </div>
             </div>
 
-            {/* Delete Modal */}
-            {showDeleteModal && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
-                    <div className="relative bg-white rounded-xl shadow-xl p-6 w-full max-w-md mx-4 border border-gray-200">
-                        <button
-                            type="button"
-                            onClick={() => setShowDeleteModal(false)}
-                            className="absolute top-3 right-3 text-gray-400 hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 inline-flex justify-center items-center"
-                        >
-                            <i className="fas fa-times w-3 h-3"></i>
-                        </button>
-
-                        <div className="text-center mb-6">
-                            <i className="fas fa-exclamation-triangle w-12 h-12 text-red-600 mx-auto mb-4"></i>
-                            <h3 className="text-lg font-semibold text-gray-800 font-montserrat">Delete Event</h3>
-                        </div>
-
-                        <p className="text-gray-700 mb-6 font-lato">
-                            Are you sure you want to delete <span className="font-semibold">{event.title}</span>? This
-                            action cannot be undone.
-                        </p>
-
-                        <div className="flex justify-end gap-3">
-                            <button
-                                onClick={() => setShowDeleteModal(false)}
-                                className="py-2.5 px-5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-100 transition-colors font-lato"
-                            >
-                                Cancel
-                            </button>
-                            <button
-                                onClick={handleDelete}
-                                disabled={isDeleting}
-                                className="px-5 py-2.5 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors inline-flex items-center font-montserrat disabled:opacity-50"
-                            >
-                                {isDeleting ? (
-                                    <>
-                                        <i className="fas fa-spinner fa-spin w-4 h-4 mr-2"></i>
-                                        Deleting...
-                                    </>
-                                ) : (
-                                    <>
-                                        <i className="fas fa-trash w-4 h-4 mr-2"></i>
-                                        Delete Event
-                                    </>
-                                )}
-                            </button>
+            {showDeleteModal && capabilities.canDelete && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 px-4">
+                    <div className="w-full max-w-md rounded-lg bg-white p-6 shadow-xl">
+                        <div className="space-y-4">
+                            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-red-100 text-red-600">
+                                <i className="fas fa-trash"></i>
+                            </div>
+                            <div>
+                                <h2 className="text-lg font-semibold text-slate-900 font-montserrat">Delete event</h2>
+                                <p className="mt-2 text-sm text-slate-600 font-lato">
+                                    This will remove <strong>{event.title}</strong> and its related records.
+                                </p>
+                            </div>
+                            <div className="flex justify-end gap-3 pt-2">
+                                <button type="button" onClick={() => setShowDeleteModal(false)} className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">
+                                    Cancel
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={handleDelete}
+                                    disabled={isDeleting}
+                                    className="rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-700 disabled:opacity-60"
+                                >
+                                    {isDeleting ? 'Deleting...' : 'Delete Event'}
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
             )}
         </DashboardLayout>
     );
+}
+
+function MetricCard({ label, value, hint }: { label: string; value: number; hint: string }) {
+    return (
+        <div className="rounded-lg border border-primary-100 bg-white p-5">
+            <p className="text-xs font-medium uppercase tracking-[0.14em] text-slate-500">{label}</p>
+            <p className="mt-3 text-3xl font-bold text-primary font-montserrat">{value}</p>
+            <p className="mt-2 text-sm text-slate-500 font-lato">{hint}</p>
+        </div>
+    );
+}
+
+function SummaryStrip({
+    label,
+    primary,
+    secondary,
+    tone,
+}: {
+    label: string;
+    primary: string;
+    secondary: string;
+    tone: 'amber' | 'emerald' | 'rose' | 'slate';
+}) {
+    const toneClasses = tone === 'emerald'
+        ? 'border-emerald-200 bg-emerald-50/70'
+        : tone === 'rose'
+            ? 'border-rose-200 bg-rose-50/70'
+            : tone === 'amber'
+                ? 'border-amber-200 bg-amber-50/70'
+                : 'border-slate-200 bg-white';
+
+    return (
+        <div className={`rounded-xl border px-4 py-3 ${toneClasses}`}>
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">{label}</p>
+                <p className="text-sm font-semibold text-slate-900 font-montserrat">{primary}</p>
+            </div>
+            <p className="mt-1 text-sm text-slate-600 font-lato">{secondary}</p>
+        </div>
+    );
+}
+
+function WorkspacePanel({ title, children }: { title: string; children: ReactNode }) {
+    return (
+        <section className="rounded-lg border border-primary-100 bg-white p-6">
+            <h2 className="mb-4 text-lg font-semibold text-slate-900 font-montserrat">{title}</h2>
+            {children}
+        </section>
+    );
+}
+
+function MetaItem({ label, value }: { label: string; value: string }) {
+    return (
+        <div className="rounded-lg border border-slate-200 p-4">
+            <dt className="text-xs font-medium uppercase tracking-[0.14em] text-slate-500">{label}</dt>
+            <dd className="mt-2 text-sm text-slate-800 font-lato">{value}</dd>
+        </div>
+    );
+}
+
+function EmptyText({ text }: { text: string }) {
+    return <p className="rounded-lg border border-dashed border-slate-200 px-4 py-8 text-center text-sm text-slate-500 font-lato">{text}</p>;
+}
+
+function QuickLink({ href, icon, label }: { href: string; icon: string; label: string }) {
+    return (
+        <Link href={href} className="flex items-center justify-between rounded-lg border border-slate-200 px-4 py-3 text-sm font-medium text-slate-700 transition hover:border-primary hover:text-primary">
+            <span className="flex items-center gap-3">
+                <i className={`fas ${icon} w-4 h-4`}></i>
+                {label}
+            </span>
+            <i className="fas fa-arrow-right w-4 h-4"></i>
+        </Link>
+    );
+}
+
+function formatDate(dateString: string) {
+    return new Date(dateString).toLocaleString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: 'numeric',
+        minute: '2-digit',
+    });
+}
+
+function formatShortDate(dateString: string) {
+    return new Date(dateString).toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+    });
 }

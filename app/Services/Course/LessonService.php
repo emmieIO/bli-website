@@ -9,6 +9,7 @@ use App\Traits\HasFileUpload;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 
 class LessonService
 {
@@ -17,6 +18,16 @@ class LessonService
     public function __construct(
         protected VimeoService $vimeoService
     ) {}
+
+    protected function videoDisk(): string
+    {
+        return config('courses.lesson_video_disk', 's3');
+    }
+
+    protected function documentDisk(): string
+    {
+        return config('courses.lesson_document_disk', 'public');
+    }
 
     /**
      * Create a new lesson for a module
@@ -55,7 +66,7 @@ class LessonService
     }
 
     /**
-     * Create a video lesson (uploads to Vimeo)
+     * Create a video lesson on the configured lesson video disk.
      *
      * @param CourseModule $module
      * @param array $data
@@ -72,35 +83,32 @@ class LessonService
             throw new \Exception('Video file is required for video lessons');
         }
 
-        // Store video temporarily
-        $tempPath = $videoFile->store('temp-videos', 'local');
+        return DB::transaction(function () use ($module, $data, $videoFile) {
+            $filePath = $this->uploadFile(
+                $videoFile,
+                'course_lessons/videos',
+                $this->videoDisk(),
+                ['video/mp4', 'video/quicktime', 'video/x-msvideo', 'video/x-ms-wmv', 'video/x-matroska'],
+                500
+            );
 
-        // Create lesson with pending status first
-        $lesson = $module->lessons()->create([
-            'title' => $data['title'],
-            'type' => 'video',
-            'description' => $data['description'] ?? null,
-            'order' => $this->getNextOrder($module),
-            'video_status' => 'pending',
-            'content_path' => null,
-            'vimeo_id' => null,
-            'video_uploaded_at' => null,
-        ]);
+            if (!$filePath) {
+                throw new \Exception('Video upload failed.');
+            }
 
-        // Dispatch background job for Vimeo upload
-        \App\Jobs\ProcessVideoUpload::dispatch(
-            $lesson->id,
-            $tempPath,
-            $data['title'],
-            $data['description'] ?? null
-        );
-
-        Log::info('Video upload job dispatched from LessonService', [
-            'lesson_id' => $lesson->id,
-            'temp_path' => $tempPath,
-        ]);
-
-        return $lesson->fresh();
+            return $module->lessons()->create([
+                'title' => $data['title'],
+                'type' => 'video',
+                'description' => $data['description'] ?? null,
+                'order' => $this->getNextOrder($module),
+                'video_status' => 'ready',
+                'content_path' => $filePath,
+                'vimeo_id' => null,
+                'video_uploaded_at' => now(),
+                'is_preview' => (bool) ($data['is_preview'] ?? false),
+                'assignment_instructions' => $data['assignment_instructions'] ?? null,
+            ]);
+        });
     }
 
     /**
@@ -122,13 +130,19 @@ class LessonService
         }
 
         return DB::transaction(function () use ($module, $data, $pdfFile) {
-            $filePath = $this->uploadFile($pdfFile, 'course_lessons/pdfs');
+            $filePath = $this->uploadFile($pdfFile, 'course_lessons/pdfs', $this->documentDisk(), ['application/pdf'], 10);
+
+            if (!$filePath) {
+                throw new \Exception('PDF upload failed.');
+            }
 
             return $module->lessons()->create([
                 'title' => $data['title'],
                 'type' => 'pdf',
                 'description' => $data['description'] ?? null,
                 'content_path' => $filePath,
+                'is_preview' => (bool) ($data['is_preview'] ?? false),
+                'assignment_instructions' => $data['assignment_instructions'] ?? null,
                 'order' => $this->getNextOrder($module),
             ]);
         });
@@ -154,6 +168,8 @@ class LessonService
                 'type' => 'link',
                 'description' => $data['description'] ?? null,
                 'content_path' => $data['link_url'],
+                'is_preview' => (bool) ($data['is_preview'] ?? false),
+                'assignment_instructions' => $data['assignment_instructions'] ?? null,
                 'order' => $this->getNextOrder($module),
             ]);
         });
@@ -181,48 +197,57 @@ class LessonService
                 $lesson->update([
                     'title' => $data['title'] ?? $lesson->title,
                     'description' => $data['description'] ?? $lesson->description,
+                    'is_preview' => (bool) ($data['is_preview'] ?? $lesson->is_preview),
+                    'assignment_instructions' => $data['assignment_instructions'] ?? $lesson->assignment_instructions,
                 ]);
 
                 // Handle file updates based on type
                 if ($lesson->type === 'pdf' && $contentFile) {
-                    // Delete old file
                     if ($lesson->content_path) {
-                        $this->deleteFile($lesson->content_path);
+                        $this->deleteFile($lesson->content_path, $this->documentDisk());
                     }
 
-                    // Upload new file
-                    $lesson->content_path = $this->uploadFile($contentFile, 'course_lessons/pdfs');
+                    $lesson->content_path = $this->uploadFile(
+                        $contentFile,
+                        'course_lessons/pdfs',
+                        $this->documentDisk(),
+                        ['application/pdf'],
+                        10
+                    );
+
+                    if (!$lesson->content_path) {
+                        throw new \Exception('PDF upload failed.');
+                    }
+
                     $lesson->save();
                 }
 
                 if ($lesson->type === 'video' && $videoFile) {
-                    // Delete old video from Vimeo
                     if ($lesson->vimeo_id) {
                         $this->vimeoService->deleteVideo($lesson->vimeo_id);
                     }
 
-                    // Store video temporarily
-                    $tempPath = $videoFile->store('temp-videos', 'local');
+                    if ($lesson->content_path) {
+                        $this->deleteFile($lesson->content_path, $this->videoDisk());
+                    }
 
-                    // Update lesson to pending status
-                    $lesson->update([
-                        'video_status' => 'pending',
-                        'vimeo_id' => null,
-                        'content_path' => null,
-                        'video_uploaded_at' => null,
-                    ]);
-
-                    // Dispatch background job for Vimeo upload
-                    \App\Jobs\ProcessVideoUpload::dispatch(
-                        $lesson->id,
-                        $tempPath,
-                        $lesson->title,
-                        $lesson->description ?? null
+                    $videoPath = $this->uploadFile(
+                        $videoFile,
+                        'course_lessons/videos',
+                        $this->videoDisk(),
+                        ['video/mp4', 'video/quicktime', 'video/x-msvideo', 'video/x-ms-wmv', 'video/x-matroska'],
+                        500
                     );
 
-                    Log::info('Video upload job dispatched from LessonService (update)', [
-                        'lesson_id' => $lesson->id,
-                        'temp_path' => $tempPath,
+                    if (!$videoPath) {
+                        throw new \Exception('Video upload failed.');
+                    }
+
+                    $lesson->update([
+                        'video_status' => 'ready',
+                        'vimeo_id' => null,
+                        'content_path' => $videoPath,
+                        'video_uploaded_at' => now(),
                     ]);
                 }
 
@@ -254,12 +279,14 @@ class LessonService
     {
         try {
             return DB::transaction(function () use ($lesson) {
-                // Delete associated files
                 if ($lesson->type === 'pdf' && $lesson->content_path) {
-                    $this->deleteFile($lesson->content_path);
+                    $this->deleteFile($lesson->content_path, $this->documentDisk());
                 }
 
-                // Delete Vimeo video
+                if ($lesson->type === 'video' && $lesson->content_path) {
+                    $this->deleteFile($lesson->content_path, $this->videoDisk());
+                }
+
                 if ($lesson->type === 'video' && $lesson->vimeo_id) {
                     $this->vimeoService->deleteVideo($lesson->vimeo_id);
                 }

@@ -121,6 +121,8 @@ class SpeakersController extends Controller
 
     public function showAssignSpeakersPage(Event $event)
     {
+        $this->authorize('manageSpeakers', $event);
+
         $speakers = $this->speakerService->fetchSpeakers();
         $assignedSpeakerIds = $event->speakers()->pluck('speakers.id')->toArray();
         return \Inertia\Inertia::render('Admin/Speakers/AssignSpeaker', compact('event', 'speakers', 'assignedSpeakerIds'));

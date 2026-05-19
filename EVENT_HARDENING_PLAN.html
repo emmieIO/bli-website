@@ -1,0 +1,944 @@
+<!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>Event Hardening Plan</title>
+            <style>
+/* From extension vscode.github */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+.vscode-dark img[src$=\#gh-light-mode-only],
+.vscode-light img[src$=\#gh-dark-mode-only],
+.vscode-high-contrast:not(.vscode-high-contrast-light) img[src$=\#gh-light-mode-only],
+.vscode-high-contrast-light img[src$=\#gh-dark-mode-only] {
+	display: none;
+}
+
+</style>
+            
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/markdown.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/highlight.css">
+<style>
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe WPC', 'Segoe UI', system-ui, 'Ubuntu', 'Droid Sans', sans-serif;
+                font-size: 14px;
+                line-height: 1.6;
+            }
+        </style>
+        <style>
+.task-list-item {
+    list-style-type: none;
+}
+
+.task-list-item-checkbox {
+    margin-left: -20px;
+    vertical-align: middle;
+    pointer-events: none;
+}
+</style>
+<style>
+:root {
+  --color-note: #0969da;
+  --color-tip: #1a7f37;
+  --color-warning: #9a6700;
+  --color-severe: #bc4c00;
+  --color-caution: #d1242f;
+  --color-important: #8250df;
+}
+
+</style>
+<style>
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-note: #2f81f7;
+    --color-tip: #3fb950;
+    --color-warning: #d29922;
+    --color-severe: #db6d28;
+    --color-caution: #f85149;
+    --color-important: #a371f7;
+  }
+}
+
+</style>
+<style>
+.markdown-alert {
+  padding: 0.5rem 1rem;
+  margin-bottom: 16px;
+  color: inherit;
+  border-left: .25em solid #888;
+}
+
+.markdown-alert>:first-child {
+  margin-top: 0
+}
+
+.markdown-alert>:last-child {
+  margin-bottom: 0
+}
+
+.markdown-alert .markdown-alert-title {
+  display: flex;
+  font-weight: 500;
+  align-items: center;
+  line-height: 1
+}
+
+.markdown-alert .markdown-alert-title .octicon {
+  margin-right: 0.5rem;
+  display: inline-block;
+  overflow: visible !important;
+  vertical-align: text-bottom;
+  fill: currentColor;
+}
+
+.markdown-alert.markdown-alert-note {
+  border-left-color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-note .markdown-alert-title {
+  color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-important {
+  border-left-color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-important .markdown-alert-title {
+  color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-warning {
+  border-left-color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-warning .markdown-alert-title {
+  color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-tip {
+  border-left-color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-tip .markdown-alert-title {
+  color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-caution {
+  border-left-color: var(--color-caution);
+}
+
+.markdown-alert.markdown-alert-caution .markdown-alert-title {
+  color: var(--color-caution);
+}
+
+</style>
+        
+        </head>
+        <body class="vscode-body vscode-light">
+            <h1 id="event-hardening-plan">Event Hardening Plan</h1>
+<h2 id="purpose">Purpose</h2>
+<p>This document is the working source of truth for hardening the event system.</p>
+<p>It has three jobs:</p>
+<ol>
+<li>define the target event experience clearly</li>
+<li>guide implementation in safe phases</li>
+<li>track progress so the work does not drift</li>
+</ol>
+<p>The goal is not just to add more event features. The goal is to make the entire event flow deterministic, role-aware, and easy to reason about.</p>
+<hr>
+<h2 id="north-star">North Star</h2>
+<p>We want one event system with four clean journeys:</p>
+<ol>
+<li>Public journey</li>
+<li>Attendee journey</li>
+<li>Speaker journey</li>
+<li>Admin journey</li>
+</ol>
+<p>At the end of this hardening work, every user should see one obvious next action based on:</p>
+<ul>
+<li>event lifecycle state</li>
+<li>registration state</li>
+<li>speaker state</li>
+<li>payment state</li>
+<li>role and permissions</li>
+</ul>
+<p>No page should expose conflicting calls to action, and no important transition should depend on scattered controller logic or UI assumptions.</p>
+<hr>
+<h2 id="success-criteria">Success Criteria</h2>
+<p>The flow is considered hardened when all of the following are true:</p>
+<ul>
+<li>event lifecycle has one canonical source of truth</li>
+<li>attendee registration has one canonical source of truth</li>
+<li>speaker progression has one canonical source of truth</li>
+<li>permissions map cleanly to responsibilities</li>
+<li>public event pages show exactly one primary CTA</li>
+<li>paid and free registration flows are predictable\</li>
+<li>full events transition to waitlist deliberately</li>
+<li>attendee workspace becomes the post-registration home</li>
+<li>speaker workspace becomes the post-application home</li>
+<li>admin event workspace supports operations instead of isolated forms</li>
+<li>important transitions are validated centrally</li>
+<li>reminders and notifications follow event state correctly</li>
+<li>feature tests cover critical role and state transitions</li>
+</ul>
+<hr>
+<h2 id="current-reality-summary">Current Reality Summary</h2>
+<p>What already exists:</p>
+<ul>
+<li>event status enum and <code>status</code> column</li>
+<li>attendee waitlist support</li>
+<li>attendee <code>My Events</code> dashboard and single workspace</li>
+<li>speaker workspace separated from attendee workspace</li>
+<li>admin event workspace with core tabs</li>
+<li>payment flow for paid events</li>
+<li>confirmation and reminder notifications</li>
+</ul>
+<p>What is still uneven:</p>
+<ul>
+<li>lifecycle states are not fully aligned with the plan</li>
+<li>legacy booleans still influence behavior</li>
+<li>permission split is incomplete</li>
+<li>registration terminology is not fully normalized</li>
+<li>speaker stage names are not fully normalized</li>
+<li>admin operations are missing agenda, reminders UI, audit log, analytics, and active waitlist management</li>
+<li>tests do not yet protect the new journey strongly enough</li>
+</ul>
+<hr>
+<h2 id="canonical-domain-model">Canonical Domain Model</h2>
+<h3 id="1-event-lifecycle">1. Event Lifecycle</h3>
+<p>This should be the single event lifecycle model:</p>
+<ol>
+<li><code>draft</code></li>
+<li><code>review</code></li>
+<li><code>published</code></li>
+<li><code>registration_open</code></li>
+<li><code>registration_closed</code></li>
+<li><code>live</code></li>
+<li><code>completed</code></li>
+<li><code>cancelled</code></li>
+<li><code>archived</code></li>
+</ol>
+<p>Rules:</p>
+<ul>
+<li><code>status</code> is the primary source of truth</li>
+<li>legacy flags like <code>is_active</code> and <code>is_published</code> may exist temporarily, but must be derived from <code>status</code></li>
+<li>no page should infer lifecycle from dates alone when a real lifecycle status exists</li>
+</ul>
+<p>Recommended compatibility mapping:</p>
+<table>
+<thead>
+<tr>
+<th>Status</th>
+<th>Publicly visible</th>
+<th>Registration allowed</th>
+<th>Active</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>draft</code></td>
+<td>no</td>
+<td>no</td>
+<td>yes</td>
+</tr>
+<tr>
+<td><code>review</code></td>
+<td>no</td>
+<td>no</td>
+<td>yes</td>
+</tr>
+<tr>
+<td><code>published</code></td>
+<td>yes</td>
+<td>no</td>
+<td>yes</td>
+</tr>
+<tr>
+<td><code>registration_open</code></td>
+<td>yes</td>
+<td>yes</td>
+<td>yes</td>
+</tr>
+<tr>
+<td><code>registration_closed</code></td>
+<td>yes</td>
+<td>no</td>
+<td>yes</td>
+</tr>
+<tr>
+<td><code>live</code></td>
+<td>yes</td>
+<td>no</td>
+<td>yes</td>
+</tr>
+<tr>
+<td><code>completed</code></td>
+<td>yes</td>
+<td>no</td>
+<td>yes</td>
+</tr>
+<tr>
+<td><code>cancelled</code></td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+</tr>
+<tr>
+<td><code>archived</code></td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+</tr>
+</tbody>
+</table>
+<h3 id="2-attendee-registration-state">2. Attendee Registration State</h3>
+<p>This should be the canonical attendee model:</p>
+<ol>
+<li><code>pending</code></li>
+<li><code>confirmed</code></li>
+<li><code>waitlisted</code></li>
+<li><code>cancelled</code></li>
+<li><code>refunded</code></li>
+<li><code>attended</code></li>
+<li><code>no_show</code></li>
+</ol>
+<p>Notes:</p>
+<ul>
+<li><code>pending</code> is important for future-safe payment and reservation handling</li>
+<li><code>confirmed</code> is clearer than <code>registered</code> for post-payment state</li>
+<li><code>refunded</code> should be explicit instead of inferring from transactions</li>
+</ul>
+<p>Short-term compatibility note:</p>
+<ul>
+<li>current code uses <code>registered</code></li>
+<li>we should decide whether to rename to <code>confirmed</code> now or defer with a compatibility layer</li>
+</ul>
+<h3 id="3-speaker-journey-state">3. Speaker Journey State</h3>
+<p>This should be the canonical speaker model:</p>
+<ol>
+<li><code>invited</code></li>
+<li><code>applied</code></li>
+<li><code>under_review</code></li>
+<li><code>approved</code></li>
+<li><code>rejected</code></li>
+<li><code>withdrawn</code></li>
+</ol>
+<p>Notes:</p>
+<ul>
+<li><code>invitation_accepted</code> and <code>declined</code> are implementation details unless we decide they should become first-class domain states</li>
+<li>if invitation handling remains separate, we should model invitation response independently from speaker application stage</li>
+</ul>
+<h3 id="4-payment-state">4. Payment State</h3>
+<p>Payment state should remain transaction-driven and separate from registration state.</p>
+<p>Transaction state:</p>
+<ol>
+<li><code>pending</code></li>
+<li><code>successful</code></li>
+<li><code>failed</code></li>
+<li><code>refunded</code></li>
+</ol>
+<p>Rules:</p>
+<ul>
+<li>a paid event attendee should not become <code>confirmed</code> until payment is verified</li>
+<li>refunds should update both transaction and attendee registration state</li>
+</ul>
+<hr>
+<h2 id="journey-matrix">Journey Matrix</h2>
+<h3 id="guest">Guest</h3>
+<ul>
+<li>Can browse event list</li>
+<li>Can view public event details</li>
+<li>Can see event status and pricing</li>
+<li>Cannot access attendee workspace</li>
+<li>Cannot access speaker workspace</li>
+<li>Primary CTA should be one of:
+<ul>
+<li><code>Login to register</code></li>
+<li><code>Login to buy ticket</code></li>
+<li><code>Apply to speak</code></li>
+<li><code>Registration closed</code></li>
+</ul>
+</li>
+</ul>
+<h3 id="authenticated-user">Authenticated User</h3>
+<ul>
+<li>Can browse public events</li>
+<li>Can register for free events if eligible</li>
+<li>Can start checkout for paid events if eligible</li>
+<li>Can join waitlist if event is full and waitlist is allowed</li>
+<li>Can apply to speak if applications are open</li>
+<li>Should never be dumped back into the public event page after successful registration as the main home</li>
+</ul>
+<h3 id="attendee">Attendee</h3>
+<ul>
+<li>Home becomes <code>My Events</code></li>
+<li>Can open single attendee workspace</li>
+<li>Can see registration status</li>
+<li>Can see payment status</li>
+<li>Can download calendar entry</li>
+<li>Can see access instructions</li>
+<li>Can see meeting link only when allowed</li>
+<li>Can see attendee resources</li>
+<li>Can cancel registration if policy allows</li>
+</ul>
+<h3 id="waitlisted-attendee">Waitlisted Attendee</h3>
+<ul>
+<li>Appears in <code>My Events</code></li>
+<li>Can open the same workspace</li>
+<li>Sees waitlist-specific messaging</li>
+<li>Does not see attendee-only materials that require confirmation</li>
+<li>Can be promoted to confirmed by explicit system/admin action</li>
+</ul>
+<h3 id="speaker-applicant">Speaker Applicant</h3>
+<ul>
+<li>Home becomes speaker workspace</li>
+<li>Can see invitation status</li>
+<li>Can see application status</li>
+<li>Can see topic and submission details</li>
+<li>Can see organizer feedback</li>
+<li>Cannot see attendee-only actions unless also registered as attendee</li>
+</ul>
+<h3 id="approved-speaker">Approved Speaker</h3>
+<ul>
+<li>Can access speaker workspace</li>
+<li>Can see confirmed session logistics</li>
+<li>Can see organizer notes</li>
+<li>Can upload assets once enabled</li>
+<li>Can access speaker-specific resources and instructions</li>
+</ul>
+<h3 id="event-manager">Event Manager</h3>
+<ul>
+<li>Can manage event lifecycle</li>
+<li>Can manage speakers</li>
+<li>Can manage attendees</li>
+<li>Can manage waitlist</li>
+<li>Can manage resources</li>
+<li>Can send updates and reminders</li>
+<li>Can inspect payments for owned/managable events</li>
+</ul>
+<h3 id="admin">Admin</h3>
+<ul>
+<li>Can do everything event managers do</li>
+<li>Can cancel, archive, delete, and audit across all events</li>
+</ul>
+<hr>
+<h2 id="public-cta-rules">Public CTA Rules</h2>
+<p>The public event page must always compute one primary CTA.</p>
+<p>Priority order:</p>
+<ol>
+<li><code>Cancelled</code></li>
+<li><code>Archived</code></li>
+<li><code>Completed</code></li>
+<li><code>Live</code></li>
+<li><code>Registration closed</code></li>
+<li><code>Join waitlist</code></li>
+<li><code>Buy ticket</code></li>
+<li><code>Register now</code></li>
+<li><code>Apply to speak</code></li>
+<li><code>View attendee workspace</code></li>
+<li><code>View speaker workspace</code></li>
+</ol>
+<p>Decision rules:</p>
+<ul>
+<li>if user is already an attendee, workspace CTA wins over registration CTA</li>
+<li>if user is already a speaker applicant or approved speaker, speaker workspace CTA wins over speak-application CTA</li>
+<li>if registration is closed, do not show buy/register/join actions</li>
+<li>if event is full and waitlist is enabled, show <code>Join waitlist</code></li>
+<li>if event is paid and capacity remains, show <code>Buy ticket</code></li>
+<li>if event is free and capacity remains, show <code>Register now</code></li>
+<li>if registration is not open but speaking applications are open, <code>Apply to speak</code> may be the primary CTA only when attendee registration is not available</li>
+</ul>
+<hr>
+<h2 id="transition-rules">Transition Rules</h2>
+<h3 id="event-lifecycle-transitions">Event Lifecycle Transitions</h3>
+<p>Allowed:</p>
+<ul>
+<li><code>draft -&gt; review</code></li>
+<li><code>review -&gt; draft</code></li>
+<li><code>review -&gt; published</code></li>
+<li><code>published -&gt; registration_open</code></li>
+<li><code>registration_open -&gt; registration_closed</code></li>
+<li><code>registration_closed -&gt; live</code></li>
+<li><code>live -&gt; completed</code></li>
+<li><code>published -&gt; cancelled</code></li>
+<li><code>registration_open -&gt; cancelled</code></li>
+<li><code>registration_closed -&gt; cancelled</code></li>
+<li><code>live -&gt; cancelled</code></li>
+<li><code>completed -&gt; archived</code></li>
+<li><code>cancelled -&gt; archived</code></li>
+</ul>
+<p>Blocked:</p>
+<ul>
+<li>skipping directly from <code>draft</code> to <code>live</code></li>
+<li>reopening archived events</li>
+<li>allowing registration in <code>registration_closed</code>, <code>live</code>, <code>completed</code>, <code>cancelled</code>, or <code>archived</code></li>
+</ul>
+<h3 id="attendee-registration-transitions">Attendee Registration Transitions</h3>
+<p>Allowed:</p>
+<ul>
+<li><code>pending -&gt; confirmed</code></li>
+<li><code>pending -&gt; cancelled</code></li>
+<li><code>pending -&gt; refunded</code></li>
+<li><code>confirmed -&gt; cancelled</code></li>
+<li><code>confirmed -&gt; attended</code></li>
+<li><code>confirmed -&gt; no_show</code></li>
+<li><code>confirmed -&gt; refunded</code></li>
+<li><code>waitlisted -&gt; confirmed</code></li>
+<li><code>waitlisted -&gt; cancelled</code></li>
+</ul>
+<p>Blocked:</p>
+<ul>
+<li><code>cancelled -&gt; attended</code></li>
+<li><code>refunded -&gt; attended</code></li>
+<li><code>no_show -&gt; confirmed</code> without explicit admin intervention rules</li>
+</ul>
+<h3 id="speaker-transitions">Speaker Transitions</h3>
+<p>Allowed:</p>
+<ul>
+<li><code>invited -&gt; applied</code></li>
+<li><code>applied -&gt; under_review</code></li>
+<li><code>under_review -&gt; approved</code></li>
+<li><code>under_review -&gt; rejected</code></li>
+<li><code>applied -&gt; withdrawn</code></li>
+<li><code>under_review -&gt; withdrawn</code></li>
+</ul>
+<p>Blocked:</p>
+<ul>
+<li><code>rejected -&gt; approved</code> without reopening review explicitly</li>
+<li><code>withdrawn -&gt; approved</code></li>
+</ul>
+<p>Implementation rule:</p>
+<ul>
+<li>all transition logic should live in one place, not be spread across controllers and UI checks</li>
+</ul>
+<hr>
+<h2 id="permission-model">Permission Model</h2>
+<h3 id="public-and-user">Public and User</h3>
+<ul>
+<li><code>event.view_public</code></li>
+<li><code>event.view_owned_registration</code></li>
+<li><code>event.register</code></li>
+<li><code>event.join_waitlist</code></li>
+</ul>
+<h3 id="speaker">Speaker</h3>
+<ul>
+<li><code>event.apply_to_speak</code></li>
+<li><code>speaker_application.view_own</code></li>
+<li><code>speaker_application.update_own_draft</code></li>
+<li><code>speaker_invitation.respond</code></li>
+<li><code>speaker_session.view_own</code></li>
+<li><code>speaker_session.upload_resources</code></li>
+</ul>
+<h3 id="event-manager-1">Event Manager</h3>
+<ul>
+<li><code>event.view_any</code></li>
+<li><code>event.create</code></li>
+<li><code>event.update</code></li>
+<li><code>event.publish</code></li>
+<li><code>event.manage_agenda</code></li>
+<li><code>event.manage_resources</code></li>
+<li><code>event.manage_attendees</code></li>
+<li><code>event.manage_waitlist</code></li>
+<li><code>event.manage_speakers</code></li>
+<li><code>event.send_updates</code></li>
+<li><code>event.view_payments</code></li>
+</ul>
+<h3 id="admin-1">Admin</h3>
+<ul>
+<li>all event manager permissions</li>
+<li><code>event.delete</code></li>
+<li><code>event.cancel</code></li>
+<li><code>event.archive</code></li>
+<li><code>event.manage_permissions</code></li>
+<li><code>transaction.view_any</code></li>
+</ul>
+<p>Implementation note:</p>
+<ul>
+<li>we may keep current permission slugs for compatibility if needed, but we should decide which set is canonical and then adapt policy checks consistently</li>
+</ul>
+<hr>
+<h2 id="admin-workspace-target">Admin Workspace Target</h2>
+<p>The admin event area should grow into these sections:</p>
+<ol>
+<li>Overview</li>
+<li>Agenda</li>
+<li>Speakers</li>
+<li>Registrations</li>
+<li>Waitlist</li>
+<li>Tickets and payments</li>
+<li>Resources</li>
+<li>Messaging and reminders</li>
+<li>Audit log</li>
+<li>Analytics</li>
+</ol>
+<p>Definition of done for admin workspace:</p>
+<ul>
+<li>each section is reachable from one event home</li>
+<li>data visibility follows permissions</li>
+<li>key actions are not scattered across unrelated pages</li>
+</ul>
+<hr>
+<h2 id="rollout-strategy">Rollout Strategy</h2>
+<h3 id="phase-1-lock-the-spec">Phase 1: Lock the Spec</h3>
+<p>Goal:</p>
+<ul>
+<li>agree on vocabulary and rules before changing behavior</li>
+</ul>
+<p>Deliverables:</p>
+<ul>
+<li>finalize canonical lifecycle</li>
+<li>finalize attendee registration states</li>
+<li>finalize speaker states</li>
+<li>finalize CTA priority rules</li>
+<li>finalize permission map</li>
+</ul>
+<h3 id="phase-2-domain-hardening">Phase 2: Domain Hardening</h3>
+<p>Goal:</p>
+<ul>
+<li>make backend state rules trustworthy</li>
+</ul>
+<p>Deliverables:</p>
+<ul>
+<li>status and transition enums or domain services</li>
+<li>compatibility mapping for legacy flags</li>
+<li>normalized registration state handling</li>
+<li>normalized speaker stage handling</li>
+<li>policy cleanup</li>
+</ul>
+<h3 id="phase-3-flow-hardening">Phase 3: Flow Hardening</h3>
+<p>Goal:</p>
+<ul>
+<li>make user journeys deterministic</li>
+</ul>
+<p>Deliverables:</p>
+<ul>
+<li>public event page CTA resolver</li>
+<li>free event registration path</li>
+<li>paid event payment-to-confirmation path</li>
+<li>waitlist promotion path</li>
+<li>attendee workspace rules</li>
+<li>speaker workspace rules</li>
+</ul>
+<h3 id="phase-4-admin-operations-hardening">Phase 4: Admin Operations Hardening</h3>
+<p>Goal:</p>
+<ul>
+<li>make event management operationally complete</li>
+</ul>
+<p>Deliverables:</p>
+<ul>
+<li>agenda management</li>
+<li>waitlist management</li>
+<li>payments visibility and filtering</li>
+<li>reminders and messaging UI</li>
+<li>audit events</li>
+<li>analytics summary</li>
+</ul>
+<h3 id="phase-5-reliability-and-safety">Phase 5: Reliability and Safety</h3>
+<p>Goal:</p>
+<ul>
+<li>protect behavior against regressions</li>
+</ul>
+<p>Deliverables:</p>
+<ul>
+<li>feature tests for major journeys</li>
+<li>transition tests</li>
+<li>permission tests</li>
+<li>notification tests</li>
+<li>logging and audit coverage</li>
+</ul>
+<hr>
+<h2 id="suggested-implementation-order">Suggested Implementation Order</h2>
+<p>To reduce risk, implementation should proceed in this order:</p>
+<ol>
+<li>create the workflow matrix in code comments/docs</li>
+<li>normalize enums and transition rules</li>
+<li>centralize policy and permission checks</li>
+<li>centralize CTA selection for event detail pages</li>
+<li>normalize attendee registration flow</li>
+<li>normalize speaker flow</li>
+<li>expand admin workspace</li>
+<li>backfill tests around every critical transition</li>
+</ol>
+<p>Why this order:</p>
+<ul>
+<li>it prevents UI work from hard-coding unstable domain rules</li>
+<li>it lets us fix logic once and reuse it everywhere</li>
+<li>it makes progress measurable</li>
+</ul>
+<hr>
+<h2 id="phase-2-scope">Phase 2 Scope</h2>
+<p>The next implementation phase should focus on domain hardening only.</p>
+<p>This means:</p>
+<ul>
+<li>no broad UI redesign yet</li>
+<li>no analytics work yet</li>
+<li>no admin information architecture expansion yet</li>
+</ul>
+<p>The purpose of Phase 2 is to make the state model stable enough that later UI work does not encode the wrong rules.</p>
+<h3 id="phase-2-deliverables">Phase 2 Deliverables</h3>
+<ul>
+<li>event lifecycle source of truth finalized</li>
+<li>legacy boolean behavior documented and derived from lifecycle</li>
+<li>attendee registration transition rules centralized</li>
+<li>speaker state model normalized for v1</li>
+<li>CTA resolution rules written down in code-ready form</li>
+<li>policy and permission gaps listed for implementation</li>
+<li>high-risk terminology mismatches documented</li>
+</ul>
+<h3 id="phase-2-non-goals">Phase 2 Non-Goals</h3>
+<ul>
+<li>full admin workspace rebuild</li>
+<li>speaker asset upload implementation</li>
+<li>analytics dashboards</li>
+<li>broad notification redesign</li>
+</ul>
+<hr>
+<h2 id="immediate-decisions-for-v1">Immediate Decisions For V1</h2>
+<p>These decisions are intentionally pragmatic. They are meant to let us harden the flow safely against the current codebase before we attempt deeper structural cleanup.</p>
+<h3 id="decision-1-keep-registered-as-the-stored-attendee-state-in-v1">Decision 1: Keep <code>registered</code> as the stored attendee state in v1</h3>
+<p>Decision:</p>
+<ul>
+<li><code>registered</code> remains the stored database value for now</li>
+<li><code>confirmed</code> remains the product-language label in UI and documentation where helpful</li>
+</ul>
+<p>Why:</p>
+<ul>
+<li>the current codebase uses <code>registered</code> widely across actions, services, views, reminders, and tests</li>
+<li>a hard rename right now would expand the change surface unnecessarily</li>
+<li>we can still centralize behavior first, then rename later if it is still worth doing</li>
+</ul>
+<p>Implementation consequence:</p>
+<ul>
+<li>add a compatibility note in code where attendee state is normalized</li>
+<li>use product copy like &quot;confirmed&quot; in UI where that reads better, while mapping internally to <code>registered</code></li>
+</ul>
+<h3 id="decision-2-add-review-to-the-canonical-lifecycle-but-defer-enabling-it-in-the-ui-until-admin-review-tooling-exists">Decision 2: Add <code>review</code> to the canonical lifecycle, but defer enabling it in the UI until admin review tooling exists</h3>
+<p>Decision:</p>
+<ul>
+<li><code>review</code> stays in the target lifecycle model</li>
+<li>the app may continue operating without active UI entry into <code>review</code> until admin review mechanics are ready</li>
+</ul>
+<p>Why:</p>
+<ul>
+<li>removing it now would weaken the long-term lifecycle model</li>
+<li>forcing it into active use immediately would create partial workflow complexity without supporting tools</li>
+</ul>
+<p>Implementation consequence:</p>
+<ul>
+<li>transition logic should reserve the state</li>
+<li>admin create/edit flows do not need to expose it immediately if that would create dead-end behavior</li>
+</ul>
+<h3 id="decision-3-keep-invitation-response-separate-from-speaker-application-stage">Decision 3: Keep invitation response separate from speaker application stage</h3>
+<p>Decision:</p>
+<ul>
+<li>invitation response remains its own concern</li>
+<li>speaker application stage remains the canonical speaker progression model</li>
+</ul>
+<p>Why:</p>
+<ul>
+<li>current code already distinguishes invitation status from application status</li>
+<li>combining them now would blur two different processes</li>
+<li>the real normalization problem is presentation and transition handling, not that both concepts exist</li>
+</ul>
+<p>Implementation consequence:</p>
+<ul>
+<li>canonical speaker progression for v1 becomes:
+<ul>
+<li><code>invited</code></li>
+<li><code>applied</code></li>
+<li><code>under_review</code></li>
+<li><code>approved</code></li>
+<li><code>rejected</code></li>
+<li><code>withdrawn</code></li>
+</ul>
+</li>
+<li>invitation response states like accepted or declined should map into that journey deliberately rather than become competing top-level stage models</li>
+</ul>
+<h3 id="decision-4-waitlist-should-be-enabled-by-default-for-full-events-in-v1">Decision 4: Waitlist should be enabled by default for full events in v1</h3>
+<p>Decision:</p>
+<ul>
+<li>if an event reaches capacity and registration is otherwise open, the system should prefer waitlisting instead of hard failure</li>
+</ul>
+<p>Why:</p>
+<ul>
+<li>the current system already supports waitlist behavior</li>
+<li>this aligns with the hardening goal of preventing silent or ambiguous failure</li>
+<li>per-event configurability can be added later if needed</li>
+</ul>
+<p>Implementation consequence:</p>
+<ul>
+<li>CTA logic should deliberately switch to waitlist when capacity is exhausted</li>
+<li>admin tooling later needs promotion flow from waitlist to registered</li>
+</ul>
+<h3 id="decision-5-location-and-meeting_link-need-separate-responsibilities">Decision 5: <code>location</code> and <code>meeting_link</code> need separate responsibilities</h3>
+<p>Decision:</p>
+<ul>
+<li><code>location</code> remains the general event venue or public-facing location field</li>
+<li><code>meeting_link</code> becomes the attendee-access field for online access</li>
+<li><code>access_notes</code> remains a separate instructional field</li>
+</ul>
+<p>Why:</p>
+<ul>
+<li>the current codebase uses <code>location</code> both as venue text and as a join URL</li>
+<li>that ambiguity leaks into public pages, attendee workspace, notifications, and admin pages</li>
+<li>the attendee workspace already points toward a cleaner model by reading <code>meeting_link</code> and <code>access_notes</code> from metadata</li>
+</ul>
+<p>Implementation consequence:</p>
+<ul>
+<li>in v1, continue reading <code>meeting_link</code> and <code>access_notes</code> from <code>metadata</code></li>
+<li>treat <code>location</code> as public event location information, not the attendee-only join URL</li>
+<li>when the time comes for schema refinement, <code>meeting_link</code> should become a dedicated event field</li>
+</ul>
+<hr>
+<h2 id="progress-tracker">Progress Tracker</h2>
+<h3 id="foundation">Foundation</h3>
+<ul class="contains-task-list">
+<li class="task-list-item enabled"><input class="task-list-item-checkbox" checked=""type="checkbox"> Canonical event lifecycle agreed</li>
+<li class="task-list-item enabled"><input class="task-list-item-checkbox" checked=""type="checkbox"> Canonical attendee registration states agreed</li>
+<li class="task-list-item enabled"><input class="task-list-item-checkbox" checked=""type="checkbox"> Canonical speaker stages agreed</li>
+<li class="task-list-item enabled"><input class="task-list-item-checkbox" checked=""type="checkbox"> Canonical permission model agreed</li>
+<li class="task-list-item enabled"><input class="task-list-item-checkbox" checked=""type="checkbox"> CTA priority rules agreed</li>
+</ul>
+<h3 id="domain">Domain</h3>
+<ul class="contains-task-list">
+<li class="task-list-item enabled"><input class="task-list-item-checkbox" checked=""type="checkbox"> Event lifecycle rules centralized</li>
+<li class="task-list-item enabled"><input class="task-list-item-checkbox" checked=""type="checkbox"> Legacy boolean compatibility documented</li>
+<li class="task-list-item enabled"><input class="task-list-item-checkbox" checked=""type="checkbox"> Registration transitions centralized</li>
+<li class="task-list-item enabled"><input class="task-list-item-checkbox" checked=""type="checkbox"> Speaker transitions centralized</li>
+<li class="task-list-item enabled"><input class="task-list-item-checkbox" checked=""type="checkbox"> Refund state integrated into registration flow</li>
+<li class="task-list-item enabled"><input class="task-list-item-checkbox" checked=""type="checkbox"> Policies aligned with canonical permissions</li>
+</ul>
+<h3 id="public-journey">Public Journey</h3>
+<ul class="contains-task-list">
+<li class="task-list-item enabled"><input class="task-list-item-checkbox" checked=""type="checkbox"> Public list segmentation is correct</li>
+<li class="task-list-item enabled"><input class="task-list-item-checkbox" checked=""type="checkbox"> Public event detail page shows one primary CTA</li>
+<li class="task-list-item enabled"><input class="task-list-item-checkbox" checked=""type="checkbox"> Free registration flow is deterministic</li>
+<li class="task-list-item enabled"><input class="task-list-item-checkbox" checked=""type="checkbox"> Paid checkout flow is deterministic</li>
+<li class="task-list-item enabled"><input class="task-list-item-checkbox" checked=""type="checkbox"> Full events route into waitlist deliberately</li>
+<li class="task-list-item enabled"><input class="task-list-item-checkbox"type="checkbox"> Closed registration states are handled clearly</li>
+</ul>
+<h3 id="attendee-journey">Attendee Journey</h3>
+<ul class="contains-task-list">
+<li class="task-list-item enabled"><input class="task-list-item-checkbox"type="checkbox"> Confirmation step defined</li>
+<li class="task-list-item enabled"><input class="task-list-item-checkbox" checked=""type="checkbox"> <code>My Events</code> is the attendee home</li>
+<li class="task-list-item enabled"><input class="task-list-item-checkbox"type="checkbox"> Single attendee workspace is complete</li>
+<li class="task-list-item enabled"><input class="task-list-item-checkbox"type="checkbox"> Calendar download behavior is correct</li>
+<li class="task-list-item enabled"><input class="task-list-item-checkbox"type="checkbox"> Access instructions visibility is correct</li>
+<li class="task-list-item enabled"><input class="task-list-item-checkbox"type="checkbox"> Meeting link visibility is correct</li>
+<li class="task-list-item enabled"><input class="task-list-item-checkbox"type="checkbox"> Cancel registration rules are correct</li>
+</ul>
+<h3 id="speaker-journey">Speaker Journey</h3>
+<ul class="contains-task-list">
+<li class="task-list-item enabled"><input class="task-list-item-checkbox"type="checkbox"> Invitation flow is normalized</li>
+<li class="task-list-item enabled"><input class="task-list-item-checkbox"type="checkbox"> Application flow is normalized</li>
+<li class="task-list-item enabled"><input class="task-list-item-checkbox" checked=""type="checkbox"> Speaker workspace reflects canonical stages</li>
+<li class="task-list-item enabled"><input class="task-list-item-checkbox"type="checkbox"> Organizer feedback flow is complete</li>
+<li class="task-list-item enabled"><input class="task-list-item-checkbox"type="checkbox"> Speaker assets flow is designed</li>
+<li class="task-list-item enabled"><input class="task-list-item-checkbox"type="checkbox"> Session slot visibility rules are defined</li>
+</ul>
+<h3 id="admin-journey">Admin Journey</h3>
+<ul class="contains-task-list">
+<li class="task-list-item enabled"><input class="task-list-item-checkbox"type="checkbox"> Overview section hardened</li>
+<li class="task-list-item enabled"><input class="task-list-item-checkbox"type="checkbox"> Agenda section implemented</li>
+<li class="task-list-item enabled"><input class="task-list-item-checkbox"type="checkbox"> Speakers section hardened</li>
+<li class="task-list-item enabled"><input class="task-list-item-checkbox"type="checkbox"> Registrations section hardened</li>
+<li class="task-list-item enabled"><input class="task-list-item-checkbox"type="checkbox"> Waitlist section implemented</li>
+<li class="task-list-item enabled"><input class="task-list-item-checkbox"type="checkbox"> Payments section hardened</li>
+<li class="task-list-item enabled"><input class="task-list-item-checkbox"type="checkbox"> Resources section hardened</li>
+<li class="task-list-item enabled"><input class="task-list-item-checkbox"type="checkbox"> Messaging and reminders section implemented</li>
+<li class="task-list-item enabled"><input class="task-list-item-checkbox"type="checkbox"> Audit log section implemented</li>
+<li class="task-list-item enabled"><input class="task-list-item-checkbox"type="checkbox"> Analytics section implemented</li>
+</ul>
+<h3 id="reliability">Reliability</h3>
+<ul class="contains-task-list">
+<li class="task-list-item enabled"><input class="task-list-item-checkbox"type="checkbox"> Registration notifications verified</li>
+<li class="task-list-item enabled"><input class="task-list-item-checkbox" checked=""type="checkbox"> Reminder notifications verified</li>
+<li class="task-list-item enabled"><input class="task-list-item-checkbox" checked=""type="checkbox"> Audit logging for critical transitions implemented</li>
+<li class="task-list-item enabled"><input class="task-list-item-checkbox"type="checkbox"> Event lifecycle feature tests added</li>
+<li class="task-list-item enabled"><input class="task-list-item-checkbox" checked=""type="checkbox"> Registration feature tests added</li>
+<li class="task-list-item enabled"><input class="task-list-item-checkbox" checked=""type="checkbox"> Speaker journey feature tests added</li>
+<li class="task-list-item enabled"><input class="task-list-item-checkbox" checked=""type="checkbox"> Permission feature tests added</li>
+<li class="task-list-item enabled"><input class="task-list-item-checkbox" checked=""type="checkbox"> Payment-to-registration feature tests updated</li>
+</ul>
+<h3 id="latest-checkpoint">Latest Checkpoint</h3>
+<ul class="contains-task-list">
+<li class="task-list-item enabled"><input class="task-list-item-checkbox" checked=""type="checkbox"> 2026-05-01: Permission hardening moved forward.</li>
+<li class="task-list-item enabled"><input class="task-list-item-checkbox" checked=""type="checkbox"> Added missing canonical event permissions for waitlist management, payments visibility, sending updates, and archiving.</li>
+<li class="task-list-item enabled"><input class="task-list-item-checkbox" checked=""type="checkbox"> Wired policy abilities for event admin operations, resources, speaker invites, and waitlist promotion.</li>
+<li class="task-list-item enabled"><input class="task-list-item-checkbox" checked=""type="checkbox"> Split admin event route guards so create, update, delete, speakers, resources, and waitlist actions are no longer all implicitly tied to <code>event-view-any</code>.</li>
+<li class="task-list-item enabled"><input class="task-list-item-checkbox" checked=""type="checkbox"> Gated admin event workspace actions and payment visibility behind explicit event capabilities.</li>
+<li class="task-list-item enabled"><input class="task-list-item-checkbox" checked=""type="checkbox"> Stopped loading event payment data for admins without the event payments ability.</li>
+<li class="task-list-item enabled"><input class="task-list-item-checkbox" checked=""type="checkbox"> Added explicit authorization and validation around speaker assignment flows.</li>
+<li class="task-list-item enabled"><input class="task-list-item-checkbox" checked=""type="checkbox"> Fixed the PHPUnit testing harness to use in-memory SQLite with an app key, so feature coverage can run reliably again.</li>
+<li class="task-list-item enabled"><input class="task-list-item-checkbox" checked=""type="checkbox"> Added permission-focused feature coverage for waitlist promotion, speaker assignment, and event payment visibility.</li>
+<li class="task-list-item enabled"><input class="task-list-item-checkbox" checked=""type="checkbox"> Introduced a confirmed-language compatibility layer while keeping the stored v1 attendee state as <code>registered</code>.</li>
+<li class="task-list-item enabled"><input class="task-list-item-checkbox" checked=""type="checkbox"> Switched event confirmation notifications and user-facing event registration copy to canonical confirmed wording.</li>
+<li class="task-list-item enabled"><input class="task-list-item-checkbox" checked=""type="checkbox"> Hardened paid event verification so successful payment respects real-time event capacity instead of silently overbooking.</li>
+<li class="task-list-item enabled"><input class="task-list-item-checkbox" checked=""type="checkbox"> Added feature coverage for the pending transaction -&gt; confirmed attendee boundary and the paid confirmation -&gt; waitlist fallback path.</li>
+<li class="task-list-item enabled"><input class="task-list-item-checkbox" checked=""type="checkbox"> Verified reminder dispatch rules so only confirmed attendees are notified and duplicate cron sends are suppressed by cache locks.</li>
+<li class="task-list-item enabled"><input class="task-list-item-checkbox" checked=""type="checkbox"> Added a lightweight <code>event_transition_audits</code> trail for confirmation, cancellation, and waitlist promotion transitions directly from <code>EventService</code>.</li>
+<li class="task-list-item enabled"><input class="task-list-item-checkbox" checked=""type="checkbox"> Added feature coverage for registration confirmation, RSVP cancellation, and waitlist promotion audit writes.</li>
+<li class="task-list-item enabled"><input class="task-list-item-checkbox" checked=""type="checkbox"> Extended end-to-end registration journey coverage for free confirmation, full-event waitlisting, and cancelled-attendee re-entry rules.</li>
+<li class="task-list-item enabled"><input class="task-list-item-checkbox" checked=""type="checkbox"> Added speaker journey feature coverage for application submission, invitation acceptance, admin approval, rejection, and reopening.</li>
+<li class="task-list-item enabled"><input class="task-list-item-checkbox" checked=""type="checkbox"> Centralized speaker state changes and workspace-stage resolution behind a single speaker transition service so invite acceptance, application approval, rejection, and reopening now share one backend path.</li>
+<li class="task-list-item enabled"><input class="task-list-item-checkbox" checked=""type="checkbox"> Integrated <code>refunded</code> as a first-class attendee state through an internal refund-request workflow: attendees submit pending requests, admins review them, and approval finalizes both transaction refund status and attendee refund state, with webhook sync completing approved requests when remittance happens through Paystack.</li>
+<li class="task-list-item enabled"><input class="task-list-item-checkbox" checked=""type="checkbox"> Refined the refund request UI so attendees can provide context from the event workspace and admins can review, annotate, approve, or decline requests from the event operations view.</li>
+<li class="task-list-item enabled"><input class="task-list-item-checkbox" checked=""type="checkbox"> Moved refund handling into a dedicated attendee refund page so the event workspace can stay focused while refund requests get a clearer form, status timeline, and next-step guidance.</li>
+<li class="task-list-item enabled"><input class="task-list-item-checkbox" checked=""type="checkbox"> Cleaned up the admin event payments tab so refund reviews and transaction history are easier to operate: latest-first ordering, clearer payment summary metrics, and a more readable ledger with refs, paid dates, and refund context.</li>
+<li class="task-list-item enabled"><input class="task-list-item-checkbox" checked=""type="checkbox"> Reframed the attendee event workspace into a more restrained, premium briefing layout with quieter hierarchy, fewer dashboard-style cards, and clearer action grouping for access, resources, and refund state.</li>
+<li class="task-list-item enabled"><input class="task-list-item-checkbox" checked=""type="checkbox"> Converted the attendee events home into a clean table-based register so prominent users can scan commitments, status, schedule, payment context, and workspace actions with less visual noise.</li>
+<li class="task-list-item enabled"><input class="task-list-item-checkbox" checked=""type="checkbox"> Tightened the refund outcome so refunded attendees are no longer treated as active event participants: they lose attendee workspace access and drop out of the <code>My Events</code> registry while refund records remain in payment/admin flows.</li>
+<li class="task-list-item enabled"><input class="task-list-item-checkbox" checked=""type="checkbox"> Segmented the public event list around actual lifecycle and capacity states, so live events, open registration, waitlist-only events, announced events, closed registration, and completed events no longer appear in one undifferentiated grid.</li>
+<li class="task-list-item enabled"><input class="task-list-item-checkbox" checked=""type="checkbox"> Clarified the free public registration flow so guests see an explicit login-to-register path, authenticated users get a true free-registration CTA, and the public event modal stops borrowing paid checkout language.</li>
+<li class="task-list-item enabled"><input class="task-list-item-checkbox" checked=""type="checkbox"> Audited the paid event checkout path against course-era assumptions and centralized event-specific eligibility checks, so checkout and payment initialization now reject already-confirmed, waitlisted, refunded, full-capacity, closed, and duplicate-pending-payment states consistently.</li>
+<li class="task-list-item enabled"><input class="task-list-item-checkbox"type="checkbox"> Next: move to the next unchecked item in <code>Public Journey</code>, <code>Closed registration states are handled clearly</code>.</li>
+</ul>
+<hr>
+<h2 id="working-decisions-log">Working Decisions Log</h2>
+<p>Use this section to record decisions so we do not re-open settled questions later.</p>
+<h3 id="pending-decisions">Pending Decisions</h3>
+<ul class="contains-task-list">
+<li class="task-list-item enabled"><input class="task-list-item-checkbox"type="checkbox"> Canonical permission slug strategy: keep current slugs with compatibility mapping, or rename to dot-notation later?</li>
+<li class="task-list-item enabled"><input class="task-list-item-checkbox"type="checkbox"> Should event managers be introduced as a distinct role now, or via admin permissions first?</li>
+<li class="task-list-item enabled"><input class="task-list-item-checkbox"type="checkbox"> Should attendee cancellation limits remain as-is, be simplified, or become policy-driven?</li>
+<li class="task-list-item enabled"><input class="task-list-item-checkbox"type="checkbox"> What is the exact promotion path from waitlisted to registered in v1?</li>
+</ul>
+<h3 id="confirmed-decisions">Confirmed Decisions</h3>
+<ul class="contains-task-list">
+<li class="task-list-item enabled"><input class="task-list-item-checkbox" checked=""type="checkbox"> Keep attendee <code>registered</code> as the stored v1 state and use &quot;confirmed&quot; as product-language where helpful</li>
+<li class="task-list-item enabled"><input class="task-list-item-checkbox" checked=""type="checkbox"> Keep attendee <code>pending</code> as a deferred domain state in v1, while <code>refunded</code> is now modeled explicitly for event registrations</li>
+<li class="task-list-item enabled"><input class="task-list-item-checkbox" checked=""type="checkbox"> Keep <code>review</code> in the canonical lifecycle, but defer active UI usage until supporting admin review flow exists</li>
+<li class="task-list-item enabled"><input class="task-list-item-checkbox" checked=""type="checkbox"> Keep invitation response separate from speaker application stage</li>
+<li class="task-list-item enabled"><input class="task-list-item-checkbox" checked=""type="checkbox"> Enable waitlist by default for full events in v1</li>
+<li class="task-list-item enabled"><input class="task-list-item-checkbox" checked=""type="checkbox"> Separate public <code>location</code> from attendee <code>meeting_link</code>, with <code>meeting_link</code> continuing to live in <code>metadata</code> in v1</li>
+</ul>
+<hr>
+<h2 id="next-build-sequence">Next Build Sequence</h2>
+<p>This is the recommended execution order after this document.</p>
+<ol class="contains-task-list">
+<li class="task-list-item enabled"><input class="task-list-item-checkbox" checked=""type="checkbox"> Centralize event lifecycle interpretation in one backend layer.</li>
+<li class="task-list-item enabled"><input class="task-list-item-checkbox" checked=""type="checkbox"> Centralize attendee registration interpretation in one backend layer.</li>
+<li class="task-list-item enabled"><input class="task-list-item-checkbox" checked=""type="checkbox"> Normalize speaker workspace stage resolution against the confirmed v1 model.</li>
+<li class="task-list-item enabled"><input class="task-list-item-checkbox" checked=""type="checkbox"> Create a single CTA resolver for public event pages.</li>
+<li class="task-list-item enabled"><input class="task-list-item-checkbox" checked=""type="checkbox"> Update tests around payment, registration, waitlist, and workspace redirects.</li>
+</ol>
+<p>This gives us the safest route to implementation because it hardens logic before expanding UI surface area.</p>
+<hr>
+<h2 id="operating-rule">Operating Rule</h2>
+<p>Before implementing any event-related change, check:</p>
+<ol>
+<li>which journey does this affect?</li>
+<li>which canonical state model does it rely on?</li>
+<li>which transition does it introduce or modify?</li>
+<li>which permission should guard it?</li>
+<li>which checklist item should be updated after it lands?</li>
+</ol>
+<p>If a change cannot answer those five questions cleanly, it is probably introducing more ambiguity and should be reworked before merge.</p>
+
+            
+            
+        </body>
+        </html>

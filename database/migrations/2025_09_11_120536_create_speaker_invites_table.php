@@ -21,6 +21,8 @@ return new class extends Migration {
             $table->string('expected_format')->nullable();
             $table->text('special_instructions')->nullable();
             $table->string('status')->default('pending');
+            $table->text('user_feedback')->nullable();
+            $table->text('admin_feedback')->nullable();
             $table->timestamp('sent_at')->nullable();
             $table->timestamp('responded_at')->nullable();
             $table->timestamp('expires_at')->nullable();

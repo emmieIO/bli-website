@@ -12,6 +12,7 @@ return new class extends Migration {
     {
         Schema::create('course_modules', function (Blueprint $table) {
             $table->id();
+            $table->string('slug')->unique();
             $table->foreignId('course_id')->constrained()->cascadeOnDelete();
 
             $table->string('title');
@@ -20,6 +21,8 @@ return new class extends Migration {
             // For sorting inside a course
             $table->unsignedInteger('order')->default(0);
             $table->timestamps();
+
+            $table->index(['course_id', 'order']);
         });
     }
 

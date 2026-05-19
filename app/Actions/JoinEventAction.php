@@ -2,6 +2,7 @@
 
 namespace App\Actions;
 
+use App\Enums\EventRegistrationStatus;
 use App\Models\Event;
 use App\Services\Event\EventService;
 use Illuminate\Http\Request;
@@ -22,15 +23,30 @@ class JoinEventAction
     {
 
         $event = Event::findBySlug($slug)->firstOrFail();
+        $workspaceRoute = route('user.events.show', $event->slug);
 
         // Check if user is already registered
         $userId = auth()->id();
         $existing = $event->attendees()->where('user_id', $userId)->first();
 
-        if ($existing && $existing->pivot->status === 'registered') {
-            return back()->with([
+        if ($existing && $existing->pivot->status === EventRegistrationStatus::REGISTERED->value) {
+            return redirect($workspaceRoute)->with([
                 "type" => "info",
-                "message" => "You are already registered for this event."
+                "message" => "Your seat is already confirmed for this event."
+            ]);
+        }
+
+        if ($existing && $existing->pivot->status === EventRegistrationStatus::WAITLISTED->value) {
+            return redirect($workspaceRoute)->with([
+                "type" => "info",
+                "message" => "You are already on the waitlist for this event."
+            ]);
+        }
+
+        if (! $event->isRegistrationOpen()) {
+            return back()->with([
+                "type" => "error",
+                "message" => "Registration is not open for this event."
             ]);
         }
 
@@ -51,17 +67,6 @@ class JoinEventAction
         // }
 
 
-        if ($event->attendee_slots !== null) {
-            // Check for available slots
-            $slotsRemaining = $event->slotsRemaining();
-            if ($slotsRemaining <= 0) {
-                return back()->with([
-                    "type" => "error",
-                    "message" => "Registration failed. No available slots remaining for this event."
-                ]);
-            }
-        }
-
         // Check for maximum registrations
         $maxRevokes = $event->maxRevokes();
         if (isset($maxRevokes) && $maxRevokes) {
@@ -73,13 +78,33 @@ class JoinEventAction
 
         // Check if event is paid
         if ($event->entry_fee > 0) {
+            if ($event->slotsRemaining() === 'Full') {
+                $result = $this->eventService->registerOrWaitlist($event, $userId);
+
+                if ($result === EventRegistrationStatus::WAITLISTED) {
+                    return redirect($workspaceRoute)->with([
+                        "type" => "success",
+                        "message" => "This event is currently full. You have been added to the waitlist."
+                    ]);
+                }
+            }
+
             return redirect()->route('events.checkout', $event->slug);
         }
 
-        if ($this->eventService->registerForEvent($event->id)) {
-            return back()->with([
+        $result = $this->eventService->registerOrWaitlist($event, $userId);
+
+        if ($result === EventRegistrationStatus::REGISTERED) {
+            return redirect($workspaceRoute)->with([
                 "type" => "success",
-                "message" => "You have successfully registered for the event."
+                "message" => "Your event registration has been confirmed."
+            ]);
+        }
+
+        if ($result === EventRegistrationStatus::WAITLISTED) {
+            return redirect($workspaceRoute)->with([
+                "type" => "success",
+                "message" => "This event is full right now. You have been added to the waitlist."
             ]);
         }
         return back()->with([

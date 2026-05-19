@@ -5,11 +5,11 @@ namespace App\Http\Controllers\Course;
 use App\Enums\LessonType;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\CreateLessonRequest;
+use App\Http\Requests\UpdateLessonRequest;
 use App\Models\CourseModule;
 use App\Models\Lesson;
 use App\Services\Course\LessonService;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
-use Illuminate\Http\Request;
 use Inertia\Inertia;
 
 class LessonController extends Controller
@@ -65,20 +65,14 @@ class LessonController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, CourseModule $module, Lesson $lesson)
+    public function update(UpdateLessonRequest $request, CourseModule $module, Lesson $lesson)
     {
         $this->authorize('update', $module->course);
 
         try {
-            $validated = $request->validate([
-                'title' => 'required|string|max:255',
-                'description' => 'nullable|string',
-                'link_url' => 'nullable|url',
-            ]);
-
             $this->lessonService->updateLesson(
                 $lesson,
-                $validated,
+                $request->validated(),
                 $request->file('content_path'),
                 $request->file('video_field')
             );

@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Enums\EventRegistrationStatus;
 use App\Models\Event;
 use App\Notifications\UpcomingEventReminder;
 use Illuminate\Console\Command;
@@ -38,7 +39,7 @@ class SendEventReminders extends Command
         // Send reminders for events starting in approximately 24 hours (23h 55m to 24h 5m window)
         // This 10-minute window accommodates two 5-minute cron runs
         $events24h = Event::with(['attendees' => function ($query) {
-                $query->where('status', 'registered');
+                $query->whereIn('status', EventRegistrationStatus::reminderEligibleValues());
             }])
             ->where('start_date', '>', $now->copy()->addHours(23)->addMinutes(55))
             ->where('start_date', '<=', $now->copy()->addHours(24)->addMinutes(5))
@@ -71,7 +72,7 @@ class SendEventReminders extends Command
         // Send reminders for events starting in approximately 2 hours (1h 55m to 2h 5m window)
         // This 10-minute window accommodates two 5-minute cron runs
         $events2h = Event::with(['attendees' => function ($query) {
-                $query->where('status', 'registered');
+                $query->whereIn('status', EventRegistrationStatus::reminderEligibleValues());
             }])
             ->where('start_date', '>', $now->copy()->addHours(1)->addMinutes(55))
             ->where('start_date', '<=', $now->copy()->addHours(2)->addMinutes(5))

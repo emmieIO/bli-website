@@ -19,11 +19,11 @@ export function ToastContainer() {
                 },
                 success: {
                     iconTheme: {
-                        primary: '#10b981',
+                        primary: '#b91c1c',
                         secondary: '#fff',
                     },
                     style: {
-                        border: '1px solid #10b981',
+                        border: '1px solid #b91c1c',
                     },
                 },
                 error: {

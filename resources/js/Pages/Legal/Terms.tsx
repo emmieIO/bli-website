@@ -6,14 +6,14 @@ export default function Terms() {
         <GuestLayout>
             <Head title="Terms of Service" />
 
-            <div className="max-w-5xl mx-auto py-12">
-                <div className="bg-white rounded-2xl shadow-xl p-8 lg:p-12">
+            <div className="legal-shell">
+                <div className="legal-card">
                     {/* Title Section */}
                     <div className="text-center mb-12 pb-8 border-b border-gray-200">
-                        <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl mb-4" style={{ backgroundColor: '#f0f9ff' }}>
-                            <i className="fas fa-file-contract text-3xl" style={{ color: '#002147' }}></i>
+                        <div className="mb-4 inline-flex h-16 w-16 items-center justify-center rounded-lg bg-primary/10">
+                            <i className="fas fa-file-contract text-3xl text-primary"></i>
                         </div>
-                        <h1 className="text-4xl font-bold font-montserrat mb-3" style={{ color: '#002147' }}>Terms of Service</h1>
+                        <h1 className="mb-3 text-4xl font-bold text-primary">Terms of Service</h1>
                         <p className="text-gray-600 text-lg">Last Updated: {new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
                     </div>
 
@@ -107,7 +107,7 @@ export default function Terms() {
                                 </p>
                             </div>
                             <p className="text-gray-700 leading-relaxed mt-4">
-                                To request a refund, contact us at <a href="mailto:support@beaconleadership.org" className="font-semibold underline hover:no-underline" style={{ color: '#002147' }}>support@beaconleadership.org</a>. Refunds are processed within 7-10 business days.
+                                To request a refund, contact us at <a href="mailto:support@beaconleadership.org" className="font-semibold text-primary underline hover:no-underline">support@beaconleadership.org</a>. Refunds are processed within 7-10 business days.
                             </p>
                         </section>
 
@@ -227,17 +227,17 @@ export default function Terms() {
                             </p>
                             <div className="bg-gray-50 p-6 rounded-xl border border-gray-200">
                                 <p className="text-gray-700 mb-2"><strong>Beacon Leadership Institute</strong></p>
-                                <p className="text-gray-700 mb-2"><i className="fas fa-envelope mr-2" style={{ color: '#00a651' }}></i> Email: <a href="mailto:legal@beaconleadership.org" className="underline hover:no-underline" style={{ color: '#002147' }}>legal@beaconleadership.org</a></p>
-                                <p className="text-gray-700 mb-2"><i className="fas fa-phone mr-2" style={{ color: '#00a651' }}></i> Phone: +234 (XXX) XXX-XXXX</p>
-                                <p className="text-gray-700"><i className="fas fa-globe mr-2" style={{ color: '#00a651' }}></i> Website: <Link href={route('homepage')} className="underline hover:no-underline" style={{ color: '#002147' }}>www.beaconleadership.org</Link></p>
+                                <p className="text-gray-700 mb-2"><i className="fas fa-envelope mr-2 text-accent"></i> Email: <a href="mailto:legal@beaconleadership.org" className="text-primary underline hover:no-underline">legal@beaconleadership.org</a></p>
+                                <p className="text-gray-700 mb-2"><i className="fas fa-phone mr-2 text-accent"></i> Phone: +234 (XXX) XXX-XXXX</p>
+                                <p className="text-gray-700"><i className="fas fa-globe mr-2 text-accent"></i> Website: <Link href={route('homepage')} className="text-primary underline hover:no-underline">www.beaconleadership.org</Link></p>
                             </div>
                         </section>
 
                         {/* Acknowledgment */}
                         <section className="mb-10">
-                            <div className="bg-blue-50 border-2 p-6 rounded-xl" style={{ borderColor: '#002147' }}>
-                                <h3 className="text-lg font-bold font-montserrat mb-3" style={{ color: '#002147' }}>
-                                    <i className="fas fa-check-circle mr-2" style={{ color: '#00a651' }}></i>
+                            <div className="rounded-xl border-2 border-primary bg-primary/5 p-6">
+                                <h3 className="mb-3 text-lg font-bold text-primary">
+                                    <i className="fas fa-check-circle mr-2 text-accent"></i>
                                     Acknowledgment
                                 </h3>
                                 <p className="text-gray-700 leading-relaxed">
@@ -249,7 +249,7 @@ export default function Terms() {
 
                     {/* Back to Home Button */}
                     <div className="mt-12 pt-8 border-t border-gray-200 text-center">
-                        <Link href={route('homepage')} className="inline-flex items-center gap-2 px-8 py-3 rounded-xl font-semibold text-white transition-all duration-300 hover:shadow-lg" style={{ backgroundColor: '#002147' }}>
+                        <Link href={route('homepage')} className="enterprise-button enterprise-button-primary">
                             <i className="fas fa-home"></i>
                             <span>Return to Homepage</span>
                         </Link>

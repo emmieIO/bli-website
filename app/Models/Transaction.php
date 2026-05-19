@@ -78,6 +78,11 @@ class Transaction extends Model
         return $this->status === 'failed';
     }
 
+    public function isRefunded(): bool
+    {
+        return $this->status === 'refunded';
+    }
+
     /**
      * Mark transaction as successful
      */
@@ -95,5 +100,10 @@ class Transaction extends Model
     public function markAsFailed(): void
     {
         $this->update(['status' => 'failed']);
+    }
+
+    public function markAsRefunded(): void
+    {
+        $this->update(['status' => 'refunded']);
     }
 }

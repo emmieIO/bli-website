@@ -25,6 +25,8 @@ class EventResourceController extends Controller
      */
     public function create(Event $event)
     {
+        $this->authorize('manageResources', $event);
+
         return \Inertia\Inertia::render('Admin/Events/AddResource', compact('event'));
     }
 
@@ -33,6 +35,8 @@ class EventResourceController extends Controller
      */
     public function store(CreateEventResourceRequest $request, Event $event)
     {
+        $this->authorize('manageResources', $event);
+
         $file = $request->file("file_path");
     
         $validated = (object)$request->validated();
@@ -81,6 +85,8 @@ class EventResourceController extends Controller
      */
     public function destroy(Event $event, EventResource $resource)
     {
+        $this->authorize('manageResources', $event);
+
         $eventResource = $this->eventResourceService->deleteEventResource($event, $resource);
         if ($eventResource) {
             return redirect()->route("admin.events.show", $event)->with([

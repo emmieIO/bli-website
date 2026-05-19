@@ -2,11 +2,16 @@
 
 namespace App\Models;
 
+use App\Enums\EventRegistrationStatus;
+use App\Enums\EventStatus;
 use BinaryCabin\LaravelUUID\Traits\HasUUID;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
 class Event extends Model
 {
@@ -37,6 +42,7 @@ class Event extends Model
         'start_date',
         'end_date',
         'creator_id',
+        'status',
         'is_active',
         'is_published',
         'is_allowing_application',
@@ -48,15 +54,28 @@ class Event extends Model
     protected $casts = [
         'metadata' => 'array',
         'start_date' => 'datetime',
-        'end_date' => 'datetime'
+        'end_date' => 'datetime',
+        'status' => EventStatus::class,
+        'is_active' => 'boolean',
+        'is_published' => 'boolean',
+        'is_allowing_application' => 'boolean',
+        'is_featured' => 'boolean',
     ];
 
     protected static function booted()
     {
+        static::saving(function (Event $event) {
+            $status = $event->lifecycleStatus();
+
+            $event->status = $status->value;
+            $event->is_published = $status->usesPublishedFlag();
+            $event->is_active = $status->isActive();
+        });
+
         static::deleting(function ($event) {
             foreach ($event->resources as $resource) {
-                if ($resource->file_path && \Storage::disk('public')->exists($resource->file_path)) {
-                    \Storage::disk('public')->delete($resource->file_path);
+                if ($resource->file_path && Storage::disk('public')->exists($resource->file_path)) {
+                    Storage::disk('public')->delete($resource->file_path);
                 }
 
                 $resource->delete();
@@ -72,7 +91,7 @@ class Event extends Model
             ->withTimestamps();
     }
 
-    public function scopeFindBySlug($query, $slug)
+    public function scopeFindBySlug(Builder $query, string $slug): Builder
     {
         return $query->where('slug', $slug);
     }
@@ -80,22 +99,27 @@ class Event extends Model
     public function scopeUpcoming(Builder $query): Builder
     {
         return $query->where('start_date', '>', Carbon::now())
-        ->where('is_published',true);
+            ->publiclyVisible();
     }
 
     public function scopeOngoing(Builder $query): Builder
     {
         return $query->where('start_date', '<=', Carbon::now())
-        ->where('end_date', '>=', Carbon::now())
-        ->where('is_published',true);
+            ->where('end_date', '>=', Carbon::now())
+            ->publiclyVisible();
 
     }
 
     public function scopeEnded(Builder $query): Builder
     {
         return $query->where('end_date', '<', Carbon::now())
-        ->where('is_published',true);
+            ->publiclyVisible();
 
+    }
+
+    public function scopePubliclyVisible(Builder $query): Builder
+    {
+        return $query->whereIn('status', EventStatus::publiclyVisibleValues());
     }
 
     public function creator()
@@ -115,15 +139,32 @@ class Event extends Model
 
     public function slotsRemaining()
     {
-        if($this->attendee_slots == null) return 'Unlimited';
-        if($this->attendee_slots == 0) return 'Full';
-        return $this->attendee_slots - $this->attendees()->count();
+        if ($this->attendee_slots === null) {
+            return 'Unlimited';
+        }
+
+        if ($this->attendee_slots === 0) {
+            return 'Full';
+        }
+
+        $occupiedSeats = $this->attendees()
+            ->wherePivotIn('status', EventRegistrationStatus::seatOccupyingValues())
+            ->count();
+
+        $remainingSeats = $this->attendee_slots - $occupiedSeats;
+
+        return $remainingSeats <= 0 ? 'Full' : $remainingSeats;
     }
 
 
     public function resources()
     {
         return $this->hasMany(EventResource::class);
+    }
+
+    public function refundRequests()
+    {
+        return $this->hasMany(EventRefundRequest::class);
     }
 
     public function recentRegistrations()
@@ -136,34 +177,64 @@ class Event extends Model
     }
     public function isCanceled(): bool
     {
-        $attendee = $this->attendees()
-            ->where('user_id', auth()->id())
-            ->first();
-
-        if (!$attendee || !isset($attendee->pivot)) {
-            return false;
-        }
-
-        return $attendee->pivot->status === 'cancelled'; // make sure spelling matches your DB
+        return $this->registrationStatusForUserEnum() === EventRegistrationStatus::CANCELLED;
     }
 
     public function isRegistered()
     {
+        return $this->isConfirmed();
+    }
+
+    public function isConfirmed(): bool
+    {
+        return $this->registrationStatusForUserEnum() === EventRegistrationStatus::CONFIRMED;
+    }
+
+    public function isWaitlisted(): bool
+    {
+        return $this->registrationStatusForUserEnum() === EventRegistrationStatus::WAITLISTED;
+    }
+
+    public function registrationStatusForUser(?int $userId = null): ?string
+    {
+        return $this->registrationStatusForUserEnum($userId)?->value;
+    }
+
+    public function registrationStatusForUserEnum(?int $userId = null): ?EventRegistrationStatus
+    {
+        $userId = $userId ?? Auth::id();
+
+        if (! $userId) {
+            return null;
+        }
+
         $attendee = $this->attendees()
-            ->where('user_id', auth()->id())
+            ->where('user_id', $userId)
             ->first();
 
-        if (!$attendee || !isset($attendee->pivot)) {
+        return EventRegistrationStatus::fromValue($attendee?->pivot?->status);
+    }
+
+    public function userHasAttendeeWorkspace(?int $userId = null): bool
+    {
+        return $this->registrationStatusForUserEnum($userId)?->hasAttendeeWorkspace() ?? false;
+    }
+
+    public function canUserRegister(?int $userId = null): bool
+    {
+        if (! $this->isRegistrationOpen()) {
             return false;
         }
 
-        return $attendee->pivot->status === 'registered'; // make sure spelling matches your DB
+        $status = $this->registrationStatusForUserEnum($userId);
+
+        return $status === null || $status === EventRegistrationStatus::CANCELLED;
     }
 
     public function getRevokeCount()
     {
         $attendee = $this->attendees()
-            ->where('user_id', auth()->id())
+            ->where('user_id', Auth::id())
             ->first();
 
         if (!$attendee || !isset($attendee->pivot)) {
@@ -175,10 +246,7 @@ class Event extends Model
 
     public function maxRevokes()
     {
-        if ($this->getRevokeCount() >= 4) {
-            return true;
-        }
-        return false;
+        return $this->getRevokeCount() >= 4;
     }
 
     public function speakerApplications()
@@ -186,5 +254,35 @@ class Event extends Model
         return $this->hasMany(SpeakerApplication::class, 'event_id');
     }
 
+    public function transactions(): MorphMany
+    {
+        return $this->morphMany(Transaction::class, 'payable');
+    }
+
+    public function isPubliclyVisible(): bool
+    {
+        return $this->lifecycleStatus()->isPubliclyVisible();
+    }
+
+    public function isRegistrationOpen(): bool
+    {
+        return $this->lifecycleStatus()->allowsRegistration() && (!$this->end_date || now()->lt($this->end_date));
+    }
+
+    public function lifecycleStatus(): EventStatus
+    {
+        if ($this->status instanceof EventStatus) {
+            return $this->status;
+        }
+
+        if (is_string($this->status) && $this->status !== '') {
+            return EventStatus::from($this->status);
+        }
+
+        return EventStatus::fromLegacyFlags(
+            (bool) $this->is_published,
+            (bool) $this->is_active
+        );
+    }
 
 }

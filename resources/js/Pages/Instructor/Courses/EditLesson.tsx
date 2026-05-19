@@ -144,7 +144,7 @@ export default function EditLesson({ module, lesson, lessontypes }: EditLessonPr
             </header>
 
             <div className="bg-white rounded-lg shadow p-6">
-                <form onSubmit={handleSubmit} className="space-y-4">
+                <form onSubmit={handleSubmit} noValidate className="space-y-4">
                     <div>
                         <label htmlFor="title" className="block mb-2 text-sm font-medium text-gray-900">
                             Lesson Title
@@ -210,7 +210,7 @@ export default function EditLesson({ module, lesson, lessontypes }: EditLessonPr
                     {showVideoField && (
                         <div>
                             <label htmlFor="video_lesson" className="block mb-2 text-sm font-medium text-gray-900">
-                                Video Resource {lesson.vimeo_id && <span className="text-xs text-gray-500">(Currently: Vimeo video uploaded)</span>}
+                                Video File
                             </label>
                             <input
                                 type="file"
@@ -220,7 +220,7 @@ export default function EditLesson({ module, lesson, lessontypes }: EditLessonPr
                                 onChange={handleVideoChange}
                                 className="bg-gray-50 border border-gray-300 file:bg-primary text-gray-900 text-sm rounded-lg block w-full"
                             />
-                            <p className="text-xs text-gray-500 mt-1">Leave empty to keep the current video. Uploading a new video will replace the existing one.</p>
+                            <p className="text-xs text-gray-500 mt-1">Leave empty to keep the current upload. New files replace the existing lesson video in the configured media bucket.</p>
                             {errors?.video_field && (
                                 <p className="text-sm text-red-500 mt-1">{errors.video_field}</p>
                             )}

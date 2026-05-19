@@ -64,33 +64,12 @@ export default function ResetPassword({ token, email }: { token: string; email: 
     return (
         <AuthLayout
             title="Reset Password"
-            description="Almost there! Set your new password to regain access."
+            description="Choose a new password for your account."
         >
             <Head title="Password Reset" />
 
-            {/* Progress Steps */}
-            <div className="mb-6 flex items-center justify-center gap-2">
-                <div className="flex items-center gap-2 text-green-600">
-                    <div className="w-8 h-8 rounded-full bg-green-100 border-2 border-green-300 flex items-center justify-center">
-                        <i className="fas fa-check w-4 h-4"></i>
-                    </div>
-                    <span className="text-sm font-lato">Email Verified</span>
-                </div>
-                <div className="w-12 h-0.5 bg-gray-300"></div>
-                <div className="flex items-center gap-2" style={{ color: '#002147' }}>
-                    <div
-                        className="w-8 h-8 rounded-full border-2 flex items-center justify-center"
-                        style={{ backgroundColor: 'rgba(0, 33, 71, 0.1)', borderColor: '#002147' }}
-                    >
-                        <i className="fas fa-lock w-4 h-4"></i>
-                    </div>
-                    <span className="text-sm font-lato">New Password</span>
-                </div>
-            </div>
-
-            {/* Email Display */}
-            <div className="mb-6 p-4 bg-blue-50 rounded-xl border border-blue-200">
-                <div className="flex items-center gap-2 text-blue-800 text-sm font-lato">
+            <div className="mb-6 rounded-lg border border-gray-200 bg-gray-50 p-4">
+                <div className="flex items-center gap-2 text-sm font-lato text-gray-700">
                     <i className="fas fa-envelope w-4 h-4"></i>
                     <span>Resetting password for: <strong>{email}</strong></span>
                 </div>
@@ -114,7 +93,7 @@ export default function ResetPassword({ token, email }: { token: string; email: 
                             required
                             className={`
                                 block w-full pl-10 pr-12 py-3
-                                border border-gray-300 rounded-xl
+                                border border-gray-300 rounded-lg
                                 text-gray-900 placeholder-gray-500
                                 focus:outline-none focus:ring-2 focus:border-primary
                                 transition-all duration-200
@@ -170,7 +149,7 @@ export default function ResetPassword({ token, email }: { token: string; email: 
                             required
                             className={`
                                 block w-full pl-10 pr-12 py-3
-                                border border-gray-300 rounded-xl
+                                border border-gray-300 rounded-lg
                                 text-gray-900 placeholder-gray-500
                                 focus:outline-none focus:ring-2 focus:border-primary
                                 transition-all duration-200
@@ -194,7 +173,7 @@ export default function ResetPassword({ token, email }: { token: string; email: 
                 </div>
 
                 {/* Password Requirements */}
-                <div className="p-4 bg-gray-50 rounded-xl border border-gray-200">
+                <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
                     <h4 className="text-sm font-semibold text-gray-800 mb-3 font-montserrat flex items-center gap-2">
                         <i className="fas fa-shield-alt w-4 h-4"></i>
                         Password Requirements
@@ -220,25 +199,11 @@ export default function ResetPassword({ token, email }: { token: string; email: 
                     isLoading={processing}
                     disabled={!isFormValid}
                     icon={!processing ? 'fas fa-shield-alt' : undefined}
-                    className="shadow-lg hover:shadow-xl font-montserrat py-3.5"
+                    className="font-montserrat py-3.5"
                 >
                     Update Password
                 </Button>
             </form>
-
-            {/* Security Notice */}
-            <div className="mt-6 p-4 bg-amber-50 rounded-xl border border-amber-200">
-                <div className="flex items-start gap-3">
-                    <i className="fas fa-info-circle w-5 h-5 text-amber-600 mt-0.5"></i>
-                    <div className="text-sm text-amber-800 font-lato">
-                        <p className="font-semibold mb-1">Security Notice:</p>
-                        <p className="text-amber-700">
-                            After resetting your password, you'll be automatically signed out from all
-                            other devices for security reasons.
-                        </p>
-                    </div>
-                </div>
-            </div>
         </AuthLayout>
     );
 }

@@ -12,15 +12,19 @@ return new class extends Migration {
     {
         Schema::create('instructor_profiles', function (Blueprint $table) {
             $table->id();
+            $table->string('application_id', 32)->unique()->nullable();
             $table->foreignId("user_id")->constrained('users', 'id')->cascadeOnDelete();
             $table->text('bio')->nullable();
+            $table->text('teaching_history')->nullable();
             $table->string('experience_years')->nullable();
-            $table->string('area_of_expertise')->nullable();
+            $table->text('area_of_expertise')->nullable();
             $table->string('linkedin_url')->nullable();
             $table->string('website')->nullable();
             $table->string('intro_video_url')->nullable();
             $table->string('resume_path')->nullable();
             $table->boolean('is_approved')->default(false);
+            $table->string('status')->default('draft');
+            $table->dateTime('approved_at')->nullable();
             $table->softDeletes();
             $table->timestamps();
         });

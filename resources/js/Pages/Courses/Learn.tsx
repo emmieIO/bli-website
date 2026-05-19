@@ -8,6 +8,7 @@ interface Lesson {
     title: string;
     subtitle: string | null;
     video_url: string | null;
+    resource_url?: string | null;
     vimeo_id: string | null;
     content_path: string | null;
     description: string | null;
@@ -95,12 +96,6 @@ export default function Learn({
         );
     }, [currentLesson, isCompleted, course.slug]);
 
-    const getResourceUrl = (path: string | null) => {
-        if (!path) return '';
-        if (path.startsWith('http')) return path;
-        return `/storage/${path}`;
-    };
-
     const lessonContent = useMemo(() => {
         if (!currentLesson) {
             return (
@@ -115,7 +110,7 @@ export default function Learn({
         if (currentLesson.type === 'pdf' && currentLesson.content_path) {
             return (
                 <iframe 
-                    src={getResourceUrl(currentLesson.content_path)}
+                    src={currentLesson.resource_url || currentLesson.content_path}
                     className="w-full h-full rounded-xl border border-slate-700"
                     title={currentLesson.title}
                 />

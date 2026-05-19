@@ -19,7 +19,11 @@ class EventRegisterEvent
     /**
      * Create a new event instance.
      */
-    public function __construct(public Event $event, public User $user)
+    public function __construct(
+        public Event $event,
+        public User $user,
+        public string $registrationContext = 'confirmed'
+    )
     {
         //
     }

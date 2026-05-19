@@ -28,6 +28,8 @@ interface Lesson {
     title: string;
     type: 'video' | 'pdf' | 'link';
     content_path: string;
+    video_url?: string | null;
+    resource_url?: string | null;
     description?: string;
 }
 
@@ -526,17 +528,19 @@ export default function Builder({ course }: BuilderProps) {
                                                             {getLessonIcon(lesson.type)} {lesson.type.charAt(0).toUpperCase() + lesson.type.slice(1)}: {lesson.title}
                                                         </span>
                                                         <div className="flex items-center gap-3">
-                                                            {lesson.type === 'video' && lesson.content_path && (
+                                                            {lesson.type === 'video' && lesson.video_url && (
                                                                 <a
-                                                                    href={`/storage/${lesson.content_path}`}
+                                                                    href={lesson.video_url}
+                                                                    target="_blank"
+                                                                    rel="noopener noreferrer"
                                                                     className="text-green-600 hover:text-green-800 text-sm"
                                                                 >
                                                                     View
                                                                 </a>
                                                             )}
-                                                            {lesson.type === 'pdf' && lesson.content_path && (
+                                                            {lesson.type === 'pdf' && lesson.resource_url && (
                                                                 <a
-                                                                    href={`/storage/${lesson.content_path}`}
+                                                                    href={lesson.resource_url}
                                                                     target="_blank"
                                                                     rel="noopener noreferrer"
                                                                     className="inline-flex items-center text-primary hover:underline text-sm"
@@ -545,9 +549,9 @@ export default function Builder({ course }: BuilderProps) {
                                                                     <i className="fas fa-file-pdf w-4 h-4"></i>
                                                                 </a>
                                                             )}
-                                                            {lesson.type === 'link' && lesson.content_path && (
+                                                            {lesson.type === 'link' && lesson.resource_url && (
                                                                 <a
-                                                                    href={lesson.content_path}
+                                                                    href={lesson.resource_url}
                                                                     target="_blank"
                                                                     rel="noopener noreferrer"
                                                                     className="inline-flex items-center text-primary hover:underline text-sm"

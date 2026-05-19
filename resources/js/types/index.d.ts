@@ -48,6 +48,7 @@ export interface Event {
     start_date: string;
     end_date?: string | null;
     creator_id: number;
+    status: 'draft' | 'review' | 'published' | 'registration_open' | 'registration_closed' | 'live' | 'completed' | 'cancelled' | 'archived';
     is_active: boolean;
     is_published: boolean;
     is_allowing_application: boolean;
@@ -66,9 +67,14 @@ export interface Lesson {
     type?: string | null;
     description?: string | null;
     vimeo_id?: string | null;
+    video_status?: 'pending' | 'uploading' | 'processing' | 'ready' | 'failed';
+    video_error?: string | null;
+    video_uploaded_at?: string | null;
     preview_vimeo_id?: string | null;
     is_preview: boolean;
     content_path?: string | null;
+    video_url?: string | null;
+    resource_url?: string | null;
     assignment_instructions?: string | null;
     order: number;
     created_at: string;

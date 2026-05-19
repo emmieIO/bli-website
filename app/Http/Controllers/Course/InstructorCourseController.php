@@ -4,30 +4,33 @@ namespace App\Http\Controllers\Course;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\CreateCourseRequest;
+use App\Http\Requests\CreateLessonRequest;
+use App\Http\Requests\UpdateLessonRequest;
 use App\Models\Course;
-use App\Models\CourseModule;
-use App\Models\Lesson;
 use App\Services\Course\CourseCategoryService;
 use App\Services\Course\CourseService;
+use App\Services\Course\LessonService;
 use App\Services\Instructors\InstructorStatsService;
-use App\Services\VimeoService;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 
 class InstructorCourseController extends Controller
 {
     use AuthorizesRequests;
-    
+
     public function __construct(
         public CourseService $courseService,
         public InstructorStatsService $instructorStatsService,
         public CourseCategoryService $courseCategoryService,
+        public LessonService $lessonService,
     ) {
     }
     public function index()
     {
-        $instructorId = auth()->user()->id;
+        $instructorId = Auth::id();
         // courses count
         // total students enrolled
         // total earnings
@@ -47,14 +50,14 @@ class InstructorCourseController extends Controller
     public function store(CreateCourseRequest $request)
     {
         $this->authorize('create', Course::class);
-        
+
         try {
             $course = $this->courseService->createCourse(
                 $request->validated(),
                 $request->file('thumbnail'),
                 $request->file('preview_video')
             );
-            
+
             if ($course) {
                 return redirect()->route('instructor.courses.show', $course)->with([
                     "message" => "Course created successfully! You can now add modules and lessons.",
@@ -67,7 +70,7 @@ class InstructorCourseController extends Controller
                 "type" => "error"
             ]);
         }
-        
+
         return back()->withInput()->with([
             "message" => "Failed to create course. Please try again.",
             "type" => "error"
@@ -77,11 +80,11 @@ class InstructorCourseController extends Controller
     public function show(Course $course)
     {
         $this->authorize('view', $course);
-        
+
         // Load course with relationships for detailed view
         $course->load(['modules.lessons', 'requirements', 'outcomes', 'category', 'students']);
-        
-        return view('instructors.courses.show', compact('course'));
+
+        return Inertia::render('Instructor/Courses/Show', compact('course'));
     }
 
     public function edit(Course $course)
@@ -197,8 +200,8 @@ class InstructorCourseController extends Controller
                 ->with('error', 'Error creating module: ' . $e->getMessage());
         }
     }
-    
-    public function updateModule(Request $request, Course $course, $moduleId)
+
+    public function updateModule(Request $request, Course $course, int $moduleId)
     {
         $this->authorize('update', $course);
 
@@ -224,38 +227,16 @@ class InstructorCourseController extends Controller
                 ->with('error', 'Error updating module: ' . $e->getMessage());
         }
     }
-    
-    public function deleteModule(Course $course, $moduleId)
+
+    public function deleteModule(Course $course, int $moduleId)
     {
         $this->authorize('update', $course);
 
-        $module = $course->modules()->findOrFail($moduleId);
+        $module = $course->modules()->with('lessons')->findOrFail($moduleId);
 
         try {
-            // Delete all Vimeo videos in this module's lessons
-            $lessons = $module->lessons()->where('type', 'video')->whereNotNull('vimeo_id')->get();
-
-            if ($lessons->isNotEmpty()) {
-                $vimeoService = app(VimeoService::class);
-                $deletedCount = 0;
-
-                foreach ($lessons as $lesson) {
-                    \Log::info("Attempting to delete Vimeo video from module deletion", [
-                        'module_id' => $module->id,
-                        'lesson_id' => $lesson->id,
-                        'vimeo_id' => $lesson->vimeo_id
-                    ]);
-
-                    if ($vimeoService->deleteVideo($lesson->vimeo_id)) {
-                        $deletedCount++;
-                    }
-                }
-
-                \Log::info("Deleted Vimeo videos from module", [
-                    'module_id' => $module->id,
-                    'videos_deleted' => $deletedCount,
-                    'total_videos' => $lessons->count()
-                ]);
+            foreach ($module->lessons as $lesson) {
+                $this->lessonService->deleteLesson($lesson);
             }
 
             $module->delete();
@@ -264,7 +245,7 @@ class InstructorCourseController extends Controller
                 ->with(['type' => 'success', 'message' => 'Module deleted successfully']);
 
         } catch (\Exception $e) {
-            \Log::error("Error deleting module", [
+            Log::error("Error deleting module", [
                 'module_id' => $moduleId,
                 'error' => $e->getMessage()
             ]);
@@ -273,7 +254,7 @@ class InstructorCourseController extends Controller
                 ->with(['type' => 'error', 'message' => 'Error deleting module: ' . $e->getMessage()]);
         }
     }
-    
+
     public function reorderModules(Request $request, Course $course)
     {
         $this->authorize('update', $course);
@@ -296,9 +277,9 @@ class InstructorCourseController extends Controller
                 ->with('error', 'Error reordering modules: ' . $e->getMessage());
         }
     }
-    
+
     // Lesson Management Methods
-    public function createLesson(Course $course, $moduleId)
+    public function createLesson(Course $course, int $moduleId)
     {
         $this->authorize('update', $course);
 
@@ -316,104 +297,31 @@ class InstructorCourseController extends Controller
         ]);
     }
 
-    public function storeLesson(Request $request, Course $course, $moduleId)
+    public function storeLesson(CreateLessonRequest $request, Course $course, int $moduleId)
     {
         $this->authorize('update', $course);
 
         $module = $course->modules()->findOrFail($moduleId);
 
-        $validated = $request->validate([
-            'title' => 'required|string|max:255',
-            'type' => 'required|in:video,pdf,link',
-            'description' => 'nullable|string|max:1000',
-            'video_field' => 'nullable|file|mimetypes:video/mp4,video/quicktime,video/x-matroska|max:512000',
-            'content_path' => 'nullable|file|mimes:pdf|max:10240',
-            'link_url' => 'nullable|url|max:500',
-            'is_preview' => 'nullable|boolean',
-            'has_instruction' => 'nullable|boolean',
-            'assignment_instructions' => 'nullable|string|max:2000',
-        ]);
-
         try {
-            $order = $module->lessons()->max('order') + 1;
-            $contentPath = null;
-            $vimeoId = null;
-            $videoStatus = null;
-            $videoUploadedAt = null;
-
-            // Handle video upload to Vimeo (ASYNC)
-            if ($validated['type'] === 'video' && $request->hasFile('video_field')) {
-                $videoFile = $request->file('video_field');
-
-                // Store video temporarily in storage/app/temp-videos
-                $tempPath = $videoFile->store('temp-videos', 'local');
-
-                // Create lesson with pending status first
-                $lesson = $module->lessons()->create([
-                    'title' => $validated['title'],
-                    'type' => $validated['type'],
-                    'description' => $validated['description'] ?? '',
-                    'content_path' => null,
-                    'vimeo_id' => null,
-                    'video_status' => 'pending', // Will be updated by job
-                    'video_uploaded_at' => null,
-                    'is_preview' => $validated['is_preview'] ?? false,
-                    'assignment_instructions' => $validated['assignment_instructions'] ?? null,
-                    'order' => $order
-                ]);
-
-                // Dispatch background job for Vimeo upload
-                \App\Jobs\ProcessVideoUpload::dispatch(
-                    $lesson->id,
-                    $tempPath,
-                    $validated['title'],
-                    $validated['description'] ?? null
-                );
-
-                \Log::info('Video upload job dispatched', [
-                    'lesson_id' => $lesson->id,
-                    'temp_path' => $tempPath,
-                ]);
-
-                return to_route('instructor.courses.builder', $course->slug)
-                    ->with('message', 'Lesson created successfully! Video is being uploaded in the background and will be available shortly.');
-            }
-
-            // Handle PDF upload
-            if ($validated['type'] === 'pdf' && $request->hasFile('content_path')) {
-                $pdfFile = $request->file('content_path');
-                $contentPath = $pdfFile->store('lessons/pdfs', 'public');
-            }
-
-            // Handle link type
-            if ($validated['type'] === 'link' && !empty($validated['link_url'])) {
-                $contentPath = $validated['link_url'];
-            }
-
-            $module->lessons()->create([
-                'title' => $validated['title'],
-                'type' => $validated['type'],
-                'description' => $validated['description'] ?? '',
-                'content_path' => $contentPath,
-                'vimeo_id' => $vimeoId,
-                'video_status' => $videoStatus,
-                'video_uploaded_at' => $videoUploadedAt,
-                'is_preview' => $validated['is_preview'] ?? false,
-                'assignment_instructions' => $validated['assignment_instructions'] ?? null,
-                'order' => $order
-            ]);
+            $this->lessonService->createLesson(
+                $module,
+                $request->validated(),
+                $request->file('content_path'),
+                $request->file('video_field')
+            );
 
             return to_route('instructor.courses.builder', $course->slug)
-                ->with('message', 'Lesson created successfully');
+                ->with(['type' => 'success', 'message' => 'Lesson created successfully.']);
 
         } catch (\Exception $e) {
             return back()
                 ->withInput()
-                ->with('error', 'Error creating lesson: ' . $e->getMessage());
+                ->with(['type' => 'error', 'message' => 'Error creating lesson: ' . $e->getMessage()]);
         }
     }
 
-    public function editLesson(Course $course, $moduleId, $lessonId)
+    public function editLesson(Course $course, int $moduleId, int $lessonId)
     {
         $this->authorize('update', $course);
 
@@ -433,28 +341,20 @@ class InstructorCourseController extends Controller
         ]);
     }
 
-    public function updateLesson(Request $request, Course $course, $moduleId, $lessonId)
+    public function updateLesson(UpdateLessonRequest $request, Course $course, int $moduleId, int $lessonId)
     {
         $this->authorize('update', $course);
 
         $module = $course->modules()->findOrFail($moduleId);
         $lesson = $module->lessons()->findOrFail($lessonId);
 
-        $validated = $request->validate([
-            'title' => 'required|string|max:255',
-            'type' => 'required|in:video,pdf,link',
-            'description' => 'nullable|string|max:1000',
-            'content_path' => 'nullable|string|max:500',
-            'duration' => 'nullable|integer|min:0'
-        ]);
-
         try {
-            $lesson->update([
-                'title' => $validated['title'],
-                'type' => $validated['type'],
-                'description' => $validated['description'] ?? '',
-                'content_path' => $validated['content_path'] ?? null,
-            ]);
+            $this->lessonService->updateLesson(
+                $lesson,
+                $request->validated(),
+                $request->file('content_path'),
+                $request->file('video_field')
+            );
 
             return to_route('instructor.courses.builder', $course->slug)
                 ->with(['type' => 'success', 'message' => 'Lesson updated successfully']);
@@ -466,7 +366,7 @@ class InstructorCourseController extends Controller
         }
     }
 
-    public function deleteLesson(Course $course, $moduleId, $lessonId)
+    public function deleteLesson(Course $course, int $moduleId, int $lessonId)
     {
         $this->authorize('update', $course);
 
@@ -474,31 +374,13 @@ class InstructorCourseController extends Controller
         $lesson = $module->lessons()->findOrFail($lessonId);
 
         try {
-            // Delete Vimeo video if it exists
-            if ($lesson->type === 'video' && $lesson->vimeo_id) {
-                \Log::info("Attempting to delete Vimeo video", [
-                    'lesson_id' => $lesson->id,
-                    'vimeo_id' => $lesson->vimeo_id
-                ]);
-
-                $vimeoService = app(VimeoService::class);
-                $deleted = $vimeoService->deleteVideo($lesson->vimeo_id);
-
-                if (!$deleted) {
-                    \Log::warning("Vimeo video deletion failed, but continuing with lesson deletion", [
-                        'lesson_id' => $lesson->id,
-                        'vimeo_id' => $lesson->vimeo_id
-                    ]);
-                }
-            }
-
-            $lesson->delete();
+            $this->lessonService->deleteLesson($lesson);
 
             return to_route('instructor.courses.builder', $course->slug)
                 ->with(['type' => 'success', 'message' => 'Lesson deleted successfully']);
 
         } catch (\Exception $e) {
-            \Log::error("Error deleting lesson", [
+            Log::error("Error deleting lesson", [
                 'lesson_id' => $lessonId,
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
@@ -508,8 +390,8 @@ class InstructorCourseController extends Controller
                 ->with(['type' => 'error', 'message' => 'Error deleting lesson: ' . $e->getMessage()]);
         }
     }
-    
-    public function reorderLessons(Request $request, Course $course, $moduleId)
+
+    public function reorderLessons(Request $request, Course $course, int $moduleId)
     {
         $this->authorize('update', $course);
 

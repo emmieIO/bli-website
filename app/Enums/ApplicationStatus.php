@@ -10,7 +10,13 @@ enum ApplicationStatus : string
     case APPROVED = 'approved';
     case REJECTED = 'rejected';
 
-    public static function values(): array{
+    public static function values(): array
+    {
         return array_column(self::cases(), 'value');
+    }
+
+    public static function fromValue(?string $value): ?self
+    {
+        return $value ? self::tryFrom($value) : null;
     }
 }

@@ -33,61 +33,47 @@ export default function BecomeASpeaker() {
             <Head title="Become a Speaker" />
 
             {/* Hero Section */}
-            <section className="min-h-screen py-12 bg-linear-to-br from-gray-50 via-white to-gray-100">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <section className="public-section min-h-screen">
+                <div className="section-shell">
                     {/* Header Section */}
                     <div className="text-center mb-16" data-aos="fade-up">
-                        <div
-                            className="inline-flex items-center px-4 py-2 rounded-full mb-6"
-                            style={{ background: 'rgba(237, 28, 36, 0.1)' }}
-                        >
-                            <i className="fas fa-microphone mr-2" style={{ color: '#ed1c24' }}></i>
-                            <span className="text-sm font-semibold font-montserrat" style={{ color: '#ed1c24' }}>
+                        <div className="mb-6 inline-flex items-center rounded-full bg-accent/5 px-4 py-2">
+                            <i className="fas fa-microphone mr-2 text-accent"></i>
+                            <span className="text-sm font-semibold text-accent">
                                 Speaker Community
                             </span>
                         </div>
 
-                        <h1
-                            className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 font-montserrat"
-                            style={{ color: '#002147' }}
-                        >
+                        <h1 className="public-hero-title mb-6">
                             Become a{' '}
-                            <span className="relative">
-                                <span className="relative z-10" style={{ color: '#ed1c24' }}>
-                                    Speaker
-                                </span>
-                                <div
-                                    className="absolute -bottom-2 left-0 w-full h-4 opacity-30"
-                                    style={{ background: '#ed1c24', transform: 'skew(-12deg)' }}
-                                ></div>
-                            </span>
+                            <span className="text-accent">Speaker</span>
                         </h1>
 
-                        <p className="text-xl md:text-2xl mb-8 text-gray-600 leading-relaxed font-lato max-w-3xl mx-auto">
+                        <p className="public-hero-copy mx-auto mb-8 text-xl md:text-2xl">
                             Join our prestigious speaker community and share your expertise with industry leaders,{' '}
-                            <strong style={{ color: '#00a651' }}>inspiring the next generation</strong> of professionals.
+                            <strong className="text-primary">inspiring the next generation</strong> of professionals.
                         </p>
 
                         {/* Trust Indicators */}
                         <div className="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-8 mb-8">
                             <div className="flex items-center">
-                                <i className="fas fa-users mr-2" style={{ color: '#00a651' }}></i>
-                                <span className="text-sm font-medium text-gray-600 font-lato">Join 200+ Expert Speakers</span>
+                                <i className="fas fa-users mr-2 text-primary"></i>
+                                <span className="text-sm font-medium text-gray-600">Join 200+ Expert Speakers</span>
                             </div>
                             <div className="flex items-center">
-                                <i className="fas fa-globe mr-2" style={{ color: '#ed1c24' }}></i>
-                                <span className="text-sm font-medium text-gray-600 font-lato">Global Audience Reach</span>
+                                <i className="fas fa-globe mr-2 text-accent"></i>
+                                <span className="text-sm font-medium text-gray-600">Global Audience Reach</span>
                             </div>
                             <div className="flex items-center">
-                                <i className="fas fa-award mr-2" style={{ color: '#002147' }}></i>
-                                <span className="text-sm font-medium text-gray-600 font-lato">Premium Events Platform</span>
+                                <i className="fas fa-award mr-2 text-primary"></i>
+                                <span className="text-sm font-medium text-gray-600">Premium Events Platform</span>
                             </div>
                         </div>
                     </div>
 
                     {/* Registration Form */}
                     <div
-                        className="bg-white rounded-3xl shadow-2xl border border-gray-100 overflow-hidden"
+                        className="public-card overflow-hidden"
                         data-aos="fade-up"
                         data-aos-delay="200"
                     >
@@ -98,33 +84,29 @@ export default function BecomeASpeaker() {
                                     {/* Personal Information */}
                                     <div className="space-y-6" data-aos="fade-up" data-aos-delay="100">
                                         <div className="flex items-center mb-6">
-                                            <div
-                                                className="w-12 h-12 rounded-2xl flex items-center justify-center mr-4"
-                                                style={{ background: 'linear-gradient(135deg, #00a651 0%, #15803d 100%)' }}
-                                            >
+                                            <div className="mr-4 flex h-12 w-12 items-center justify-center rounded-lg bg-primary">
                                                 <i className="fas fa-user text-white text-lg"></i>
                                             </div>
                                             <div>
-                                                <h3 className="text-xl font-bold font-montserrat" style={{ color: '#002147' }}>
+                                                <h3 className="text-xl font-bold text-primary">
                                                     Personal Information
                                                 </h3>
-                                                <p className="text-sm text-gray-500 font-lato">Tell us about yourself</p>
+                                                <p className="text-sm text-gray-500">Tell us about yourself</p>
                                             </div>
                                         </div>
 
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                             <div>
                                                 <label
-                                                    className="block text-sm font-semibold mb-2 font-montserrat"
-                                                    style={{ color: '#002147' }}
+                                                    className="mb-2 block text-sm font-semibold text-primary"
                                                 >
-                                                    <i className="fas fa-user mr-2" style={{ color: '#00a651' }}></i>Full Name
+                                                    <i className="fas fa-user mr-2 text-primary"></i>Full Name
                                                 </label>
                                                 <input
                                                     type="text"
                                                     value={form.data.name}
                                                     onChange={(e) => form.setData('name', e.target.value)}
-                                                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-[#00a651] transition-all duration-300 font-lato"
+                                                    className="public-input"
                                                     placeholder="Enter your full name"
                                                     required
                                                 />
@@ -136,16 +118,15 @@ export default function BecomeASpeaker() {
                                             </div>
                                             <div>
                                                 <label
-                                                    className="block text-sm font-semibold mb-2 font-montserrat"
-                                                    style={{ color: '#002147' }}
+                                                    className="mb-2 block text-sm font-semibold text-primary"
                                                 >
-                                                    <i className="fas fa-envelope mr-2" style={{ color: '#ed1c24' }}></i>Email Address
+                                                    <i className="fas fa-envelope mr-2 text-accent"></i>Email Address
                                                 </label>
                                                 <input
                                                     type="email"
                                                     value={form.data.email}
                                                     onChange={(e) => form.setData('email', e.target.value)}
-                                                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-[#ed1c24] transition-all duration-300 font-lato"
+                                                    className="public-input"
                                                     placeholder="your.email@example.com"
                                                     required
                                                 />
@@ -160,16 +141,15 @@ export default function BecomeASpeaker() {
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                             <div>
                                                 <label
-                                                    className="block text-sm font-semibold mb-2 font-montserrat"
-                                                    style={{ color: '#002147' }}
+                                                    className="mb-2 block text-sm font-semibold text-primary"
                                                 >
-                                                    <i className="fas fa-phone mr-2" style={{ color: '#002147' }}></i>Phone Number
+                                                    <i className="fas fa-phone mr-2 text-primary"></i>Phone Number
                                                 </label>
                                                 <input
                                                     type="tel"
                                                     value={form.data.phone}
                                                     onChange={(e) => form.setData('phone', e.target.value)}
-                                                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-[#002147] transition-all duration-300 font-lato"
+                                                    className="public-input"
                                                     placeholder="+234 803 123 4567"
                                                     required
                                                 />
@@ -181,17 +161,16 @@ export default function BecomeASpeaker() {
                                             </div>
                                             <div>
                                                 <label
-                                                    className="block text-sm font-semibold mb-2 font-montserrat"
-                                                    style={{ color: '#002147' }}
+                                                    className="mb-2 block text-sm font-semibold text-primary"
                                                 >
-                                                    <i className="fas fa-briefcase mr-2" style={{ color: '#00a651' }}></i>
+                                                    <i className="fas fa-briefcase mr-2 text-primary"></i>
                                                     Professional Title
                                                 </label>
                                                 <input
                                                     type="text"
                                                     value={form.data.headline}
                                                     onChange={(e) => form.setData('headline', e.target.value)}
-                                                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-[#00a651] transition-all duration-300 font-lato"
+                                                    className="public-input"
                                                     placeholder="e.g. Senior Developer, CEO, Consultant"
                                                     required
                                                 />
@@ -205,16 +184,15 @@ export default function BecomeASpeaker() {
 
                                         <div>
                                             <label
-                                                className="block text-sm font-semibold mb-2 font-montserrat"
-                                                style={{ color: '#002147' }}
+                                                className="mb-2 block text-sm font-semibold text-primary"
                                             >
-                                                <i className="fas fa-building mr-2" style={{ color: '#ed1c24' }}></i>Organization
+                                                <i className="fas fa-building mr-2 text-accent"></i>Organization
                                             </label>
                                             <input
                                                 type="text"
                                                 value={form.data.organization}
                                                 onChange={(e) => form.setData('organization', e.target.value)}
-                                                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-[#ed1c24] transition-all duration-300 font-lato"
+                                                className="public-input"
                                                 placeholder="Your company or organization (optional)"
                                             />
                                             {form.errors.organization && (
@@ -228,33 +206,29 @@ export default function BecomeASpeaker() {
                                     {/* Account Security */}
                                     <div className="space-y-6" data-aos="fade-up" data-aos-delay="200">
                                         <div className="flex items-center mb-6">
-                                            <div
-                                                className="w-12 h-12 rounded-2xl flex items-center justify-center mr-4"
-                                                style={{ background: 'linear-gradient(135deg, #ed1c24 0%, #dc2626 100%)' }}
-                                            >
+                                            <div className="mr-4 flex h-12 w-12 items-center justify-center rounded-lg bg-accent">
                                                 <i className="fas fa-lock text-white text-lg"></i>
                                             </div>
                                             <div>
-                                                <h3 className="text-xl font-bold font-montserrat" style={{ color: '#002147' }}>
+                                                <h3 className="text-xl font-bold text-primary">
                                                     Account Security
                                                 </h3>
-                                                <p className="text-sm text-gray-500 font-lato">Set up your account credentials</p>
+                                                <p className="text-sm text-gray-500">Set up your account credentials</p>
                                             </div>
                                         </div>
 
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                             <div>
                                                 <label
-                                                    className="block text-sm font-semibold mb-2 font-montserrat"
-                                                    style={{ color: '#002147' }}
+                                                    className="mb-2 block text-sm font-semibold text-primary"
                                                 >
-                                                    <i className="fas fa-key mr-2" style={{ color: '#ed1c24' }}></i>Password
+                                                    <i className="fas fa-key mr-2 text-accent"></i>Password
                                                 </label>
                                                 <input
                                                     type="password"
                                                     value={form.data.password}
                                                     onChange={(e) => form.setData('password', e.target.value)}
-                                                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-[#ed1c24] transition-all duration-300 font-lato"
+                                                    className="public-input"
                                                     placeholder="Create a strong password"
                                                     required
                                                 />
@@ -266,17 +240,16 @@ export default function BecomeASpeaker() {
                                             </div>
                                             <div>
                                                 <label
-                                                    className="block text-sm font-semibold mb-2 font-montserrat"
-                                                    style={{ color: '#002147' }}
+                                                    className="mb-2 block text-sm font-semibold text-primary"
                                                 >
-                                                    <i className="fas fa-check-double mr-2" style={{ color: '#00a651' }}></i>
+                                                    <i className="fas fa-check-double mr-2 text-primary"></i>
                                                     Confirm Password
                                                 </label>
                                                 <input
                                                     type="password"
                                                     value={form.data.password_confirmation}
                                                     onChange={(e) => form.setData('password_confirmation', e.target.value)}
-                                                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-[#00a651] transition-all duration-300 font-lato"
+                                                    className="public-input"
                                                     placeholder="Confirm your password"
                                                     required
                                                 />
@@ -287,22 +260,19 @@ export default function BecomeASpeaker() {
                                     {/* Professional Profile */}
                                     <div className="space-y-4" data-aos="fade-up" data-aos-delay="300">
                                         <div className="flex items-center mb-6">
-                                            <div
-                                                className="w-12 h-12 rounded-2xl flex items-center justify-center mr-4"
-                                                style={{ background: 'linear-gradient(135deg, #002147 0%, #003875 100%)' }}
-                                            >
+                                            <div className="mr-4 flex h-12 w-12 items-center justify-center rounded-lg bg-primary">
                                                 <i className="fas fa-briefcase text-white text-lg"></i>
                                             </div>
                                             <div>
-                                                <h3 className="text-xl font-bold font-montserrat" style={{ color: '#002147' }}>
+                                                <h3 className="text-xl font-bold text-primary">
                                                     Professional Profile
                                                 </h3>
-                                                <p className="text-sm text-gray-500 font-lato">Share your expertise and background</p>
+                                                <p className="text-sm text-gray-500">Share your expertise and background</p>
                                             </div>
                                         </div>
 
                                         <div>
-                                            <label htmlFor="bio" className="block text-sm font-medium text-gray-700 mb-2 font-lato">
+                                            <label htmlFor="bio" className="mb-2 block text-sm font-medium text-gray-700">
                                                 Professional Bio
                                             </label>
                                             <textarea
@@ -310,7 +280,7 @@ export default function BecomeASpeaker() {
                                                 value={form.data.bio}
                                                 onChange={(e) => form.setData('bio', e.target.value)}
                                                 rows={4}
-                                                className="block w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-200 font-lato placeholder-gray-400"
+                                                className="public-input"
                                                 placeholder="Tell us about your expertise, experience, and speaking background..."
                                                 required
                                             ></textarea>
@@ -321,7 +291,7 @@ export default function BecomeASpeaker() {
 
                                         {/* Profile Photo */}
                                         <div className="space-y-3">
-                                            <label htmlFor="photo" className="block text-sm font-medium text-gray-700 font-lato">
+                                            <label htmlFor="photo" className="block text-sm font-medium text-gray-700">
                                                 Profile Photo
                                             </label>
                                             <input
@@ -329,7 +299,7 @@ export default function BecomeASpeaker() {
                                                 type="file"
                                                 accept="image/*"
                                                 onChange={(e) => form.setData('photo', e.target.files?.[0] || null)}
-                                                className="block w-full px-4 border border-gray-300 rounded-xl file:bg-primary focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-200 font-lato placeholder-gray-400"
+                                                className="block w-full rounded-lg border border-gray-300 px-4 file:mr-4 file:border-0 file:bg-primary file:px-4 file:py-3 file:text-white"
                                             />
                                             <p className="text-xs text-gray-500 mt-1">JPG, PNG up to 2MB</p>
                                             {form.errors.photo && (
@@ -340,7 +310,7 @@ export default function BecomeASpeaker() {
                                         {/* Social Links */}
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                             <div>
-                                                <label className="block text-sm font-medium text-gray-700 mb-2 font-lato">
+                                                <label className="mb-2 block text-sm font-medium text-gray-700">
                                                     LinkedIn Profile
                                                 </label>
                                                 <input
@@ -348,14 +318,14 @@ export default function BecomeASpeaker() {
                                                     value={form.data.linkedin}
                                                     onChange={(e) => form.setData('linkedin', e.target.value)}
                                                     placeholder="https://linkedin.com/in/yourprofile"
-                                                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-200 font-lato"
+                                                    className="public-input"
                                                 />
                                                 {form.errors.linkedin && (
                                                     <small className="text-xs text-secondary">{form.errors.linkedin}</small>
                                                 )}
                                             </div>
                                             <div>
-                                                <label className="block text-sm font-medium text-gray-700 mb-2 font-lato">
+                                                <label className="mb-2 block text-sm font-medium text-gray-700">
                                                     Website
                                                 </label>
                                                 <input
@@ -363,7 +333,7 @@ export default function BecomeASpeaker() {
                                                     value={form.data.website}
                                                     onChange={(e) => form.setData('website', e.target.value)}
                                                     placeholder="https://yourwebsite.com"
-                                                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-200 font-lato"
+                                                    className="public-input"
                                                 />
                                                 {form.errors.website && (
                                                     <small className="text-xs text-secondary">{form.errors.website}</small>
@@ -374,33 +344,27 @@ export default function BecomeASpeaker() {
 
                                     {/* Terms and Submit */}
                                     <div className="space-y-4 pt-6 border-t border-gray-200" data-aos="fade-up" data-aos-delay="400">
-                                        <div
-                                            className="flex items-start gap-3 p-4 rounded-xl"
-                                            style={{ background: 'rgba(0, 33, 71, 0.05)' }}
-                                        >
+                                        <div className="flex items-start gap-3 rounded-lg bg-primary/5 p-4">
                                             <input
                                                 id="agree_terms"
                                                 type="checkbox"
                                                 checked={form.data.agree_terms}
                                                 onChange={(e) => form.setData('agree_terms', e.target.checked)}
                                                 className="h-4 w-4 border-gray-300 rounded focus:ring-2 transition-all duration-300 mt-1"
-                                                style={{ color: '#002147' }}
                                                 required
                                             />
-                                            <label htmlFor="agree_terms" className="text-sm text-gray-700 font-lato leading-relaxed">
+                                            <label htmlFor="agree_terms" className="text-sm leading-relaxed text-gray-700">
                                                 I agree to the{' '}
                                                 <a
                                                     href={route('terms-of-service')}
-                                                    className="font-medium hover:underline transition-colors duration-300"
-                                                    style={{ color: '#002147' }}
+                                                    className="font-medium text-primary transition-colors duration-300 hover:underline"
                                                 >
                                                     Terms of Service
                                                 </a>{' '}
                                                 and{' '}
                                                 <a
                                                     href={route('privacy-policy')}
-                                                    className="font-medium hover:underline transition-colors duration-300"
-                                                    style={{ color: '#002147' }}
+                                                    className="font-medium text-primary transition-colors duration-300 hover:underline"
                                                 >
                                                     Privacy Policy
                                                 </a>
@@ -412,11 +376,7 @@ export default function BecomeASpeaker() {
                                         <button
                                             type="submit"
                                             disabled={form.processing}
-                                            className="w-full text-white font-semibold py-4 px-6 rounded-xl transition-all duration-300 transform hover:scale-[1.02] shadow-lg hover:shadow-xl font-montserrat flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed"
-                                            style={{
-                                                background: 'linear-gradient(135deg, #002147 0%, #ed1c24 100%)',
-                                                border: 'none',
-                                            }}
+                                            className="enterprise-button enterprise-button-primary w-full justify-center py-4 disabled:cursor-not-allowed disabled:opacity-50"
                                         >
                                             {form.processing && <i className="fas fa-spinner animate-spin text-lg"></i>}
                                             <i className="fas fa-paper-plane"></i>
@@ -427,34 +387,25 @@ export default function BecomeASpeaker() {
                             </div>
 
                             {/* Right Side - Benefits */}
-                            <div
-                                className="p-10 md:p-12"
-                                style={{ background: 'linear-gradient(135deg, #002147 0%, #003875 100%)' }}
-                            >
+                            <div className="border-l border-gray-200 bg-gray-50 p-10 md:p-12">
                                 <div className="space-y-8">
                                     <div className="text-center">
-                                        <div
-                                            className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6"
-                                            style={{ background: 'rgba(0, 166, 81, 0.2)', backdropFilter: 'blur(10px)' }}
-                                        >
-                                            <i className="fas fa-star text-2xl" style={{ color: '#00a651' }}></i>
+                                        <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-lg bg-primary/10">
+                                            <i className="fas fa-star text-2xl text-primary"></i>
                                         </div>
-                                        <h3 className="text-2xl font-bold text-white mb-4 font-montserrat">Speaker Benefits</h3>
-                                        <p className="text-gray-200 font-lato">Join our exclusive community of thought leaders</p>
+                                        <h3 className="mb-4 text-2xl font-bold text-primary">Speaker Benefits</h3>
+                                        <p className="text-gray-600">Join our speaker community and contribute to flagship events.</p>
                                     </div>
 
                                     <div className="space-y-6">
-                                        <div className="group p-4 rounded-2xl transition-all duration-300 hover:bg-white/10">
+                                        <div className="rounded-lg border border-gray-200 bg-white p-4">
                                             <div className="flex items-start gap-4">
-                                                <div
-                                                    className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 transition-all duration-300 group-hover:scale-110"
-                                                    style={{ background: 'rgba(0, 166, 81, 0.2)' }}
-                                                >
-                                                    <i className="fas fa-users text-lg" style={{ color: '#00a651' }}></i>
+                                                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-primary/10">
+                                                    <i className="fas fa-users text-lg text-primary"></i>
                                                 </div>
                                                 <div>
-                                                    <h4 className="font-bold text-white mb-2 font-montserrat">Global Audience Reach</h4>
-                                                    <p className="text-sm text-gray-200 font-lato leading-relaxed">
+                                                    <h4 className="mb-2 font-bold text-primary">Global Audience Reach</h4>
+                                                    <p className="text-sm leading-relaxed text-gray-600">
                                                         Share your expertise with thousands of passionate learners and industry leaders
                                                         worldwide.
                                                     </p>
@@ -462,17 +413,14 @@ export default function BecomeASpeaker() {
                                             </div>
                                         </div>
 
-                                        <div className="group p-4 rounded-2xl transition-all duration-300 hover:bg-white/10">
+                                        <div className="rounded-lg border border-gray-200 bg-white p-4">
                                             <div className="flex items-start gap-4">
-                                                <div
-                                                    className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 transition-all duration-300 group-hover:scale-110"
-                                                    style={{ background: 'rgba(237, 28, 36, 0.2)' }}
-                                                >
-                                                    <i className="fas fa-award text-lg" style={{ color: '#ed1c24' }}></i>
+                                                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-accent/10">
+                                                    <i className="fas fa-award text-lg text-accent"></i>
                                                 </div>
                                                 <div>
-                                                    <h4 className="font-bold text-white mb-2 font-montserrat">Build Your Brand</h4>
-                                                    <p className="text-sm text-gray-200 font-lato leading-relaxed">
+                                                    <h4 className="mb-2 font-bold text-primary">Build Your Brand</h4>
+                                                    <p className="text-sm leading-relaxed text-gray-600">
                                                         Enhance your professional reputation and establish yourself as a thought leader in
                                                         your industry.
                                                     </p>
@@ -480,17 +428,14 @@ export default function BecomeASpeaker() {
                                             </div>
                                         </div>
 
-                                        <div className="group p-4 rounded-2xl transition-all duration-300 hover:bg-white/10">
+                                        <div className="rounded-lg border border-gray-200 bg-white p-4">
                                             <div className="flex items-start gap-4">
-                                                <div
-                                                    className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 transition-all duration-300 group-hover:scale-110"
-                                                    style={{ background: 'rgba(0, 166, 81, 0.2)' }}
-                                                >
-                                                    <i className="fas fa-handshake text-lg" style={{ color: '#00a651' }}></i>
+                                                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-primary/10">
+                                                    <i className="fas fa-handshake text-lg text-primary"></i>
                                                 </div>
                                                 <div>
-                                                    <h4 className="font-bold text-white mb-2 font-montserrat">Premium Networking</h4>
-                                                    <p className="text-sm text-gray-200 font-lato leading-relaxed">
+                                                    <h4 className="mb-2 font-bold text-primary">Premium Networking</h4>
+                                                    <p className="text-sm leading-relaxed text-gray-600">
                                                         Connect with other experts, C-level executives, and thought leaders in exclusive
                                                         events.
                                                     </p>
@@ -498,17 +443,14 @@ export default function BecomeASpeaker() {
                                             </div>
                                         </div>
 
-                                        <div className="group p-4 rounded-2xl transition-all duration-300 hover:bg-white/10">
+                                        <div className="rounded-lg border border-gray-200 bg-white p-4">
                                             <div className="flex items-start gap-4">
-                                                <div
-                                                    className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 transition-all duration-300 group-hover:scale-110"
-                                                    style={{ background: 'rgba(237, 28, 36, 0.2)' }}
-                                                >
-                                                    <i className="fas fa-microphone-alt text-lg" style={{ color: '#ed1c24' }}></i>
+                                                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-accent/10">
+                                                    <i className="fas fa-microphone-alt text-lg text-accent"></i>
                                                 </div>
                                                 <div>
-                                                    <h4 className="font-bold text-white mb-2 font-montserrat">Exclusive Opportunities</h4>
-                                                    <p className="text-sm text-gray-200 font-lato leading-relaxed">
+                                                    <h4 className="mb-2 font-bold text-primary">Exclusive Opportunities</h4>
+                                                    <p className="text-sm leading-relaxed text-gray-600">
                                                         Get priority access to high-profile speaking engagements and premium corporate events.
                                                     </p>
                                                 </div>
@@ -517,27 +459,27 @@ export default function BecomeASpeaker() {
                                     </div>
 
                                     {/* Stats */}
-                                    <div className="grid grid-cols-2 gap-4 pt-6 border-t border-white/20">
+                                    <div className="grid grid-cols-2 gap-4 border-t border-gray-200 pt-6">
                                         <div className="text-center">
-                                            <div className="text-2xl font-bold text-white mb-1 font-montserrat" style={{ color: '#00a651' }}>
+                                            <div className="mb-1 text-2xl font-bold text-primary">
                                                 200+
                                             </div>
-                                            <div className="text-xs text-gray-300 font-lato">Expert Speakers</div>
+                                            <div className="text-xs text-gray-500">Expert Speakers</div>
                                         </div>
                                         <div className="text-center">
-                                            <div className="text-2xl font-bold text-white mb-1 font-montserrat" style={{ color: '#ed1c24' }}>
+                                            <div className="mb-1 text-2xl font-bold text-accent">
                                                 50K+
                                             </div>
-                                            <div className="text-xs text-gray-300 font-lato">Audience Reached</div>
+                                            <div className="text-xs text-gray-500">Audience Reached</div>
                                         </div>
                                     </div>
 
                                     {/* Already have account */}
-                                    <div className="pt-6 border-t border-white/20">
-                                        <p className="text-sm text-gray-200 font-lato text-center mb-4">Already have an account?</p>
+                                    <div className="border-t border-gray-200 pt-6">
+                                        <p className="mb-4 text-center text-sm text-gray-600">Already have an account?</p>
                                         <a
                                             href={route('login')}
-                                            className="w-full inline-flex items-center justify-center px-6 py-3 rounded-xl font-semibold transition-all duration-300 hover:shadow-lg font-montserrat border-2 border-white/30 text-white hover:bg-white/10"
+                                            className="enterprise-button enterprise-button-outline w-full justify-center"
                                         >
                                             <i className="fas fa-sign-in-alt mr-2"></i>
                                             Sign In Here
@@ -545,21 +487,17 @@ export default function BecomeASpeaker() {
                                     </div>
 
                                     {/* Support Info */}
-                                    <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20">
+                                    <div className="rounded-lg border border-gray-200 bg-white p-6">
                                         <div className="flex items-center gap-4">
-                                            <div
-                                                className="w-12 h-12 rounded-xl flex items-center justify-center"
-                                                style={{ background: 'rgba(0, 166, 81, 0.2)' }}
-                                            >
-                                                <i className="fas fa-headset text-lg" style={{ color: '#00a651' }}></i>
+                                            <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10">
+                                                <i className="fas fa-headset text-lg text-primary"></i>
                                             </div>
                                             <div>
-                                                <h4 className="font-bold text-white text-sm font-montserrat">Need Help?</h4>
-                                                <p className="text-xs text-gray-200 font-lato">Contact our speaker success team</p>
+                                                <h4 className="text-sm font-bold text-primary">Need Help?</h4>
+                                                <p className="text-xs text-gray-600">Contact our speaker success team</p>
                                                 <a
                                                     href="mailto:speakers@beaconleadership.org"
-                                                    className="text-xs font-medium hover:underline font-montserrat"
-                                                    style={{ color: '#00a651' }}
+                                                    className="text-xs font-medium text-accent hover:underline"
                                                 >
                                                     speakers@beaconleadership.org
                                                 </a>

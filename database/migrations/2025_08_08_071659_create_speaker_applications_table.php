@@ -25,11 +25,16 @@ return new class extends Migration
 
             // Status tracking
             $table->string('status')->default('pending'); // Use enum class in model, store as string
+            $table->dateTime('approved_at')->nullable();
+            $table->dateTime('rejected_at')->nullable();
             $table->text('feedback')->nullable();
 
             // Timestamps
             $table->timestamps();
             $table->timestamp('reviewed_at')->nullable();
+
+            $table->index('status');
+            $table->index(['event_id', 'status']);
         });
     }
 

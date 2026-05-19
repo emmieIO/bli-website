@@ -2,6 +2,7 @@
 
 namespace App\Policies;
 
+use App\Enums\EventStatus;
 use App\Enums\Permissions\EventPermissionsEnum;
 use App\Models\Event;
 use App\Models\User;
@@ -30,8 +31,7 @@ class EventPolicy
     public function view(?User $user, Event $event): bool
     {
         if (!$user) {
-            // Allow public viewing of published events
-            return !$event->is_canceled;
+            return $event->isPubliclyVisible();
         }
 
         // Admin can view any event
@@ -41,7 +41,7 @@ class EventPolicy
 
         // Authenticated users can view non-canceled events
         return $user->hasPermissionTo(EventPermissionsEnum::VIEW->value)
-            && !$event->is_canceled;
+            && $event->isPubliclyVisible();
     }
 
     /**
@@ -57,12 +57,7 @@ class EventPolicy
      */
     public function update(User $user, Event $event): bool
     {
-        // Admin can update any event
-        if ($user->hasPermissionTo(EventPermissionsEnum::UPDATE_ANY->value)) {
-            return true;
-        }
-
-        return false;
+        return $user->hasPermissionTo(EventPermissionsEnum::UPDATE_ANY->value);
     }
 
     /**
@@ -96,8 +91,7 @@ class EventPolicy
     public function register(User $user, Event $event): bool
     {
         return $user->hasPermissionTo(EventPermissionsEnum::REGISTER->value)
-            && !$event->is_canceled
-            && !$event->attendees()->where('user_id', $user->id)->exists();
+            && $event->canUserRegister($user->id);
     }
 
     /**
@@ -105,9 +99,13 @@ class EventPolicy
      */
     public function applyToSpeak(User $user, Event $event): bool
     {
-        return $user->hasPermissionTo(EventPermissionsEnum::APPLY_TO_SPEAK->value)
+        $canApply = $user->hasPermissionTo(EventPermissionsEnum::APPLY_TO_SPEAK->value)
+            || $user->hasPermissionTo(EventPermissionsEnum::MANAGE_SPEAKERS->value)
+            || $user->hasPermissionTo(EventPermissionsEnum::VIEW_ANY->value);
+
+        return $canApply
             && $event->is_allowing_application
-            && !$event->is_canceled;
+            && $event->lifecycleStatus() !== EventStatus::CANCELLED;
     }
 
     /**
@@ -119,6 +117,15 @@ class EventPolicy
     }
 
     /**
+     * Determine whether the user can manage the waitlist for an event.
+     */
+    public function manageWaitlist(User $user, Event $event): bool
+    {
+        return $user->hasPermissionTo(EventPermissionsEnum::MANAGE_WAITLIST->value)
+            || $user->hasPermissionTo(EventPermissionsEnum::MANAGE_ATTENDEES->value);
+    }
+
+    /**
      * Determine whether the user can manage event speakers.
      */
     public function manageSpeakers(User $user, Event $event): bool
@@ -127,11 +134,52 @@ class EventPolicy
     }
 
     /**
+     * Determine whether the user can manage event resources.
+     */
+    public function manageResources(User $user, Event $event): bool
+    {
+        return $user->hasPermissionTo(EventPermissionsEnum::MANAGE_RESOURCES->value);
+    }
+
+    /**
+     * Determine whether the user can view event payments.
+     */
+    public function viewPayments(User $user, Event $event): bool
+    {
+        return $user->hasPermissionTo(EventPermissionsEnum::VIEW_PAYMENTS->value);
+    }
+
+    /**
+     * Determine whether the user can send event updates.
+     */
+    public function sendUpdates(User $user, Event $event): bool
+    {
+        return $user->hasPermissionTo(EventPermissionsEnum::SEND_UPDATES->value);
+    }
+
+    /**
+     * Determine whether the user can publish an event.
+     */
+    public function publish(User $user, Event $event): bool
+    {
+        return $user->hasPermissionTo(EventPermissionsEnum::PUBLISH->value);
+    }
+
+    /**
      * Determine whether the user can cancel an event.
      */
     public function cancel(User $user, Event $event): bool
     {
         return $user->hasPermissionTo(EventPermissionsEnum::CANCEL->value)
-            && !$event->is_canceled;
+            && $event->lifecycleStatus() !== EventStatus::CANCELLED;
+    }
+
+    /**
+     * Determine whether the user can archive an event.
+     */
+    public function archive(User $user, Event $event): bool
+    {
+        return $user->hasPermissionTo(EventPermissionsEnum::ARCHIVE->value)
+            && $event->lifecycleStatus() !== EventStatus::ARCHIVED;
     }
 }

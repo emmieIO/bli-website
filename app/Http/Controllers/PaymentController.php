@@ -139,9 +139,17 @@ class PaymentController extends Controller
             ]);
         }
 
-        if ($event->isRegistered()) {
-            return redirect()->route('events.show', $event->slug)->with([
-                'message' => 'You are already registered.',
+        $user = auth()->user();
+        $checkoutStatus = $this->paymentService->canCheckoutEvent($user, $event);
+
+        if (! $checkoutStatus['can_checkout']) {
+            $redirectRoute = match ($checkoutStatus['reason']) {
+                'already_confirmed', 'already_waitlisted' => route('user.events.show', $event->slug),
+                default => route('events.show', $event->slug),
+            };
+
+            return redirect($redirectRoute)->with([
+                'message' => $checkoutStatus['message'],
                 'type' => 'info'
             ]);
         }
@@ -164,6 +172,15 @@ class PaymentController extends Controller
         ]);
 
         $user = auth()->user();
+
+        $checkoutStatus = $this->paymentService->canCheckoutEvent($user, $event);
+
+        if (! $checkoutStatus['can_checkout']) {
+            return response()->json([
+                'success' => false,
+                'message' => $checkoutStatus['message'],
+            ], 422);
+        }
 
         try {
             $result = $this->paymentService->initializeEventPayment($user, $event, $validated);
@@ -225,10 +242,14 @@ class PaymentController extends Controller
                         'type' => 'success'
                     ]);
             } elseif ($result['type'] === 'event') {
+                $message = ($result['registration_status'] ?? null) === 'waitlisted'
+                    ? 'Payment successful! You have been added to the event waitlist.'
+                    : 'Payment successful! Your event registration is now confirmed.';
+
                 return redirect()
-                    ->route('events.show', $result['event']->slug)
+                    ->route('user.events.show', $result['event']->slug)
                     ->with([
-                        'message' => 'Payment successful! You are now registered for the event.',
+                        'message' => $message,
                         'type' => 'success'
                     ]);
             } else {
@@ -299,8 +320,13 @@ class PaymentController extends Controller
             // If already successful, redirect to appropriate page
             if ($transaction->status === 'successful') {
                 if ($transaction->payable_type === Event::class) {
-                    return redirect()->route('events.show', $transaction->payable->slug)->with([
-                        'message' => 'You are already registered for this event.',
+                    $registrationStatus = $transaction->payable?->registrationStatusForUser(auth()->id());
+                    $message = $registrationStatus === 'waitlisted'
+                        ? 'Your payment was successful and you are currently on the event waitlist.'
+                        : 'Your registration for this event is already confirmed.';
+
+                    return redirect()->route('user.events.show', $transaction->payable->slug)->with([
+                        'message' => $message,
                         'type' => 'info'
                     ]);
                 }
@@ -327,10 +353,14 @@ class PaymentController extends Controller
                         'type' => 'success'
                     ]);
             } elseif ($result['type'] === 'event') {
+                $message = ($result['registration_status'] ?? null) === 'waitlisted'
+                    ? 'Payment successful! You have been added to the event waitlist.'
+                    : 'Payment successful! Your event registration is now confirmed.';
+
                 return redirect()
-                    ->route('events.show', $result['event']->slug)
+                    ->route('user.events.show', $result['event']->slug)
                     ->with([
-                        'message' => 'Payment successful! You are now registered for the event.',
+                        'message' => $message,
                         'type' => 'success'
                     ]);
             } else {
@@ -363,7 +393,7 @@ class PaymentController extends Controller
         $transaction = \App\Models\Transaction::where('transaction_id', $txRef)->first();
 
         if ($transaction && $transaction->payable_type === Event::class) {
-            return redirect()->route('events.show', $transaction->payable->slug)->with($flashData);
+            return redirect()->route('user.events.show', $transaction->payable->slug)->with($flashData);
         }
 
         $route = $transaction && $transaction->course

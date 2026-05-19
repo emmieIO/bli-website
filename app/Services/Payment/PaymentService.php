@@ -5,6 +5,7 @@ namespace App\Services\Payment;
 use App\Models\Cart;
 use App\Models\Course;
 use App\Models\Event;
+use App\Models\EventRefundRequest;
 use App\Models\Transaction;
 use App\Models\User;
 use App\Services\Event\EventService;
@@ -109,6 +110,12 @@ class PaymentService
         DB::beginTransaction();
 
         try {
+            $checkoutStatus = $this->canCheckoutEvent($user, $event);
+
+            if (! $checkoutStatus['can_checkout']) {
+                throw new \RuntimeException($checkoutStatus['message']);
+            }
+
             $txRef = $this->generateTransactionReference($user, $event);
 
             $transaction = $this->createTransaction($user, $event, $txRef, (float) $event->entry_fee);
@@ -151,11 +158,119 @@ class PaymentService
     }
 
     /**
+     * Check if user can checkout for an event
+     */
+    public function canCheckoutEvent(User $user, Event $event): array
+    {
+        if ((float) $event->entry_fee <= 0) {
+            return [
+                'can_checkout' => false,
+                'reason' => 'free_event',
+                'message' => 'This is a free event. Register directly instead of using checkout.',
+            ];
+        }
+
+        if (! $event->isRegistrationOpen()) {
+            return [
+                'can_checkout' => false,
+                'reason' => 'registration_closed',
+                'message' => 'Registration is not open for this event.',
+            ];
+        }
+
+        if ($event->end_date && now()->greaterThan($event->end_date)) {
+            return [
+                'can_checkout' => false,
+                'reason' => 'event_ended',
+                'message' => 'This event has already ended.',
+            ];
+        }
+
+        $registrationStatus = $event->registrationStatusForUserEnum($user->id);
+
+        if ($registrationStatus === \App\Enums\EventRegistrationStatus::REGISTERED) {
+            return [
+                'can_checkout' => false,
+                'reason' => 'already_confirmed',
+                'message' => 'Your registration is already confirmed.',
+            ];
+        }
+
+        if ($registrationStatus === \App\Enums\EventRegistrationStatus::WAITLISTED) {
+            return [
+                'can_checkout' => false,
+                'reason' => 'already_waitlisted',
+                'message' => 'You are already on the waitlist for this event.',
+            ];
+        }
+
+        if ($registrationStatus === \App\Enums\EventRegistrationStatus::REFUNDED) {
+            return [
+                'can_checkout' => false,
+                'reason' => 'already_refunded',
+                'message' => 'This registration was refunded. Please contact support if you need to register again.',
+            ];
+        }
+
+        if ($event->maxRevokes()) {
+            return [
+                'can_checkout' => false,
+                'reason' => 'revoke_limit_reached',
+                'message' => 'Registration failed. The event has reached its maximum number of registrations.',
+            ];
+        }
+
+        if ($event->slotsRemaining() === 'Full') {
+            return [
+                'can_checkout' => false,
+                'reason' => 'event_full',
+                'message' => 'This event is currently full. Join the waitlist instead of proceeding to checkout.',
+            ];
+        }
+
+        $successfulTransaction = Transaction::query()
+            ->where('user_id', $user->id)
+            ->where('payable_id', $event->id)
+            ->where('payable_type', Event::class)
+            ->where('status', 'successful')
+            ->latest()
+            ->first();
+
+        if ($successfulTransaction) {
+            return [
+                'can_checkout' => false,
+                'reason' => 'already_paid',
+                'message' => 'You already have a completed payment for this event.',
+            ];
+        }
+
+        $pendingTransaction = Transaction::query()
+            ->where('user_id', $user->id)
+            ->where('payable_id', $event->id)
+            ->where('payable_type', Event::class)
+            ->where('status', 'pending')
+            ->latest()
+            ->first();
+
+        if ($pendingTransaction) {
+            return [
+                'can_checkout' => false,
+                'reason' => 'pending_payment',
+                'message' => 'You already have a pending payment for this event. Complete or verify that payment first.',
+            ];
+        }
+
+        return [
+            'can_checkout' => true,
+        ];
+    }
+
+    /**
      * Verify and process payment
      */
     public function verifyAndProcessPayment(string $txRef): array
     {
-        $transaction = Transaction::where('transaction_id', $txRef)->first();
+        $transaction = Transaction::query()->where('transaction_id', $txRef)->first();
 
         if (!$transaction) {
             throw new \Exception('Transaction not found');
@@ -164,11 +279,14 @@ class PaymentService
         if (!$transaction->isPending()) {
             if ($transaction->isSuccessful()) {
                 if ($transaction->payable_type === Event::class || ($transaction->metadata['type'] ?? '') === 'event') {
+                    $event = $transaction->payable;
+
                     return [
                         'success' => true,
                         'type' => 'event',
-                        'event' => $transaction->payable,
+                        'event' => $event,
                         'transaction' => $transaction,
+                        'registration_status' => $event?->registrationStatusForUser($transaction->user_id),
                     ];
                 }
 
@@ -176,7 +294,9 @@ class PaymentService
                     'success' => true,
                     'type' => $transaction->metadata['type'] ?? 'course',
                     'course' => $transaction->course,
-                    'courses' => isset($transaction->metadata['course_ids']) ? Course::whereIn('id', $transaction->metadata['course_ids'])->get() : [],
+                    'courses' => isset($transaction->metadata['course_ids'])
+                        ? Course::query()->findMany($transaction->metadata['course_ids'])
+                        : [],
                     'transaction' => $transaction,
                 ];
             } else {
@@ -210,23 +330,25 @@ class PaymentService
 
         try {
             // Update transaction
-            $transaction->update([
+            $transaction->forceFill([
                 'status' => 'successful',
                 'payment_ref' => $data['reference'] ?? $txRef,
                 'payment_type' => $data['channel'] ?? null,
                 'metadata' => array_merge($transaction->metadata ?? [], ['payment_data' => $data]),
                 'paid_at' => now(),
-            ]);
+            ])->save();
 
             // Handle Event Payment
             if ($transaction->payable_type === Event::class || ($transaction->metadata['type'] ?? '') === 'event') {
                 $event = $transaction->payable;
                 if (!$event && isset($transaction->metadata['event_id'])) {
-                    $event = Event::find($transaction->metadata['event_id']);
+                    $event = Event::query()->find($transaction->metadata['event_id']);
                 }
 
                 if ($event) {
-                    $this->eventService->registerForEvent($event->id, $transaction->user_id);
+                    $registrationStatus = $this->eventService->registerOrWaitlist($event, $transaction->user_id);
+                } else {
+                    $registrationStatus = false;
                 }
 
                 DB::commit();
@@ -235,6 +357,7 @@ class PaymentService
                     'type' => 'event',
                     'event' => $event,
                     'transaction' => $transaction,
+                    'registration_status' => $registrationStatus?->value,
                 ];
             }
 
@@ -246,7 +369,7 @@ class PaymentService
                 $courseIds = $transaction->metadata['course_ids'] ?? [];
 
                 foreach ($courseIds as $courseId) {
-                    $course = Course::find($courseId);
+                    $course = Course::query()->find($courseId);
                     if ($course) {
                         $this->enrollUserInCourse($transaction->user_id, $course);
                     }
@@ -262,7 +385,7 @@ class PaymentService
                 // Clear the cart
                 $cartId = $transaction->metadata['cart_id'] ?? null;
                 if ($cartId) {
-                    $cart = Cart::find($cartId);
+                    $cart = Cart::query()->find($cartId);
                     if ($cart) {
                         $cart->clear();
                     }
@@ -273,7 +396,7 @@ class PaymentService
                 return [
                     'success' => true,
                     'type' => 'cart',
-                    'courses' => Course::whereIn('id', $courseIds)->get(),
+                    'courses' => Course::query()->findMany($courseIds),
                     'transaction' => $transaction,
                 ];
             } else {
@@ -316,12 +439,17 @@ class PaymentService
             return;
         }
 
-        if ($payload['event'] !== 'charge.success') {
+        if (($payload['event'] ?? null) === 'refund.processed') {
+            $this->processRefundWebhook($payload);
+            return;
+        }
+
+        if (($payload['event'] ?? null) !== 'charge.success') {
             return;
         }
 
         $txRef = $payload['data']['reference'];
-        $transaction = Transaction::where('transaction_id', $txRef)->first();
+        $transaction = Transaction::query()->where('transaction_id', $txRef)->first();
 
         if (!$transaction || !$transaction->isPending()) {
             return;
@@ -330,23 +458,23 @@ class PaymentService
         DB::beginTransaction();
 
         try {
-            $transaction->update([
+            $transaction->forceFill([
                 'status' => 'successful',
                 'payment_ref' => $payload['data']['reference'] ?? $txRef,
                 'payment_type' => $payload['data']['channel'] ?? null,
                 'metadata' => array_merge($transaction->metadata ?? [], ['webhook_data' => $payload['data']]),
                 'paid_at' => now(),
-            ]);
+            ])->save();
 
             // Handle Event Payment
             if ($transaction->payable_type === Event::class || ($transaction->metadata['type'] ?? '') === 'event') {
                 $event = $transaction->payable;
                 if (!$event && isset($transaction->metadata['event_id'])) {
-                    $event = Event::find($transaction->metadata['event_id']);
+                    $event = Event::query()->find($transaction->metadata['event_id']);
                 }
 
                 if ($event) {
-                    $this->eventService->registerForEvent($event->id, $transaction->user_id);
+                    $this->eventService->registerOrWaitlist($event, $transaction->user_id);
                 }
             } elseif ($transaction->course) {
                 // Single course purchase
@@ -357,7 +485,7 @@ class PaymentService
                 $courseIds = $transaction->metadata['course_ids'] ?? [];
 
                 foreach ($courseIds as $courseId) {
-                    $course = Course::find($courseId);
+                    $course = Course::query()->find($courseId);
                     if ($course) {
                         $this->enrollUserInCourse($transaction->user_id, $course);
                     }
@@ -381,6 +509,63 @@ class PaymentService
             DB::rollBack();
 
             Log::error('Paystack webhook processing failed', [
+                'error' => $e->getMessage(),
+                'transaction_id' => $txRef,
+            ]);
+
+            throw $e;
+        }
+    }
+
+    public function processRefundWebhook(array $payload): void
+    {
+        $txRef = $payload['data']['transaction_reference'] ?? null;
+
+        if (! $txRef) {
+            Log::warning('Refund webhook missing transaction reference', [
+                'payload' => $payload,
+            ]);
+            return;
+        }
+
+        $transaction = Transaction::query()->where('transaction_id', $txRef)->first();
+
+        if (! $transaction || $transaction->status === 'refunded') {
+            return;
+        }
+
+        DB::beginTransaction();
+
+        try {
+            $transaction->forceFill([
+                'status' => 'refunded',
+                'metadata' => array_merge($transaction->metadata ?? [], [
+                    'refund_data' => $payload['data'],
+                ]),
+            ])->save();
+
+            if ($transaction->payable_type === Event::class || ($transaction->metadata['type'] ?? '') === 'event') {
+                $refundRequest = EventRefundRequest::query()
+                    ->where('transaction_id', $transaction->id)
+                    ->where('status', 'pending')
+                    ->latest()
+                    ->first();
+
+                if ($refundRequest) {
+                    $this->eventService->approveRefundRequest($refundRequest);
+                }
+            }
+
+            DB::commit();
+
+            Log::info('Refund processed via Paystack webhook', [
+                'transaction_id' => $txRef,
+                'user_id' => $transaction->user_id,
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            Log::error('Refund webhook processing failed', [
                 'error' => $e->getMessage(),
                 'transaction_id' => $txRef,
             ]);
@@ -423,7 +608,7 @@ class PaymentService
         }
 
         // Check if already has successful transaction
-        $existingTransaction = Transaction::where('user_id', $user->id)
+        $existingTransaction = Transaction::query()->where('user_id', $user->id)
             ->where('course_id', $course->id)
             ->where('status', 'successful')
             ->first();
@@ -446,7 +631,7 @@ class PaymentService
      */
     public function markTransactionAsFailed(string $txRef): void
     {
-        $transaction = Transaction::where('transaction_id', $txRef)->first();
+        $transaction = Transaction::query()->where('transaction_id', $txRef)->first();
 
         if ($transaction) {
             $transaction->markAsFailed();

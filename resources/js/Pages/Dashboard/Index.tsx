@@ -72,34 +72,27 @@ export default function Dashboard({ stats, courses, adminStats, instructorStats 
         <DashboardLayout sideLinks={sideLinks}>
             <Head title="Dashboard" />
 
-            <section className="min-h-screen bg-linear-to-br from-gray-50 to-primary-50/30">
-                <div className="space-y-8">
-                    {/* Header */}
-                    <div className="mb-8">
-                        <h1 className="text-3xl font-bold font-montserrat" style={{ color: '#002147' }}>
-                            Dashboard
-                        </h1>
-                        {isAdmin ? (
-                            <p className="text-gray-600 mt-2 font-lato leading-relaxed">
-                                As an admin, you can manage users, courses, and view platform analytics from this dashboard.
-                            </p>
-                        ) : (
-                            <p className="text-gray-600 mt-2 font-lato leading-relaxed">
-                                Welcome to your dashboard. Here you can track your course progress and continue your learning journey.
-                            </p>
-                        )}
+            <div className="workspace-stack">
+                <section className="workspace-header-card px-6 py-6 lg:px-8">
+                    <div className="max-w-3xl">
+                        <p className="workspace-muted-label">Workspace Home</p>
+                        <h1 className="mt-3 text-3xl font-semibold tracking-tight text-slate-900">Dashboard</h1>
+                        <p className="mt-3 text-sm leading-7 text-slate-600">
+                            {isAdmin
+                                ? 'Monitor platform activity, manage operations, and keep an eye on the health of courses and events from one calmer overview.'
+                                : 'Pick up your work quickly, track momentum, and move straight into the learning or delivery tasks that matter next.'}
+                        </p>
                     </div>
+                </section>
 
-                    {/* Stats Cards */}
-                    {isAdmin ? (
-                        <AdminDashboard adminStats={adminStats} />
-                    ) : isInstructor ? (
-                        <InstructorDashboard instructorStats={instructorStats} />
-                    ) : (
-                        <StudentDashboard stats={stats} courses={courses} />
-                    )}
-                </div>
-            </section>
+                {isAdmin ? (
+                    <AdminDashboard adminStats={adminStats} />
+                ) : isInstructor ? (
+                    <InstructorDashboard instructorStats={instructorStats} />
+                ) : (
+                    <StudentDashboard stats={stats} courses={courses} />
+                )}
+            </div>
         </DashboardLayout>
     );
 }
@@ -258,7 +251,7 @@ function StudentDashboard({ stats, courses }: DashboardProps) {
 
             {/* Continue Learning Section */}
             {courses && courses.length > 0 ? (
-                <div className="mt-8 bg-white rounded-2xl shadow-lg border border-primary-100 p-8">
+                <div className="workspace-card mt-8 p-8">
                     <div className="flex items-center justify-between mb-6">
                         <div>
                             <h2 className="text-2xl font-bold font-montserrat" style={{ color: '#002147' }}>
@@ -293,7 +286,7 @@ function StudentDashboard({ stats, courses }: DashboardProps) {
 
             {/* Progress Summary */}
             {totalCourses > 0 && (
-                <div className="mt-8 bg-white rounded-2xl shadow-lg border border-primary-100 p-8">
+                <div className="workspace-card mt-8 p-8">
                     <div className="flex items-center justify-between mb-6">
                         <div>
                             <h2 className="text-2xl font-bold font-montserrat" style={{ color: '#002147' }}>
@@ -390,7 +383,7 @@ function StudentDashboard({ stats, courses }: DashboardProps) {
 
             {/* Empty State */}
             {totalCourses === 0 && (
-                <div className="mt-8 bg-white rounded-2xl shadow-lg border border-primary-100 p-12 text-center">
+                <div className="workspace-card mt-8 p-12 text-center">
                     <div className="max-w-md mx-auto">
                         <div className="w-20 h-20 rounded-full mx-auto mb-6 flex items-center justify-center" style={{ backgroundColor: '#00265115' }}>
                             <i className="fas fa-graduation-cap text-4xl" style={{ color: '#002147' }}></i>
@@ -428,16 +421,16 @@ interface StatCardProps {
 
 function StatCard({ title, value, icon, color, badge, badgeColor, description }: StatCardProps) {
     return (
-        <div className="bg-white rounded-2xl shadow-lg border border-primary-100 p-6 transition-all duration-300 hover:shadow-xl hover:border-primary-200 group">
+        <div className="workspace-card p-6 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl group">
             <div className="flex items-center justify-between">
                 <div>
-                    <p className="text-sm font-medium text-gray-500 font-lato">{title}</p>
-                    <h3 className="text-2xl font-bold mt-1 font-montserrat" style={{ color }}>
+                    <p className="text-sm font-medium text-slate-500 font-lato">{title}</p>
+                    <h3 className="mt-1 text-2xl font-bold font-montserrat" style={{ color }}>
                         {value}
                     </h3>
                 </div>
                 <div
-                    className="p-3 rounded-xl group-hover:opacity-90 transition-all"
+                    className="rounded-2xl p-3 group-hover:opacity-90 transition-all"
                     style={{ backgroundColor: `${color}15` }}
                 >
                     <i className={`fas ${icon} w-6 h-6`} style={{ color }}></i>
@@ -458,7 +451,7 @@ function StatCard({ title, value, icon, color, badge, badgeColor, description }:
                 </div>
             )}
             {description && (
-                <p className="text-xs text-gray-500 mt-3 font-lato">{description}</p>
+                <p className="mt-3 text-xs text-slate-500 font-lato">{description}</p>
             )}
         </div>
     );

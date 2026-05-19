@@ -14,20 +14,20 @@ return new class extends Migration
         Schema::create('transactions', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->foreignId('course_id')->constrained()->onDelete('cascade');
+            $table->foreignId('course_id')->nullable()->constrained()->nullOnDelete();
+            $table->nullableMorphs('payable');
             $table->string('transaction_id')->unique(); // Flutterwave transaction ID
-            $table->string('flw_ref')->unique(); // Flutterwave reference
+            $table->string('payment_ref')->nullable()->unique();
             $table->decimal('amount', 10, 2);
-            $table->string('currency', 3)->default('USD');
+            $table->string('currency', 3)->default('NGN');
             $table->string('status')->default('pending'); // pending, successful, failed
             $table->string('payment_type')->nullable(); // card, bank_transfer, etc.
             $table->json('metadata')->nullable(); // Store additional Flutterwave data
             $table->timestamp('paid_at')->nullable();
             $table->timestamps();
 
-            $table->index('user_id');
-            $table->index('course_id');
             $table->index('status');
+            $table->index(['user_id', 'course_id', 'status']);
         });
     }
 

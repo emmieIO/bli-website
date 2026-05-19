@@ -1,4 +1,4 @@
-import { Head, Link, router} from '@inertiajs/react';
+import { Head, Link, router } from '@inertiajs/react';
 import GuestLayout from '@/Layouts/GuestLayout';
 import { useState, useEffect, FormEvent } from 'react';
 
@@ -44,7 +44,27 @@ interface Event {
     speakers?: Speaker[];
     resources?: Resource[];
     is_registered?: boolean;
+    registration_status?: 'registered' | 'waitlisted' | 'cancelled' | null;
     revoke_count?: number;
+    attendee_workspace_url?: string | null;
+    program_profile?: {
+        program_type: 'general_event' | 'discipleship_track';
+        program_code?: string | null;
+        registration_mode: 'open' | 'selective';
+        requires_screening: boolean;
+        screening_note?: string | null;
+        cohort_duration_weeks?: number | null;
+        group_model?: string | null;
+        central_teaching_schedule?: string | null;
+        group_meeting_schedule?: string | null;
+        weekly_prayer_target_minutes?: number | null;
+        weekly_evangelism_target_min?: number | null;
+        weekly_evangelism_target_max?: number | null;
+        weekly_discipleship_target_min?: number | null;
+        weekly_discipleship_target_max?: number | null;
+        meeting_link?: string | null;
+        access_notes?: string | null;
+    };
 }
 
 interface EventShowProps {
@@ -52,10 +72,19 @@ interface EventShowProps {
     auth?: {
         user?: User;
     };
-    signed_speaker_route?: string;
+    primary_cta: {
+        key: string;
+        kind: 'action' | 'status';
+        label: string;
+        description: string;
+        href?: string | null;
+        method: 'get' | 'post';
+        requires_auth: boolean;
+        requires_confirmation: boolean;
+    };
 }
 
-export default function EventShow({ event, auth, signed_speaker_route }: EventShowProps) {
+export default function EventShow({ event, auth, primary_cta }: EventShowProps) {
     const [showModal, setShowModal] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [countdown, setCountdown] = useState('');
@@ -131,259 +160,353 @@ export default function EventShow({ event, auth, signed_speaker_route }: EventSh
 
     const slotsRemaining = event.slots_remaining;
     const isRegistered = event.is_registered ?? false;
+    const isWaitlisted = event.registration_status === 'waitlisted';
     const revokeCount = event.revoke_count ?? 0;
+    const programProfile = event.program_profile;
+    const modeLabel = event.mode ? event.mode.charAt(0).toUpperCase() + event.mode.slice(1) : 'Hybrid';
+    const isFreeRegistrationFlow = primary_cta.key === 'register_now';
+    const isWaitlistFlow = primary_cta.key === 'join_waitlist';
+    const isPaidCheckoutFlow = primary_cta.key === 'buy_ticket';
+    const showPrimaryCta = primary_cta.kind === 'action' && !(revokeCount === 4 && (primary_cta.key === 'register_now' || primary_cta.key === 'join_waitlist'));
+    const ctaTone = primary_cta.key === 'view_attendee_workspace'
+        ? 'border-emerald-200 bg-emerald-50'
+        : primary_cta.key === 'view_speaker_workspace'
+            ? 'border-slate-200 bg-slate-100'
+            : primary_cta.key === 'join_waitlist'
+                ? 'border-amber-200 bg-amber-50'
+                : 'border-slate-200 bg-slate-50';
+    const programTypeLabel = programProfile?.program_type === 'discipleship_track' ? 'Discipleship Track' : 'General Event';
+    const prayerTargetLabel = programProfile?.weekly_prayer_target_minutes
+        ? `${Math.floor(programProfile.weekly_prayer_target_minutes / 60)}h ${programProfile.weekly_prayer_target_minutes % 60}m weekly prayer target`
+        : null;
+    const evangelismTargetLabel = programProfile?.weekly_evangelism_target_min
+        ? `${programProfile.weekly_evangelism_target_min}-${programProfile.weekly_evangelism_target_max ?? programProfile.weekly_evangelism_target_min} people reached weekly`
+        : null;
+    const discipleshipTargetLabel = programProfile?.weekly_discipleship_target_min
+        ? `Disciple ${programProfile.weekly_discipleship_target_min}-${programProfile.weekly_discipleship_target_max ?? programProfile.weekly_discipleship_target_min} people`
+        : null;
+
+    const handlePrimaryCta = () => {
+        if (revokeCount === 4 && (primary_cta.key === 'register_now' || primary_cta.key === 'join_waitlist')) {
+            return;
+        }
+
+        if (primary_cta.requires_auth && !auth?.user) {
+            router.get(route('login'));
+            return;
+        }
+
+        if (primary_cta.requires_confirmation) {
+            setShowModal(true);
+            return;
+        }
+
+        if (primary_cta.href) {
+            router.visit(primary_cta.href);
+        }
+    };
 
     return (
         <GuestLayout>
             <Head title={event.title} />
 
-            {/* Breadcrumb Navigation */}
-            <section className="py-6 bg-linear-to-br from-gray-50 to-white border-b border-gray-100">
-                <div className="container mx-auto px-6">
-                    <nav className="breadcrumb">
-                        <ul className="flex items-center space-x-3 text-sm font-lato">
+            <section className="border-b border-slate-200 bg-white py-5">
+                <div className="section-shell">
+                    <nav>
+                        <ul className="flex items-center space-x-3 text-sm">
                             <li className="inline">
-                                <Link
-                                    href={route('homepage')}
-                                    className="flex items-center gap-2 font-semibold transition-colors duration-300 hover:scale-105 text-accent"
-                                >
+                                <Link href={route('homepage')} className="font-medium text-slate-500 transition-colors hover:text-slate-950">
                                     <i className="fas fa-home text-xs"></i>
-                                    <span>Home</span>
+                                    <span className="ml-2">Home</span>
                                 </Link>
                             </li>
+                            <li className="inline text-xs text-slate-400"><i className="fas fa-chevron-right"></i></li>
                             <li className="inline">
-                                <i className="fas fa-chevron-right text-xs text-gray-400"></i>
+                                <Link href={route('events.index')} className="font-medium text-slate-500 transition-colors hover:text-slate-950">Events</Link>
                             </li>
-                            <li className="inline">
-                                <Link
-                                    href={route('events.index')}
-                                    className="flex items-center gap-2 font-semibold transition-colors duration-300 hover:scale-105 text-accent"
-                                >
-                                    <i className="fas fa-calendar-alt text-xs"></i>
-                                    <span>Events</span>
-                                </Link>
-                            </li>
-                            <li className="inline">
-                                <i className="fas fa-chevron-right text-xs text-gray-400"></i>
-                            </li>
-                            <li className="inline">
-                                <span className="text-gray-600 truncate max-w-[200px] sm:max-w-[300px] font-medium">
-                                    {event.title}
-                                </span>
-                            </li>
+                            <li className="inline text-xs text-slate-400"><i className="fas fa-chevron-right"></i></li>
+                            <li className="inline truncate font-medium text-slate-900">{event.title}</li>
                         </ul>
                     </nav>
                 </div>
             </section>
 
-            {/* Event Details Section */}
-            <section className="py-8 md:py-12">
-                <div className="container mx-auto px-4">
-                    <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 lg:gap-8">
-                        {/* Main Content */}
-                        <div className="lg:col-span-3 space-y-6 md:space-y-8">
-                            {/* Event Header */}
-                            <div className="space-y-6 md:space-y-8">
-                                <div className="space-y-4">
-                                    {/* Event Title */}
-                                    <h1 className="text-2xl md:text-4xl lg:text-5xl font-extrabold leading-tight font-montserrat text-primary">
-                                        {event.title}
-                                    </h1>
-
-                                    {/* Event Theme */}
-                                    <h2 className="text-lg md:text-xl lg:text-2xl font-bold font-montserrat text-accent">
-                                        {event.theme}
-                                    </h2>
+            <section className="public-section bg-slate-50">
+                <div className="section-shell">
+                    <div className="grid gap-6 lg:grid-cols-[minmax(0,1.65fr)_minmax(320px,0.95fr)] lg:gap-8">
+                        <div className="space-y-6 lg:space-y-8">
+                            <section className="relative isolate overflow-hidden rounded-2xl border border-slate-200 bg-slate-900 text-white shadow-sm">
+                                <div className="absolute inset-0">
+                                    <img
+                                        src={`/storage/${event.program_cover}`}
+                                        alt={event.title}
+                                        className="h-full w-full object-cover"
+                                        onError={(e) => {
+                                            (e.target as HTMLImageElement).src = 'https://placehold.co/1200x900?text=Cover+Image+Missing';
+                                        }}
+                                    />
+                                    <div className="absolute inset-0 bg-slate-900/68"></div>
                                 </div>
 
-                                {/* Event Status Section */}
-                                <div className="flex flex-wrap items-center gap-4">
-                                    {/* Status Badge */}
-                                    {isLive && (
-                                        <span className="px-4 py-2 rounded-full text-sm font-semibold flex items-center gap-2 font-montserrat shadow-lg text-white bg-secondary">
-                                            <span className="w-2.5 h-2.5 bg-white rounded-full animate-pulse"></span>
-                                            <i className="fas fa-broadcast-tower text-xs"></i>
-                                            Live Now
-                                        </span>
-                                    )}
-                                    {isUpcoming && (
-                                        <span className="px-4 py-2 rounded-full text-sm font-semibold font-montserrat shadow-lg text-white bg-accent">
-                                            <i className="fas fa-clock text-xs mr-1"></i>
-                                            Coming Soon
-                                        </span>
-                                    )}
-                                    {isPast && (
-                                        <span className="px-4 py-2 rounded-full text-sm font-semibold font-montserrat shadow-lg bg-gray-500 text-white">
-                                            <i className="fas fa-history text-xs mr-1"></i>
-                                            Event Ended
-                                        </span>
-                                    )}
+                                <div className="relative flex min-h-[440px] items-end md:min-h-[520px]">
+                                    <div className="w-full px-6 pb-8 pt-12 lg:px-10 lg:pb-10 lg:pt-16">
+                                        <div className="max-w-4xl space-y-6">
+                                            <div className="flex flex-wrap items-center gap-3">
+                                                <span
+                                                    className="inline-flex items-center rounded-md bg-white/10 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-white/92"
+                                                    style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.35)' }}
+                                                >
+                                                    {getModeIcon(event.mode)}
+                                                    {modeLabel}
+                                                </span>
+                                                {isUpcoming && (
+                                                    <span
+                                                        className="inline-flex items-center rounded-md bg-emerald-600 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-white"
+                                                        style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.28)' }}
+                                                    >
+                                                        <i className="fas fa-clock mr-2 text-[10px]"></i>
+                                                        Upcoming
+                                                    </span>
+                                                )}
+                                                {isLive && (
+                                                    <span className="inline-flex items-center rounded-md bg-white px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-900">
+                                                        <span className="mr-2 h-2 w-2 rounded-full bg-emerald-600 animate-pulse"></span>
+                                                        Live
+                                                    </span>
+                                                )}
+                                                {isPast && (
+                                                    <span
+                                                        className="inline-flex items-center rounded-md bg-white/10 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-white/92"
+                                                        style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.35)' }}
+                                                    >
+                                                        Ended
+                                                    </span>
+                                                )}
+                                            </div>
 
-                                    {/* Event Mode Badge */}
-                                    <span className="px-4 py-2 rounded-full text-sm font-semibold font-montserrat shadow-md border-2 capitalize text-primary border-primary bg-primary/10">
-                                        {getModeIcon(event.mode)}
-                                        {event.mode || 'Hybrid'}
-                                    </span>
+                                            <div className="space-y-4">
+                                                <h1
+                                                    className="max-w-4xl text-4xl font-semibold leading-[0.98] !text-white md:text-5xl lg:text-6xl"
+                                                    style={{ textShadow: '0 4px 18px rgba(0, 0, 0, 0.35)' }}
+                                                >
+                                                    {event.title}
+                                                </h1>
+                                                {event.theme && (
+                                                    <p
+                                                        className="max-w-3xl text-lg leading-8 text-white/78 md:text-xl"
+                                                        style={{ textShadow: '0 2px 10px rgba(0, 0, 0, 0.28)' }}
+                                                    >
+                                                        {event.theme}
+                                                    </p>
+                                                )}
+                                            </div>
 
-                                    {/* Countdown Timer */}
-                                    {isUpcoming && countdown && (
-                                        <div className="flex items-center gap-3 px-4 py-2 bg-white rounded-full shadow-md border border-gray-200">
-                                            <i className="fas fa-stopwatch text-sm text-accent"></i>
-                                            <span className="font-semibold text-sm font-lato text-primary">{countdown}</span>
+                                            <div
+                                                className="max-w-3xl text-base leading-8 text-white/88 md:text-lg"
+                                                style={{ textShadow: '0 2px 10px rgba(0, 0, 0, 0.28)' }}
+                                            >
+                                                <p>{primary_cta.description}</p>
+                                            </div>
+
+                                            <div className="grid max-w-4xl gap-x-8 gap-y-6 border-t border-white/14 pt-6 text-sm text-white/78 sm:grid-cols-2 xl:grid-cols-4">
+                                                <div>
+                                                    <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/54">Starts</p>
+                                                    <p
+                                                        className="mt-2 text-base font-semibold text-white/96"
+                                                        style={{ textShadow: '0 2px 8px rgba(0, 0, 0, 0.22)' }}
+                                                    >
+                                                        {formatDate(event.start_date)}
+                                                    </p>
+                                                    <p className="mt-1 text-white/72">{formatTime(event.start_date)}</p>
+                                                </div>
+                                                <div>
+                                                    <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/54">Ends</p>
+                                                    <p
+                                                        className="mt-2 text-base font-semibold text-white/96"
+                                                        style={{ textShadow: '0 2px 8px rgba(0, 0, 0, 0.22)' }}
+                                                    >
+                                                        {formatDate(event.end_date)}
+                                                    </p>
+                                                    <p className="mt-1 text-white/72">{formatTime(event.end_date)}</p>
+                                                </div>
+                                                <div>
+                                                    <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/54">Entry</p>
+                                                    <p
+                                                        className="mt-2 text-base font-semibold text-white/96"
+                                                        style={{ textShadow: '0 2px 8px rgba(0, 0, 0, 0.22)' }}
+                                                    >
+                                                        {event.entry_fee > 0 ? `₦${event.entry_fee.toLocaleString()}` : 'Free'}
+                                                    </p>
+                                                </div>
+                                                <div>
+                                                    <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/54">Seats</p>
+                                                    <p
+                                                        className="mt-2 text-base font-semibold text-white/96"
+                                                        style={{ textShadow: '0 2px 8px rgba(0, 0, 0, 0.22)' }}
+                                                    >
+                                                        {slotsRemaining === null ? 'Unlimited' : slotsRemaining === 0 ? 'Full' : `${slotsRemaining} left`}
+                                                    </p>
+                                                </div>
+                                                <div>
+                                                    <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/54">Next action</p>
+                                                    <p
+                                                        className="mt-2 text-base font-semibold text-white/96"
+                                                        style={{ textShadow: '0 2px 8px rgba(0, 0, 0, 0.22)' }}
+                                                    >
+                                                        {primary_cta.label}
+                                                    </p>
+                                                </div>
+                                            </div>
+
+                                            {isUpcoming && countdown && (
+                                                <div className="border-l-2 border-emerald-400 pl-4">
+                                                    <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-emerald-300">Countdown</p>
+                                                    <p
+                                                        className="mt-2 text-lg font-semibold text-white/96"
+                                                        style={{ textShadow: '0 2px 8px rgba(0, 0, 0, 0.22)' }}
+                                                    >
+                                                        {countdown}
+                                                    </p>
+                                                    <p className="mt-1 text-sm text-white/68">Until the event begins</p>
+                                                </div>
+                                            )}
                                         </div>
-                                    )}
-                                </div>
-                            </div>
-
-                            {/* Event Cover Image */}
-                            <div className="relative rounded-2xl overflow-hidden shadow-2xl border border-gray-200 group">
-                            <img
-                                src={`/storage/${event.program_cover}`}
-                                alt={event.title}
-                                className="w-full h-full object-cover"
-                                onError={(e) => {
-                                    (e.target as HTMLImageElement).src = 'https://placehold.co/600x400?text=Cover+Image+Missing';
-                                }}
-                            />
-
-                                {/* Image Overlay */}
-                                <div className="absolute inset-0 bg-linear-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-
-                                {/* Image Caption */}
-                                <div className="absolute bottom-4 left-4 right-4">
-                                    <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-                                        <p className="text-white text-sm font-lato">{event.title}</p>
                                     </div>
                                 </div>
-                            </div>
+                            </section>
 
-                            {/* Event Description */}
-                            <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-8 md:p-10">
-                                <div className="flex items-center gap-4 mb-6 md:mb-8">
-                                    <div className="w-12 h-12 rounded-2xl flex items-center justify-center bg-linear-to-br from-primary to-primary">
-                                        <i className="fas fa-info-circle text-white text-xl"></i>
+                            <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm lg:p-7">
+                                <div className="mb-5 flex items-center gap-3">
+                                    <div className="flex h-10 w-10 items-center justify-center rounded-md bg-slate-900 text-white">
+                                        <i className="fas fa-align-left text-sm"></i>
                                     </div>
-                                    <h2 className="text-2xl md:text-3xl font-bold font-montserrat text-primary">
-                                        Event Description
-                                    </h2>
+                                    <h2 className="text-xl font-semibold text-slate-950 md:text-2xl">Overview</h2>
                                 </div>
-
                                 <div
-                                    className="prose prose-lg max-w-none text-gray-700 font-lato
-                                        prose-headings:font-montserrat prose-headings:text-primary prose-headings:font-bold
+                                    className="prose max-w-none text-slate-700
+                                        prose-headings:font-sans prose-headings:text-slate-950 prose-headings:font-semibold
                                         prose-h1:text-3xl prose-h2:text-2xl prose-h3:text-xl prose-h4:text-lg
-                                        prose-p:leading-relaxed prose-p:mb-4 prose-p:text-gray-700
-                                        prose-a:text-accent prose-a:font-semibold prose-a:no-underline hover:prose-a:underline prose-a:transition-all
-                                        prose-strong:text-primary prose-strong:font-bold
-                                        prose-em:text-gray-600 prose-em:italic
+                                        prose-p:leading-relaxed prose-p:mb-4 prose-p:text-slate-700
+                                        prose-a:text-emerald-700 prose-a:font-semibold prose-a:no-underline hover:prose-a:underline
+                                        prose-strong:text-slate-950 prose-strong:font-semibold
                                         prose-ul:list-disc prose-ul:ml-6 prose-ul:mb-4
                                         prose-ol:list-decimal prose-ol:ml-6 prose-ol:mb-4
-                                        prose-li:mb-2 prose-li:text-gray-700 prose-li:marker:text-accent
-                                        prose-blockquote:border-l-4 prose-blockquote:border-accent prose-blockquote:pl-4 prose-blockquote:italic prose-blockquote:text-gray-600 prose-blockquote:bg-gray-50 prose-blockquote:py-2
-                                        prose-code:bg-gray-100 prose-code:px-2 prose-code:py-1 prose-code:rounded prose-code:text-sm prose-code:text-primary
-                                        prose-pre:bg-gray-900 prose-pre:text-gray-100 prose-pre:p-4 prose-pre:rounded-lg prose-pre:overflow-x-auto
-                                        prose-img:rounded-lg prose-img:shadow-md
+                                        prose-li:mb-2 prose-li:text-slate-700 prose-li:marker:text-emerald-700
+                                        prose-blockquote:border-l-4 prose-blockquote:border-emerald-600 prose-blockquote:pl-4 prose-blockquote:italic prose-blockquote:text-slate-600 prose-blockquote:bg-slate-50 prose-blockquote:py-2
+                                        prose-code:bg-slate-100 prose-code:px-2 prose-code:py-1 prose-code:rounded prose-code:text-sm prose-code:text-slate-900
+                                        prose-pre:bg-slate-900 prose-pre:text-slate-100 prose-pre:p-4 prose-pre:rounded-lg prose-pre:overflow-x-auto
+                                        prose-img:rounded-xl prose-img:shadow-md
                                         prose-table:border-collapse prose-table:w-full
-                                        prose-th:bg-primary prose-th:text-white prose-th:p-3 prose-th:text-left prose-th:font-semibold
-                                        prose-td:border prose-td:border-gray-300 prose-td:p-3"
+                                        prose-th:bg-slate-900 prose-th:text-white prose-th:p-3 prose-th:text-left prose-th:font-semibold
+                                        prose-td:border prose-td:border-slate-300 prose-td:p-3"
                                     dangerouslySetInnerHTML={{ __html: event.description }}
                                 />
                             </div>
 
-                            {/* Event Speakers */}
-                            {event.speakers && event.speakers.length > 0 && (
-                                <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-8 md:p-10">
-                                    <div className="flex items-center gap-4 mb-8">
-                                        <div className="w-12 h-12 rounded-2xl flex items-center justify-center bg-linear-to-br from-accent to-green-700">
-                                            <i className="fas fa-microphone text-white text-xl"></i>
+                            {programProfile && (
+                                <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm lg:p-7">
+                                    <div className="mb-5 flex items-center gap-3">
+                                        <div className="flex h-10 w-10 items-center justify-center rounded-md bg-emerald-50 text-emerald-700">
+                                            <i className="fas fa-route text-sm"></i>
                                         </div>
-                                        <h2 className="text-2xl md:text-3xl font-bold font-montserrat text-primary">
-                                            Featured Speakers
-                                        </h2>
+                                        <div>
+                                            <h2 className="text-xl font-semibold text-slate-950 md:text-2xl">Program Structure</h2>
+                                            <p className="text-sm text-slate-600">How this intake is organized and what participants are expected to carry.</p>
+                                        </div>
                                     </div>
 
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
+                                    <div className="grid gap-4 md:grid-cols-2">
+                                        <ProgramFact label="Program type" value={programTypeLabel} />
+                                        <ProgramFact label="Admission" value={programProfile.registration_mode === 'selective' || programProfile.requires_screening ? 'Selective screening' : 'Open registration'} />
+                                        {programProfile.program_code && <ProgramFact label="Program code" value={programProfile.program_code} />}
+                                        {programProfile.cohort_duration_weeks && <ProgramFact label="Cycle length" value={`${programProfile.cohort_duration_weeks} weeks`} />}
+                                        {programProfile.central_teaching_schedule && <ProgramFact label="Central teaching" value={programProfile.central_teaching_schedule} />}
+                                        {programProfile.group_meeting_schedule && <ProgramFact label="Group meetings" value={programProfile.group_meeting_schedule} />}
+                                        {programProfile.group_model && <ProgramFact label="Group model" value={programProfile.group_model} />}
+                                        {programProfile.meeting_link && <ProgramFact label="Meeting link" value="Shared after successful registration" />}
+                                    </div>
+
+                                    {(programProfile.screening_note || prayerTargetLabel || evangelismTargetLabel || discipleshipTargetLabel || programProfile.access_notes) && (
+                                        <div className="mt-6 space-y-3 border-t border-slate-100 pt-5">
+                                            {programProfile.screening_note && (
+                                                <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm leading-6 text-amber-900">
+                                                    <span className="font-semibold">Screening note:</span> {programProfile.screening_note}
+                                                </div>
+                                            )}
+                                            {(prayerTargetLabel || evangelismTargetLabel || discipleshipTargetLabel) && (
+                                                <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                                                    <p className="text-sm font-semibold text-slate-950">Weekly commitments</p>
+                                                    <ul className="mt-3 space-y-2 text-sm leading-6 text-slate-700">
+                                                        {prayerTargetLabel && <li>{prayerTargetLabel}</li>}
+                                                        {evangelismTargetLabel && <li>{evangelismTargetLabel}</li>}
+                                                        {discipleshipTargetLabel && <li>{discipleshipTargetLabel}</li>}
+                                                    </ul>
+                                                </div>
+                                            )}
+                                            {programProfile.access_notes && (
+                                                <p className="text-sm leading-6 text-slate-600">{programProfile.access_notes}</p>
+                                            )}
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+
+                            {event.speakers && event.speakers.length > 0 && (
+                                <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm lg:p-7">
+                                    <div className="mb-5 flex items-center gap-3">
+                                        <div className="flex h-10 w-10 items-center justify-center rounded-md bg-slate-900 text-white">
+                                            <i className="fas fa-microphone text-sm"></i>
+                                        </div>
+                                        <h2 className="text-xl font-semibold text-slate-950 md:text-2xl">Speakers</h2>
+                                    </div>
+
+                                    <div className="grid gap-4 md:grid-cols-2">
                                         {event.speakers.map((speaker) => (
-                                            <div
+                                            <Link
                                                 key={speaker.id}
-                                                className="group bg-linear-to-br from-gray-50 to-white rounded-2xl border border-gray-200 hover:border-accent/30 hover:shadow-xl transition-all duration-500 p-6"
+                                                href={route('speakers.profile', speaker.id)}
+                                                className="block rounded-xl border border-slate-200 bg-slate-50 p-5 transition hover:border-slate-300 hover:bg-white hover:shadow-sm"
                                             >
-                                                <div className="flex items-start gap-5">
-                                                    {/* Speaker Avatar */}
-                                                    <div className="shrink-0 relative">
-                                                        <img
-                                                            src={
-                                                                speaker.user.photo
-                                                                    ? `/storage/${speaker.user.photo}`
-                                                                    : `https://ui-avatars.com/api/?name=${encodeURIComponent(speaker.user.name)}&background=002147&color=fff&size=128&font-size=0.35&bold=true`
-                                                            }
-                                                            alt={speaker.user.name}
-                                                            className="w-16 h-16 md:w-20 md:h-20 rounded-2xl object-cover shadow-lg group-hover:scale-110 transition-transform duration-500"
-                                                        />
-
-                                                        {/* Speaker Badge */}
-                                                        <div className="absolute -top-2 -right-2 w-6 h-6 rounded-full flex items-center justify-center shadow-sm bg-accent">
-                                                            <i className="fas fa-star text-white text-xs"></i>
-                                                        </div>
-                                                    </div>
-
-                                                    {/* Speaker Info */}
-                                                    <div className="flex-1 min-w-0">
-                                                        <Link
-                                                            href={route('speakers.profile', speaker.id)}
-                                                            className="font-bold text-lg md:text-xl mb-2 font-montserrat block group-hover:text-accent transition-colors duration-300 text-primary"
-                                                        >
-                                                            {speaker.user.name}
-                                                        </Link>
-
+                                                <div className="flex items-start gap-4">
+                                                    <img
+                                                        src={
+                                                            speaker.user.photo
+                                                                ? `/storage/${speaker.user.photo}`
+                                                                : `https://ui-avatars.com/api/?name=${encodeURIComponent(speaker.user.name)}&background=002147&color=fff&size=128&font-size=0.35&bold=true`
+                                                        }
+                                                        alt={speaker.user.name}
+                                                        className="h-16 w-16 rounded-xl object-cover"
+                                                    />
+                                                    <div className="min-w-0 flex-1">
+                                                        <p className="text-base font-semibold text-slate-950 md:text-lg">{speaker.user.name}</p>
                                                         {speaker.user.headline && (
-                                                            <p className="font-semibold text-sm md:text-base mb-3 font-montserrat line-clamp-2 text-accent">
-                                                                {speaker.user.headline}
-                                                            </p>
+                                                            <p className="mt-1 text-sm font-medium text-emerald-700">{speaker.user.headline}</p>
                                                         )}
-
-                                                        {speaker.bio ? (
-                                                            <p className="text-gray-600 text-sm leading-relaxed line-clamp-3 font-lato">
-                                                                {speaker.bio}
-                                                            </p>
-                                                        ) : !speaker.user.headline ? (
-                                                            <p className="text-gray-400 text-sm italic font-lato">
-                                                                Professional speaker and industry expert
-                                                            </p>
-                                                        ) : null}
-
-                                                        {/* View Profile Link */}
-                                                        <div className="mt-4">
-                                                            <Link
-                                                                href={route('speakers.profile', speaker.id)}
-                                                                className="inline-flex items-center gap-2 text-sm font-semibold transition-all duration-300 hover:gap-3 text-accent"
-                                                            >
-                                                                <span>View Profile</span>
-                                                                <i className="fas fa-arrow-right text-xs"></i>
-                                                            </Link>
-                                                        </div>
+                                                        <p className="mt-3 line-clamp-3 text-sm leading-6 text-slate-600">
+                                                            {speaker.bio || 'Professional speaker and industry expert.'}
+                                                        </p>
                                                     </div>
                                                 </div>
-                                            </div>
+                                            </Link>
                                         ))}
                                     </div>
                                 </div>
                             )}
 
-                            {/* Event Resources (only for registered users with downloadable resources) */}
-                            {auth?.user && isRegistered && event.resources && event.resources.filter(r => r.is_downloadable).length > 0 && (
-                                <div className="bg-linear-to-br from-white to-green-50 rounded-2xl shadow-lg border-2 border-accent/20 p-6 md:p-8">
-                                    <div className="flex items-center gap-3 mb-6">
-                                        <div className="w-12 h-12 rounded-xl flex items-center justify-center" style={{ backgroundColor: '#e6f7ed' }}>
-                                            <i className="fas fa-download text-2xl" style={{ color: '#00a651' }}></i>
+                            {auth?.user && isRegistered && event.resources && event.resources.filter((r) => r.is_downloadable).length > 0 && (
+                                <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm lg:p-7">
+                                    <div className="mb-5 flex items-center gap-3">
+                                        <div className="flex h-10 w-10 items-center justify-center rounded-md bg-emerald-50 text-emerald-700">
+                                            <i className="fas fa-download text-sm"></i>
                                         </div>
                                         <div>
-                                            <h2 className="text-xl md:text-2xl font-bold text-primary font-montserrat">Event Resources</h2>
-                                            <p className="text-sm text-gray-600 font-lato">Downloadable materials for attendees</p>
+                                            <h2 className="text-xl font-semibold text-slate-950 md:text-2xl">Attendee Resources</h2>
+                                            <p className="text-sm text-slate-600">Downloads and links available after registration.</p>
                                         </div>
                                     </div>
-                                    <div className="grid grid-cols-1 gap-3">
-                                        {event.resources.filter(r => r.is_downloadable).map((resource) => (
+
+                                    <div className="space-y-3">
+                                        {event.resources.filter((r) => r.is_downloadable).map((resource) => (
                                             <div key={resource.id}>
                                                 {resource.type === 'file' && resource.file_path && (
                                                     <a
@@ -391,21 +514,16 @@ export default function EventShow({ event, auth, signed_speaker_route }: EventSh
                                                         download
                                                         target="_blank"
                                                         rel="noopener noreferrer"
-                                                        className="flex items-center gap-4 p-4 bg-white rounded-xl border-2 border-gray-200 hover:border-accent hover:shadow-md transition-all duration-300 font-lato group"
+                                                        className="flex items-center gap-4 rounded-xl border border-slate-200 bg-slate-50 p-4 transition hover:border-slate-300 hover:bg-white"
                                                     >
-                                                        <div className="w-12 h-12 rounded-lg flex items-center justify-center bg-primary/10 group-hover:bg-accent/10 transition-colors shrink-0">
-                                                            <i className="fas fa-file-pdf text-xl text-primary group-hover:text-accent transition-colors"></i>
+                                                        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-md bg-slate-100 text-slate-900">
+                                                            <i className="fas fa-file-pdf"></i>
                                                         </div>
-                                                        <div className="flex-1 min-w-0">
-                                                            <p className="font-semibold text-gray-900 font-montserrat truncate">{resource.title}</p>
-                                                            {resource.description && (
-                                                                <p className="text-sm text-gray-600 font-lato mt-1 line-clamp-1">{resource.description}</p>
-                                                            )}
+                                                        <div className="min-w-0 flex-1">
+                                                            <p className="truncate font-semibold text-slate-950">{resource.title}</p>
+                                                            {resource.description && <p className="mt-1 line-clamp-1 text-sm text-slate-600">{resource.description}</p>}
                                                         </div>
-                                                        <div className="flex items-center gap-2 shrink-0">
-                                                            <span className="text-xs font-medium text-accent bg-accent/10 px-3 py-1 rounded-full font-lato">File</span>
-                                                            <i className="fas fa-download text-accent text-lg group-hover:scale-110 transition-transform"></i>
-                                                        </div>
+                                                        <span className="text-sm font-medium text-emerald-700">Download</span>
                                                     </a>
                                                 )}
                                                 {resource.type === 'link' && resource.external_link && (
@@ -413,21 +531,16 @@ export default function EventShow({ event, auth, signed_speaker_route }: EventSh
                                                         href={resource.external_link}
                                                         target="_blank"
                                                         rel="noopener noreferrer"
-                                                        className="flex items-center gap-4 p-4 bg-white rounded-xl border-2 border-gray-200 hover:border-accent hover:shadow-md transition-all duration-300 font-lato group"
+                                                        className="flex items-center gap-4 rounded-xl border border-slate-200 bg-slate-50 p-4 transition hover:border-slate-300 hover:bg-white"
                                                     >
-                                                        <div className="w-12 h-12 rounded-lg flex items-center justify-center bg-primary/10 group-hover:bg-accent/10 transition-colors shrink-0">
-                                                            <i className="fas fa-link text-xl text-primary group-hover:text-accent transition-colors"></i>
+                                                        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-md bg-slate-100 text-slate-900">
+                                                            <i className="fas fa-link"></i>
                                                         </div>
-                                                        <div className="flex-1 min-w-0">
-                                                            <p className="font-semibold text-gray-900 font-montserrat truncate">{resource.title}</p>
-                                                            {resource.description && (
-                                                                <p className="text-sm text-gray-600 font-lato mt-1 line-clamp-1">{resource.description}</p>
-                                                            )}
+                                                        <div className="min-w-0 flex-1">
+                                                            <p className="truncate font-semibold text-slate-950">{resource.title}</p>
+                                                            {resource.description && <p className="mt-1 line-clamp-1 text-sm text-slate-600">{resource.description}</p>}
                                                         </div>
-                                                        <div className="flex items-center gap-2 shrink-0">
-                                                            <span className="text-xs font-medium text-accent bg-accent/10 px-3 py-1 rounded-full font-lato">Link</span>
-                                                            <i className="fas fa-external-link-alt text-accent text-lg group-hover:scale-110 transition-transform"></i>
-                                                        </div>
+                                                        <span className="text-sm font-medium text-emerald-700">Open</span>
                                                     </a>
                                                 )}
                                             </div>
@@ -437,388 +550,246 @@ export default function EventShow({ event, auth, signed_speaker_route }: EventSh
                             )}
                         </div>
 
-                        {/* Sidebar */}
-                        <div className="space-y-8">
-                            {/* Registration Card */}
-                            <div className="relative overflow-hidden rounded-2xl shadow-2xl">
-                                {/* Gradient Background */}
-                                <div className="absolute inset-0 bg-linear-to-br from-primary via-primary to-accent"></div>
+                        <aside className="space-y-6 lg:sticky lg:top-24 lg:self-start">
+                            <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm lg:p-6">
+                                <div className="border-b border-slate-200 pb-5">
+                                    <p className="text-[11px] font-semibold uppercase text-slate-500">Next action</p>
+                                    <h3 className="mt-2 text-xl font-semibold text-slate-950 md:text-2xl">{primary_cta.label}</h3>
+                                    <p className="mt-2 text-sm leading-6 text-slate-600">{primary_cta.description}</p>
+                                </div>
 
-                                {/* Content */}
-                                <div className="relative p-8 text-white">
-                                    {/* Header */}
-                                    <div className="text-center mb-8">
-                                        <div className="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center mx-auto mb-4">
-                                            <i className="fas fa-ticket-alt text-2xl text-white"></i>
+                                <div className="space-y-4 py-5">
+                                    <div className={`rounded-xl border p-4 ${ctaTone}`}>
+                                        <div className="flex items-start justify-between gap-4">
+                                            <div>
+                                                <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">Path</p>
+                                                <p className="mt-2 text-lg font-semibold text-slate-950">{primary_cta.label}</p>
+                                                <p className="mt-2 text-sm leading-6 text-slate-600">{primary_cta.description}</p>
+                                            </div>
+                                            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-white text-slate-900 shadow-sm">
+                                                {primary_cta.key === 'view_attendee_workspace' && <i className="fas fa-calendar-check"></i>}
+                                                {primary_cta.key === 'view_speaker_workspace' && <i className="fas fa-microphone"></i>}
+                                                {isPaidCheckoutFlow && <i className="fas fa-ticket-alt"></i>}
+                                                {isWaitlistFlow && <i className="fas fa-clock"></i>}
+                                                {primary_cta.key === 'apply_to_speak' && <i className="fas fa-bullhorn"></i>}
+                                                {(isFreeRegistrationFlow || primary_cta.kind === 'status') && <i className="fas fa-arrow-right"></i>}
+                                            </div>
                                         </div>
-                                        <h3 className="text-2xl font-bold font-montserrat">Event Registration</h3>
-                                        <p className="text-white/80 font-lato mt-2">
-                                            {isRegistered ? 'You\'re all set!' : 'Secure your spot today'}
+                                    </div>
+
+                                    <div className="flex items-start justify-between gap-4 border-b border-slate-100 pb-4">
+                                        <div>
+                                            <p className="text-sm font-medium text-slate-500">Entry Fee</p>
+                                            <p className="mt-1 text-sm text-slate-600">{event.entry_fee > 0 ? 'Per participant' : 'No payment required'}</p>
+                                        </div>
+                                        <p className="text-xl font-semibold text-slate-950 md:text-2xl">
+                                            {event.entry_fee > 0 ? `₦${event.entry_fee.toLocaleString()}` : 'Free'}
                                         </p>
                                     </div>
 
-                                    {/* Registration Status - Show when registered */}
-                                    {isRegistered && (
-                                        <div className="mb-6 p-5 bg-white/15 backdrop-blur-sm rounded-xl border-2 border-white/30">
-                                            <div className="flex items-center gap-3 mb-3">
-                                                <div className="w-12 h-12 bg-accent rounded-full flex items-center justify-center shrink-0">
-                                                    <i className="fas fa-check text-white text-xl"></i>
-                                                </div>
-                                                <div className="flex-1">
-                                                    <p className="font-bold text-white font-montserrat text-lg">Registration Confirmed</p>
-                                                    <p className="text-white/90 text-sm font-lato">Your spot is secured</p>
-                                                </div>
-                                            </div>
-                                            <div className="pt-3 border-t border-white/20">
-                                                <p className="text-white/90 text-sm font-lato flex items-start gap-2">
-                                                    <i className="fas fa-info-circle mt-0.5 shrink-0"></i>
-                                                    <span>Check your email for confirmation and event details. You'll receive a reminder before the event starts.</span>
-                                                </p>
-                                            </div>
-                                        </div>
-                                    )}
-
-                                    {/* Event Details */}
-                                    <div className="space-y-4 mb-8">
-                                        {/* Slots Remaining */}
-                                        <div className="bg-white/10 backdrop-blur-sm rounded-xl p-5 border border-white/20">
-                                            <div className="flex justify-between items-center mb-2">
-                                                <span className="text-white/90 font-semibold font-lato flex items-center gap-2">
-                                                    <i className="fas fa-users text-base"></i>
-                                                    Available Slots
-                                                </span>
-                                                <span className="font-bold text-2xl text-white font-montserrat">
-                                                    {event.slots_remaining === null ? 'Unlimited' : slotsRemaining}
-                                                </span>
-                                            </div>
-                                            {typeof slotsRemaining === 'number' && slotsRemaining <= 10 && slotsRemaining > 0 && (
-                                                <p className="text-white/80 text-xs font-lato mt-2">
-                                                    <i className="fas fa-exclamation-circle mr-1"></i>
-                                                    Limited slots available - Register soon!
-                                                </p>
-                                            )}
-                                            {slotsRemaining === 0 && (
-                                                <p className="text-red-200 text-xs font-lato mt-2 font-semibold">
-                                                    <i className="fas fa-times-circle mr-1"></i>
-                                                    Event is fully booked
-                                                </p>
-                                            )}
-                                        </div>
-
-                                        {/* Registration Fee */}
-                                        <div className="bg-white/10 backdrop-blur-sm rounded-xl p-5 border border-white/20">
-                                            <div className="flex justify-between items-start mb-2">
-                                                <div className="flex-1">
-                                                    <span className="text-white/90 font-semibold font-lato flex items-center gap-2 mb-1">
-                                                        <i className="fas fa-tag text-base"></i>
-                                                        Entry Fee
-                                                    </span>
-                                                    {event.entry_fee > 0 && (
-                                                        <p className="text-white/70 text-xs font-lato">Per participant</p>
-                                                    )}
-                                                </div>
-                                                <div className="text-right">
-                                                    {event.entry_fee > 0 ? (
-                                                        <>
-                                                            <span className="font-bold text-3xl text-white font-montserrat block leading-none">
-                                                                ₦{event.entry_fee.toLocaleString()}
-                                                            </span>
-                                                            <span className="text-white/70 text-xs font-lato mt-1 block">
-                                                                Non-refundable
-                                                            </span>
-                                                        </>
-                                                    ) : (
-                                                        <>
-                                                            <span className="font-bold text-3xl text-white font-montserrat block leading-none">FREE</span>
-                                                            <span className="text-white/70 text-xs font-lato mt-1 block">
-                                                                No payment required
-                                                            </span>
-                                                        </>
-                                                    )}
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    {/* Registration Button */}
-                                    {isPast ? (
-                                        <div className="w-full bg-gray-500 text-white py-4 px-6 rounded-xl font-bold text-lg cursor-not-allowed shadow-lg flex items-center justify-center gap-3 font-montserrat mb-4 opacity-80">
-                                            <i className="fas fa-history text-xl"></i>
-                                            <span>Event has Ended</span>
-                                        </div>
-                                    ) : !isRegistered ? (
-                                        <button
-                                            onClick={() => {
-                                                if (!auth?.user) {
-                                                    router.get(route('login'));
-                                                    return;
-                                                }
-                                                setShowModal(true);
-                                            }}
-                                            disabled={revokeCount === 4 || slotsRemaining === 0}
-                                            className="w-full bg-white text-primary py-4 px-6 rounded-xl font-bold text-lg hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl flex items-center justify-center gap-3 font-montserrat mb-4"
-                                        >
-                                            {revokeCount === 4 ? (
-                                                <>
-                                                    <i className="fas fa-ban text-xl text-gray-500"></i>
-                                                    <span>Maximum Registrations Reached</span>
-                                                </>
-                                            ) : slotsRemaining === 0 ? (
-                                                <>
-                                                    <i className="fas fa-users-slash text-xl text-gray-500"></i>
-                                                    <span>Event Full</span>
-                                                </>
-                                            ) : !auth?.user ? (
-                                                <>
-                                                    <i className="fas fa-sign-in-alt text-xl text-primary"></i>
-                                                    <span>Login to Register</span>
-                                                </>
-                                            ) : (
-                                                <>
-                                                    <i className="fas fa-hand-paper text-xl text-primary"></i>
-                                                    <span>Register Now</span>
-                                                </>
-                                            )}
-                                        </button>
-                                    ) : (
-                                        <div className="w-full bg-white/20 backdrop-blur-sm border-2 border-white/40 text-white py-4 px-6 rounded-xl font-bold text-lg cursor-default shadow-lg flex items-center justify-center gap-3 font-montserrat mb-4">
-                                            <i className="fas fa-check-circle text-2xl text-accent"></i>
-                                            <span>You're Registered!</span>
-                                        </div>
-                                    )}
-
-                                    {/* Speaker Application */}
-                                    {event.is_allowing_application === true && signed_speaker_route && !isRegistered && (
-                                        <a
-                                            href={signed_speaker_route}
-                                            className="w-full border-2 border-white text-white py-3 px-6 rounded-xl font-semibold hover:bg-white hover:text-primary transition-all duration-300 flex items-center justify-center gap-3 font-montserrat group"
-                                        >
-                                            <i className="fas fa-microphone group-hover:scale-110 transition-transform"></i>
-                                            Apply as Speaker
-                                        </a>
-                                    )}
-
-                                    {/* Login Notice */}
-                                    {!auth?.user && (
-                                        <div className="mt-6 p-4 bg-white/10 backdrop-blur-sm rounded-xl border border-white/20">
-                                            <p className="text-white/90 text-sm text-center font-lato flex items-center justify-center gap-2">
-                                                <i className="fas fa-info-circle"></i>
-                                                You must be logged in to register for this event
+                                    <div className="flex items-start justify-between gap-4 border-b border-slate-100 pb-4">
+                                        <div>
+                                            <p className="text-sm font-medium text-slate-500">Availability</p>
+                                            <p className="mt-1 text-sm text-slate-600">
+                                                {slotsRemaining === null ? 'Open registration' : 'Remaining seats'}
                                             </p>
                                         </div>
-                                    )}
+                                        <p className="text-xl font-semibold text-slate-950 md:text-2xl">
+                                            {slotsRemaining === null ? 'Unlimited' : slotsRemaining}
+                                        </p>
+                                    </div>
 
-                                    {/* Registered Users: Quick Actions */}
-                                    {isRegistered && (
-                                        <div className="mt-6 space-y-3">
-                                            <div className="border-t border-white/20 pt-4">
-                                                <p className="text-white/90 text-sm font-semibold font-montserrat mb-3">Quick Actions</p>
-                                                <div className="space-y-2">
-                                                    <Link
-                                                        href={route('user.events')}
-                                                        className="flex items-center gap-3 p-3 bg-white/10 backdrop-blur-sm rounded-lg hover:bg-white/20 transition-all duration-300 font-lato group border border-white/20"
-                                                    >
-                                                        <i className="fas fa-calendar-check text-white group-hover:scale-110 transition-transform"></i>
-                                                        <span className="font-medium text-white text-sm">View My Events</span>
-                                                        <i className="fas fa-arrow-right text-xs ml-auto opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all duration-300 text-white"></i>
-                                                    </Link>
-                                                </div>
-                                            </div>
+                                    <div className="flex items-start justify-between gap-4">
+                                        <div>
+                                            <p className="text-sm font-medium text-slate-500">Format</p>
+                                            <p className="mt-1 text-sm text-slate-600">Delivery mode</p>
+                                        </div>
+                                        <p className="text-base font-semibold text-slate-950">{modeLabel}</p>
+                                    </div>
+
+                                    {typeof slotsRemaining === 'number' && slotsRemaining <= 10 && slotsRemaining > 0 && (
+                                        <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700">
+                                            Limited seats remaining.
                                         </div>
                                     )}
+
+                                    {slotsRemaining === 0 && !isWaitlisted && (
+                                        <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-medium text-amber-700">
+                                            This event is full. New registrations will join the waitlist.
+                                        </div>
+                                    )}
+
+                                    {isLive && (
+                                        <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-slate-900">
+                                            This event is live right now.
+                                        </div>
+                                    )}
+
+                                    {primary_cta.kind === 'status' || !showPrimaryCta ? (
+                                        <div className="flex w-full items-center justify-center rounded-xl bg-slate-700 px-5 py-4 text-center text-base font-semibold text-white">
+                                            {revokeCount === 4 && (isFreeRegistrationFlow || isWaitlistFlow)
+                                                ? 'Registration limit reached'
+                                                : primary_cta.label}
+                                        </div>
+                                    ) : (
+                                        <button
+                                            onClick={handlePrimaryCta}
+                                            disabled={revokeCount === 4 && (isFreeRegistrationFlow || isWaitlistFlow)}
+                                            className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-slate-950 px-5 py-4 text-base font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50"
+                                        >
+                                            {primary_cta.key === 'view_attendee_workspace' && <i className="fas fa-calendar-check"></i>}
+                                            {primary_cta.key === 'view_speaker_workspace' && <i className="fas fa-microphone"></i>}
+                                            {isPaidCheckoutFlow && <i className="fas fa-ticket-alt"></i>}
+                                            {isWaitlistFlow && <i className="fas fa-clock"></i>}
+                                            {primary_cta.key === 'apply_to_speak' && <i className="fas fa-microphone"></i>}
+                                            {(isFreeRegistrationFlow || primary_cta.key === 'live') && <i className="fas fa-check"></i>}
+                                            <span>{primary_cta.label}</span>
+                                        </button>
+                                    )}
                                 </div>
+
+                                {!auth?.user && (
+                                    <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm leading-6 text-slate-600">
+                                        Sign in to register and access attendee materials after confirmation.
+                                    </div>
+                                )}
+
                             </div>
 
-                            {/* Event Info Card */}
-                            <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 hover:shadow-xl transition-shadow duration-300">
-                                <div className="flex items-center gap-3 mb-6">
-                                    <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-primary/10">
-                                        <i className="fas fa-info-circle text-lg text-primary"></i>
-                                    </div>
-                                    <h4 className="font-bold text-xl font-montserrat text-primary">Event Details</h4>
-                                </div>
-
-                                <div className="space-y-5">
-                                    {/* Start Time */}
-                                    <div className="flex items-start gap-4 p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors duration-300">
-                                        <div className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 bg-accent/10">
-                                            <i className="fas fa-play-circle text-xl text-accent"></i>
+                            <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm lg:p-6">
+                                <p className="text-[11px] font-semibold uppercase text-slate-500">Event Logistics</p>
+                                <div className="mt-5 space-y-5">
+                                    <div className="flex items-start gap-3">
+                                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-slate-100 text-slate-900">
+                                            <i className="fas fa-calendar-day text-sm"></i>
                                         </div>
-                                        <div className="flex-1 min-w-0">
-                                            <p className="font-bold text-sm font-montserrat mb-1 text-primary">Event Starts</p>
-                                            <p className="text-gray-800 font-semibold font-lato">{formatTime(event.start_date)}</p>
-                                            <p className="text-gray-600 text-sm font-lato">{formatDate(event.start_date)}</p>
+                                        <div>
+                                            <p className="text-sm font-semibold text-slate-950">Schedule</p>
+                                            <p className="mt-1 text-sm text-slate-600">{formatDate(event.start_date)}</p>
+                                            <p className="text-sm text-slate-600">
+                                                {formatTime(event.start_date)} to {formatTime(event.end_date)}
+                                            </p>
                                         </div>
                                     </div>
 
-                                    {/* End Time */}
-                                    <div className="flex items-start gap-4 p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors duration-300">
-                                        <div className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 bg-secondary/10">
-                                            <i className="fas fa-flag-checkered text-xl text-secondary"></i>
-                                        </div>
-                                        <div className="flex-1 min-w-0">
-                                            <p className="font-bold text-sm font-montserrat mb-1 text-primary">Event Ends</p>
-                                            <p className="text-gray-800 font-semibold font-lato">{formatTime(event.end_date)}</p>
-                                            <p className="text-gray-600 text-sm font-lato">{formatDate(event.end_date)}</p>
-                                        </div>
-                                    </div>
-
-                                    {/* Location (for registered users) */}
-                                    {auth?.user && isRegistered && (
+                                    {(event.mode === 'offline' || event.mode === 'hybrid') && event.physical_address && (
                                         <div className="flex items-start gap-3">
-                                            <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center shrink-0">
-                                                <i className="fas fa-map-pin text-primary"></i>
+                                            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-slate-100 text-slate-900">
+                                                <i className="fas fa-map-marker-alt text-sm"></i>
                                             </div>
-                                            <div className="flex-1 min-w-0">
-                                                <p className="font-semibold text-primary text-sm font-montserrat">
-                                                    {event.mode === 'offline'
-                                                        ? 'Venue Address'
-                                                        : event.mode === 'online'
-                                                            ? 'Meeting Link'
-                                                            : 'Location & Link'}
-                                                </p>
-                                                {/* Physical Address for Offline and Hybrid */}
-                                                {(event.mode === 'offline' || event.mode === 'hybrid') && event.physical_address && (
-                                                    <p className="text-gray-700 text-sm wrap-break-words font-lato mb-2">{event.physical_address}</p>
-                                                )}
-                                                
-                                                {/* Meeting Link for Online and Hybrid */}
-                                                {(event.mode === 'online' || event.mode === 'hybrid') && event.location && (
-                                                    <>
-                                                        {isPast ? (
-                                                            <span className="text-red-600 font-semibold text-sm font-lato block">
-                                                                Meeting link has expired.
-                                                            </span>
-                                                        ) : startDate <= now ? (
-                                                            <a
-                                                                href={event.location}
-                                                                className="text-secondary font-semibold hover:underline break-all text-sm font-lato block"
-                                                                target="_blank"
-                                                                rel="noopener noreferrer"
-                                                            >
-                                                                Click to Join Meeting
-                                                            </a>
-                                                        ) : (
-                                                            <span className="text-gray-600 text-sm font-lato block">
-                                                                Meeting link will be available on {formatDate(event.start_date)} at{' '}
-                                                                {formatTime(event.start_date)}.
-                                                            </span>
-                                                        )}
-                                                    </>
+                                            <div>
+                                                <p className="text-sm font-semibold text-slate-950">Venue</p>
+                                                <p className="mt-1 text-sm leading-6 text-slate-600">{event.physical_address}</p>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {(event.mode === 'online' || event.mode === 'hybrid') && (
+                                        <div className="flex items-start gap-3">
+                                            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-slate-100 text-slate-900">
+                                                <i className="fas fa-video text-sm"></i>
+                                            </div>
+                                            <div>
+                                                <p className="text-sm font-semibold text-slate-950">Online access</p>
+                                                {auth?.user && isRegistered && event.location ? (
+                                                    isPast ? (
+                                                        <p className="mt-1 text-sm text-slate-600">Meeting link has expired.</p>
+                                                    ) : startDate <= now ? (
+                                                        <a
+                                                            href={event.location}
+                                                            className="mt-1 inline-flex items-center text-sm font-medium text-emerald-700 hover:underline"
+                                                            target="_blank"
+                                                            rel="noopener noreferrer"
+                                                        >
+                                                            Join meeting
+                                                        </a>
+                                                    ) : (
+                                                        <p className="mt-1 text-sm text-slate-600">
+                                                            The meeting link will appear here at the event start time.
+                                                        </p>
+                                                    )
+                                                ) : (
+                                                    <p className="mt-1 text-sm text-slate-600">
+                                                        Available to confirmed attendees.
+                                                    </p>
                                                 )}
                                             </div>
                                         </div>
                                     )}
-                                </div>
-                            </div>
 
-                            {/* Quick Actions Card */}
-                            <div className="relative overflow-hidden rounded-2xl shadow-lg">
-                                {/* Gradient Background */}
-                                <div className="absolute inset-0 bg-linear-to-br from-accent to-green-700"></div>
-
-                                {/* Content */}
-                                <div className="relative p-6 text-white">
-                                    <div className="flex items-center gap-3 mb-6">
-                                        <div className="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center">
-                                            <i className="fas fa-bolt text-lg text-white"></i>
+                                    <div className="flex items-start gap-3">
+                                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-slate-100 text-slate-900">
+                                            <i className="fas fa-link text-sm"></i>
                                         </div>
-                                        <h4 className="font-bold text-xl text-white font-montserrat">Quick Actions</h4>
-                                    </div>
-
-                                    <div className="space-y-3">
-                                        <Link
-                                            href={route('events.index')}
-                                            className="flex items-center gap-3 p-4 bg-white/10 backdrop-blur-sm rounded-xl hover:bg-white/20 transition-all duration-300 font-lato group border border-white/20"
-                                        >
-                                            <i className="fas fa-calendar-alt text-lg group-hover:scale-110 transition-transform duration-300 text-white"></i>
-                                            <span className="font-semibold">View All Events</span>
-                                            <i className="fas fa-arrow-right text-sm ml-auto opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all duration-300"></i>
-                                        </Link>
-
-                                        <Link
-                                            href={route('homepage')}
-                                            className="flex items-center gap-3 p-4 bg-white/10 backdrop-blur-sm rounded-xl hover:bg-white/20 transition-all duration-300 font-lato group border border-white/20"
-                                        >
-                                            <i className="fas fa-home text-lg group-hover:scale-110 transition-transform duration-300 text-white"></i>
-                                            <span className="font-semibold">Back to Home</span>
-                                            <i className="fas fa-arrow-right text-sm ml-auto opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all duration-300"></i>
-                                        </Link>
-
-                                        {auth?.user && (
-                                            <Link
-                                                href={route('user.events')}
-                                                className="flex items-center gap-3 p-4 bg-white/10 backdrop-blur-sm rounded-xl hover:bg-white/20 transition-all duration-300 font-lato group border border-white/20"
-                                            >
-                                                <i className="fas fa-list text-lg group-hover:scale-110 transition-transform duration-300 text-white"></i>
-                                                <span className="font-semibold">My Events</span>
-                                                <i className="fas fa-arrow-right text-sm ml-auto opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all duration-300"></i>
+                                        <div className="space-y-2">
+                                            <Link href={route('events.index')} className="block text-sm font-medium text-slate-900 hover:text-emerald-700">
+                                                View all events
                                             </Link>
-                                        )}
-
-                                        <Link
-                                            href={route('courses.index')}
-                                            className="flex items-center gap-3 p-4 bg-white/10 backdrop-blur-sm rounded-xl hover:bg-white/20 transition-all duration-300 font-lato group border border-white/20"
-                                        >
-                                            <i className="fas fa-graduation-cap text-lg group-hover:scale-110 transition-transform duration-300 text-white"></i>
-                                            <span className="font-semibold">Browse Courses</span>
-                                            <i className="fas fa-arrow-right text-sm ml-auto opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all duration-300"></i>
-                                        </Link>
+                                            <Link href={route('homepage')} className="block text-sm font-medium text-slate-900 hover:text-emerald-700">
+                                                Return to homepage
+                                            </Link>
+                                            <Link href={route('courses.index')} className="block text-sm font-medium text-slate-900 hover:text-emerald-700">
+                                                Browse courses
+                                            </Link>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
+                        </aside>
                     </div>
                 </div>
             </section>
 
             {/* Registration Modal */}
             {showModal && (
-                <div className="fixed inset-0 z-50 flex justify-center items-center bg-black/60 backdrop-blur-md">
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-md">
                     <div className="relative p-4 w-full max-w-lg max-h-full">
-                        <div className="relative bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden">
-                            {/* Modal Header with Gradient */}
-                            <div className="relative p-6 text-center bg-linear-to-br from-primary to-primary">
+                        <div className="relative overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl">
+                            <div className="border-b border-slate-200 bg-slate-950 p-6 text-center">
                                 {/* Close Button */}
                                 <button
                                     type="button"
                                     onClick={() => setShowModal(false)}
-                                    className="absolute top-4 right-4 text-white/80 hover:text-white hover:bg-white/20 rounded-xl text-sm w-8 h-8 flex justify-center items-center transition-all duration-300"
+                                    className="absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-md text-sm text-white/80 transition-all duration-300 hover:bg-white/20 hover:text-white"
                                 >
                                     <i className="fas fa-times w-4 h-4"></i>
                                 </button>
 
                                 {/* Modal Icon */}
-                                <div className="w-20 h-20 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center mx-auto mb-4">
-                                    <i className="fas fa-ticket-alt text-3xl text-white"></i>
+                                <div className="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-xl bg-white/10">
+                                    <i className={`fas ${isWaitlistFlow ? 'fa-clock' : 'fa-calendar-check'} text-3xl text-white`}></i>
                                 </div>
 
                                 {/* Modal Title */}
-                                <h3 className="text-xl font-bold text-white font-montserrat mb-2">Event Registration</h3>
-                                <p className="text-white/90 text-sm font-lato">Secure your spot at this transformational event</p>
+                                <h3 className="mb-2 text-xl font-bold text-white">{isWaitlistFlow ? 'Join Event Waitlist' : 'Confirm Free Registration'}</h3>
+                                <p className="text-sm text-white/90">
+                                    {isWaitlistFlow ? 'Stay in line for the next available seat' : 'Reserve your seat and move directly into the attendee journey'}
+                                </p>
                             </div>
 
                             {/* Modal Content */}
                             <div className="p-8 text-center">
                                 <div className="mb-6">
-                                    <h4 className="text-lg font-semibold mb-2 font-montserrat text-primary">
-                                        You're about to register for:
+                                    <h4 className="mb-2 text-lg font-semibold text-slate-950">
+                                        {isWaitlistFlow ? "You're about to join the waitlist for:" : "You're about to confirm your registration for:"}
                                     </h4>
-                                    <div className="p-4 rounded-xl border-2 border-dashed mb-4 border-accent bg-accent/5">
-                                        <span className="font-bold text-lg block font-montserrat text-primary">{event.title}</span>
-                                        <span className="text-sm font-lato text-accent">{event.theme}</span>
+                                    <div className="mb-4 rounded-xl border border-emerald-200 bg-emerald-50 p-4">
+                                        <span className="block text-lg font-semibold text-slate-950">{event.title}</span>
+                                        <span className="text-sm text-emerald-700">{event.theme}</span>
                                     </div>
-                                    <p className="text-gray-600 font-lato">
-                                        We're excited to have you join us for this transformational experience!
+                                    <p className="text-slate-600">
+                                        {isWaitlistFlow
+                                            ? 'We will notify you as soon as a confirmed seat becomes available.'
+                                            : 'This is a free event. Once confirmed, your attendee workspace becomes the home for access instructions, resources, and updates.'}
                                     </p>
                                 </div>
 
                                 <form onSubmit={handleRegistration}>
-                                    <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                                    <div className="flex flex-col justify-center gap-4 sm:flex-row">
                                         <button
                                             type="submit"
                                             disabled={isSubmitting}
-                                            className="text-white font-semibold rounded-xl text-sm px-6 py-3 text-center transition-all duration-300 font-montserrat flex items-center justify-center gap-2 min-w-40 shadow-lg hover:shadow-xl transform hover:scale-105 bg-accent hover:bg-green-700"
+                                            className="inline-flex min-w-40 items-center justify-center gap-2 rounded-xl bg-slate-950 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
                                         >
                                             {isSubmitting ? (
                                                 <>
@@ -833,19 +804,19 @@ export default function EventShow({ event, auth, signed_speaker_route }: EventSh
                                                         ></circle>
                                                         <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
                                                     </svg>
-                                                    Registering...
+                                                    {isWaitlistFlow ? 'Joining waitlist...' : 'Confirming registration...'}
                                                 </>
                                             ) : (
                                                 <>
-                                                    <i className="fas fa-check"></i>
-                                                    Yes, Register Me
+                                                    <i className={`fas ${isWaitlistFlow ? 'fa-clock' : 'fa-check'}`}></i>
+                                                    {isWaitlistFlow ? 'Yes, Join Waitlist' : 'Yes, Confirm Registration'}
                                                 </>
                                             )}
                                         </button>
                                         <button
                                             type="button"
                                             onClick={() => setShowModal(false)}
-                                            className="py-3 px-6 text-sm font-semibold border-2 rounded-xl transition-all duration-300 font-montserrat hover:bg-gray-50 text-primary border-primary"
+                                            className="inline-flex items-center justify-center rounded-xl border border-slate-200 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
                                         >
                                             <i className="fas fa-times mr-2"></i>
                                             Cancel
@@ -858,5 +829,14 @@ export default function EventShow({ event, auth, signed_speaker_route }: EventSh
                 </div>
             )}
         </GuestLayout>
+    );
+}
+
+function ProgramFact({ label, value }: { label: string; value: string }) {
+    return (
+        <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">{label}</p>
+            <p className="mt-2 text-sm font-semibold text-slate-950">{value}</p>
+        </div>
     );
 }

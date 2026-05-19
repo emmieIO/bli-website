@@ -13,7 +13,10 @@ interface Event {
     mode?: 'online' | 'offline' | 'hybrid';
     physical_address?: string;
     entry_fee: number;
-    slots_remaining?: number;
+    slots_remaining?: number | null;
+    public_segment: 'live_now' | 'open_registration' | 'waitlist_open' | 'announced' | 'registration_closed' | 'completed';
+    public_status_label: string;
+    availability_note: string;
 }
 
 interface PaginatedEvents {
@@ -29,15 +32,22 @@ interface PaginatedEvents {
     }>;
 }
 
-interface EventsIndexProps {
-    events: PaginatedEvents;
-    upcomingEvents: number;
-    ongoingEvents: number;
-    expiredEvents: number;
+interface EventSection {
+    key: Event['public_segment'];
+    title: string;
+    description: string;
+    events: Event[];
 }
 
-export default function EventsIndex({ events, upcomingEvents, ongoingEvents, expiredEvents }: EventsIndexProps) {
-    const [searchQuery, setSearchQuery] = useState('');
+interface EventsIndexProps {
+    events: PaginatedEvents;
+    searchQuery?: string | null;
+    segmentCounts: Record<Event['public_segment'], number>;
+    sections: EventSection[];
+}
+
+export default function EventsIndex({ events, searchQuery: initialSearchQuery = '', segmentCounts, sections }: EventsIndexProps) {
+    const [searchQuery, setSearchQuery] = useState(initialSearchQuery);
 
     const handleSearch = (e: FormEvent) => {
         e.preventDefault();
@@ -47,20 +57,6 @@ export default function EventsIndex({ events, upcomingEvents, ongoingEvents, exp
     const formatDate = (dateString: string) => {
         const date = new Date(dateString);
         return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-    };
-
-    const getEventStatus = (startDate: string, endDate: string) => {
-        const now = new Date();
-        const start = new Date(startDate);
-        const end = new Date(endDate);
-
-        if (now >= start && now <= end) {
-            return 'live';
-        } else if (now < start) {
-            return 'upcoming';
-        } else {
-            return 'past';
-        }
     };
 
     const getModeIcon = (mode?: string) => {
@@ -77,32 +73,31 @@ export default function EventsIndex({ events, upcomingEvents, ongoingEvents, exp
 
     return (
         <GuestLayout>
-            <Head title="Upcoming Events" />
+            <Head title="Events" />
 
             {/* Hero Section */}
-            <section className="py-16 md:py-20 bg-linear-to-br from-white to-gray-50">
-                <div className="container mx-auto px-6 text-center">
+            <section className="public-hero">
+                <div className="section-shell text-center">
                     {/* Badge */}
-                    <div className="inline-flex items-center gap-2 border rounded-full px-6 py-3 mb-8 bg-accent/10 border-accent">
+                    <div className="mb-8 inline-flex items-center gap-2 rounded-full border border-accent/15 bg-accent/5 px-6 py-3">
                         <i className="fas fa-calendar-alt text-sm text-accent"></i>
-                        <span className="font-medium font-montserrat text-sm tracking-wide text-primary">
-                            Transformational Gatherings
+                        <span className="text-sm font-medium tracking-wide text-primary">
+                            Public Event Registry
                         </span>
                     </div>
 
                     {/* Main Heading */}
-                    <h1 className="font-bold font-montserrat text-4xl md:text-5xl lg:text-6xl mb-6 leading-tight text-primary">
-                        Upcoming <span className="text-accent">Events</span>
+                    <h1 className="public-hero-title mb-6">
+                        Explore <span className="text-accent">Events</span>
                     </h1>
 
-                    <p className="text-xl text-gray-600 mb-12 max-w-3xl mx-auto leading-relaxed font-lato">
-                        Join our transformational programs, prophetic workshops, and kingdom-focused gatherings designed to equip and
-                        empower leaders.
+                    <p className="public-hero-copy mx-auto mb-12">
+                        Browse public events by actual availability: live now, open registration, waitlist, announced, closed, and completed visibility.
                     </p>
 
                     {/* Search */}
                     <form onSubmit={handleSearch} className="max-w-2xl mx-auto mb-12">
-                        <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
+                        <div className="public-card p-6">
                             <div className="flex flex-col md:flex-row gap-4">
                                 <div className="flex-1 relative">
                                     <i className="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
@@ -111,12 +106,12 @@ export default function EventsIndex({ events, upcomingEvents, ongoingEvents, exp
                                         value={searchQuery}
                                         onChange={(e) => setSearchQuery(e.target.value)}
                                         placeholder="Search events, topics, or locations..."
-                                        className="w-full pl-12 pr-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent font-lato"
+                                        className="public-input pl-12"
                                     />
                                 </div>
                                 <button
                                     type="submit"
-                                    className="px-8 py-3 rounded-xl font-semibold transition-all duration-300 shadow-md hover:shadow-lg transform hover:scale-105 text-white font-montserrat bg-accent hover:bg-accent-700"
+                                    className="enterprise-button enterprise-button-primary"
                                 >
                                     <i className="fas fa-search mr-2"></i>
                                     Search
@@ -125,145 +120,118 @@ export default function EventsIndex({ events, upcomingEvents, ongoingEvents, exp
                         </div>
                     </form>
 
-                    {/* Stats */}
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
-                        <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 hover:shadow-xl transition-all duration-300">
-                            <div className="flex items-center justify-center gap-3 mb-4">
-                                <div className="w-12 h-12 rounded-2xl flex items-center justify-center bg-secondary/10">
-                                    <i className="fas fa-broadcast-tower text-xl text-secondary"></i>
-                                </div>
-                            </div>
-                            <div className="font-bold text-3xl mb-2 font-montserrat text-secondary">{ongoingEvents}</div>
-                            <div className="text-gray-600 font-lato font-semibold">Happening Now</div>
-                        </div>
-
-                        <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 hover:shadow-xl transition-all duration-300">
-                            <div className="flex items-center justify-center gap-3 mb-4">
-                                <div className="w-12 h-12 rounded-2xl flex items-center justify-center bg-accent/10">
-                                    <i className="fas fa-calendar-alt text-xl text-accent"></i>
-                                </div>
-                            </div>
-                            <div className="font-bold text-3xl mb-2 font-montserrat text-accent">{upcomingEvents}</div>
-                            <div className="text-gray-600 font-lato font-semibold">Coming Soon</div>
-                        </div>
-
-                        <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 hover:shadow-xl transition-all duration-300">
-                            <div className="flex items-center justify-center gap-3 mb-4">
-                                <div className="w-12 h-12 rounded-2xl flex items-center justify-center bg-primary/10">
-                                    <i className="fas fa-history text-xl text-primary"></i>
-                                </div>
-                            </div>
-                            <div className="font-bold text-3xl mb-2 font-montserrat text-primary">{expiredEvents}</div>
-                            <div className="text-gray-600 font-lato font-semibold">Past Events</div>
-                        </div>
+                    {/* Summary */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 max-w-6xl mx-auto">
+                        <PublicSummary title="Live Now" value={segmentCounts.live_now} tone="secondary" />
+                        <PublicSummary title="Open Registration" value={segmentCounts.open_registration} tone="accent" />
+                        <PublicSummary title="Waitlist Open" value={segmentCounts.waitlist_open} tone="primary" />
+                        <PublicSummary title="Closed / Completed" value={segmentCounts.registration_closed + segmentCounts.completed} tone="slate" />
                     </div>
                 </div>
             </section>
 
             {/* Events Grid Section */}
-            <section className="py-20 bg-white">
-                <div className="container mx-auto px-6">
+            <section className="public-section bg-white">
+                <div className="section-shell">
                     {events.data && events.data.length > 0 ? (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                            {events.data.map((event, index) => {
-                                const status = getEventStatus(event.start_date, event.end_date);
-
-                                return (
-                                    <div
-                                        key={event.id}
-                                        className="group bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 overflow-hidden border border-gray-100 hover:border-accent/20"
-                                    >
-                                        {/* Event Image */}
-                                        <div className="relative h-48 overflow-hidden">
-                                            <img
-                                                src={`/storage/${event.program_cover}`}
-                                                alt={event.title}
-                                                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                                                onError={(e) => {
-                                                    (e.target as HTMLImageElement).src = 'https://placehold.co/600x400?text=Cover+Image+Missing';
-                                                }}
-                                            />
-
-                                            {/* Event Status Badge */}
-                                            <div className="absolute top-4 left-4">
-                                                {status === 'live' && (
-                                                    <span className="px-3 py-1.5 text-xs font-semibold rounded-full text-white font-montserrat flex items-center gap-2 bg-secondary">
-                                                        <span className="w-2 h-2 bg-white rounded-full animate-pulse"></span>
-                                                        Live Now
-                                                    </span>
-                                                )}
-                                                {status === 'upcoming' && (
-                                                    <span className="px-3 py-1.5 text-xs font-semibold rounded-full text-white font-montserrat bg-accent">
-                                                        Coming Soon
-                                                    </span>
-                                                )}
-                                                {status === 'past' && (
-                                                    <span className="px-3 py-1.5 text-xs font-semibold rounded-full bg-gray-600 text-white font-montserrat">
-                                                        Past Event
-                                                    </span>
-                                                )}
-                                            </div>
-
-                                            {/* Price Badge */}
-                                            <div className="absolute top-4 right-4">
-                                                {event.entry_fee > 0 ? (
-                                                    <span className="px-3 py-1.5 text-sm font-bold rounded-full bg-white shadow-md font-montserrat text-primary">
-                                                        ₦{event.entry_fee.toLocaleString()}
-                                                    </span>
-                                                ) : (
-                                                    <span className="px-3 py-1.5 text-sm font-bold rounded-full bg-white shadow-md font-montserrat text-secondary">
-                                                        FREE
-                                                    </span>
-                                                )}
-                                            </div>
-                                        </div>
-
-                                        {/* Event Content */}
-                                        <div className="p-6">
-                                            {/* Event Title */}
-                                            <h3 className="text-xl font-bold mb-3 font-montserrat line-clamp-2 group-hover:text-accent transition-colors duration-300 text-primary">
-                                                <Link href={route('events.show', event.slug)}>{event.title}</Link>
-                                            </h3>
-
-                                            {/* Event Theme */}
-                                            <p className="font-semibold text-sm mb-4 line-clamp-2 font-montserrat text-accent">
-                                                {event.theme}
+                        <div className="space-y-14">
+                            {sections.map((section) => (
+                                <div key={section.key} className="space-y-6">
+                                    <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+                                        <div>
+                                            <h2 className="text-2xl font-bold font-montserrat text-primary">{section.title}</h2>
+                                            <p className="mt-2 max-w-3xl text-sm leading-7 text-gray-600 font-lato">
+                                                {section.description}
                                             </p>
-
-                                            {/* Event Details */}
-                                            <div className="space-y-3 mb-6">
-                                                <div className="flex items-center gap-3 text-sm text-gray-600">
-                                                    <i className="fas fa-calendar text-sm text-accent"></i>
-                                                    <span className="font-lato">
-                                                        {formatDate(event.start_date)} - {formatDate(event.end_date)}
-                                                    </span>
-                                                </div>
-
-                                                <div className="flex items-center gap-3 text-sm text-gray-600">
-                                                    {getModeIcon(event.mode)}
-                                                    <span className="font-lato capitalize">{event.mode || 'Hybrid'}</span>
-                                                </div>
-
-                                                {event.slots_remaining !== undefined && (
-                                                    <div className="flex items-center gap-3 text-sm text-gray-600">
-                                                        <i className="fas fa-users text-sm text-accent"></i>
-                                                        <span className="font-lato">{event.slots_remaining} slots remaining</span>
-                                                    </div>
-                                                )}
-                                            </div>
-
-                                            {/* Action Button */}
-                                            <Link
-                                                href={route('events.show', event.slug)}
-                                                className="w-full flex items-center justify-center gap-2 font-semibold py-3 px-4 rounded-xl transition-all duration-300 shadow-md hover:shadow-lg transform hover:scale-105 text-white font-montserrat bg-primary hover:bg-primary"
-                                            >
-                                                <span>View Details</span>
-                                                <i className="fas fa-arrow-right text-sm group-hover:translate-x-1 transition-transform"></i>
-                                            </Link>
                                         </div>
+                                        <span className="inline-flex rounded-full border border-slate-200 bg-slate-50 px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-slate-600">
+                                            {section.events.length} event{section.events.length === 1 ? '' : 's'}
+                                        </span>
                                     </div>
-                                );
-                            })}
+
+                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                                        {section.events.map((event) => (
+                                            <div
+                                                key={event.id}
+                                                className="public-card group overflow-hidden transition-all duration-500 hover:-translate-y-1 hover:border-accent/20 hover:shadow-2xl"
+                                            >
+                                                <div className="relative h-48 overflow-hidden">
+                                                    <img
+                                                        src={`/storage/${event.program_cover}`}
+                                                        alt={event.title}
+                                                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                                                        onError={(e) => {
+                                                            (e.target as HTMLImageElement).src = 'https://placehold.co/600x400?text=Cover+Image+Missing';
+                                                        }}
+                                                    />
+
+                                                    <div className="absolute top-4 left-4">
+                                                        <span className={`px-3 py-1.5 text-xs font-semibold rounded-full text-white font-montserrat ${segmentBadgeClass(event.public_segment)}`}>
+                                                            {event.public_status_label}
+                                                        </span>
+                                                    </div>
+
+                                                    <div className="absolute top-4 right-4">
+                                                        {event.entry_fee > 0 ? (
+                                                            <span className="px-3 py-1.5 text-sm font-bold rounded-full bg-white shadow-md font-montserrat text-primary">
+                                                                ₦{event.entry_fee.toLocaleString()}
+                                                            </span>
+                                                        ) : (
+                                                            <span className="px-3 py-1.5 text-sm font-bold rounded-full bg-white shadow-md font-montserrat text-secondary">
+                                                                FREE
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                </div>
+
+                                                <div className="p-6">
+                                                    <h3 className="mb-3 line-clamp-2 text-xl font-bold text-primary transition-colors duration-300 group-hover:text-accent">
+                                                        <Link href={route('events.show', event.slug)}>{event.title}</Link>
+                                                    </h3>
+
+                                                    <p className="mb-3 line-clamp-2 text-sm font-semibold text-accent">
+                                                        {event.theme}
+                                                    </p>
+                                                    <p className="mb-5 text-sm leading-6 text-gray-600 font-lato">
+                                                        {event.availability_note}
+                                                    </p>
+
+                                                    <div className="space-y-3 mb-6">
+                                                        <div className="flex items-center gap-3 text-sm text-gray-600">
+                                                            <i className="fas fa-calendar text-sm text-accent"></i>
+                                                            <span className="font-lato">
+                                                                {formatDate(event.start_date)} - {formatDate(event.end_date)}
+                                                            </span>
+                                                        </div>
+
+                                                        <div className="flex items-center gap-3 text-sm text-gray-600">
+                                                            {getModeIcon(event.mode)}
+                                                            <span className="font-lato capitalize">{event.mode || 'Hybrid'}</span>
+                                                        </div>
+
+                                                        {event.slots_remaining !== undefined && (
+                                                            <div className="flex items-center gap-3 text-sm text-gray-600">
+                                                                <i className="fas fa-users text-sm text-accent"></i>
+                                                                <span className="font-lato">
+                                                                    {event.slots_remaining === null ? 'Unlimited seating' : event.slots_remaining === 0 ? 'Currently full' : `${event.slots_remaining} slots remaining`}
+                                                                </span>
+                                                            </div>
+                                                        )}
+                                                    </div>
+
+                                                    <Link
+                                                        href={route('events.show', event.slug)}
+                                                        className="enterprise-button enterprise-button-primary w-full"
+                                                    >
+                                                        <span>View Details</span>
+                                                        <i className="fas fa-arrow-right text-sm group-hover:translate-x-1 transition-transform"></i>
+                                                    </Link>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            ))}
                         </div>
                     ) : (
                         /* Empty State */
@@ -279,7 +247,7 @@ export default function EventsIndex({ events, upcomingEvents, ongoingEvents, exp
                                 </p>
                                 <Link
                                     href={route('homepage')}
-                                    className="inline-flex items-center gap-2 font-semibold px-6 py-3 rounded-xl transition-all duration-300 shadow-md hover:shadow-lg text-white font-montserrat bg-accent"
+                                    className="enterprise-button enterprise-button-primary"
                                 >
                                     <i className="fas fa-home"></i>
                                     <span>Back to Home</span>
@@ -291,4 +259,40 @@ export default function EventsIndex({ events, upcomingEvents, ongoingEvents, exp
             </section>
         </GuestLayout>
     );
+}
+
+function PublicSummary({ title, value, tone }: { title: string; value: number; tone: 'secondary' | 'accent' | 'primary' | 'slate' }) {
+    const toneClass = tone === 'secondary'
+        ? 'bg-secondary/10 text-secondary'
+        : tone === 'accent'
+            ? 'bg-accent/10 text-accent'
+            : tone === 'primary'
+                ? 'bg-primary/10 text-primary'
+                : 'bg-slate-100 text-slate-700';
+
+    return (
+        <div className="public-stat-card transition-all duration-300 hover:shadow-xl">
+            <div className="flex items-center justify-center gap-3 mb-4">
+                <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${toneClass}`}>
+                    <i className="fas fa-layer-group text-xl"></i>
+                </div>
+            </div>
+            <div className="font-bold text-3xl mb-2 font-montserrat text-primary">{value}</div>
+            <div className="text-gray-600 font-lato font-semibold">{title}</div>
+        </div>
+    );
+}
+
+function segmentBadgeClass(segment: Event['public_segment']) {
+    return segment === 'live_now'
+        ? 'bg-secondary'
+        : segment === 'open_registration'
+            ? 'bg-accent'
+            : segment === 'waitlist_open'
+                ? 'bg-primary'
+                : segment === 'announced'
+                    ? 'bg-slate-700'
+                    : segment === 'registration_closed'
+                        ? 'bg-zinc-700'
+                        : 'bg-gray-600';
 }

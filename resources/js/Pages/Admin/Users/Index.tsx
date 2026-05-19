@@ -119,49 +119,50 @@ export default function UserManagement({ users, roles }: UserManagementProps) {
         <DashboardLayout sideLinks={sideLinks}>
             <Head title="User Management" />
 
-            {/* Header */}
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
-                <div>
-                    <h1 className="text-3xl font-bold text-gray-800 mb-2 font-montserrat">User Management</h1>
-                    <p className="text-gray-600 font-lato">
-                        Manage user accounts and assign roles to control access permissions.
-                    </p>
-                </div>
-                <div className="flex items-center gap-3">
-                    <Button
-                        onClick={fetchStats}
-                        variant="secondary"
-                        icon="chart-bar"
-                        loading={loading}
-                        className="bg-gray-600 hover:bg-gray-700 text-white"
-                    >
-                        User Statistics
-                    </Button>
-                    <Link
-                        href={route('admin.roles.index')}
-                        className="inline-flex items-center gap-2 bg-primary hover:bg-primary-600 py-3 px-6 rounded-lg font-medium text-white transition-all duration-200 shadow-sm font-montserrat"
-                    >
-                        <i className="fas fa-shield-alt w-4 h-4"></i>
-                        <span>Manage Roles</span>
-                    </Link>
-                </div>
-            </div>
+            <div className="workspace-stack">
+                <section className="workspace-header-card px-6 py-6 lg:px-8">
+                    <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+                        <div className="max-w-3xl">
+                            <p className="workspace-muted-label">System Administration</p>
+                            <h1 className="mt-3 text-3xl font-semibold tracking-tight text-slate-900">User Management</h1>
+                            <p className="mt-3 text-sm leading-7 text-slate-600">
+                                Review platform users, assign roles, and keep access management straightforward.
+                            </p>
+                        </div>
+                        <div className="flex items-center gap-3">
+                            <Button
+                                onClick={fetchStats}
+                                variant="secondary"
+                                icon="chart-bar"
+                                loading={loading}
+                                className="bg-slate-700 hover:bg-slate-800 text-white"
+                            >
+                                User Statistics
+                            </Button>
+                            <Link
+                                href={route('admin.roles.index')}
+                                className="inline-flex items-center gap-2 rounded-2xl bg-slate-900 px-5 py-3 text-sm font-medium text-white transition hover:bg-slate-800"
+                            >
+                                <i className="fas fa-shield-alt w-4 h-4"></i>
+                                <span>Manage Roles</span>
+                            </Link>
+                        </div>
+                    </div>
+                </section>
 
-            {/* Stats Cards */}
-            {showStats && stats && (
-                <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
-                    <StatsCard icon="users" label="Total Users" value={stats.total_users} color="blue" />
-                    <StatsCard icon="shield-alt" label="Admins" value={stats.admins} color="red" />
-                    <StatsCard icon="graduation-cap" label="Instructors" value={stats.instructors} color="green" />
-                    <StatsCard icon="book-open" label="Students" value={stats.students} color="purple" />
-                    <StatsCard icon="user-slash" label="No Role" value={stats.users_without_roles} color="yellow" />
-                </div>
-            )}
+                {showStats && stats && (
+                    <div className="grid grid-cols-1 gap-4 md:grid-cols-5">
+                        <StatsCard icon="users" label="Total Users" value={stats.total_users} color="blue" />
+                        <StatsCard icon="shield-alt" label="Admins" value={stats.admins} color="red" />
+                        <StatsCard icon="graduation-cap" label="Instructors" value={stats.instructors} color="green" />
+                        <StatsCard icon="book-open" label="Students" value={stats.students} color="purple" />
+                        <StatsCard icon="user-slash" label="No Role" value={stats.users_without_roles} color="yellow" />
+                    </div>
+                )}
 
-            {/* Users Table */}
-            <div className="relative overflow-x-auto shadow-lg rounded-xl bg-white border border-gray-200">
-                <table className="w-full text-sm text-left text-gray-600">
-                    <thead className="text-xs text-gray-600 uppercase bg-gray-50 border-b border-gray-200">
+                <section className="workspace-card relative overflow-x-auto">
+                    <table className="w-full text-sm text-left text-gray-600">
+                    <thead className="text-xs text-gray-600 uppercase bg-slate-50/90 border-b border-gray-200">
                         <tr>
                             <th scope="col" className="px-6 py-4 font-semibold font-montserrat">
                                 User Details
@@ -259,15 +260,15 @@ export default function UserManagement({ users, roles }: UserManagementProps) {
                             </tr>
                         )}
                     </tbody>
-                </table>
-            </div>
+                    </table>
+                </section>
 
-            {/* Pagination */}
-            {users.last_page > 1 && (
-                <div className="mt-6 flex justify-center">
-                    <Pagination links={users.links} />
-                </div>
-            )}
+                {users.last_page > 1 && (
+                    <div className="flex justify-center">
+                        <Pagination links={users.links} />
+                    </div>
+                )}
+            </div>
 
             {/* Role Assignment Modal */}
             {showRoleModal && selectedUser && (
@@ -352,7 +353,7 @@ function StatsCard({
     const { bg, text } = colorClasses[color] || colorClasses.blue;
 
     return (
-        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+        <div className="workspace-card p-6">
             <div className="flex items-center">
                 <div className={`p-2 ${bg} rounded-lg`}>
                     <i className={`fas fa-${icon} w-6 h-6 ${text}`}></i>

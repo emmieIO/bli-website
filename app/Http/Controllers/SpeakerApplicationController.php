@@ -8,13 +8,17 @@ use App\Models\Event;
 use App\Models\SpeakerApplication;
 use App\Models\SpeakerInvite;
 use App\Services\Speakers\SpeakerApplicationService;
+use App\Services\Speakers\SpeakerTransitionService;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
 
 class SpeakerApplicationController extends Controller
 {
     use AuthorizesRequests;
-    public function __construct(public SpeakerApplicationService $service)
+    public function __construct(
+        public SpeakerApplicationService $service,
+        protected SpeakerTransitionService $speakerTransitionService
+    )
     {
     }
     /**
@@ -25,10 +29,12 @@ class SpeakerApplicationController extends Controller
         $this->authorize('applyToSpeak', $event);
         $existing = $this->service->getExistingApplication($event);
 
-        if ($existing && $existing->isApproved()) {
-            return redirect()->route('events.show', $event->slug)->with([
-                "type" => "warning",
-                "message" => "You have already been approved to speak at this event."
+        if ($existing && ($existing->isApproved() || $existing->isPending())) {
+            return redirect()->route('speaker.events.show', $event->slug)->with([
+                "type" => "info",
+                "message" => $existing->isApproved()
+                    ? "You are already approved to speak at this event."
+                    : "Your application is already in review."
             ]);
         }
 
@@ -94,11 +100,7 @@ class SpeakerApplicationController extends Controller
     {
         $this->authorize('manageSpeakers', $application->event);
 
-        $application->update([
-            'status' => ApplicationStatus::PENDING->value,
-            'feedback' => null,
-            'reviewed_at' => null,
-        ]);
+        $this->speakerTransitionService->reopenApplicationReview($application);
 
         return redirect()->back()->with([
             'type' => 'success',
@@ -115,7 +117,7 @@ class SpeakerApplicationController extends Controller
         $existingApplication = $this->service->getExistingApplication($event);
 
         if ($existingApplication && $existingApplication->isPending()) {
-            return redirect()->signedRoute('events.show', $event->slug)->with([
+            return redirect()->route('speaker.events.show', $event->slug)->with([
                 "type" => "warning",
                 "message" => "You already have a pending application for this event."
             ]);
@@ -124,7 +126,7 @@ class SpeakerApplicationController extends Controller
         $photo = $request->file("photo");
 
         if ($this->service->apply($data, $event, $photo)) {
-            return redirect()->back()->with(
+            return redirect()->route('speaker.events.show', $event->slug)->with(
                 [
                     "type" => 'success',
                     "message" => 'Application submitted successfully.'

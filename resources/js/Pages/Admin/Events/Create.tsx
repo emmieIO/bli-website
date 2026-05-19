@@ -7,6 +7,7 @@ import RichTextEditor from '@/Components/RichTextEditor';
 
 interface FormData {
     title: string;
+    status: 'draft' | 'review' | 'published' | 'registration_open' | 'registration_closed' | 'live' | 'completed' | 'cancelled' | 'archived' | '';
     mode: 'online' | 'offline' | 'hybrid' | '';
     attendee_slots: string;
     theme: string;
@@ -23,11 +24,31 @@ interface FormData {
     is_featured: boolean;
 }
 
+interface ProgramMetadataFormData {
+    program_type: 'general_event' | 'discipleship_track';
+    program_code: string;
+    registration_mode: 'open' | 'selective';
+    requires_screening: boolean;
+    screening_note: string;
+    cohort_duration_weeks: string;
+    group_model: string;
+    central_teaching_schedule: string;
+    group_meeting_schedule: string;
+    weekly_prayer_target_minutes: string;
+    weekly_evangelism_target_min: string;
+    weekly_evangelism_target_max: string;
+    weekly_discipleship_target_min: string;
+    weekly_discipleship_target_max: string;
+    meeting_link: string;
+    access_notes: string;
+}
+
 export default function CreateEvent() {
     const { auth, sideLinks, errors } = usePage().props as any;
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [formData, setFormData] = useState<FormData>({
         title: '',
+        status: 'draft',
         mode: '',
         attendee_slots: '',
         theme: '',
@@ -42,6 +63,24 @@ export default function CreateEvent() {
         is_published: false,
         is_allowing_application: false,
         is_featured: false,
+    });
+    const [programMetadata, setProgramMetadata] = useState<ProgramMetadataFormData>({
+        program_type: 'general_event',
+        program_code: '',
+        registration_mode: 'open',
+        requires_screening: false,
+        screening_note: '',
+        cohort_duration_weeks: '',
+        group_model: '',
+        central_teaching_schedule: '',
+        group_meeting_schedule: '',
+        weekly_prayer_target_minutes: '',
+        weekly_evangelism_target_min: '',
+        weekly_evangelism_target_max: '',
+        weekly_discipleship_target_min: '',
+        weekly_discipleship_target_max: '',
+        meeting_link: '',
+        access_notes: '',
     });
     const [programCover, setProgramCover] = useState<File | null>(null);
 
@@ -60,6 +99,18 @@ export default function CreateEvent() {
         if (e.target.files && e.target.files[0]) {
             setProgramCover(e.target.files[0]);
         }
+    };
+
+    const handleMetadataChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+        const { name, value, type } = e.target;
+
+        if (type === 'checkbox') {
+            const checked = (e.target as HTMLInputElement).checked;
+            setProgramMetadata((prev) => ({ ...prev, [name]: checked }));
+            return;
+        }
+
+        setProgramMetadata((prev) => ({ ...prev, [name]: value }));
     };
 
     const handleSubmit = (e: FormEvent) => {
@@ -87,6 +138,17 @@ export default function CreateEvent() {
             data.append('program_cover', programCover);
         }
 
+        Object.entries(programMetadata).forEach(([key, value]) => {
+            if (typeof value === 'boolean') {
+                data.append(`metadata[${key}]`, value ? '1' : '0');
+                return;
+            }
+
+            if (value !== '') {
+                data.append(`metadata[${key}]`, value);
+            }
+        });
+
         router.post(route('admin.events.store'), data, {
             preserveScroll: true,
             onFinish: () => {
@@ -97,6 +159,7 @@ export default function CreateEvent() {
 
     const shouldShowLocation = formData.mode === 'online' || formData.mode === 'hybrid';
     const shouldShowPhysicalAddress = formData.mode === 'offline' || formData.mode === 'hybrid';
+    const isDiscipleshipTrack = programMetadata.program_type === 'discipleship_track';
 
     return (
         <DashboardLayout sideLinks={sideLinks}>
@@ -151,6 +214,33 @@ export default function CreateEvent() {
                                 />
 
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div>
+                                        <label htmlFor="status" className="block text-sm font-medium text-gray-700 mb-1 font-lato">
+                                            Operational Status <span className="text-red-500 ml-1">*</span>
+                                        </label>
+                                        <select
+                                            id="status"
+                                            name="status"
+                                            value={formData.status}
+                                            onChange={handleInputChange}
+                                            required
+                                            className={`block w-full px-3 py-2 border rounded-lg shadow-sm focus:ring-primary-500 focus:border-primary-500 focus:outline-none text-sm font-lato ${errors?.status ? 'border-red-500' : 'border-gray-300'}`}
+                                        >
+                                            <option value="draft">Draft</option>
+                                            <option value="review">Review</option>
+                                            <option value="published">Published</option>
+                                            <option value="registration_open">Registration Open</option>
+                                            <option value="registration_closed">Registration Closed</option>
+                                            <option value="live">Live</option>
+                                            <option value="completed">Completed</option>
+                                            <option value="cancelled">Cancelled</option>
+                                            <option value="archived">Archived</option>
+                                        </select>
+                                        {errors?.status && (
+                                            <p className="text-sm text-red-500 mt-1 font-lato">{errors.status}</p>
+                                        )}
+                                    </div>
+
                                     <div>
                                         <label htmlFor="mode" className="block text-sm font-medium text-gray-700 mb-1 font-lato">
                                             Event Mode <span className="text-red-500 ml-1">*</span>
@@ -267,6 +357,212 @@ export default function CreateEvent() {
                             </div>
                         </div>
 
+                        <div>
+                            <h3 className="text-lg font-semibold text-gray-900 mb-4 pb-2 border-b border-gray-200">
+                                Program Setup
+                            </h3>
+                            <div className="space-y-6">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div>
+                                        <label htmlFor="program_type" className="block text-sm font-medium text-gray-700 mb-1 font-lato">
+                                            Program Type
+                                        </label>
+                                        <select
+                                            id="program_type"
+                                            name="program_type"
+                                            value={programMetadata.program_type}
+                                            onChange={handleMetadataChange}
+                                            className="block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-primary-500 focus:border-primary-500 focus:outline-none text-sm font-lato"
+                                        >
+                                            <option value="general_event">General Event</option>
+                                            <option value="discipleship_track">Discipleship Track</option>
+                                        </select>
+                                    </div>
+
+                                    <Input
+                                        label="Program Code"
+                                        name="program_code"
+                                        value={programMetadata.program_code}
+                                        onChange={handleMetadataChange}
+                                        error={errors?.['metadata.program_code']}
+                                        placeholder="e.g. BDT"
+                                    />
+                                </div>
+
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div>
+                                        <label htmlFor="registration_mode" className="block text-sm font-medium text-gray-700 mb-1 font-lato">
+                                            Intake Mode
+                                        </label>
+                                        <select
+                                            id="registration_mode"
+                                            name="registration_mode"
+                                            value={programMetadata.registration_mode}
+                                            onChange={handleMetadataChange}
+                                            className="block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-primary-500 focus:border-primary-500 focus:outline-none text-sm font-lato"
+                                        >
+                                            <option value="open">Open Registration</option>
+                                            <option value="selective">Selective Admission</option>
+                                        </select>
+                                        {errors?.['metadata.registration_mode'] && (
+                                            <p className="text-sm text-red-500 mt-1 font-lato">{errors['metadata.registration_mode']}</p>
+                                        )}
+                                    </div>
+
+                                    <Input
+                                        label="Cohort Duration (Weeks)"
+                                        name="cohort_duration_weeks"
+                                        type="number"
+                                        min="1"
+                                        max="52"
+                                        value={programMetadata.cohort_duration_weeks}
+                                        onChange={handleMetadataChange}
+                                        error={errors?.['metadata.cohort_duration_weeks']}
+                                        placeholder="6"
+                                    />
+                                </div>
+
+                                <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
+                                    <label className="inline-flex items-center">
+                                        <input
+                                            type="checkbox"
+                                            name="requires_screening"
+                                            checked={programMetadata.requires_screening}
+                                            onChange={handleMetadataChange}
+                                            className="rounded border-gray-300 text-primary focus:ring-primary"
+                                        />
+                                        <span className="ml-2 text-sm font-medium text-gray-700">Require screening before admission</span>
+                                    </label>
+                                    <p className="mt-2 text-xs text-gray-500">
+                                        Use this for application review, interviews, pastoral approval, or other selective intake steps.
+                                    </p>
+                                </div>
+
+                                {(programMetadata.requires_screening || programMetadata.registration_mode === 'selective') && (
+                                    <Textarea
+                                        label="Screening Note"
+                                        name="screening_note"
+                                        value={programMetadata.screening_note}
+                                        onChange={handleMetadataChange}
+                                        error={errors?.['metadata.screening_note']}
+                                        placeholder="Explain that payment does not guarantee admission and summarize the screening process."
+                                    />
+                                )}
+
+                                {isDiscipleshipTrack && (
+                                    <>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                            <Input
+                                                label="Group Model"
+                                                name="group_model"
+                                                value={programMetadata.group_model}
+                                                onChange={handleMetadataChange}
+                                                error={errors?.['metadata.group_model']}
+                                                placeholder="e.g. Cluster-based accountability groups"
+                                            />
+                                            <Input
+                                                label="Central Teaching Schedule"
+                                                name="central_teaching_schedule"
+                                                value={programMetadata.central_teaching_schedule}
+                                                onChange={handleMetadataChange}
+                                                error={errors?.['metadata.central_teaching_schedule']}
+                                                placeholder="e.g. Weekly, 60-90 mins"
+                                            />
+                                        </div>
+
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                            <Input
+                                                label="Group Meeting Schedule"
+                                                name="group_meeting_schedule"
+                                                value={programMetadata.group_meeting_schedule}
+                                                onChange={handleMetadataChange}
+                                                error={errors?.['metadata.group_meeting_schedule']}
+                                                placeholder="e.g. Weekly reflection and accountability"
+                                            />
+                                            <Input
+                                                label="Weekly Prayer Target (Minutes)"
+                                                name="weekly_prayer_target_minutes"
+                                                type="number"
+                                                min="0"
+                                                value={programMetadata.weekly_prayer_target_minutes}
+                                                onChange={handleMetadataChange}
+                                                error={errors?.['metadata.weekly_prayer_target_minutes']}
+                                                placeholder="420"
+                                            />
+                                        </div>
+
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                            <div className="grid grid-cols-2 gap-4">
+                                                <Input
+                                                    label="Evangelism Min"
+                                                    name="weekly_evangelism_target_min"
+                                                    type="number"
+                                                    min="0"
+                                                    value={programMetadata.weekly_evangelism_target_min}
+                                                    onChange={handleMetadataChange}
+                                                    error={errors?.['metadata.weekly_evangelism_target_min']}
+                                                    placeholder="3"
+                                                />
+                                                <Input
+                                                    label="Evangelism Max"
+                                                    name="weekly_evangelism_target_max"
+                                                    type="number"
+                                                    min="0"
+                                                    value={programMetadata.weekly_evangelism_target_max}
+                                                    onChange={handleMetadataChange}
+                                                    error={errors?.['metadata.weekly_evangelism_target_max']}
+                                                    placeholder="5"
+                                                />
+                                            </div>
+
+                                            <div className="grid grid-cols-2 gap-4">
+                                                <Input
+                                                    label="Discipleship Min"
+                                                    name="weekly_discipleship_target_min"
+                                                    type="number"
+                                                    min="0"
+                                                    value={programMetadata.weekly_discipleship_target_min}
+                                                    onChange={handleMetadataChange}
+                                                    error={errors?.['metadata.weekly_discipleship_target_min']}
+                                                    placeholder="1"
+                                                />
+                                                <Input
+                                                    label="Discipleship Max"
+                                                    name="weekly_discipleship_target_max"
+                                                    type="number"
+                                                    min="0"
+                                                    value={programMetadata.weekly_discipleship_target_max}
+                                                    onChange={handleMetadataChange}
+                                                    error={errors?.['metadata.weekly_discipleship_target_max']}
+                                                    placeholder="3"
+                                                />
+                                            </div>
+                                        </div>
+                                    </>
+                                )}
+
+                                <div className="grid grid-cols-1 gap-6">
+                                    <Input
+                                        label="Attendee Meeting Link"
+                                        name="meeting_link"
+                                        value={programMetadata.meeting_link}
+                                        onChange={handleMetadataChange}
+                                        error={errors?.['metadata.meeting_link']}
+                                        placeholder="https://..."
+                                    />
+
+                                    <Textarea
+                                        label="Access Notes"
+                                        name="access_notes"
+                                        value={programMetadata.access_notes}
+                                        onChange={handleMetadataChange}
+                                        error={errors?.['metadata.access_notes']}
+                                        placeholder="Orientation notes, onboarding expectations, reporting process, or joining instructions."
+                                    />
+                                </div>
+                            </div>
+                        </div>
+
                         {/* Section: Media */}
                         <div>
                             <h3 className="text-lg font-semibold text-gray-900 mb-4 pb-2 border-b border-gray-200">
@@ -310,32 +606,8 @@ export default function CreateEvent() {
 
                         {/* Section: Options */}
                         <div>
-                            <h3 className="text-lg font-semibold text-gray-900 mb-4 pb-2 border-b border-gray-200">
-                                Event Options
-                            </h3>
+                            <h3 className="text-lg font-semibold text-gray-900 mb-4 pb-2 border-b border-gray-200">Visibility & Intake</h3>
                             <div className="flex flex-wrap items-center gap-6 p-4 bg-gray-50 rounded-lg">
-                                <label className="inline-flex items-center">
-                                    <input
-                                        type="checkbox"
-                                        name="is_active"
-                                        checked={formData.is_active}
-                                        onChange={handleInputChange}
-                                        className="rounded border-gray-300 text-primary focus:ring-primary"
-                                    />
-                                    <span className="ml-2 text-sm font-medium text-gray-700">Active</span>
-                                </label>
-
-                                <label className="inline-flex items-center">
-                                    <input
-                                        type="checkbox"
-                                        name="is_published"
-                                        checked={formData.is_published}
-                                        onChange={handleInputChange}
-                                        className="rounded border-gray-300 text-primary focus:ring-primary"
-                                    />
-                                    <span className="ml-2 text-sm font-medium text-gray-700">Published</span>
-                                </label>
-
                                 <label className="inline-flex items-center">
                                     <input
                                         type="checkbox"
@@ -359,9 +631,7 @@ export default function CreateEvent() {
                                 </label>
                             </div>
                             <p className="mt-2 text-xs text-gray-500">
-                                Active — event is enabled in the admin dashboard. Published — event is visible to the public.
-                                Enable speaker applications to accept submissions; manage them from the Applications section.
-                                Is featured — highlights this event in featured lists and homepage sections to increase visibility.
+                                Status controls the public stage of the event. Use the switches here for speaker intake and homepage highlighting.
                             </p>
                         </div>
 

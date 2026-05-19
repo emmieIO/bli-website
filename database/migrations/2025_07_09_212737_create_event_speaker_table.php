@@ -13,8 +13,9 @@ return new class extends Migration
     {
         Schema::create('event_speaker', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('event_id')->contrained('events', 'id')->cascadeOnDelete();
-            $table->foreignId('speaker_id')->contrained('speakers', 'id')->cascadeOnDelete();
+            $table->foreignId('event_id')->constrained('events', 'id')->cascadeOnDelete();
+            $table->foreignId('speaker_id')->constrained('speakers', 'id')->cascadeOnDelete();
+            $table->unique(['event_id', 'speaker_id']);
             $table->timestamps();
         });
     }

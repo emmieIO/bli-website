@@ -26,9 +26,12 @@ class CreateLessonRequest extends FormRequest
             "title"=> "required|string|max:255",
             "type"=> "required|string|in:".implode(',', array_column(LessonType::cases(), 'value')),
             'description'=> 'nullable|string',
-            'video_field'=> 'nullable|file|mimes:mp4,mov,avi,wmv|max:51200', // max 50MB
+            'video_field'=> 'nullable|file|mimes:mp4,mov,avi,wmv,mkv|max:512000',
             'content_path'=> 'nullable|file|mimes:pdf|max:10240', // max 10MB
             'link_url'=> 'nullable|url|max:2048',
+            'is_preview' => 'nullable|boolean',
+            'has_instruction' => 'nullable|boolean',
+            'assignment_instructions' => 'nullable|string|max:2000',
         ];
     }
 
@@ -62,7 +65,7 @@ class CreateLessonRequest extends FormRequest
             'video_field.required' => 'A video file must be provided for the lesson type.',
             'video_field.mimes' => 'The content file must be a video (mp4, mov, avi, wmv).',
             'video_field.file' => 'The video must be a valid file.',
-            'video_field.max' => 'The video file may not be greater than 50MB.',
+            'video_field.max' => 'The video file may not be greater than 500MB.',
             'content_path.required' => 'A PDF document must be provided for the lesson type.',
             'content_path.mimes' => 'The content file must be a PDF document.',
             'content_path.mimetypes' => 'The content file must be a valid PDF or binary document.',

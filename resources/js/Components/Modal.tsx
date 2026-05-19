@@ -15,53 +15,53 @@ export default function Modal({
     children,
 }: Props) {
     const maxWidthClass = {
-        sm: 'sm:max-w-sm',
-        md: 'sm:max-w-md',
-        lg: 'sm:max-w-lg',
-        xl: 'sm:max-w-xl',
-        '2xl': 'sm:max-w-2xl',
+        sm: 'max-w-sm',
+        md: 'max-w-md',
+        lg: 'max-w-lg',
+        xl: 'max-w-xl',
+        '2xl': 'max-w-2xl',
     }[maxWidth];
 
     return (
-        <Transition show={show} as={Fragment} leave="duration-200">
-            <Dialog as="div" className="relative z-50" onClose={onClose}>
+        <Transition show={show} as={Fragment} appear>
+            <Dialog as="div" className="relative z-50" open={show} onClose={onClose}>
                 <Transition.Child
                     as={Fragment}
-                    enter="ease-out duration-300"
+                    enter="ease-out duration-220"
                     enterFrom="opacity-0"
                     enterTo="opacity-100"
-                    leave="ease-in duration-200"
+                    leave="ease-in duration-180"
                     leaveFrom="opacity-100"
                     leaveTo="opacity-0"
                 >
-                    <div className="fixed inset-0 bg-gray-500/75 transition-opacity" />
+                    <div className="fixed inset-0 bg-slate-950/55" />
                 </Transition.Child>
 
-                <div className="fixed inset-0 z-10 overflow-y-auto">
-                    <div className="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
+                <div className="fixed inset-0 overflow-y-auto">
+                    <div className="flex min-h-full items-center justify-center px-4 py-6 sm:px-6 sm:py-10">
                         <Transition.Child
                             as={Fragment}
-                            enter="ease-out duration-300"
-                            enterFrom="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                            enter="ease-out duration-220"
+                            enterFrom="opacity-0 translate-y-2 sm:translate-y-0 sm:scale-95"
                             enterTo="opacity-100 translate-y-0 sm:scale-100"
-                            leave="ease-in duration-200"
+                            leave="ease-in duration-180"
                             leaveFrom="opacity-100 translate-y-0 sm:scale-100"
-                            leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                            leaveTo="opacity-0 translate-y-1 sm:translate-y-0 sm:scale-[0.985]"
                         >
                             <Dialog.Panel
-                                className={`relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full ${maxWidthClass}`}
+                                className={`modal-panel relative mx-auto w-full overflow-hidden rounded-2xl border border-slate-200 bg-white text-left shadow-2xl ring-1 ring-slate-950/5 ${maxWidthClass}`}
                             >
-                                <div className="absolute top-0 right-0 hidden pt-4 pr-4 sm:block">
-                                    <button
-                                        type="button"
-                                        className="rounded-md bg-white text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-                                        onClick={onClose}
-                                    >
-                                        <span className="sr-only">Close</span>
-                                        <X className="h-6 w-6" aria-hidden="true" />
-                                    </button>
+                                <button
+                                    type="button"
+                                    className="absolute right-3 top-3 z-10 inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-400 shadow-sm transition hover:text-slate-600 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2"
+                                    onClick={onClose}
+                                >
+                                    <span className="sr-only">Close</span>
+                                    <X className="h-5 w-5" aria-hidden="true" />
+                                </button>
+                                <div className="max-h-[calc(100vh-3rem)] overflow-y-auto sm:max-h-[calc(100vh-5rem)]">
+                                    {children}
                                 </div>
-                                {children}
                             </Dialog.Panel>
                         </Transition.Child>
                     </div>

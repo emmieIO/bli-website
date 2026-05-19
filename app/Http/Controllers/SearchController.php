@@ -27,7 +27,7 @@ class SearchController extends Controller
         }
 
         // Search Events
-        $events = Event::where('is_published', true)
+        $events = Event::publiclyVisible()
             ->where(function ($q) use ($query) {
                 $q->where('title', 'LIKE', "%{$query}%")
                     ->orWhere('theme', 'LIKE', "%{$query}%")

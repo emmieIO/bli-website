@@ -14,7 +14,10 @@ class EventRegisteredNotification extends Notification implements ShouldQueue
 {
     use Queueable;
 
-    public function __construct(public Event $event)
+    public function __construct(
+        public Event $event,
+        public string $registrationContext = 'confirmed'
+    )
     {
     }
 
@@ -46,53 +49,44 @@ class EventRegisteredNotification extends Notification implements ShouldQueue
             default => $this->event->location ?? 'Location TBA'
         };
 
+        $isWaitlistPromotion = $this->registrationContext === 'promoted_from_waitlist';
+        $subject = $isWaitlistPromotion
+            ? '🎉 Seat Confirmed from Waitlist - ' . $this->event->title
+            : '🎉 Registration Confirmed - ' . $this->event->title;
+        $nextSteps = $isWaitlistPromotion
+            ? [
+                'Your seat has been confirmed from the waitlist',
+                'A calendar invite is attached to this email',
+                'Review your attendee workspace for access and event details',
+            ]
+            : [
+                'Your spot is secured',
+                'A calendar invite is attached to this email',
+                'You will receive a reminder before the event',
+            ];
+
         $mail = (new MailMessage)
-            ->subject('🎉 Registration Confirmed - ' . $this->event->title)
-            ->greeting('Hello ' . ucfirst($notifiable->name) . '!')
-            ->line("**Congratulations!** Your registration for **{$this->event->title}** has been confirmed.")
-            ->line('---')
-            ->line('### Event Information')
-            ->line('**Event:** ' . $this->event->title);
-
-        // Add theme if available
-        if ($this->event->theme) {
-            $mail->line('**Theme:** ' . $this->event->theme);
-        }
-
-        $mail->line('**Date:** ' . $dateRange)
-            ->line('**Time:** ' . $timeRange)
-            ->line('**Mode:** ' . ucfirst($this->event->mode ?? 'Hybrid'))
-            ->line('**Location:** ' . $locationDisplay);
-
-        // Add entry fee information
-        if ($this->event->entry_fee > 0) {
-            $mail->line('**Entry Fee:** ₦' . number_format($this->event->entry_fee, 2));
-        } else {
-            $mail->line('**Entry Fee:** FREE');
-        }
-
-        $mail->line('---')
-            ->action('View Full Event Details', route('events.show', $this->event->slug))
-            ->line('### What\'s Next?')
-            ->line('✅ Your spot is secured')
-            ->line('✅ Calendar invite is attached to this email')
-            ->line('✅ You\'ll receive a reminder before the event');
-
-        // Add mode-specific instructions
-        if ($this->event->mode === 'online' || $this->event->mode === 'hybrid') {
-            $mail->line('✅ Meeting link will be available on the event page 1 hour before start time');
-        }
-
-        if ($this->event->mode === 'offline' || $this->event->mode === 'hybrid') {
-            $mail->line('✅ Please arrive 15 minutes early for check-in');
-        }
-
-        $mail->line('---')
-            ->line('**Need to make changes?** Visit your event dashboard to manage your registrations.')
-            ->line('If you have any questions, feel free to reach out to us.')
-            ->line('We look forward to seeing you at the event!')
-            ->salutation('Best regards,
-The ' . config('app.name') . ' Team')
+            ->subject($subject)
+            ->view([
+                'html' => 'emails.events.registered',
+                'text' => 'emails.events.registered_plain',
+            ], [
+                'recipientName' => ucfirst($notifiable->name),
+                'event' => $this->event,
+                'subjectLine' => $subject,
+                'isWaitlistPromotion' => $isWaitlistPromotion,
+                'dateRange' => $dateRange,
+                'timeRange' => $timeRange,
+                'locationDisplay' => $locationDisplay,
+                'entryFeeDisplay' => $this->event->entry_fee > 0
+                    ? 'N' . number_format($this->event->entry_fee, 2)
+                    : 'Free',
+                'workspaceUrl' => route('events.open', $this->event),
+                'nextSteps' => $nextSteps,
+                'modeTips' => $this->buildModeTips(),
+                'contactEmail' => $this->event->contact_email,
+                'appName' => config('app.name'),
+            ])
             ->attachData(
                 $ics,
                 str_replace(['/', '\\', ':', '*', '?', '"', '<', '>', '|'], '-', $this->event->title) . '.ics',
@@ -105,6 +99,21 @@ The ' . config('app.name') . ' Team')
         }
 
         return $mail;
+    }
+
+    protected function buildModeTips(): array
+    {
+        $tips = [];
+
+        if ($this->event->mode === 'online' || $this->event->mode === 'hybrid') {
+            $tips[] = 'Meeting access will be available from your event workspace before the session starts.';
+        }
+
+        if ($this->event->mode === 'offline' || $this->event->mode === 'hybrid') {
+            $tips[] = 'Please plan to arrive at least 15 minutes early for check-in.';
+        }
+
+        return $tips;
     }
 
     public function toArray(object $notifiable): array
@@ -127,9 +136,13 @@ The ' . config('app.name') . ' Team')
             'date_range' => $dateRange,
             'time_range' => $timeRange,
             'mode' => $this->event->mode ?? 'Hybrid',
-            'message' => "Your registration for '{$this->event->title}' has been confirmed!",
-            'action_url' => route('events.show', $this->event->slug),
-            'type' => 'event_registration',
+            'message' => $this->registrationContext === 'promoted_from_waitlist'
+                ? "A seat opened up and your registration for '{$this->event->title}' is now confirmed!"
+                : "Your registration for '{$this->event->title}' has been confirmed!",
+            'action_url' => route('events.open', $this->event),
+            'type' => $this->registrationContext === 'promoted_from_waitlist'
+                ? 'event_waitlist_promoted'
+                : 'event_registration',
         ];
     }
 }

@@ -41,8 +41,8 @@ export default function BlogShow({ post, relatedPosts }: BlogShowProps) {
             <Head title={post.title} />
 
             {/* Article Header */}
-            <article className="py-12 bg-linear-to-br from-white to-gray-50">
-                <div className="container mx-auto px-6 max-w-4xl">
+            <article className="public-hero public-hero-compact">
+                <div className="section-shell max-w-4xl">
                     <Link
                         href={route('blog.index')}
                         className="inline-flex items-center gap-2 text-accent hover:text-primary transition-colors mb-8 font-medium"
@@ -51,12 +51,12 @@ export default function BlogShow({ post, relatedPosts }: BlogShowProps) {
                         Back to Blog
                     </Link>
 
-                    <h1 className="font-bold font-montserrat text-4xl md:text-5xl mb-6 leading-tight text-primary">
+                    <h1 className="public-hero-title mb-6 text-left">
                         {post.title}
                     </h1>
 
                     {post.excerpt && (
-                        <p className="text-xl text-gray-600 mb-8 font-lato leading-relaxed">
+                        <p className="public-hero-copy mb-8">
                             {post.excerpt}
                         </p>
                     )}
@@ -80,8 +80,8 @@ export default function BlogShow({ post, relatedPosts }: BlogShowProps) {
 
             {/* Featured Image */}
             {post.featured_image && (
-                <div className="container mx-auto px-6 max-w-4xl -mt-8 mb-12">
-                    <div className="rounded-xl overflow-hidden shadow-lg">
+                <div className="section-shell max-w-4xl -mt-6 mb-12">
+                    <div className="public-card overflow-hidden p-3">
                         <img
                             src={`/storage/${post.featured_image}`}
                             alt={post.title}
@@ -92,11 +92,11 @@ export default function BlogShow({ post, relatedPosts }: BlogShowProps) {
             )}
 
             {/* Article Content */}
-            <section className="py-12 bg-white">
-                <div className="container mx-auto px-6 max-w-4xl">
+            <section className="public-section bg-white">
+                <div className="section-shell max-w-4xl">
                     <div
-                        className="prose prose-lg max-w-none font-lato
-                            prose-headings:font-montserrat prose-headings:text-primary
+                        className="prose prose-lg max-w-none
+                            prose-headings:font-sans prose-headings:text-primary
                             prose-a:text-accent prose-a:no-underline hover:prose-a:underline
                             prose-strong:text-primary
                             prose-img:rounded-lg prose-img:shadow-md"
@@ -107,9 +107,9 @@ export default function BlogShow({ post, relatedPosts }: BlogShowProps) {
 
             {/* Related Posts */}
             {relatedPosts.length > 0 && (
-                <section className="py-16 bg-gray-50">
-                    <div className="container mx-auto px-6 max-w-6xl">
-                        <h2 className="font-bold font-montserrat text-3xl mb-8 text-primary">
+                <section className="public-section bg-gray-50">
+                    <div className="section-shell max-w-6xl">
+                        <h2 className="mb-8 text-3xl font-bold text-primary">
                             Related Articles
                         </h2>
 
@@ -118,7 +118,7 @@ export default function BlogShow({ post, relatedPosts }: BlogShowProps) {
                                 <Link
                                     key={relatedPost.id}
                                     href={route('blog.show', relatedPost.slug)}
-                                    className="group bg-white rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 border border-gray-100"
+                                    className="public-card group overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
                                 >
                                     <div className="relative h-40 bg-gray-200 overflow-hidden">
                                         {relatedPost.featured_image ? (
@@ -128,14 +128,14 @@ export default function BlogShow({ post, relatedPosts }: BlogShowProps) {
                                                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                                             />
                                         ) : (
-                                            <div className="w-full h-full flex items-center justify-center bg-linear-to-br from-accent/20 to-primary/20">
-                                                <i className="fas fa-file-alt text-3xl text-accent/40"></i>
+                                            <div className="flex h-full w-full items-center justify-center bg-gray-100">
+                                                <i className="fas fa-file-alt text-3xl text-primary/30"></i>
                                             </div>
                                         )}
                                     </div>
 
                                     <div className="p-4">
-                                        <h3 className="font-bold font-montserrat text-lg mb-2 text-primary group-hover:text-accent transition-colors line-clamp-2">
+                                        <h3 className="mb-2 line-clamp-2 text-lg font-bold text-primary transition-colors group-hover:text-accent">
                                             {relatedPost.title}
                                         </h3>
                                         <p className="text-sm text-gray-500">

@@ -66,9 +66,10 @@ module.exports = {
                 black: 'var(--color-black)',
             },
             fontFamily: {
-                sans: ['Lato', 'Instrument Sans', ...defaultTheme.fontFamily.sans],
-                montserrat: ['Montserrat', 'sans-serif'],
-                lato: ['Lato', 'sans-serif'],
+                sans: ['Inter', ...defaultTheme.fontFamily.sans],
+                display: ['Inter', ...defaultTheme.fontFamily.sans],
+                montserrat: ['Inter', ...defaultTheme.fontFamily.sans],
+                lato: ['Inter', ...defaultTheme.fontFamily.sans],
             },
         },
     },

@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Enums\Permissions\EventPermissionsEnum;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Role;
@@ -13,11 +14,28 @@ class RoleAndPermissionsSeeder extends Seeder
      */
     public function run(): void
     {
-        $roles = [
-            "student",
-            "instructor",
-            "admin",
+        $eventAdminPermissions = [
+            EventPermissionsEnum::VIEW_ANY->value,
+            EventPermissionsEnum::CREATE->value,
+            EventPermissionsEnum::UPDATE_ANY->value,
+            EventPermissionsEnum::DELETE_ANY->value,
+            EventPermissionsEnum::PUBLISH->value,
+            EventPermissionsEnum::MANAGE_ATTENDEES->value,
+            EventPermissionsEnum::MANAGE_WAITLIST->value,
+            EventPermissionsEnum::MANAGE_SPEAKERS->value,
+            EventPermissionsEnum::MANAGE_RESOURCES->value,
+            EventPermissionsEnum::VIEW_PAYMENTS->value,
+            EventPermissionsEnum::SEND_UPDATES->value,
+            EventPermissionsEnum::CANCEL->value,
+            EventPermissionsEnum::ARCHIVE->value,
+        ];
 
+        $eventUserPermissions = [
+            EventPermissionsEnum::VIEW->value,
+            EventPermissionsEnum::REGISTER->value,
+            EventPermissionsEnum::VIEW_OWN_REGISTRATION->value,
+            EventPermissionsEnum::JOIN_WAITLIST->value,
+            EventPermissionsEnum::APPLY_TO_SPEAK->value,
         ];
 
         $rolesPermissions = [
@@ -26,8 +44,9 @@ class RoleAndPermissionsSeeder extends Seeder
                                         'analytics-view-system',     // System-wide course analytics
 
                                         // Event management
-                                        'manage events',
-                        
+                                        ...$eventAdminPermissions,
+                                        EventPermissionsEnum::APPLY_TO_SPEAK->value,
+
                                         // Speaker management
                                         "create-speaker",
                                         'view-speaker',
@@ -131,6 +150,8 @@ class RoleAndPermissionsSeeder extends Seeder
                         
             
                             'view-own-invitations',      // View own invitations
+
+                            ...$eventUserPermissions,
                         
             
                         ],
@@ -236,6 +257,8 @@ class RoleAndPermissionsSeeder extends Seeder
                         
             
                             'view-own-invitations',      // View own invitations
+
+                            ...$eventUserPermissions,
                         
             
                         ]

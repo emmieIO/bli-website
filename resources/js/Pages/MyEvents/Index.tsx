@@ -1,17 +1,22 @@
+import { FormEvent, useMemo, useState } from 'react';
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import DashboardLayout from '@/Layouts/DashboardLayout';
-import { useState, FormEvent } from 'react';
 import Button from '@/Components/Button';
 
 interface Event {
     id: number;
     title: string;
     slug: string;
-    description?: string;
     start_date: string;
     end_date: string;
-    location?: string;
-    status: 'upcoming' | 'ongoing' | 'ended';
+    location?: string | null;
+    mode?: string | null;
+    journey_status: 'upcoming' | 'ongoing' | 'ended';
+    registration_status: 'registered' | 'waitlisted' | 'attended' | 'no_show';
+    latest_transaction?: {
+        status: string;
+        amount: string;
+    } | null;
     pivot?: {
         revoke_count?: number;
     };
@@ -21,11 +26,44 @@ interface MyEventsProps {
     events: Event[];
 }
 
+const registrationTone: Record<string, string> = {
+    registered: 'border-emerald-200 bg-emerald-50 text-emerald-800',
+    waitlisted: 'border-amber-200 bg-amber-50 text-amber-800',
+    attended: 'border-slate-200 bg-slate-50 text-slate-700',
+    no_show: 'border-rose-200 bg-rose-50 text-rose-700',
+};
+
+const registrationLabel: Record<string, string> = {
+    registered: 'confirmed',
+    waitlisted: 'waitlisted',
+    attended: 'attended',
+    no_show: 'no show',
+};
+
+const journeyTone: Record<string, string> = {
+    upcoming: 'border-slate-200 bg-slate-50 text-slate-700',
+    ongoing: 'border-blue-200 bg-blue-50 text-blue-800',
+    ended: 'border-zinc-200 bg-zinc-50 text-zinc-700',
+};
+
 export default function MyEvents({ events }: MyEventsProps) {
     const { sideLinks } = usePage().props as any;
     const [showCancelModal, setShowCancelModal] = useState(false);
     const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
     const [isProcessing, setIsProcessing] = useState(false);
+
+    const stats = useMemo(() => ({
+        total: events.length,
+        confirmed: events.filter((event) => event.registration_status === 'registered').length,
+        waitlisted: events.filter((event) => event.registration_status === 'waitlisted').length,
+        live: events.filter((event) => event.journey_status === 'ongoing').length,
+    }), [events]);
+
+    const formatDate = (value: string) => new Intl.DateTimeFormat('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+    }).format(new Date(value));
 
     const handleCancelClick = (event: Event) => {
         setSelectedEvent(event);
@@ -34,7 +72,10 @@ export default function MyEvents({ events }: MyEventsProps) {
 
     const handleCancelEvent = (e: FormEvent) => {
         e.preventDefault();
-        if (!selectedEvent) return;
+
+        if (!selectedEvent) {
+            return;
+        }
 
         setIsProcessing(true);
         router.delete(route('user.revoke.event', selectedEvent.slug), {
@@ -47,66 +88,145 @@ export default function MyEvents({ events }: MyEventsProps) {
         });
     };
 
-    const formatDate = (dateString: string) => {
-        const date = new Date(dateString);
-        return date.toLocaleDateString('en-US', {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric',
-        });
-    };
-
-    const getRemainingChances = (event: Event) => {
-        return 5 - (event.pivot?.revoke_count ?? 0);
-    };
+    const getRemainingChances = (event: Event) => 5 - (event.pivot?.revoke_count ?? 0);
 
     return (
         <DashboardLayout sideLinks={sideLinks}>
             <Head title="My Events" />
 
-            <div className="space-y-8">
-                {/* Header Section */}
-                <div className="text-center space-y-4">
-                    <h1 className="text-3xl font-bold text-primary font-montserrat">My Events</h1>
-                    <p className="text-lg text-gray-600 max-w-2xl mx-auto font-lato">
-                        Manage your event registrations and stay updated with your schedule
-                    </p>
-                </div>
+            <div className="workspace-stack">
+                <section className="workspace-header-card overflow-hidden">
+                    <div className="border-b border-slate-200 px-6 py-7 lg:px-8 lg:py-8">
+                        <div className="flex flex-col gap-6 xl:flex-row xl:items-start xl:justify-between">
+                            <div className="max-w-2xl space-y-3">
+                                <span className="inline-flex items-center rounded-full border border-slate-300 bg-white px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-600">
+                                    Event Registry
+                                </span>
+                                <div>
+                                    <h1 className="text-3xl font-semibold tracking-tight text-slate-900 md:text-[2.35rem]">
+                                        My Events
+                                    </h1>
+                                    <p className="mt-3 text-sm leading-6 text-slate-600 md:text-[15px]">
+                                        Review active registrations, waitlist positions, payment context, and direct workspace access.
+                                    </p>
+                                </div>
+                            </div>
 
-                {/* Events Grid */}
-                <div className="grid lg:grid-cols-2 xl:grid-cols-3 gap-8">
-                    {events.length > 0 ? (
-                        events.map((event) => (
-                            <EventCard
-                                key={event.id}
-                                event={event}
-                                formatDate={formatDate}
-                                onCancelClick={handleCancelClick}
-                            />
-                        ))
-                    ) : (
-                        <EmptyState />
-                    )}
-                </div>
-
-                {/* Browse More Events CTA */}
-                {events.length > 0 && (
-                    <div className="text-center pt-8 border-t border-primary-50">
-                        <div className="max-w-md mx-auto space-y-4">
-                            <p className="text-gray-600 font-lato">Looking for more events to join?</p>
-                            <Link
-                                href={route('events.index')}
-                                className="inline-flex items-center gap-3 bg-linear-to-r from-primary to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white font-semibold px-8 py-4 rounded-xl transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-xl font-montserrat"
-                            >
-                                <i className="fas fa-sparkles w-5 h-5"></i>
-                                Explore More Events
-                            </Link>
+                            <div className="min-w-full overflow-x-auto xl:min-w-[620px]">
+                                <div className="grid min-w-[620px] grid-cols-4 divide-x divide-slate-200 rounded-2xl border border-slate-200 bg-white">
+                                    <SummaryItem label="All Events" value={stats.total.toString()} context="Total registrations" />
+                                    <SummaryItem label="Confirmed" value={stats.confirmed.toString()} context="Active attendee seats" />
+                                    <SummaryItem label="Waitlisted" value={stats.waitlisted.toString()} context="Awaiting placement" />
+                                    <SummaryItem label="Live Now" value={stats.live.toString()} context="Currently in session" />
+                                </div>
+                            </div>
                         </div>
                     </div>
+
+                    <div className="bg-white px-6 py-4 lg:px-8">
+                        <p className="text-sm leading-6 text-slate-600">
+                            Open any event workspace for schedule, access instructions, resources, refund status, and speaker details.
+                        </p>
+                    </div>
+                </section>
+
+                {events.length > 0 ? (
+                    <section className="workspace-card overflow-hidden">
+                        <div className="overflow-x-auto">
+                            <table className="min-w-full divide-y divide-slate-200">
+                                <thead className="bg-slate-50/80">
+                                    <tr>
+                                        <TableHead>Event</TableHead>
+                                        <TableHead>Registration</TableHead>
+                                        <TableHead>Journey</TableHead>
+                                        <TableHead>Schedule</TableHead>
+                                        <TableHead>Format</TableHead>
+                                        <TableHead>Payment</TableHead>
+                                        <TableHead>Location</TableHead>
+                                        <TableHead align="right">Actions</TableHead>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-slate-100 bg-white">
+                                    {events.map((event) => (
+                                        <tr key={event.id} className="align-top transition hover:bg-slate-50/70">
+                                            <td className="px-6 py-5">
+                                                <div className="space-y-1">
+                                                    <p className="text-sm font-semibold text-slate-900">{event.title}</p>
+                                                    <p className="text-sm text-slate-500">
+                                                        {event.registration_status === 'waitlisted'
+                                                            ? 'Awaiting the next available seat.'
+                                                            : 'Open workspace for access details and updates.'}
+                                                    </p>
+                                                </div>
+                                            </td>
+                                            <td className="px-6 py-5">
+                                                <span className={`inline-flex rounded-full border px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] ${registrationTone[event.registration_status]}`}>
+                                                    {registrationLabel[event.registration_status] ?? event.registration_status}
+                                                </span>
+                                            </td>
+                                            <td className="px-6 py-5">
+                                                <span className={`inline-flex rounded-full border px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] ${journeyTone[event.journey_status]}`}>
+                                                    {event.journey_status}
+                                                </span>
+                                            </td>
+                                            <td className="px-6 py-5 text-sm leading-6 text-slate-700">
+                                                <div>{formatDate(event.start_date)}</div>
+                                                <div className="text-slate-500">to {formatDate(event.end_date)}</div>
+                                            </td>
+                                            <td className="px-6 py-5 text-sm text-slate-700">
+                                                {event.mode ? event.mode.charAt(0).toUpperCase() + event.mode.slice(1) : 'Hybrid'}
+                                            </td>
+                                            <td className="px-6 py-5 text-sm text-slate-700">
+                                                {event.latest_transaction ? event.latest_transaction.status : 'No payment required'}
+                                            </td>
+                                            <td className="px-6 py-5 text-sm text-slate-700">
+                                                {event.location || 'Shared in workspace'}
+                                            </td>
+                                            <td className="px-6 py-5">
+                                                <div className="flex flex-col items-end gap-3">
+                                                    <Link
+                                                        href={route('user.events.show', event.slug)}
+                                                        className="inline-flex items-center rounded-xl border border-slate-900 bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800"
+                                                    >
+                                                        Open workspace
+                                                    </Link>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => handleCancelClick(event)}
+                                                        disabled={event.journey_status === 'ended'}
+                                                        className="text-sm font-medium text-rose-700 transition hover:text-rose-800 disabled:cursor-not-allowed disabled:text-slate-400"
+                                                    >
+                                                        Cancel registration
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    </section>
+                ) : (
+                    <section className="workspace-card border-dashed p-10 text-center">
+                        <div className="mx-auto max-w-xl space-y-4">
+                            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full border border-slate-200 bg-slate-50 text-slate-700">
+                                <i className="fas fa-calendar-plus text-xl"></i>
+                            </div>
+                            <h2 className="text-2xl font-semibold text-slate-900">No event registrations yet</h2>
+                            <p className="text-sm leading-7 text-slate-600">
+                                Once you register for an event, this page becomes your event register for confirmations, reminders, and attendee resources.
+                            </p>
+                            <Link
+                                href={route('events.index')}
+                                className="inline-flex items-center rounded-xl border border-slate-900 bg-slate-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-800"
+                            >
+                                Browse events
+                            </Link>
+                        </div>
+                    </section>
                 )}
             </div>
 
-            {/* Cancel Event Modal */}
             {showCancelModal && selectedEvent && (
                 <CancelEventModal
                     event={selectedEvent}
@@ -120,115 +240,35 @@ export default function MyEvents({ events }: MyEventsProps) {
     );
 }
 
-function EventCard({
-    event,
-    formatDate,
-    onCancelClick,
+function SummaryItem({
+    label,
+    value,
+    context,
 }: {
-    event: Event;
-    formatDate: (date: string) => string;
-    onCancelClick: (event: Event) => void;
+    label: string;
+    value: string;
+    context: string;
 }) {
-    const getStatusColor = (status: string) => {
-        switch (status) {
-            case 'upcoming':
-                return 'bg-accent text-white shadow-md';
-            case 'ongoing':
-                return 'bg-blue-500 text-white shadow-md';
-            default:
-                return 'bg-gray-100 text-gray-700';
-        }
-    };
-
-    const getStatusDotColor = (status: string) => {
-        switch (status) {
-            case 'upcoming':
-                return 'bg-accent animate-pulse';
-            case 'ongoing':
-                return 'bg-blue-500 animate-pulse';
-            default:
-                return 'bg-gray-400';
-        }
-    };
-
     return (
-        <div className="group bg-white border border-primary-50 shadow-sm rounded-2xl p-6 flex flex-col justify-between space-y-5 hover:shadow-2xl hover:border-primary-100 transition-all duration-300 transform hover:-translate-y-1">
-            {/* Header with Status */}
-            <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                    <span
-                        className={`text-xs font-semibold px-3 py-1.5 rounded-full font-montserrat capitalize ${getStatusColor(
-                            event.status
-                        )}`}
-                    >
-                        {event.status}
-                    </span>
-                    <div className={`w-2 h-2 rounded-full ${getStatusDotColor(event.status)}`}></div>
-                </div>
-
-                {/* Title */}
-                <h3 className="text-xl font-bold text-primary font-montserrat leading-tight group-hover:text-primary-600 transition-colors">
-                    {event.title}
-                </h3>
-            </div>
-
-            {/* Event Details */}
-            <div className="space-y-3">
-                <div className="flex items-center gap-3 text-primary-700">
-                    <i className="fas fa-calendar w-4 h-4 text-primary-500"></i>
-                    <span className="font-lato font-medium">{formatDate(event.start_date)}</span>
-                </div>
-                <div className="flex items-center gap-3 text-primary-700">
-                    <i className="fas fa-map-marker-alt w-4 h-4 text-primary-500"></i>
-                    <span className="font-lato">{event.location || 'Location TBA'}</span>
-                </div>
-            </div>
-
-            {/* Actions */}
-            <div className="flex justify-between items-center pt-4 border-t border-primary-100 mt-2">
-                <Link
-                    href={route('events.show', event.slug)}
-                    className="inline-flex items-center gap-2 text-sm text-primary hover:text-primary-600 font-medium font-lato transition-colors group-hover:underline"
-                >
-                    <i className="fas fa-external-link-alt w-4 h-4"></i>
-                    View Details
-                </Link>
-
-                <button
-                    onClick={() => onCancelClick(event)}
-                    disabled={event.status === 'ended'}
-                    className="inline-flex items-center gap-2 text-sm font-medium text-red-600 hover:text-red-700 disabled:text-gray-400 disabled:cursor-not-allowed transition-all duration-200 font-lato group-hover:scale-105"
-                >
-                    <i className="fas fa-times-circle w-4 h-4"></i>
-                    Cancel
-                </button>
-            </div>
+        <div className="px-5 py-4">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">{label}</p>
+            <p className="mt-3 text-2xl font-semibold tracking-tight text-slate-900">{value}</p>
+            <p className="mt-1 text-xs leading-5 text-slate-500">{context}</p>
         </div>
     );
 }
 
-function EmptyState() {
+function TableHead({
+    children,
+    align = 'left',
+}: {
+    children: React.ReactNode;
+    align?: 'left' | 'right';
+}) {
     return (
-        <div className="col-span-3 text-center py-16 px-8 bg-linear-to-br from-primary-50 to-white rounded-2xl border-2 border-dashed border-primary-100">
-            <div className="max-w-md mx-auto space-y-6">
-                <div className="w-20 h-20 mx-auto bg-primary-100 rounded-2xl flex items-center justify-center">
-                    <i className="fas fa-calendar-times w-10 h-10 text-primary-400"></i>
-                </div>
-                <div className="space-y-3">
-                    <h3 className="text-2xl font-bold text-primary font-montserrat">No Events Yet</h3>
-                    <p className="text-gray-600 font-lato leading-relaxed">
-                        You haven't registered for any events yet. Explore our upcoming events and join the community!
-                    </p>
-                </div>
-                <Link
-                    href={route('events.index')}
-                    className="inline-flex items-center gap-3 bg-primary hover:bg-primary-600 text-white font-semibold px-8 py-4 rounded-xl transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-xl font-montserrat"
-                >
-                    <i className="fas fa-calendar-plus w-5 h-5"></i>
-                    Browse All Events
-                </Link>
-            </div>
-        </div>
+        <th className={`px-6 py-4 text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500 ${align === 'right' ? 'text-right' : 'text-left'}`}>
+            {children}
+        </th>
     );
 }
 
@@ -246,42 +286,37 @@ function CancelEventModal({
     onConfirm: (e: FormEvent) => void;
 }) {
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
-            <div className="relative bg-white rounded-lg shadow-xl p-6 w-full max-w-md mx-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 px-4">
+            <div className="relative w-full max-w-md rounded-lg bg-white p-6 shadow-xl">
                 <button
                     type="button"
                     onClick={onClose}
-                    className="absolute top-3 right-3 text-gray-400 hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 inline-flex justify-center items-center"
+                    className="absolute right-3 top-3 inline-flex h-8 w-8 items-center justify-center rounded-lg text-gray-400 hover:bg-gray-100 hover:text-gray-900"
                 >
-                    <i className="fas fa-times w-3 h-3"></i>
+                    <i className="fas fa-times"></i>
                 </button>
 
-                <div className="text-center">
-                    <div className="mx-auto mb-4 w-12 h-12 text-red-600 flex items-center justify-center">
-                        <i className="fas fa-exclamation-triangle w-12 h-12"></i>
+                <div className="space-y-4 text-center">
+                    <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-red-50 text-red-600">
+                        <i className="fas fa-exclamation-triangle"></i>
                     </div>
 
-                    <div className="mb-5 space-y-2">
-                        <h3 className="text-lg text-gray-800 font-montserrat font-semibold">
-                            Are you sure you want to unregister from:{' '}
-                            <span className="font-bold text-primary">{event.title}</span>?
-                        </h3>
-                        <p className="font-lato text-sm text-accent font-bold">
-                            Staying registered enables us send you notifications & reminders on this event.
+                    <div className="space-y-2">
+                        <h3 className="text-lg font-semibold text-primary">Cancel registration for {event.title}?</h3>
+                        <p className="text-sm leading-6 text-gray-600">
+                            Cancelling removes you from the attendee journey and may affect your remaining registration attempts.
                         </p>
-                        {remainingChances < 5 && (
-                            <p className="font-lato text-sm text-red-600 font-medium">
-                                You have {remainingChances} cancellation{remainingChances !== 1 ? 's' : ''} remaining.
-                            </p>
-                        )}
+                        <p className="text-sm font-medium text-red-600">
+                            {remainingChances} cancellation{remainingChances !== 1 ? 's' : ''} remaining.
+                        </p>
                     </div>
 
                     <form onSubmit={onConfirm} className="flex justify-center gap-3">
                         <Button type="submit" variant="danger" loading={isProcessing}>
-                            Yes, I'm sure
+                            Confirm cancel
                         </Button>
                         <Button type="button" variant="secondary" onClick={onClose}>
-                            No, cancel
+                            Keep registration
                         </Button>
                     </form>
                 </div>

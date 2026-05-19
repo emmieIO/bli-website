@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Models\Event;
 use Illuminate\Foundation\Http\FormRequest;
 
 class SpeakerInviteRequest extends FormRequest
@@ -11,7 +12,10 @@ class SpeakerInviteRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return true;
+        $event = $this->route('event');
+
+        return $event instanceof Event
+            && $this->user()?->can('manageSpeakers', $event) === true;
     }
 
     /**
@@ -51,4 +55,3 @@ class SpeakerInviteRequest extends FormRequest
             ];
     }
 }
-

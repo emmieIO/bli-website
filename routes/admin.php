@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin\EventController;
 use App\Http\Controllers\Admin\EventResourceController;
 use App\Http\Controllers\Admin\InstructorApplicationController;
 use App\Http\Controllers\Admin\InstructorsManagementController;
+use App\Http\Controllers\Admin\ReviewEventRefundRequestController;
 use App\Http\Controllers\Admin\SpeakersController;
 use App\Http\Controllers\Course\CourseCategoryController;
 use App\Http\Controllers\Course\CourseController;
@@ -17,27 +18,48 @@ use Illuminate\Support\Facades\Route;
 
 Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () {
 
-    // Events Management (NOT resource - has custom methods like massDelete, inviteSpeaker)
-    Route::middleware(['permission:manage events'])->group(function () {
+    // Events Management
+    Route::middleware(['permission:event-view-any'])->group(function () {
         Route::get('/events', [EventController::class, 'index'])->name('events.index');
+        Route::get('/events/{event}/show', [EventController::class, 'show'])->name('events.show');
+    });
+
+    Route::middleware(['permission:event-create'])->group(function () {
         Route::get('/events/create', [EventController::class, 'create'])->name('events.create');
         Route::post('/events', [EventController::class, 'store'])->name('events.store');
-        Route::get('/events/{event}/show', [EventController::class, 'show'])->name('events.show');
+    });
+
+    Route::middleware(['permission:event-update-any|event-publish|event-cancel'])->group(function () {
         Route::get('/events/{slug}/edit', [EventController::class, 'edit'])->name('events.edit');
         Route::put('/events/{event}/edit', [EventController::class, 'update'])->name('events.update');
+    });
+
+    Route::middleware(['permission:event-delete-any'])->group(function () {
         Route::delete('/events/{event}', [EventController::class, 'destroy'])->name('events.destroy');
         Route::delete('/events/mass-delete', [EventController::class, 'massDelete'])->name('events.massDelete');
+    });
 
-        // Event-specific actions
+    Route::middleware(['permission:event-manage-speakers'])->group(function () {
         Route::post('/events/{event}/invite-speaker', [EventController::class, 'inviteSpeaker'])->name('events.invite-speaker');
         Route::post('/events/{event}/assign-speaker', AssignSpeakerToEvent::class)->name('events.assign-speaker');
         Route::get('/events/{event}/assign-speakers', [SpeakersController::class, 'showAssignSpeakersPage'])->name('events.assign-speakers');
     });
 
     // Event Resources (simple operations)
-    Route::get('/events/{event}/create-resource', [EventResourceController::class, 'create'])->name('events.resources.create');
-    Route::post('/events/{event}/create-resource', [EventResourceController::class, 'store'])->name('events.resources.store');
-    Route::delete('/events/{event}/destroy-resource/{resource}', [EventResourceController::class, 'destroy'])->name('events.resources.destroy');
+    Route::middleware(['permission:event-manage-resources'])->group(function () {
+        Route::get('/events/{event}/create-resource', [EventResourceController::class, 'create'])->name('events.resources.create');
+        Route::post('/events/{event}/create-resource', [EventResourceController::class, 'store'])->name('events.resources.store');
+        Route::delete('/events/{event}/destroy-resource/{resource}', [EventResourceController::class, 'destroy'])->name('events.resources.destroy');
+    });
+
+    Route::middleware(['permission:event-manage-waitlist|event-manage-attendees'])->group(function () {
+        Route::post('/events/{event}/attendees/{user}/promote-waitlist', [EventController::class, 'promoteWaitlistedAttendee'])
+            ->name('events.attendees.promote-waitlist');
+        Route::post('/events/refund-requests/{refundRequest}/approve', [ReviewEventRefundRequestController::class, 'approve'])
+            ->name('events.refund-requests.approve');
+        Route::patch('/events/refund-requests/{refundRequest}/decline', [ReviewEventRefundRequestController::class, 'decline'])
+            ->name('events.refund-requests.decline');
+    });
 
     // Speakers Management (NOT resource - has custom methods like pendingSpeaker, activateSpeaker)
     Route::get('/speakers', [SpeakersController::class, 'index'])->name('speakers.index');

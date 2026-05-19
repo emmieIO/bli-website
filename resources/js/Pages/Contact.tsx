@@ -18,12 +18,13 @@ export default function Contact() {
         <GuestLayout>
             <Head title="Contact Us" />
 
-            <section className="py-16 bg-gray-50 min-h-screen">
-                <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+            <section className="public-section min-h-screen">
+                <div className="section-shell">
                     {/* Section Header */}
-                    <div className="text-center mb-12">
-                        <h2 className="text-4xl font-bold text-primary font-montserrat">Contact Us</h2>
-                        <p className="text-gray-600 mt-2 max-w-xl mx-auto font-lato">
+                    <div className="mb-12 text-center">
+                        <p className="enterprise-label mb-4">Contact</p>
+                        <h2 className="public-hero-title text-primary">Contact Us</h2>
+                        <p className="public-hero-copy mx-auto mt-3">
                             Have questions or want to get in touch with us? Fill out the form and our team will reach out to you
                             shortly.
                         </p>
@@ -32,36 +33,36 @@ export default function Contact() {
                     {/* Main Content Grid */}
                     <div className="grid md:grid-cols-2 gap-10 items-start">
                         {/* Contact Info */}
-                        <div className="space-y-6">
+                        <div className="public-card space-y-6 p-6 lg:p-8">
                             <div className="flex items-start gap-4">
-                                <i className="fas fa-map-marker-alt text-xl text-secondary"></i>
+                                <i className="fas fa-map-marker-alt mt-1 text-lg text-accent"></i>
                                 <div>
-                                    <h4 className="font-semibold text-primary font-montserrat">Address</h4>
-                                    <p className="text-gray-600 font-lato">123 Beacon Avenue, Lagos, Nigeria</p>
+                                    <h4 className="font-semibold text-primary">Address</h4>
+                                    <p className="text-gray-600">123 Beacon Avenue, Lagos, Nigeria</p>
                                 </div>
                             </div>
 
                             <div className="flex items-start gap-4">
-                                <i className="fas fa-envelope text-xl text-secondary"></i>
+                                <i className="fas fa-envelope mt-1 text-lg text-accent"></i>
                                 <div>
-                                    <h4 className="font-semibold text-primary font-montserrat">Email</h4>
-                                    <p className="text-gray-600 font-lato">info@beaconleadership.org</p>
+                                    <h4 className="font-semibold text-primary">Email</h4>
+                                    <p className="text-gray-600">info@beaconleadership.org</p>
                                 </div>
                             </div>
 
                             <div className="flex items-start gap-4">
-                                <i className="fas fa-phone text-xl text-secondary"></i>
+                                <i className="fas fa-phone mt-1 text-lg text-accent"></i>
                                 <div>
-                                    <h4 className="font-semibold text-primary font-montserrat">Phone</h4>
-                                    <p className="text-gray-600 font-lato">+234-706-442-5639</p>
+                                    <h4 className="font-semibold text-primary">Phone</h4>
+                                    <p className="text-gray-600">+234-706-442-5639</p>
                                 </div>
                             </div>
 
                             <div className="flex items-start gap-4">
-                                <i className="fas fa-clock text-xl text-secondary"></i>
+                                <i className="fas fa-clock mt-1 text-lg text-accent"></i>
                                 <div>
-                                    <h4 className="font-semibold text-primary font-montserrat">Office Hours</h4>
-                                    <p className="text-gray-600 font-lato">Monday - Friday: 9:00 AM - 5:00 PM</p>
+                                    <h4 className="font-semibold text-primary">Office Hours</h4>
+                                    <p className="text-gray-600">Monday - Friday: 9:00 AM - 5:00 PM</p>
                                 </div>
                             </div>
                         </div>
@@ -69,10 +70,10 @@ export default function Contact() {
                         {/* Contact Form */}
                         <form
                             onSubmit={handleSubmit}
-                            className="bg-white p-6 rounded-lg shadow-md space-y-5 border border-secondary/20"
+                            className="public-card space-y-5 p-6 lg:p-8"
                         >
                             <div>
-                                <label htmlFor="name" className="block font-medium text-primary mb-1 font-montserrat">
+                                <label htmlFor="name" className="mb-1 block font-medium text-primary">
                                     Full Name
                                 </label>
                                 <input
@@ -82,13 +83,13 @@ export default function Contact() {
                                     required
                                     value={data.name}
                                     onChange={(e) => setData('name', e.target.value)}
-                                    className="w-full border border-secondary/20 rounded-md px-4 py-2 focus:ring-secondary focus:border-secondary font-lato"
+                                    className="public-input"
                                 />
                                 {errors.name && <p className="mt-1 text-sm text-secondary">{errors.name}</p>}
                             </div>
 
                             <div>
-                                <label htmlFor="email" className="block font-medium text-primary mb-1 font-montserrat">
+                                <label htmlFor="email" className="mb-1 block font-medium text-primary">
                                     Email
                                 </label>
                                 <input
@@ -98,13 +99,13 @@ export default function Contact() {
                                     required
                                     value={data.email}
                                     onChange={(e) => setData('email', e.target.value)}
-                                    className="w-full border border-secondary/20 rounded-md px-4 py-2 focus:ring-secondary focus:border-secondary font-lato"
+                                    className="public-input"
                                 />
                                 {errors.email && <p className="mt-1 text-sm text-secondary">{errors.email}</p>}
                             </div>
 
                             <div>
-                                <label htmlFor="message" className="block font-medium text-primary mb-1 font-montserrat">
+                                <label htmlFor="message" className="mb-1 block font-medium text-primary">
                                     Message
                                 </label>
                                 <textarea
@@ -114,7 +115,7 @@ export default function Contact() {
                                     required
                                     value={data.message}
                                     onChange={(e) => setData('message', e.target.value)}
-                                    className="w-full border border-secondary/20 rounded-md px-4 py-2 focus:ring-secondary focus:border-secondary font-lato"
+                                    className="public-input"
                                 ></textarea>
                                 {errors.message && <p className="mt-1 text-sm text-secondary">{errors.message}</p>}
                             </div>
@@ -122,7 +123,7 @@ export default function Contact() {
                             <button
                                 type="submit"
                                 disabled={processing}
-                                className="inline-flex items-center gap-2 px-6 py-3 bg-secondary text-white rounded-lg hover:bg-primary transition font-montserrat disabled:opacity-50"
+                                className="enterprise-button enterprise-button-primary disabled:opacity-50"
                             >
                                 <i className="fas fa-paper-plane"></i>
                                 {processing ? 'Sending...' : 'Send Message'}

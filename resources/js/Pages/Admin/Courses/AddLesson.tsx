@@ -131,7 +131,7 @@ export default function AddLesson({ module, lessontypes }: AddLessonProps) {
             </header>
 
             <div>
-                <form onSubmit={handleSubmit} className="space-y-4">
+                <form onSubmit={handleSubmit} noValidate className="space-y-4">
                     <div>
                         <label htmlFor="title" className="block mb-2 text-sm font-medium text-gray-900">
                             Lesson Title
@@ -195,7 +195,7 @@ export default function AddLesson({ module, lessontypes }: AddLessonProps) {
                     {showVideoField && (
                         <div>
                             <label htmlFor="video_lesson" className="block mb-2 text-sm font-medium text-gray-900">
-                                Video Resource
+                                Video File
                             </label>
                             <input
                                 type="file"
@@ -205,6 +205,7 @@ export default function AddLesson({ module, lessontypes }: AddLessonProps) {
                                 onChange={handleVideoChange}
                                 className="bg-gray-50 border border-gray-300 file:bg-primary text-gray-900 text-sm rounded-lg block w-full"
                             />
+                            <p className="mt-1 text-xs text-gray-500">Stored on the configured lesson video bucket after upload.</p>
                             {errors?.video_field && (
                                 <p className="text-sm text-red-500 mt-1">{errors.video_field}</p>
                             )}

@@ -12,6 +12,7 @@ return new class extends Migration {
     {
         Schema::create('lessons', function (Blueprint $table) {
             $table->id();
+            $table->string('slug')->unique();
             $table->foreignId('module_id')->constrained('course_modules', 'id')->cascadeOnDelete();
             $table->string('title');
             $table->string('type', 0)->nullable();
@@ -19,6 +20,10 @@ return new class extends Migration {
 
             // For video lessons
             $table->string('vimeo_id')->nullable();
+            $table->enum('video_status', ['pending', 'uploading', 'processing', 'ready', 'failed'])
+                ->default('pending');
+            $table->text('video_error')->nullable();
+            $table->timestamp('video_uploaded_at')->nullable();
             $table->string('preview_vimeo_id')->nullable();
             $table->boolean('is_preview')->default(false);
 
@@ -30,6 +35,9 @@ return new class extends Migration {
 
             $table->unsignedInteger('order')->default(0);
             $table->timestamps();
+
+            $table->index('type');
+            $table->index(['module_id', 'order']);
         });
     }
 

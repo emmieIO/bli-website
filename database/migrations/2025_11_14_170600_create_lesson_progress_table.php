@@ -23,6 +23,8 @@ return new class extends Migration
             $table->timestamps();
 
             $table->unique(['user_id', 'lesson_id']);
+            $table->index(['user_id', 'course_id']);
+            $table->index('is_completed');
         });
     }
 

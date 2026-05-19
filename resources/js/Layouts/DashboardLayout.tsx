@@ -1,4 +1,4 @@
-import { PropsWithChildren, useState, useEffect, useRef } from 'react';
+import { PropsWithChildren, useState, useEffect, useRef, useMemo, useLayoutEffect } from 'react';
 import { Link, router, usePage } from '@inertiajs/react';
 import { ToastContainer, useToastNotifications } from '@/Components/Toast';
 import FlashMessage from '@/Components/FlashMessage';
@@ -16,7 +16,6 @@ import {
     ChevronDown,
     Menu,
     X,
-    Home,
     Search,
     ExternalLink,
     User,
@@ -25,10 +24,17 @@ import {
     ShoppingCart,
     LifeBuoy,
     Banknote,
+    Receipt,
+    Ticket,
+    Star,
+    BriefcaseBusiness,
+    UserRound,
+    ShieldCheck,
 } from 'lucide-react';
 import axios from 'axios';
 
 interface SideLink {
+    section?: string;
     title: string;
     icon: string;
     route?: string;
@@ -38,12 +44,16 @@ interface SideLink {
     children?: Array<{
         title: string;
         route: string;
-        permission?: string;
+        permission?: string | string[];
     }>;
 }
 
 interface DashboardLayoutProps extends PropsWithChildren {
-    // sideLinks: SideLink[]; // Removed
+    sideLinks?: SideLink[];
+    user?: {
+        name?: string;
+        email?: string;
+    } | null;
 }
 
 interface SearchResult {
@@ -72,15 +82,17 @@ interface Notification {
     data: any;
 }
 
-export default function DashboardLayout({ children }: PropsWithChildren) {
-    const { auth, sideLinks } = usePage().props as any;
-    const user = auth?.user;
+export default function DashboardLayout({ children, sideLinks: propSideLinks, user: propUser }: DashboardLayoutProps) {
+    const page = usePage() as any;
+    const { auth, sideLinks } = page.props;
+    const currentUrl = page.url as string;
+    const user = propUser ?? auth?.user;
 
     // Toast notifications
     useToastNotifications();
 
     // Fallback to empty array if sideLinks is undefined
-    const links = sideLinks || [];
+    const links: SideLink[] = propSideLinks || sideLinks || [];
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [expandedMenus, setExpandedMenus] = useState<string[]>([]);
     const [showMobileSearch, setShowMobileSearch] = useState(false);
@@ -102,9 +114,23 @@ export default function DashboardLayout({ children }: PropsWithChildren) {
     const [notifications, setNotifications] = useState<Notification[]>([]);
     const [unreadCount, setUnreadCount] = useState(0);
     const notificationRef = useRef<HTMLDivElement>(null);
+    const sidebarNavRef = useRef<HTMLElement>(null);
 
     // Cart state
     const [cartCount, setCartCount] = useState(0);
+
+    const getPageTitle = () => {
+        const flattenedChildren = links.flatMap((link) => link.children ?? []);
+        const activeChild = flattenedChildren.find((child) => route().current(child.route));
+
+        if (activeChild) {
+            return activeChild.title;
+        }
+
+        const activeLink = links.find((link) => link.route && route().current(link.route));
+
+        return activeLink?.title || 'Dashboard';
+    };
 
     const toggleMenu = (title: string) => {
         setExpandedMenus(prev =>
@@ -140,6 +166,14 @@ export default function DashboardLayout({ children }: PropsWithChildren) {
         return true;
     };
 
+    const isLinkActive = (link: SideLink) => {
+        if (link.route && route().current(link.route)) {
+            return true;
+        }
+
+        return link.children?.some((child) => route().current(child.route)) ?? false;
+    };
+
     const logout = (e: React.FormEvent) => {
         e.preventDefault();
         router.post(route('logout'));
@@ -149,7 +183,7 @@ export default function DashboardLayout({ children }: PropsWithChildren) {
         if (user?.photo) {
             return `/storage/${user.photo}`;
         }
-        return `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.name || '')}&background=002147&color=fff`;
+        return `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.name || '')}&background=1f2937&color=fff`;
     };
 
     // Handle search with debouncing
@@ -300,6 +334,41 @@ export default function DashboardLayout({ children }: PropsWithChildren) {
         };
     }, []);
 
+    useEffect(() => {
+        const activeMenus = links
+            .filter((link) => link.children && isLinkActive(link))
+            .map((link) => link.title);
+
+        if (activeMenus.length > 0) {
+            setExpandedMenus((prev) => Array.from(new Set([...prev, ...activeMenus])));
+        }
+    }, [links]);
+
+    useEffect(() => {
+        const sidebarNav = sidebarNavRef.current;
+        if (!sidebarNav) return;
+
+        const storageKey = 'dashboard-sidebar-scroll-top';
+        const handleScroll = () => {
+            sessionStorage.setItem(storageKey, String(sidebarNav.scrollTop));
+        };
+
+        sidebarNav.addEventListener('scroll', handleScroll, { passive: true });
+        return () => {
+            sidebarNav.removeEventListener('scroll', handleScroll);
+        };
+    }, []);
+
+    useLayoutEffect(() => {
+        const sidebarNav = sidebarNavRef.current;
+        if (!sidebarNav) return;
+
+        const savedScrollTop = sessionStorage.getItem('dashboard-sidebar-scroll-top');
+        if (!savedScrollTop) return;
+
+        sidebarNav.scrollTop = Number(savedScrollTop);
+    }, [currentUrl]);
+
     // Map icon names to Lucide components
     const getIcon = (iconName: string) => {
         const iconMap: Record<string, any> = {
@@ -314,132 +383,202 @@ export default function DashboardLayout({ children }: PropsWithChildren) {
             'settings': Settings,
             'life-buoy': LifeBuoy,
             'banknote': Banknote,
+            'wallet': Banknote,
+            'receipt': Receipt,
+            'ticket': Ticket,
+            'star': Star,
+            'blog': BriefcaseBusiness,
+            'user-group': UserRound,
+            'academic-cap': GraduationCap,
+            'users-cog': ShieldCheck,
         };
         return iconMap[iconName] || LayoutDashboard;
     };
 
+    const visibleLinks = useMemo(() => links.filter((link) => shouldShowLink(link)), [links, user]);
+
+    const groupedLinks = useMemo(() => {
+        return visibleLinks.reduce<Record<string, SideLink[]>>((groups, link) => {
+            const section = link.section || 'General';
+
+            if (!groups[section]) {
+                groups[section] = [];
+            }
+
+            groups[section].push(link);
+
+            return groups;
+        }, {});
+    }, [visibleLinks]);
+
+    const pageTitle = getPageTitle();
+
     return (
-        <div className="min-h-screen bg-gray-50">
+        <div className="hide-scrollbar min-h-screen overflow-y-auto bg-[linear-gradient(180deg,#f8fafc_0%,#eef4f7_100%)] text-slate-900">
             {/* Toast Notifications */}
             <ToastContainer />
             <FlashMessage />
 
+            {isSidebarOpen && (
+                <button
+                    type="button"
+                    aria-label="Close sidebar overlay"
+                    className="fixed inset-0 z-30 bg-slate-950/45 backdrop-blur-[1px] sm:hidden"
+                    onClick={() => setIsSidebarOpen(false)}
+                />
+            )}
+
             {/* Sidebar */}
             <aside
-                className={`fixed top-0 left-0 z-40 w-64 h-screen transition-transform ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
-                    } sm:translate-x-0 bg-linear-to-b from-slate-900 to-slate-800 shadow-2xl`}
+                className={`fixed inset-y-0 left-0 z-40 w-[17rem] border-r border-slate-200/70 bg-white/92 shadow-[0_20px_60px_rgba(15,23,42,0.08)] backdrop-blur transition-transform ${
+                    isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
+                } sm:translate-x-0`}
             >
-                <div className="h-full px-4 py-6 overflow-y-auto">
+                <div className="flex h-full flex-col overflow-hidden">
                     {/* Logo */}
-                    <div className="flex items-center justify-between mb-8 pb-6 border-b border-slate-700/50">
-                        <Link href={route('user_dashboard')} className="flex items-center space-x-3 group">
-                            <div className="relative">
+                    <div className="border-b border-slate-200 px-5 pb-5 pt-6">
+                        <div className="flex items-center justify-between">
+                            <Link href={route('user_dashboard')} className="group flex items-center gap-3">
                                 <img
                                     src="/images/logo.jpg"
-                                    className="h-10 w-10 rounded-xl shadow-lg ring-2 ring-white/10 group-hover:ring-white/20 transition-all duration-300"
+                                    className="h-11 w-11 rounded-xl border border-slate-200 object-cover shadow-sm transition-all duration-300 group-hover:shadow-md"
                                     alt="BLI Logo"
                                 />
-                            </div>
-                            <span className="text-white font-bold text-lg tracking-tight group-hover:text-blue-300 transition-colors duration-300">
-                                BLI
-                            </span>
-                        </Link>
-                        <button
-                            onClick={() => setIsSidebarOpen(false)}
-                            className="inline-flex items-center p-2 text-sm text-slate-400 rounded-lg sm:hidden hover:bg-slate-700/50 hover:text-white"
-                        >
-                            <X size={20} />
-                        </button>
+                                <div>
+                                    <span className="block text-sm font-semibold tracking-tight text-slate-900">BLI Workspace</span>
+                                <span className="block text-xs text-slate-500">Clean daily operations</span>
+                                </div>
+                            </Link>
+                            <button
+                                onClick={() => setIsSidebarOpen(false)}
+                            className="inline-flex items-center rounded-lg p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 sm:hidden"
+                            >
+                                <X size={18} />
+                            </button>
+                        </div>
                     </div>
 
                     {/* Navigation */}
-                    <nav className="text-slate-300">
-                        <ul className="space-y-1">
-                            {links.map((link, index) => {
-                                if (!shouldShowLink(link)) return null;
+                    <nav ref={sidebarNavRef} className="hide-scrollbar flex-1 overflow-y-auto px-4 py-5">
+                        <div className="space-y-6">
+                            {Object.entries(groupedLinks).map(([section, sectionLinks]) => (
+                                <div key={section}>
+                                    <p className="px-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">
+                                        {section}
+                                    </p>
+                                    <ul className="mt-2 space-y-1.5">
+                                        {sectionLinks.map((link: SideLink) => {
+                                            const isExpanded = expandedMenus.includes(link.title);
+                                            const isActive = isLinkActive(link);
+                                            const IconComponent = getIcon(link.icon);
 
-                                if (link.children) {
-                                    const isExpanded = expandedMenus.includes(link.title);
-                                    const IconComponent = getIcon(link.icon);
-                                    return (
-                                        <li key={index}>
-                                            <button
-                                                onClick={() => toggleMenu(link.title)}
-                                                className="flex items-center w-full p-3 text-sm font-medium text-slate-300 transition-all duration-200 rounded-xl group hover:bg-slate-700/50 hover:text-white"
-                                            >
-                                                <IconComponent size={18} className="text-slate-400 transition-colors duration-200 group-hover:text-blue-400 mr-3 shrink-0" />
-                                                <span className="flex-1 text-left whitespace-nowrap">{link.title}</span>
-                                                <ChevronDown size={16} className={`text-slate-400 transition-all duration-200 ${isExpanded ? 'rotate-180' : ''}`} />
-                                            </button>
-                                            {isExpanded && (
-                                                <ul className="mt-2 space-y-1 ml-4">
-                                                    {link.children.map((child, childIndex) => {
-                                                        if (!hasPermission(child.permission)) return null;
-                                                        return (
-                                                            <li key={childIndex}>
-                                                                <Link
-                                                                    href={route(child.route)}
-                                                                    className="flex items-center w-full p-2.5 text-sm text-slate-400 transition-all duration-200 rounded-lg hover:bg-slate-700/30 hover:text-white hover:translate-x-1 border-l-2 border-slate-600 hover:border-blue-400 pl-4"
-                                                                >
-                                                                    <span className="w-2 h-2 bg-slate-500 rounded-full mr-3"></span>
-                                                                    {child.title}
-                                                                </Link>
-                                                            </li>
-                                                        );
-                                                    })}
-                                                </ul>
-                                            )}
-                                        </li>
-                                    );
-                                }
+                                            if (link.children) {
+                                                return (
+                                                    <li key={link.title}>
+                                                        <button
+                                                            onClick={() => toggleMenu(link.title)}
+                                                        className={`group flex w-full items-center gap-3 rounded-xl px-3 py-3 text-sm transition-all ${
+                                                                isActive
+                                                                    ? 'bg-slate-900 text-white shadow-sm'
+                                                                    : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+                                                            }`}
+                                                        >
+                                                            <span className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${
+                                                                isActive ? 'bg-white/12 text-white' : 'bg-slate-100 text-slate-500 group-hover:bg-white'
+                                                            }`}>
+                                                                <IconComponent size={18} />
+                                                            </span>
+                                                            <span className="flex-1 text-left font-medium">{link.title}</span>
+                                                            <ChevronDown size={16} className={`transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
+                                                        </button>
 
-                                const IconComponent = getIcon(link.icon);
-                                return (
-                                    <li key={index}>
-                                        <Link
-                                            href={route(link.route!)}
-                                            className="flex items-center p-3 text-sm font-medium text-slate-300 rounded-xl transition-all duration-200 hover:bg-slate-700/50 hover:text-white group"
-                                        >
-                                            <IconComponent size={18} className="text-slate-400 transition-colors duration-200 group-hover:text-blue-400 mr-3 shrink-0" />
-                                            <span className="flex-1 whitespace-nowrap">{link.title}</span>
-                                        </Link>
-                                    </li>
-                                );
-                            })}
-                        </ul>
+                                                        {isExpanded && (
+                                                            <ul className="ml-6 mt-2 space-y-1 border-l border-slate-200 pl-4">
+                                                                {link.children.map((child: { title: string; route: string; permission?: string | string[] }) => {
+                                                                    if (!hasPermission(child.permission)) return null;
+
+                                                                    const childActive = route().current(child.route);
+
+                                                                    return (
+                                                                        <li key={child.title}>
+                                                                            <Link
+                                                                                href={route(child.route)}
+                                                                            className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition ${
+                                                                                    childActive
+                                                                                        ? 'bg-slate-200 font-medium text-slate-900'
+                                                                                        : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800'
+                                                                                }`}
+                                                                            >
+                                                                                <span className={`h-1.5 w-1.5 rounded-full ${childActive ? 'bg-slate-700' : 'bg-slate-300'}`}></span>
+                                                                                {child.title}
+                                                                            </Link>
+                                                                        </li>
+                                                                    );
+                                                                })}
+                                                            </ul>
+                                                        )}
+                                                    </li>
+                                                );
+                                            }
+
+                                            return (
+                                                <li key={link.title}>
+                                                    <Link
+                                                        href={route(link.route!)}
+                                                        className={`group flex items-center gap-3 rounded-xl px-3 py-3 text-sm transition-all ${
+                                                            isActive
+                                                                ? 'bg-slate-900 text-white shadow-sm'
+                                                                : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+                                                        }`}
+                                                    >
+                                                        <span className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${
+                                                            isActive ? 'bg-white/12 text-white' : 'bg-slate-100 text-slate-500 group-hover:bg-white'
+                                                        }`}>
+                                                            <IconComponent size={18} />
+                                                        </span>
+                                                        <span className="flex-1 font-medium">{link.title}</span>
+                                                    </Link>
+                                                </li>
+                                            );
+                                        })}
+                                    </ul>
+                                </div>
+                            ))}
+                        </div>
                     </nav>
+
+                    <div className="border-t border-slate-200 px-5 py-4">
+                        <div className="rounded-lg bg-slate-100 px-4 py-3">
+                            <p className="text-sm font-semibold text-slate-900">{user?.name}</p>
+                            <p className="mt-1 truncate text-xs text-slate-500">{user?.email}</p>
+                        </div>
+                    </div>
                 </div>
             </aside>
 
             {/* Main Content Area */}
-            <div className="sm:ml-64">
+            <div className="sm:ml-[17rem]">
                 {/* Top Navbar */}
-                <nav className="bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-lg sticky top-0 z-30">
-                    <div className="px-4 lg:px-6 py-3">
+                <nav className="sticky top-0 z-30 border-b border-slate-200/80 bg-white/85 backdrop-blur">
+                    <div className="px-4 py-3 lg:px-6 xl:px-8">
                         <div className="flex items-center justify-between">
                             {/* Left: Mobile menu + Breadcrumb */}
                             <div className="flex items-center gap-4">
                                 <button
                                     onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-                                    className="inline-flex items-center p-2 text-slate-600 rounded-xl sm:hidden hover:bg-primary-600 hover:text-white"
+                                    className="inline-flex items-center rounded-xl border border-slate-200 bg-white p-2 text-slate-600 transition hover:bg-slate-900 hover:text-white sm:hidden"
                                 >
                                     <Menu size={20} />
                                 </button>
 
-                                <nav className="hidden sm:flex items-center space-x-2 text-sm">
-                                    <Link
-                                        href={route('user_dashboard')}
-                                        className="flex items-center text-slate-500 hover:text-primary-600 transition-colors"
-                                        style={{ color: route().current('user_dashboard') ? '#002147' : undefined }}
-                                    >
-                                        <Home size={16} className="mr-1" />
-                                        <span className="font-medium">Dashboard</span>
-                                    </Link>
-                                </nav>
+                                <div className="hidden sm:block">
+                                    <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">Workspace</p>
+                                    <p className="mt-1 text-lg font-semibold text-slate-900">{pageTitle}</p>
+                                </div>
                             </div>
 
                             {/* Center: Search (Desktop) */}
-                            <div className="hidden lg:flex flex-1 max-w-lg mx-8" ref={searchRef}>
+                            <div className="mx-8 hidden max-w-xl flex-1 lg:flex" ref={searchRef}>
                                 <div className="relative w-full">
                                     <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                                         <Search size={16} className="text-slate-400" />
@@ -449,14 +588,13 @@ export default function DashboardLayout({ children }: PropsWithChildren) {
                                         value={searchQuery}
                                         onChange={(e) => handleSearch(e.target.value)}
                                         onFocus={() => searchQuery.length >= 2 && setShowResults(true)}
-                                        className="block w-full pl-10 pr-4 py-2.5 text-sm text-slate-900 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:border-primary-500 transition-all"
-                                        style={{ '--tw-ring-color': '#002147' } as any}
+                                        className="block w-full rounded-lg border border-slate-200 bg-slate-50 py-3 pl-10 pr-4 text-sm text-slate-900 transition-all focus:border-accent-300 focus:bg-white focus:ring-4 focus:ring-accent-100"
                                         placeholder="Search events, courses, speakers..."
                                     />
 
                                     {/* Search Results Dropdown */}
                                     {showResults && (
-                                        <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-xl shadow-2xl border border-slate-200 max-h-96 overflow-y-auto z-50">
+                                        <div className="app-panel absolute left-0 right-0 top-full z-50 mt-2 max-h-96 overflow-y-auto">
                                             {isSearching ? (
                                                 <div className="p-8 text-center text-slate-500">
                                                     <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
@@ -477,24 +615,24 @@ export default function DashboardLayout({ children }: PropsWithChildren) {
                             <div className="flex items-center gap-3">
                                 <Link
                                     href={route('homepage')}
-                                    className="hidden md:inline-flex items-center gap-2 px-3 py-2 text-sm font-medium text-slate-600 bg-slate-100 rounded-lg hover:bg-primary-600 hover:text-white transition-all"
+                                    className="hidden items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-600 transition hover:border-slate-300 hover:text-slate-900 md:inline-flex"
                                 >
                                     <ExternalLink size={16} />
                                     <span className="hidden lg:inline">Website</span>
                                 </Link>
 
-                                <button className="lg:hidden p-2 text-slate-600 rounded-lg hover:bg-slate-100" onClick={() => setShowMobileSearch(!showMobileSearch)}>
+                                <button className="rounded-lg p-2 text-slate-600 transition hover:bg-slate-100 lg:hidden" onClick={() => setShowMobileSearch(!showMobileSearch)}>
                                     <Search size={20} />
                                 </button>
 
                                 {/* Shopping Cart */}
                                 <Link
                                     href={route('cart.index')}
-                                    className="relative p-2 text-slate-600 rounded-lg hover:bg-slate-100 transition-all"
+                                    className="relative rounded-lg border border-slate-200 bg-white p-2 text-slate-600 transition hover:border-slate-300 hover:text-slate-900"
                                 >
                                     <ShoppingCart size={20} />
                                     {cartCount > 0 && (
-                                        <span className="absolute top-0 right-0 flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-primary-500 rounded-full">
+                                            <span className="absolute right-0 top-0 flex h-5 w-5 items-center justify-center rounded-full bg-accent-500 text-xs font-bold text-white">
                                             {cartCount > 9 ? '9+' : cartCount}
                                         </span>
                                     )}
@@ -509,11 +647,11 @@ export default function DashboardLayout({ children }: PropsWithChildren) {
                                                 fetchNotifications();
                                             }
                                         }}
-                                        className="relative p-2 text-slate-600 rounded-lg hover:bg-slate-100 transition-all"
+                                        className="relative rounded-lg border border-slate-200 bg-white p-2 text-slate-600 transition hover:border-slate-300 hover:text-slate-900"
                                     >
                                         <Bell size={20} />
                                         {unreadCount > 0 && (
-                                            <span className="absolute top-0 right-0 flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-red-500 rounded-full">
+                                            <span className="absolute right-0 top-0 flex h-5 w-5 items-center justify-center rounded-full bg-slate-900 text-xs font-bold text-white">
                                                 {unreadCount > 9 ? '9+' : unreadCount}
                                             </span>
                                         )}
@@ -521,13 +659,13 @@ export default function DashboardLayout({ children }: PropsWithChildren) {
 
                                     {/* Notification Dropdown */}
                                     {showNotifications && (
-                                        <div className="absolute right-0 mt-2 w-96 max-h-128 bg-white rounded-xl shadow-xl border border-slate-200 overflow-hidden z-50">
-                                            <div className="px-4 py-3 bg-linear-to-r from-primary-50 to-slate-50 flex items-center justify-between">
+                                        <div className="app-panel absolute right-0 z-50 mt-2 max-h-128 w-96 overflow-hidden">
+                                            <div className="flex items-center justify-between border-b border-gray-200 bg-gray-50 px-4 py-3">
                                                 <h3 className="text-sm font-semibold text-slate-800">Notifications</h3>
                                                 {unreadCount > 0 && (
                                                     <button
                                                         onClick={markAllAsRead}
-                                                        className="text-xs text-primary-600 hover:text-primary-700 font-medium"
+                                                        className="text-xs font-medium text-slate-600 hover:text-slate-900"
                                                     >
                                                         Mark all as read
                                                     </button>
@@ -544,8 +682,7 @@ export default function DashboardLayout({ children }: PropsWithChildren) {
                                                         {notifications.map((notification) => (
                                                             <li
                                                                 key={notification.id}
-                                                                className={`border-b border-slate-100 last:border-b-0 ${!notification.read_at ? 'bg-blue-50/50' : ''
-                                                                    }`}
+                                                                className={`border-b border-slate-100 last:border-b-0 ${!notification.read_at ? 'bg-slate-100/80' : ''}`}
                                                             >
                                                                 <button
                                                                     onClick={() => handleNotificationClick(notification)}
@@ -561,7 +698,7 @@ export default function DashboardLayout({ children }: PropsWithChildren) {
                                                                             </p>
                                                                         </div>
                                                                         {!notification.read_at && (
-                                                                            <div className="w-2 h-2 bg-blue-500 rounded-full mt-1 shrink-0"></div>
+                                                                            <div className="mt-1 h-2 w-2 shrink-0 rounded-full bg-slate-700"></div>
                                                                         )}
                                                                     </div>
                                                                 </button>
@@ -578,31 +715,31 @@ export default function DashboardLayout({ children }: PropsWithChildren) {
                                 <div className="relative" ref={profileDropdownRef}>
                                     <button
                                         onClick={() => setShowProfileDropdown(!showProfileDropdown)}
-                                        className="flex items-center gap-2 p-1.5 text-sm bg-slate-50 rounded-xl hover:bg-slate-100 transition-all"
+                                        className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white p-1.5 text-sm transition hover:border-slate-300"
                                     >
                                         <img
-                                            className="w-8 h-8 rounded-lg object-cover border border-slate-200"
+                                            className="h-8 w-8 rounded-lg border border-slate-200 object-cover"
                                             src={getAvatarUrl()}
                                             alt={user?.name}
                                             onError={(e) => {
-                                                (e.target as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.name || '')}&background=002147&color=fff`;
+                                                (e.target as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.name || '')}&background=1f2937&color=fff`;
                                             }}
                                         />
                                         <div className="hidden md:block text-left">
-                                            <p className="text-sm font-semibold text-slate-700 leading-tight">
-                                                {user?.name?.substring(0, 12)}
-                                            </p>
-                                            <p className="text-xs text-slate-500 leading-tight">
-                                                {user?.email?.substring(0, 20)}
-                                            </p>
-                                        </div>
+                                                <p className="text-sm font-semibold leading-tight text-slate-700">
+                                                    {user?.name?.substring(0, 12)}
+                                                </p>
+                                                <p className="text-xs leading-tight text-slate-500">
+                                                    {user?.email?.substring(0, 20)}
+                                                </p>
+                                            </div>
                                         <ChevronDown size={16} className={`text-slate-400 transition-transform duration-200 ${showProfileDropdown ? 'rotate-180' : ''}`} />
                                     </button>
 
                                     {/* Dropdown Menu */}
                                     {showProfileDropdown && (
-                                        <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-xl border border-slate-200 overflow-hidden z-50">
-                                            <div className="px-4 py-3 bg-linear-to-r from-primary-50 to-slate-50">
+                                        <div className="app-panel absolute right-0 z-50 mt-2 w-56 overflow-hidden">
+                                            <div className="border-b border-gray-200 bg-gray-50 px-4 py-3">
                                                 <p className="text-sm font-semibold text-slate-800">{user?.name}</p>
                                                 <p className="text-sm text-slate-600 truncate">{user?.email}</p>
                                             </div>
@@ -610,7 +747,7 @@ export default function DashboardLayout({ children }: PropsWithChildren) {
                                                 <li>
                                                     <Link
                                                         href={route('homepage')}
-                                                        className="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 hover:text-primary-600 transition-colors"
+                                                        className="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 transition-colors hover:bg-slate-50 hover:text-slate-900"
                                                     >
                                                         <ExternalLink size={16} className="text-slate-400" />
                                                         Visit Website
@@ -619,7 +756,7 @@ export default function DashboardLayout({ children }: PropsWithChildren) {
                                                 <li>
                                                     <Link
                                                         href={route('profile.edit')}
-                                                        className="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 hover:text-primary-600 transition-colors"
+                                                        className="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 transition-colors hover:bg-slate-50 hover:text-slate-900"
                                                     >
                                                         <User size={16} className="text-slate-400" />
                                                         Profile Settings
@@ -628,9 +765,9 @@ export default function DashboardLayout({ children }: PropsWithChildren) {
                                                 <li className="border-t border-slate-100 mt-1 pt-1">
                                                     <button
                                                         onClick={logout}
-                                                        className="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors"
+                                                        className="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors"
                                                     >
-                                                        <LogOut size={16} className="text-red-500" />
+                                                        <LogOut size={16} className="text-slate-400" />
                                                         Sign out
                                                     </button>
                                                 </li>
@@ -653,13 +790,13 @@ export default function DashboardLayout({ children }: PropsWithChildren) {
                                         value={searchQuery}
                                         onChange={(e) => handleSearch(e.target.value)}
                                         onFocus={() => searchQuery.length >= 2 && setShowResults(true)}
-                                        className="block w-full pl-10 pr-4 py-2.5 text-sm text-slate-900 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:border-primary-500"
+                                        className="block w-full rounded-lg border border-slate-200 bg-slate-50 py-3 pl-10 pr-4 text-sm text-slate-900 focus:border-accent-300 focus:bg-white focus:ring-4 focus:ring-accent-100"
                                         placeholder="Search events, courses, speakers..."
                                     />
 
                                     {/* Mobile Search Results */}
                                     {showResults && (
-                                        <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-xl shadow-2xl border border-slate-200 max-h-96 overflow-y-auto z-50">
+                                        <div className="app-panel absolute left-0 right-0 top-full z-50 mt-2 max-h-96 overflow-y-auto">
                                             {isSearching ? (
                                                 <div className="p-8 text-center text-slate-500">
                                                     <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
@@ -680,8 +817,10 @@ export default function DashboardLayout({ children }: PropsWithChildren) {
                 </nav>
 
                 {/* Page Content */}
-                <main className="p-4 lg:p-6">
-                    {children}
+                <main className="px-4 py-6 lg:px-6 xl:px-8">
+                    <div className="dashboard-page-shell">
+                        {children}
+                    </div>
                 </main>
             </div>
         </div>
@@ -723,7 +862,7 @@ function SearchResultsDisplay({
                             className="w-full px-4 py-3 hover:bg-slate-50 transition-colors text-left border-b border-slate-100 last:border-0"
                         >
                             <div className="flex items-start gap-3">
-                                <Calendar size={16} className="text-blue-500 mt-1 shrink-0" />
+                                <Calendar size={16} className="mt-1 shrink-0 text-secondary" />
                                 <div className="flex-1 min-w-0">
                                     <p className="font-medium text-sm text-slate-900 truncate">{event.title}</p>
                                     {event.subtitle && (
@@ -762,8 +901,8 @@ function SearchResultsDisplay({
                                         }}
                                     />
                                 ) : (
-                                    <div className="w-12 h-12 rounded bg-linear-to-br from-green-100 to-green-50 flex items-center justify-center shrink-0">
-                                        <BookOpen size={20} className="text-green-600" />
+                                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded bg-secondary-50">
+                                        <BookOpen size={20} className="text-slate-600" />
                                     </div>
                                 )}
                                 <div className="flex-1 min-w-0">
@@ -804,8 +943,8 @@ function SearchResultsDisplay({
                                         }}
                                     />
                                 ) : (
-                                    <div className="w-12 h-12 rounded-full bg-linear-to-br from-purple-100 to-purple-50 flex items-center justify-center shrink-0">
-                                        <Mic size={20} className="text-purple-600" />
+                                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-accent-50">
+                                        <Mic size={20} className="text-accent" />
                                     </div>
                                 )}
                                 <div className="flex-1 min-w-0">

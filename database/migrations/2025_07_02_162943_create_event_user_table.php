@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\EventRegistrationStatus;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -15,8 +16,12 @@ return new class extends Migration
             $table->id();
             $table->foreignId('event_id')->constrained('events', 'id')->cascadeOnDelete();
             $table->foreignId('user_id')->constrained('users', 'id')->cascadeOnDelete();
+            $table->string('status')->default(EventRegistrationStatus::REGISTERED->value);
+            $table->unsignedInteger('revoke_count')->default(0);
             $table->unique(['event_id', 'user_id']);
             $table->timestamps();
+
+            $table->index(['event_id', 'status']);
         });
     }
 

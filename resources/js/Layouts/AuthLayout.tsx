@@ -1,221 +1,91 @@
 import { PropsWithChildren } from 'react';
 import { Head, Link } from '@inertiajs/react';
 import { ToastContainer, useToastNotifications } from '@/Components/Toast';
+import { ArrowLeft } from 'lucide-react';
 
 interface AuthLayoutProps extends PropsWithChildren {
     title?: string;
     description?: string;
+    wide?: boolean;
 }
 
-export default function AuthLayout({ title, description, children }: AuthLayoutProps) {
-    // Toast notifications
+export default function AuthLayout({ title, description, wide = false, children }: AuthLayoutProps) {
     useToastNotifications();
 
     return (
         <>
             <Head title={title || 'Authentication'} />
-
-            {/* Toast Notifications */}
             <ToastContainer />
+            <div className="lg:flex h-screen overflow-hidden">
+                {/* Left: Brand Panel */}
+                <div className="fixed inset-y-0 left-0 hidden w-1/2 flex-col justify-between bg-primary p-12 lg:flex">
+                    <div
+                        className="absolute inset-0 bg-cover bg-center opacity-15"
+                        style={{ backgroundImage: 'url(/images/auth.jpg)' }}
+                    />
+                    <div className="absolute -right-20 -top-20 h-72 w-72 rounded-full bg-accent/40 blur-3xl" />
+                    <div className="absolute -bottom-32 -left-20 h-60 w-60 rounded-full bg-accent/30 blur-3xl" />
+                    <div className="absolute left-1/2 top-1/3 h-40 w-40 -translate-x-1/2 -translate-y-1/2 rounded-full bg-accent/10 blur-3xl" />
 
-            <div className="overflow-x-hidden min-h-screen">
-                {/* Mobile/Tablet Header */}
-                <nav className="lg:hidden bg-white shadow-lg sticky top-0 z-50 border-b border-gray-100">
-                    <div className="max-w-7xl mx-auto flex justify-between items-center py-3 px-4 md:px-8">
-                        {/* Logo */}
-                        <Link href={route('homepage')} className="flex items-center space-x-3 group">
-                            <div className="relative">
-                                <img
-                                    src="/images/logo.jpg"
-                                    alt="BLI Logo"
-                                    className="w-12 h-12 rounded-xl object-cover shadow-md"
-                                />
-                                <div
-                                    className="absolute -top-1 -right-1 w-3 h-3 rounded-full"
-                                    style={{ backgroundColor: '#00a651' }}
-                                />
-                            </div>
-                            <div>
-                                <div className="flex items-center gap-2">
-                                    <span
-                                        className="text-lg font-bold tracking-tight font-montserrat leading-tight"
-                                        style={{ color: '#002147' }}
-                                    >
-                                        Beacon Leadership
-                                    </span>
-                                </div>
-                                <span
-                                    className="text-xs font-semibold tracking-wide font-lato block"
-                                    style={{ color: '#00a651' }}
-                                >
-                                    Institute
-                                </span>
-                            </div>
+                    <div className="relative z-10">
+                        <Link href={route('homepage')} className="flex items-center gap-3">
+                            <img
+                                src="/images/logo.jpg"
+                                alt="BLI"
+                                className="h-11 w-11 rounded-md object-cover ring-2 ring-accent-400/60"
+                            />
+                            <p className="text-base font-bold text-white">Beacon Leadership Institute</p>
                         </Link>
+                    </div>
 
+                    <div className="relative z-10">
+                        <h2 className="text-4xl font-bold leading-tight text-white">
+                            Shape the next generation of leaders.
+                        </h2>
+                        <div className="my-5 h-1 w-16 rounded-full bg-accent" />
+                        <p className="mt-4 text-base leading-relaxed text-white/80">
+                            Access structured courses, live events, and a community focused on developing leaders
+                            with spiritual depth and practical clarity.
+                        </p>
+                    </div>
+
+                    <div className="relative z-10 border-t border-white/10 pt-6">
+                        <p className="text-sm text-white/50">
+                            &copy; {new Date().getFullYear()} Beacon Leadership Institute
+                        </p>
+                    </div>
+                </div>
+
+                {/* Right: Form Panel */}
+                <div className="flex w-full flex-col overflow-y-auto bg-gradient-to-br from-accent-50 via-white to-primary-50 lg:ml-[50%] lg:w-1/2">
+                    <header className="flex items-center justify-end border-b border-accent-100 bg-white/80 px-8 py-4 backdrop-blur-sm">
                         <Link
                             href={route('homepage')}
-                            className="text-sm font-semibold hover:underline"
-                            style={{ color: '#002147' }}
+                            className="inline-flex items-center gap-1.5 text-sm font-medium text-primary transition hover:text-accent"
                         >
-                            <i className="fas fa-arrow-left mr-2" style={{ color: '#00a651' }}></i>
-                            Back to Home
+                            <ArrowLeft className="h-4 w-4" />
+                            Back to site
                         </Link>
-                    </div>
-                </nav>
+                    </header>
 
-                {/* Main Content - 2 Column Grid for Large Screens */}
-                <main className="min-h-screen lg:grid lg:grid-cols-2">
-                    {/* Left Column - Branding & Visual (Hidden on Mobile/Tablet) */}
-                    <div
-                        className="hidden lg:flex flex-col justify-center items-center p-12 relative overflow-hidden"
-                        style={{ backgroundColor: '#002147' }}
-                    >
-                        {/* Background Pattern */}
-                        <div className="absolute inset-0 opacity-5">
-                            <div className="absolute inset-0" style={{
-                                backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)',
-                                backgroundSize: '40px 40px'
-                            }}></div>
-                        </div>
-
-                        {/* Content */}
-                        <div className="relative z-10 max-w-lg text-center">
-                            {/* Logo */}
-                            <Link href={route('homepage')} className="inline-block mb-8 group">
-                                <div className="flex flex-col items-center">
-                                    <div className="relative mb-4">
-                                        <img
-                                            src="/images/logo.jpg"
-                                            alt="BLI Logo"
-                                            className="w-32 h-32 rounded-3xl object-cover shadow-2xl group-hover:shadow-green-500/50 transition-all duration-500 transform group-hover:scale-105"
-                                        />
-                                        <div
-                                            className="absolute -top-2 -right-2 w-6 h-6 rounded-full animate-pulse"
-                                            style={{ backgroundColor: '#00a651' }}
-                                        ></div>
-                                    </div>
-                                    <div className="text-white">
-                                        <div className="flex items-center justify-center gap-3 mb-2">
-                                            <h1 className="text-4xl font-bold tracking-tight font-montserrat">
-                                                Beacon Leadership
-                                            </h1>
-                                            <i
-                                                className="fas fa-lightbulb text-2xl group-hover:text-yellow-400 transition-colors duration-300"
-                                                style={{ color: '#00a651' }}
-                                            ></i>
-                                        </div>
-                                        <p className="text-xl font-semibold tracking-wider font-lato" style={{ color: '#00a651' }}>
-                                            Institute
-                                        </p>
-                                    </div>
+                    <main className="flex flex-1 items-center justify-center px-8 py-12">
+                        <div className={`w-full ${wide ? 'max-w-xl' : 'max-w-sm'}`}>
+                            {title && (
+                                <div className="mb-8">
+                                    <h1 className="text-2xl font-bold tracking-tight text-primary">
+                                        {title}
+                                    </h1>
+                                    {description && (
+                                        <p className="mt-2 text-sm leading-6 text-primary-400">{description}</p>
+                                    )}
+                                    <div className="mt-4 h-1 w-10 rounded-full bg-accent" />
                                 </div>
-                            </Link>
+                            )}
 
-                            {/* Welcome Message */}
-                            <div className="space-y-6 text-white">
-                                <h2 className="text-3xl font-bold font-montserrat leading-tight">
-                                    Empowering Tomorrow's Leaders
-                                </h2>
-                                <p className="text-lg text-gray-300 font-lato leading-relaxed">
-                                    Join a community dedicated to developing exceptional leadership skills through
-                                    world-class courses, events, and mentorship programs.
-                                </p>
-
-                                {/* Features */}
-                                <div className="grid grid-cols-1 gap-4 mt-8">
-                                    <div className="flex items-center gap-4 p-4 bg-white/5 rounded-xl backdrop-blur-sm border border-white/10">
-                                        <div className="shrink-0 w-12 h-12 rounded-lg flex items-center justify-center" style={{ backgroundColor: '#00a651' }}>
-                                            <i className="fas fa-graduation-cap text-white text-xl"></i>
-                                        </div>
-                                        <div className="text-left">
-                                            <h3 className="font-semibold font-montserrat">Expert-Led Courses</h3>
-                                            <p className="text-sm text-gray-300 font-lato">Learn from industry leaders</p>
-                                        </div>
-                                    </div>
-                                    <div className="flex items-center gap-4 p-4 bg-white/5 rounded-xl backdrop-blur-sm border border-white/10">
-                                        <div className="shrink-0 w-12 h-12 rounded-lg flex items-center justify-center" style={{ backgroundColor: '#00a651' }}>
-                                            <i className="fas fa-users text-white text-xl"></i>
-                                        </div>
-                                        <div className="text-left">
-                                            <h3 className="font-semibold font-montserrat">Global Community</h3>
-                                            <p className="text-sm text-gray-300 font-lato">Connect with like-minded leaders</p>
-                                        </div>
-                                    </div>
-                                    <div className="flex items-center gap-4 p-4 bg-white/5 rounded-xl backdrop-blur-sm border border-white/10">
-                                        <div className="shrink-0 w-12 h-12 rounded-lg flex items-center justify-center" style={{ backgroundColor: '#00a651' }}>
-                                            <i className="fas fa-certificate text-white text-xl"></i>
-                                        </div>
-                                        <div className="text-left">
-                                            <h3 className="font-semibold font-montserrat">Certified Programs</h3>
-                                            <p className="text-sm text-gray-300 font-lato">Earn recognized credentials</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Quick Links */}
-                            <div className="mt-12 flex items-center justify-center gap-6 text-sm">
-                                <Link
-                                    href={route('homepage')}
-                                    className="text-gray-300 hover:text-white transition-colors font-lato flex items-center gap-2"
-                                >
-                                    <i className="fas fa-home"></i>
-                                    <span>Home</span>
-                                </Link>
-                                <span className="text-gray-600">•</span>
-                                <Link
-                                    href={route('courses.index')}
-                                    className="text-gray-300 hover:text-white transition-colors font-lato flex items-center gap-2"
-                                >
-                                    <i className="fas fa-book-open"></i>
-                                    <span>Courses</span>
-                                </Link>
-                                <span className="text-gray-600">•</span>
-                                <Link
-                                    href={route('events.index')}
-                                    className="text-gray-300 hover:text-white transition-colors font-lato flex items-center gap-2"
-                                >
-                                    <i className="fas fa-calendar-alt"></i>
-                                    <span>Events</span>
-                                </Link>
-                            </div>
+                            {children}
                         </div>
-                    </div>
-
-                    {/* Right Column - Auth Form */}
-                    <div className="flex items-center justify-center px-4 py-12 lg:px-12 bg-gray-50">
-                        <div className="w-full max-w-lg">
-                            {/* Auth Card */}
-                            <div className="bg-white rounded-2xl shadow-2xl overflow-hidden border border-gray-100">
-                                {/* Header */}
-                                {title && (
-                                    <div className="px-8 lg:px-10 pt-8 pb-6 text-center border-b border-gray-100">
-                                        <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl mb-4" style={{ backgroundColor: '#f0f9ff' }}>
-                                            <i className="fas fa-user-circle text-3xl" style={{ color: '#002147' }}></i>
-                                        </div>
-                                        <h2 className="text-3xl font-bold font-montserrat mb-2" style={{ color: '#002147' }}>
-                                            {title}
-                                        </h2>
-                                        {description && (
-                                            <p className="text-gray-600 font-lato text-base">{description}</p>
-                                        )}
-                                    </div>
-                                )}
-
-                                {/* Content */}
-                                <div className="px-8 lg:px-10 py-8">
-                                    {children}
-                                </div>
-                            </div>
-
-                            {/* Footer Text */}
-                            <p className="text-center text-gray-600 text-sm mt-6 font-lato">
-                                © {new Date().getFullYear()} Beacon Leadership Institute. All rights reserved.
-                            </p>
-                        </div>
-                    </div>
-                </main>
+                    </main>
+                </div>
             </div>
         </>
     );

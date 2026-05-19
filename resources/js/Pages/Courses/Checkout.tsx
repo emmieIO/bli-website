@@ -100,19 +100,20 @@ export default function Checkout({ course, paystackPublicKey }: CheckoutProps) {
         <GuestLayout>
             <Head title={`Checkout - ${course.title}`} />
 
-            <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-                <div className="max-w-4xl mx-auto">
+            <div className="public-section min-h-screen px-4 sm:px-6 lg:px-8">
+                <div className="section-shell max-w-5xl">
                     {/* Header */}
                     <div className="text-center mb-8">
-                        <h1 className="text-3xl font-bold text-gray-900 font-montserrat">Complete Your Purchase</h1>
-                        <p className="mt-2 text-gray-600 font-lato">You're one step away from accessing this amazing course</p>
+                        <p className="enterprise-label mb-3">Checkout</p>
+                        <h1 className="text-3xl font-bold text-gray-900">Complete Your Purchase</h1>
+                        <p className="mt-2 text-gray-600">You're one step away from accessing this course</p>
                     </div>
 
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                         {/* Order Summary */}
                         <div className="lg:col-span-2">
-                            <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-                                <h2 className="text-xl font-bold text-gray-900 mb-4 font-montserrat">Order Summary</h2>
+                            <div className="public-card mb-6 p-6">
+                                <h2 className="mb-4 text-xl font-bold text-gray-900">Order Summary</h2>
 
                                 <div className="flex gap-4">
                                     {course.thumbnail_path && (
@@ -125,7 +126,7 @@ export default function Checkout({ course, paystackPublicKey }: CheckoutProps) {
                                     <div className="flex-1">
                                         <h3 className="font-semibold text-gray-900 font-montserrat">{course.title}</h3>
                                         {course.subtitle && (
-                                            <p className="text-sm text-gray-600 font-lato">{course.subtitle}</p>
+                                            <p className="text-sm text-gray-600">{course.subtitle}</p>
                                         )}
                                         <p className="text-sm text-gray-500 mt-1 font-lato">
                                             by {course.instructor.name}
@@ -143,9 +144,9 @@ export default function Checkout({ course, paystackPublicKey }: CheckoutProps) {
                             </div>
 
                             {/* Payment Form */}
-                            <div className="bg-white rounded-lg shadow-md p-6">
+                            <div className="public-card p-6">
                                 <div className="flex justify-between items-center mb-4">
-                                    <h2 className="text-xl font-bold text-gray-900 font-montserrat">Payment Details</h2>
+                                    <h2 className="text-xl font-bold text-gray-900">Payment Details</h2>
                                     {user && (
                                         <label className="flex items-center space-x-2 text-sm text-gray-600 cursor-pointer">
                                             <input
@@ -154,14 +155,14 @@ export default function Checkout({ course, paystackPublicKey }: CheckoutProps) {
                                                 onChange={(e) => handleUseMyDetails(e.target.checked)}
                                                 className="rounded text-primary focus:ring-primary border-gray-300"
                                             />
-                                            <span className="font-lato">Use my profile details</span>
+                                            <span>Use my profile details</span>
                                         </label>
                                     )}
                                 </div>
 
                                 <form onSubmit={handleSubmit} className="space-y-4">
                                     <div>
-                                        <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1 font-montserrat">
+                                        <label htmlFor="name" className="mb-1 block text-sm font-medium text-gray-700">
                                             Full Name
                                         </label>
                                         <input
@@ -171,13 +172,13 @@ export default function Checkout({ course, paystackPublicKey }: CheckoutProps) {
                                             value={name}
                                             onChange={(e) => setName(e.target.value)}
                                             disabled={useMyDetails}
-                                            className={`w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent font-lato ${useMyDetails ? 'bg-gray-100 cursor-not-allowed' : ''}`}
+                                            className={`public-input ${useMyDetails ? 'cursor-not-allowed bg-gray-100' : ''}`}
                                             placeholder="John Doe"
                                         />
                                     </div>
 
                                     <div>
-                                        <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1 font-montserrat">
+                                        <label htmlFor="email" className="mb-1 block text-sm font-medium text-gray-700">
                                             Email Address
                                         </label>
                                         <input
@@ -187,13 +188,13 @@ export default function Checkout({ course, paystackPublicKey }: CheckoutProps) {
                                             value={email}
                                             onChange={(e) => setEmail(e.target.value)}
                                             disabled={useMyDetails}
-                                            className={`w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent font-lato ${useMyDetails ? 'bg-gray-100 cursor-not-allowed' : ''}`}
+                                            className={`public-input ${useMyDetails ? 'cursor-not-allowed bg-gray-100' : ''}`}
                                             placeholder="your@email.com"
                                         />
                                     </div>
 
                                     <div>
-                                        <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1 font-montserrat">
+                                        <label htmlFor="phone" className="mb-1 block text-sm font-medium text-gray-700">
                                             Phone Number (Optional)
                                         </label>
                                         <input
@@ -202,7 +203,7 @@ export default function Checkout({ course, paystackPublicKey }: CheckoutProps) {
                                             value={phone}
                                             onChange={(e) => setPhone(e.target.value)}
                                             disabled={useMyDetails}
-                                            className={`w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent font-lato ${useMyDetails ? 'bg-gray-100 cursor-not-allowed' : ''}`}
+                                            className={`public-input ${useMyDetails ? 'cursor-not-allowed bg-gray-100' : ''}`}
                                             placeholder="+1234567890"
                                         />
                                     </div>
@@ -210,7 +211,7 @@ export default function Checkout({ course, paystackPublicKey }: CheckoutProps) {
                                     <button
                                         type="submit"
                                         disabled={isProcessing}
-                                        className="w-full bg-primary text-white py-3 px-6 rounded-lg font-semibold hover:bg-primary-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-montserrat"
+                                        className="enterprise-button enterprise-button-primary w-full disabled:cursor-not-allowed disabled:opacity-50"
                                     >
                                         {isProcessing ? 'Processing...' : `Pay ₦${Number(course.price).toLocaleString()}`}
                                     </button>
@@ -218,7 +219,7 @@ export default function Checkout({ course, paystackPublicKey }: CheckoutProps) {
 
                                 {/* Payment Methods */}
                                 <div className="mt-6 pt-6 border-t border-gray-200">
-                                    <p className="text-sm text-gray-600 text-center mb-3 font-lato">
+                                    <p className="mb-3 text-center text-sm text-gray-600">
                                         Secure payment powered by Paystack
                                     </p>
                                     <div className="flex justify-center gap-4">
@@ -233,31 +234,31 @@ export default function Checkout({ course, paystackPublicKey }: CheckoutProps) {
 
                         {/* Sidebar */}
                         <div className="lg:col-span-1">
-                            <div className="bg-white rounded-lg shadow-md p-6 sticky top-4">
-                                <h3 className="text-lg font-bold text-gray-900 mb-4 font-montserrat">After Purchase</h3>
+                            <div className="public-card sticky top-4 p-6">
+                                <h3 className="mb-4 text-lg font-bold text-gray-900">After Purchase</h3>
                                 <ul className="space-y-3">
                                     <li className="flex items-start gap-3">
                                         <i className="fas fa-check-circle text-green-500 mt-1"></i>
-                                        <span className="text-sm text-gray-700 font-lato">Instant access to all course content</span>
+                                        <span className="text-sm text-gray-700">Instant access to all course content</span>
                                     </li>
                                     <li className="flex items-start gap-3">
                                         <i className="fas fa-check-circle text-green-500 mt-1"></i>
-                                        <span className="text-sm text-gray-700 font-lato">Lifetime access to the course</span>
+                                        <span className="text-sm text-gray-700">Lifetime access to the course</span>
                                     </li>
                                     <li className="flex items-start gap-3">
                                         <i className="fas fa-check-circle text-green-500 mt-1"></i>
-                                        <span className="text-sm text-gray-700 font-lato">Certificate of completion</span>
+                                        <span className="text-sm text-gray-700">Certificate of completion</span>
                                     </li>
                                     <li className="flex items-start gap-3">
                                         <i className="fas fa-check-circle text-green-500 mt-1"></i>
-                                        <span className="text-sm text-gray-700 font-lato">30-day money-back guarantee</span>
+                                        <span className="text-sm text-gray-700">30-day money-back guarantee</span>
                                     </li>
                                 </ul>
 
                                 <div className="mt-6 pt-6 border-t border-gray-200">
                                     <button
                                         onClick={() => router.visit(route('courses.show', course.slug))}
-                                        className="w-full text-primary hover:text-primary-700 font-semibold text-sm font-montserrat"
+                                        className="w-full text-sm font-semibold text-primary hover:text-primary-700"
                                     >
                                         ← Back to Course
                                     </button>
