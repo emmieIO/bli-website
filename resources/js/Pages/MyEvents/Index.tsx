@@ -133,7 +133,7 @@ export default function MyEvents({ events }: MyEventsProps) {
                 {events.length > 0 ? (
                     <section className="workspace-card overflow-hidden">
                         <div className="overflow-x-auto">
-                            <table className="min-w-full divide-y divide-slate-200">
+                            <table className="min-w-[1120px] divide-y divide-slate-200">
                                 <thead className="bg-slate-50/80">
                                     <tr>
                                         <TableHead>Event</TableHead>
@@ -159,31 +159,31 @@ export default function MyEvents({ events }: MyEventsProps) {
                                                     </p>
                                                 </div>
                                             </td>
-                                            <td className="px-6 py-5">
-                                                <span className={`inline-flex rounded-full border px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] ${registrationTone[event.registration_status]}`}>
+                                            <td className="whitespace-nowrap px-6 py-5">
+                                                <span className={`inline-flex whitespace-nowrap rounded-full border px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] ${registrationTone[event.registration_status]}`}>
                                                     {registrationLabel[event.registration_status] ?? event.registration_status}
                                                 </span>
                                             </td>
-                                            <td className="px-6 py-5">
-                                                <span className={`inline-flex rounded-full border px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] ${journeyTone[event.journey_status]}`}>
+                                            <td className="whitespace-nowrap px-6 py-5">
+                                                <span className={`inline-flex whitespace-nowrap rounded-full border px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] ${journeyTone[event.journey_status]}`}>
                                                     {event.journey_status}
                                                 </span>
                                             </td>
-                                            <td className="px-6 py-5 text-sm leading-6 text-slate-700">
+                                            <td className="whitespace-nowrap px-6 py-5 text-sm leading-6 text-slate-700">
                                                 <div>{formatDate(event.start_date)}</div>
                                                 <div className="text-slate-500">to {formatDate(event.end_date)}</div>
                                             </td>
-                                            <td className="px-6 py-5 text-sm text-slate-700">
+                                            <td className="whitespace-nowrap px-6 py-5 text-sm text-slate-700">
                                                 {event.mode ? event.mode.charAt(0).toUpperCase() + event.mode.slice(1) : 'Hybrid'}
                                             </td>
-                                            <td className="px-6 py-5 text-sm text-slate-700">
+                                            <td className="whitespace-nowrap px-6 py-5 text-sm text-slate-700">
                                                 {event.latest_transaction ? event.latest_transaction.status : 'No payment required'}
                                             </td>
                                             <td className="px-6 py-5 text-sm text-slate-700">
                                                 {event.location || 'Shared in workspace'}
                                             </td>
                                             <td className="px-6 py-5">
-                                                <div className="flex flex-col items-end gap-3">
+                                                <div className="flex flex-col items-end gap-3 whitespace-nowrap">
                                                     <Link
                                                         href={route('user.events.show', event.slug)}
                                                         className="inline-flex items-center rounded-xl border border-slate-900 bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800"
