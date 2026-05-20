@@ -30,7 +30,7 @@ class MentorshipService
         }
 
         // Validate that the instructor has the instructor role
-        if (!$instructor->hasRole('instructor')) {
+        if (!$instructor->canAccessInstructorArea()) {
             throw new \Exception('The selected user is not an instructor.');
         }
 

@@ -6,7 +6,7 @@ use App\Models\Course;
 use App\Models\User;
 use App\Models\Transaction;
 use App\Models\Event;
-use App\Services\Event\EventService;
+use App\Services\Event\EventQueryService;
 use App\Services\MiscService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -14,13 +14,13 @@ use Inertia\Inertia;
 class HomeController extends Controller
 {
     public function __construct(
-        public EventService $eventService,
+        public EventQueryService $eventQueryService,
         public MiscService $miscService
     ) {}
 
     public function index()
     {
-        $events = $this->eventService->fetchFeaturedEvents();
+        $events = $this->eventQueryService->fetchFeaturedEvents();
         $categories = $this->miscService->fetchFiveCategories();
 
         // Get real platform statistics

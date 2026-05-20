@@ -4,7 +4,8 @@ namespace App\Actions;
 
 use App\Enums\EventRegistrationStatus;
 use App\Models\Event;
-use App\Services\Event\EventService;
+use App\Services\Event\EventParticipantStateService;
+use App\Services\Event\EventRegistrationService;
 use Illuminate\Http\Request;
 
 class JoinEventAction
@@ -13,7 +14,8 @@ class JoinEventAction
      * Create a new class instance.
      */
     public function __construct(
-        protected EventService $eventService
+        protected EventRegistrationService $eventRegistrationService,
+        protected EventParticipantStateService $participantStateService
     ) {
     }
     /**
@@ -68,7 +70,7 @@ class JoinEventAction
 
 
         // Check for maximum registrations
-        $maxRevokes = $event->maxRevokes();
+        $maxRevokes = $this->participantStateService->hasReachedMaxRevokes($event, $userId);
         if (isset($maxRevokes) && $maxRevokes) {
             return back()->with([
                 "type" => "error",
@@ -78,8 +80,8 @@ class JoinEventAction
 
         // Check if event is paid
         if ($event->entry_fee > 0) {
-            if ($event->slotsRemaining() === 'Full') {
-                $result = $this->eventService->registerOrWaitlist($event, $userId);
+            if ($this->participantStateService->slotsRemaining($event) === 'Full') {
+                $result = $this->eventRegistrationService->registerOrWaitlist($event, $userId);
 
                 if ($result === EventRegistrationStatus::WAITLISTED) {
                     return redirect($workspaceRoute)->with([
@@ -92,7 +94,7 @@ class JoinEventAction
             return redirect()->route('events.checkout', $event->slug);
         }
 
-        $result = $this->eventService->registerOrWaitlist($event, $userId);
+        $result = $this->eventRegistrationService->registerOrWaitlist($event, $userId);
 
         if ($result === EventRegistrationStatus::REGISTERED) {
             return redirect($workspaceRoute)->with([

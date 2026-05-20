@@ -6,6 +6,7 @@ use App\Enums\EventStatus;
 use App\Enums\Permissions\EventPermissionsEnum;
 use App\Models\Event;
 use App\Models\User;
+use App\Services\Event\EventParticipantStateService;
 use Illuminate\Auth\Access\Response;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
@@ -91,7 +92,7 @@ class EventPolicy
     public function register(User $user, Event $event): bool
     {
         return $user->hasPermissionTo(EventPermissionsEnum::REGISTER->value)
-            && $event->canUserRegister($user->id);
+            && app(EventParticipantStateService::class)->canUserRegister($event, $user->id);
     }
 
     /**

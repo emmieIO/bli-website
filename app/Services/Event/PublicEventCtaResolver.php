@@ -14,7 +14,8 @@ use Illuminate\Support\Facades\URL;
 class PublicEventCtaResolver
 {
     public function __construct(
-        protected SpeakerTransitionService $speakerTransitionService
+        protected SpeakerTransitionService $speakerTransitionService,
+        protected EventParticipantStateService $participantStateService
     ) {}
 
     public function resolve(Event $event, ?User $user = null): array
@@ -36,7 +37,7 @@ class PublicEventCtaResolver
             return $this->status('completed', 'Event completed', 'This event has already concluded.');
         }
 
-        if ($user && $event->userHasAttendeeWorkspace($user->id)) {
+        if ($user && $this->participantStateService->userHasAttendeeWorkspace($event, $user->id)) {
             return $this->action(
                 'view_attendee_workspace',
                 'Open attendee workspace',
@@ -77,7 +78,7 @@ class PublicEventCtaResolver
             );
         }
 
-        if ($event->slotsRemaining() === 'Full') {
+        if ($this->participantStateService->slotsRemaining($event) === 'Full') {
             return $this->joinAction(
                 'join_waitlist',
                 $event,

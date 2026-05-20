@@ -3,116 +3,25 @@
 namespace App\Services\Event;
 
 use App\Enums\EventRegistrationStatus;
-use App\Enums\EventStatus;
+use App\Enums\Permissions\EventPermissionsEnum;
 use App\Events\EventRegisterEvent;
-use App\Events\Events\EventCreated;
 use App\Models\Event;
 use App\Models\EventRefundRequest;
 use App\Models\EventTransitionAudit;
-use App\Models\SpeakerInvite;
 use App\Models\Transaction;
 use App\Models\User;
 use App\Notifications\EventRefundRequestedNotification;
 use App\Notifications\EventRefundRequestReviewedNotification;
-use App\Notifications\SpeakerInvitationNotification;
-use App\Enums\Permissions\EventPermissionsEnum;
-use App\Services\Speakers\SpeakerApplicationService;
-use App\Services\Speakers\SpeakerTransitionService;
-use App\Traits\HasFileUpload;
-use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
 use Throwable;
 
-class EventService
+class EventRegistrationService
 {
-    use HasFileUpload;
-    /**
-     * Create a new class instance.
-     */
-
     public function __construct(
-        protected SpeakerService $speakerService,
-        protected SpeakerApplicationService $speakerApplicationService,
-        protected SpeakerTransitionService $speakerTransitionService
-        ){}
-
-    public function getPublishedEvents(null|string $q=null)
-    {
-        $events = Event::publiclyVisible()
-            ->when($q, function ($query, $searchQuery) {
-                $like = '%' . $searchQuery . '%';
-
-                $query->where(function ($nestedQuery) use ($like) {
-                    $nestedQuery->where('title', 'like', $like)
-                        ->orWhere('mode', 'like', $like)
-                        ->orWhere('theme', 'like', $like)
-                        ->orWhere('physical_address', 'like', $like);
-                });
-            })
-            ->orderBy('created_at', 'asc')
-            ->paginate()
-            ->withQueryString();
-
-        return $events;
-    }
-
-    public function fetchFeaturedEvents(){
-        return Event::query()
-            ->where('is_featured', '=', true)
-            ->publiclyVisible()
-            ->where('start_date', '>', Carbon::now())
-            ->orderByDesc('created_at')
-            ->take(3)
-            ->get();
-    }
-
-
-    public function getEventsCreatedByUser(string|null $filter = null, bool $includePaymentMetrics = true)
-    {
-        $user = Auth::user();
-        if ($user) {
-            if ($user->hasRole('admin') || $user->hasRole('super-admin')) {
-                $query = Event::query();
-            } else {
-                $query = $user->eventsCreated();
-            }
-
-            if ($filter === 'past') {
-                $query->where('end_date', '<', now());
-            } elseif ($filter === 'ongoing') {
-                $query->where('start_date', '<=', now())
-                    ->where('end_date', '>=', now());
-            } elseif ($filter === 'future') {
-                $query->where('start_date', '>', now());
-            } elseif ($filter === 'draft') {
-                $query->where('status', EventStatus::DRAFT->value);
-            } elseif (in_array($filter, EventStatus::values(), true)) {
-                $query->where('status', $filter);
-            }
-
-            $withCount = [
-                'speakers',
-                'attendees',
-                'speakerApplications',
-            ];
-
-            if ($includePaymentMetrics) {
-                $withCount['transactions as successful_transactions_count'] = fn ($transactionQuery) => $transactionQuery->where('status', 'successful');
-            }
-
-            return $query
-                ->withCount($withCount)
-                ->orderBy('start_date', 'desc')
-                ->paginate()
-                ->withQueryString();
-        }
-        return collect([]);
-    }
+        protected EventParticipantStateService $participantStateService
+    ) {}
 
     public function registerForEvent(int $eventId, ?int $userId = null): bool
     {
@@ -135,7 +44,7 @@ class EventService
             return false;
         }
 
-        $targetStatus = $event->slotsRemaining() === 'Full'
+        $targetStatus = $this->participantStateService->slotsRemaining($event) === 'Full'
             ? EventRegistrationStatus::WAITLISTED
             : EventRegistrationStatus::REGISTERED;
 
@@ -145,14 +54,15 @@ class EventService
     public function getEventsImAttending()
     {
         $user = Auth::user();
-        if ($user) {
-            $events = $user->events()
-                ->wherePivotIn('status', EventRegistrationStatus::workspaceAccessibleValues())
-                ->with(['resources', 'transactions' => fn ($query) => $query->where('user_id', $user->id)->latest()])
-                ->get();
-            return $events;
+
+        if (! $user) {
+            return collect([]);
         }
-        return collect([]);
+
+        return $user->events()
+            ->wherePivotIn('status', EventRegistrationStatus::workspaceAccessibleValues())
+            ->with(['resources', 'transactions' => fn ($query) => $query->where('user_id', $user->id)->latest()])
+            ->get();
     }
 
     public function getAttendeeEventWorkspace(string $slug): ?Event
@@ -184,7 +94,7 @@ class EventService
         }
 
         $event = Event::findBySlug($slug)->firstOrFail();
-        $registrationStatus = $event->registrationStatusForUserEnum($userId);
+        $registrationStatus = $this->participantStateService->registrationStatusForUserEnum($event, $userId);
 
         if (! $registrationStatus || ! in_array($registrationStatus, [
             EventRegistrationStatus::REGISTERED,
@@ -326,7 +236,7 @@ class EventService
                     return 'invalid_status';
                 }
 
-                if ($event->slotsRemaining() === 'Full') {
+                if ($this->participantStateService->slotsRemaining($event) === 'Full') {
                     return 'no_capacity';
                 }
 
@@ -462,7 +372,7 @@ class EventService
                     'admin_note' => $adminNote,
                 ]);
 
-                $currentStatus = $refundRequest->event->registrationStatusForUserEnum($refundRequest->user_id);
+                $currentStatus = $this->participantStateService->registrationStatusForUserEnum($refundRequest->event, $refundRequest->user_id);
 
                 $this->recordRegistrationAudit(
                     event: $refundRequest->event,
@@ -550,6 +460,7 @@ class EventService
 
             if (! $currentStatus) {
                 Log::warning("User {$userId} has an unknown registration state for event {$event->id}. Registration denied.");
+
                 return false;
             }
 
@@ -558,11 +469,13 @@ class EventService
                     'from' => $currentStatus->value,
                     'to' => $targetStatus->value,
                 ]);
+
                 return false;
             }
 
             if ($currentStatus === EventRegistrationStatus::CANCELLED && ($existing->pivot->revoke_count ?? 0) >= 4) {
                 Log::warning("User {$userId} attempted to re-register for event {$event->id} but has reached the maximum revoke count ({$existing->pivot->revoke_count}). Registration denied.");
+
                 return false;
             }
 
@@ -580,10 +493,7 @@ class EventService
                 actorUserId: Auth::id(),
             );
 
-            if (
-                $targetStatus === EventRegistrationStatus::REGISTERED
-                && $currentStatus !== EventRegistrationStatus::REGISTERED
-            ) {
+            if ($targetStatus === EventRegistrationStatus::REGISTERED && $currentStatus !== EventRegistrationStatus::REGISTERED) {
                 $user = User::query()->find($userId, ['*']);
 
                 if ($user) {
@@ -640,158 +550,4 @@ class EventService
             'context' => $context === [] ? null : $context,
         ]);
     }
-
-    public function createEvent(array $validated, UploadedFile|null $program_cover = null)
-    {
-
-        try {
-            DB::beginTransaction();
-            $filepath = null;
-
-            $validated['slug'] = (string) Str::uuid();
-
-            if($program_cover){
-                $filepath = $this->uploadFile($program_cover, 'program_covers');
-                $validated['program_cover'] = $filepath;
-            }
-
-            $validated['status'] = $validated['status'] ?? EventStatus::DRAFT->value;
-
-            $event = Event::create($validated);
-            DB::commit();
-            event(new EventCreated($event));
-
-            return $event;
-        } catch (\Exception $e) {
-            DB::rollback();
-            if (!empty($filepath) && Storage::disk('public')->exists($filepath)) {
-                Storage::disk('public')->delete($filepath);
-            }
-            Log::error('Event creation failed: ' . $e->getMessage());
-            return null;
-        }
-    }
-
-    protected function generateUniqueSlug(string $title): string
-    {
-        $slug = Str::slug($title);
-        $count = Event::query()
-            ->where('slug', 'like', "{$slug}%", 'and')
-            ->count('id');
-        return $count ? "{$slug}-{$count}" : $slug;
-    }
-
-    public function updateEvent(array $validated, Event $event, UploadedFile|null $program_cover = null)
-    {
-        DB::beginTransaction();
-        try {
-            $file_path = $event->program_cover;
-
-            if ($program_cover) {
-                $new_file_path = $this->uploadFile($program_cover, 'program_covers');
-                if($new_file_path){
-                    $validated['program_cover'] = $new_file_path;
-                    if(!empty($file_path)){
-                        $this->removeFile($file_path);
-                    }
-                }
-            } else {
-                $validated['program_cover'] = $file_path;
-            }
-
-            $event->fill($validated);
-            $event->save();
-            DB::commit();
-            return $event->fresh();
-
-        } catch (\Exception $e) {
-            DB::rollBack();
-            Log::error('Event update failed: ' . $e->getMessage());
-            return null;
-        }
-    }
-
-    protected function removeFile(string|null $file_path, string $type = 'public')
-    {
-        if (!empty($file_path) && Storage::disk($type)->exists($file_path)) {
-            Storage::disk($type)->delete($file_path);
-        }
-    }
-
-    public function deleteEvent(Event $event)
-    {
-        try {
-            $file_path = $event->program_cover;
-            $result = DB::transaction(function () use ($event) {
-                return $event->deleteOrFail();
-            });
-            $this->removeFile($file_path);
-            return $result;
-
-        } catch (\Exception $e) {
-            Log::error('Event deletion failed: ' . $e->getMessage());
-            return false;
-        }
-    }
-
-    public function deleteMany(array $eventIds)
-    {
-        try {
-            // Get all events with their program_cover paths before deletion
-            $events = Event::query()
-                ->whereIn('id', $eventIds, 'and', false)
-                ->get(['id', 'program_cover']);
-
-            $filePaths = $events->pluck('program_cover')->filter()->toArray();
-
-            $result = DB::transaction(function () use ($eventIds) {
-                return Event::query()
-                    ->whereIn('id', $eventIds, 'and', false)
-                    ->delete();
-            });
-
-            // Delete all associated files after successful database deletion
-            foreach ($filePaths as $filePath) {
-                $this->removeFile($filePath);
-            }
-
-            return $result;
-
-        } catch (\Exception $e) {
-            Log::error('Mass event deletion failed: ' . $e->getMessage());
-            return false;
-        }
-    }
-
-    public function inviteSpeakerToEvent(Event $event, array $data): bool|string
-    {
-        $speaker = $this->speakerService->findOneSpeaker($data['speaker_id']);
-        if ($this->speakerService->speakerAlreadyInvited($event, $speaker)) {
-            return "already_invited";
-        }
-        if($this->speakerService->speakerHasAplication($event, $speaker)) {
-            $existingApplication = $this->speakerService->findExistingSpeakerApplication($event, $speaker);
-            if ($existingApplication) {
-                $this->speakerTransitionService->approveApplication($existingApplication);
-                return "speaker_approved";
-            }
-        }
-
-        try {
-            $data['expires_at'] = Carbon::now()->addDay();
-            DB::transaction(function () use ($data) {
-                $invitation = SpeakerInvite::create($data);
-
-                $invitation->speaker->user->notify(new SpeakerInvitationNotification($invitation));
-            });
-            return true;
-        } catch (Throwable $e) {
-            Log::error('Speaker invitation failed: ', [
-                'exception' => $e->getMessage(),
-            ]);
-            return false;
-        }
-    }
-
-
 }

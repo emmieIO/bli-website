@@ -879,7 +879,7 @@
 <li class="task-list-item enabled"><input class="task-list-item-checkbox" checked=""type="checkbox"> Hardened paid event verification so successful payment respects real-time event capacity instead of silently overbooking.</li>
 <li class="task-list-item enabled"><input class="task-list-item-checkbox" checked=""type="checkbox"> Added feature coverage for the pending transaction -&gt; confirmed attendee boundary and the paid confirmation -&gt; waitlist fallback path.</li>
 <li class="task-list-item enabled"><input class="task-list-item-checkbox" checked=""type="checkbox"> Verified reminder dispatch rules so only confirmed attendees are notified and duplicate cron sends are suppressed by cache locks.</li>
-<li class="task-list-item enabled"><input class="task-list-item-checkbox" checked=""type="checkbox"> Added a lightweight <code>event_transition_audits</code> trail for confirmation, cancellation, and waitlist promotion transitions directly from <code>EventService</code>.</li>
+<li class="task-list-item enabled"><input class="task-list-item-checkbox" checked=""type="checkbox"> Added a lightweight <code>event_transition_audits</code> trail for confirmation, cancellation, and waitlist promotion transitions through the event registration workflow.</li>
 <li class="task-list-item enabled"><input class="task-list-item-checkbox" checked=""type="checkbox"> Added feature coverage for registration confirmation, RSVP cancellation, and waitlist promotion audit writes.</li>
 <li class="task-list-item enabled"><input class="task-list-item-checkbox" checked=""type="checkbox"> Extended end-to-end registration journey coverage for free confirmation, full-event waitlisting, and cancelled-attendee re-entry rules.</li>
 <li class="task-list-item enabled"><input class="task-list-item-checkbox" checked=""type="checkbox"> Added speaker journey feature coverage for application submission, invitation acceptance, admin approval, rejection, and reopening.</li>
@@ -894,7 +894,9 @@
 <li class="task-list-item enabled"><input class="task-list-item-checkbox" checked=""type="checkbox"> Segmented the public event list around actual lifecycle and capacity states, so live events, open registration, waitlist-only events, announced events, closed registration, and completed events no longer appear in one undifferentiated grid.</li>
 <li class="task-list-item enabled"><input class="task-list-item-checkbox" checked=""type="checkbox"> Clarified the free public registration flow so guests see an explicit login-to-register path, authenticated users get a true free-registration CTA, and the public event modal stops borrowing paid checkout language.</li>
 <li class="task-list-item enabled"><input class="task-list-item-checkbox" checked=""type="checkbox"> Audited the paid event checkout path against course-era assumptions and centralized event-specific eligibility checks, so checkout and payment initialization now reject already-confirmed, waitlisted, refunded, full-capacity, closed, and duplicate-pending-payment states consistently.</li>
+<li class="task-list-item enabled"><input class="task-list-item-checkbox" checked=""type="checkbox"> Replaced the old <code>EventService</code> facade with focused event services for queries, CRUD, participant state, registration flow, and speaker invitations so the event domain now has clearer boundaries.</li>
 <li class="task-list-item enabled"><input class="task-list-item-checkbox"type="checkbox"> Next: move to the next unchecked item in <code>Public Journey</code>, <code>Closed registration states are handled clearly</code>.</li>
+<li class="task-list-item enabled"><input class="task-list-item-checkbox"type="checkbox"> Cross-domain consistency pass: apply the same boundary-cleanup pattern used in events to the remaining course, speaker, payment, and identity domains so service usage, naming, and controller dependencies stay consistent across the platform.</li>
 </ul>
 <hr>
 <h2 id="working-decisions-log">Working Decisions Log</h2>
@@ -924,6 +926,7 @@
 <li class="task-list-item enabled"><input class="task-list-item-checkbox" checked=""type="checkbox"> Normalize speaker workspace stage resolution against the confirmed v1 model.</li>
 <li class="task-list-item enabled"><input class="task-list-item-checkbox" checked=""type="checkbox"> Create a single CTA resolver for public event pages.</li>
 <li class="task-list-item enabled"><input class="task-list-item-checkbox" checked=""type="checkbox"> Update tests around payment, registration, waitlist, and workspace redirects.</li>
+<li class="task-list-item enabled"><input class="task-list-item-checkbox"type="checkbox"> Run the next domain-consistency cleanup pass across courses, speakers, payments, and identity boundaries.</li>
 </ol>
 <p>This gives us the safest route to implementation because it hardens logic before expanding UI surface area.</p>
 <hr>

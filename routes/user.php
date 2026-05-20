@@ -44,7 +44,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/events/{event}/calendar', [EventCalenderController::class, 'download'])->name('events.calendar');
 
     // Speaker invitations and applications
-    Route::get('/user/speaking/{slug}', [\App\Http\Controllers\UserDashBoard\ShowSpeakerWorkspaceController::class, '__invoke'])->name('speaker.events.show');
+    Route::get('/user/speaking/{slug}', [\App\Http\Controllers\UserDashBoard\ShowSpeakerWorkspaceController::class, '__invoke'])
+        ->middleware('speaker.workspace')
+        ->name('speaker.events.show');
     Route::get('/user/speaking/{event}/application', [SpeakerApplicationController::class, 'apply'])->name('speaker.events.apply');
     Route::post('/user/speaking/{event}/application', [SpeakerApplicationController::class, 'store'])->name('speaker.events.store');
     Route::get('/events/invitations', [SpeakerInvitationController::class, 'index'])->name('invitations.index');

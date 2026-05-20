@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use App\Enums\EventRegistrationStatus;
 use App\Enums\EventStatus;
 use BinaryCabin\LaravelUUID\Traits\HasUUID;
 use Illuminate\Database\Eloquent\Builder;
@@ -10,7 +9,6 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 
 class Event extends Model
@@ -137,26 +135,6 @@ class Event extends Model
         return $this->attendees()->count();
     }
 
-    public function slotsRemaining()
-    {
-        if ($this->attendee_slots === null) {
-            return 'Unlimited';
-        }
-
-        if ($this->attendee_slots === 0) {
-            return 'Full';
-        }
-
-        $occupiedSeats = $this->attendees()
-            ->wherePivotIn('status', EventRegistrationStatus::seatOccupyingValues())
-            ->count();
-
-        $remainingSeats = $this->attendee_slots - $occupiedSeats;
-
-        return $remainingSeats <= 0 ? 'Full' : $remainingSeats;
-    }
-
-
     public function resources()
     {
         return $this->hasMany(EventResource::class);
@@ -174,79 +152,6 @@ class Event extends Model
             ->orderByPivot('created_at', 'desc')
             ->limit(5)
             ->get();
-    }
-    public function isCanceled(): bool
-    {
-        return $this->registrationStatusForUserEnum() === EventRegistrationStatus::CANCELLED;
-    }
-
-    public function isRegistered()
-    {
-        return $this->isConfirmed();
-    }
-
-    public function isConfirmed(): bool
-    {
-        return $this->registrationStatusForUserEnum() === EventRegistrationStatus::CONFIRMED;
-    }
-
-    public function isWaitlisted(): bool
-    {
-        return $this->registrationStatusForUserEnum() === EventRegistrationStatus::WAITLISTED;
-    }
-
-    public function registrationStatusForUser(?int $userId = null): ?string
-    {
-        return $this->registrationStatusForUserEnum($userId)?->value;
-    }
-
-    public function registrationStatusForUserEnum(?int $userId = null): ?EventRegistrationStatus
-    {
-        $userId = $userId ?? Auth::id();
-
-        if (! $userId) {
-            return null;
-        }
-
-        $attendee = $this->attendees()
-            ->where('user_id', $userId)
-            ->first();
-
-        return EventRegistrationStatus::fromValue($attendee?->pivot?->status);
-    }
-
-    public function userHasAttendeeWorkspace(?int $userId = null): bool
-    {
-        return $this->registrationStatusForUserEnum($userId)?->hasAttendeeWorkspace() ?? false;
-    }
-
-    public function canUserRegister(?int $userId = null): bool
-    {
-        if (! $this->isRegistrationOpen()) {
-            return false;
-        }
-
-        $status = $this->registrationStatusForUserEnum($userId);
-
-        return $status === null || $status === EventRegistrationStatus::CANCELLED;
-    }
-
-    public function getRevokeCount()
-    {
-        $attendee = $this->attendees()
-            ->where('user_id', Auth::id())
-            ->first();
-
-        if (!$attendee || !isset($attendee->pivot)) {
-            return false;
-        }
-
-        return $attendee->pivot->revoke_count;
-    }
-
-    public function maxRevokes()
-    {
-        return $this->getRevokeCount() >= 4;
     }
 
     public function speakerApplications()

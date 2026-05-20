@@ -4,6 +4,7 @@ namespace App\Services\Event;
 
 
 use App\Enums\SpeakerStatus;
+use App\Enums\UserRoles;
 use App\Models\Event;
 use App\Models\Speaker;
 use App\Models\SpeakerApplication;
@@ -73,6 +74,10 @@ class SpeakerService
                 ]);
                 $speaker = Speaker::create($speakerData);
 
+                if ($this->miscService->isAdmin() && ! $user->hasRole(UserRoles::SPEAKER->value)) {
+                    $user->assignRole(UserRoles::SPEAKER->value);
+                }
+
 
                 DB::afterCommit(function () use ($user) {
                     if ($this->miscService->isAdmin()) {
@@ -131,6 +136,9 @@ class SpeakerService
 
             return DB::transaction(function () use ($speaker, $user) {
                 $user->forceFill(['email_verified_at' => now()])->save();
+                if (! $user->hasRole(UserRoles::SPEAKER->value)) {
+                    $user->assignRole(UserRoles::SPEAKER->value);
+                }
                 $speaker->Fill(['status' => SpeakerStatus::ACTIVE->value])->save();
                 DB::afterCommit(function () use ($user) {
                     $user->notifyNow(new SpeakerAccountApprovedNotification());
@@ -146,7 +154,12 @@ class SpeakerService
     public function deleteSpeaker(Speaker $speaker)
     {
         $photo_path = $speaker->photo;
+        $user = $speaker->user;
+
         if ($speaker->delete()) {
+            if ($user && ! $user->speaker()->exists() && $user->hasRole(UserRoles::SPEAKER->value)) {
+                $user->removeRole(UserRoles::SPEAKER->value);
+            }
             $this->deleteFile($photo_path);
             return true;
         }

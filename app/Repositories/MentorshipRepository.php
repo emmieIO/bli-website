@@ -274,7 +274,7 @@ class MentorshipRepository implements MentorshipRepositoryInterface
             $stats['admin_approved'] = MentorshipRequest::forStudent($user->id)->byStatus('admin_approved')->count();
             $stats['active'] = MentorshipRequest::forStudent($user->id)->active()->count();
             $stats['rejected'] = MentorshipRequest::forStudent($user->id)->byStatus('rejected')->count();
-        } elseif ($user->hasRole('instructor')) {
+        } elseif ($user->canAccessInstructorArea()) {
             $stats['total'] = MentorshipRequest::forInstructor($user->id)->count();
             $stats['pending'] = MentorshipRequest::forInstructor($user->id)->byStatus('pending')->count();
             $stats['instructor_approved'] = MentorshipRequest::forInstructor($user->id)->byStatus('instructor_approved')->count();

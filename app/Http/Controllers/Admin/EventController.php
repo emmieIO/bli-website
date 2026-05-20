@@ -9,7 +9,10 @@ use App\Http\Requests\UpdateEventRequest;
 use App\Enums\Permissions\EventPermissionsEnum;
 use App\Models\Event;
 use App\Models\User;
-use App\Services\Event\EventService;
+use App\Services\Event\EventCrudService;
+use App\Services\Event\EventQueryService;
+use App\Services\Event\EventRegistrationService;
+use App\Services\Event\EventSpeakerInvitationService;
 use App\Services\Event\SpeakerService;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
@@ -20,7 +23,10 @@ class EventController extends Controller
     use AuthorizesRequests;
 
     public function __construct(
-        protected EventService $eventService,
+        protected EventQueryService $eventQueryService,
+        protected EventCrudService $eventCrudService,
+        protected EventSpeakerInvitationService $eventSpeakerInvitationService,
+        protected EventRegistrationService $eventRegistrationService,
         protected SpeakerService $speakerService
     ) {
 
@@ -34,7 +40,7 @@ class EventController extends Controller
         $includePaymentMetrics = Auth::user()?->can(EventPermissionsEnum::VIEW_PAYMENTS->value) ?? false;
 
         return \Inertia\Inertia::render('Admin/Events/Index', [
-            'events' => $this->eventService->getEventsCreatedByUser($query, $includePaymentMetrics),
+            'events' => $this->eventQueryService->getEventsCreatedByUser($query, $includePaymentMetrics),
             'capabilities' => [
                 'canCreate' => Auth::user()?->can(EventPermissionsEnum::CREATE->value) ?? false,
                 'canUpdateAny' => Auth::user()?->hasAnyPermission([
@@ -117,7 +123,7 @@ class EventController extends Controller
 
         $program_cover = $request->file('program_cover');
         $validated = $request->validated();
-        $event = $this->eventService->createEvent($validated, $program_cover);
+        $event = $this->eventCrudService->createEvent($validated, $program_cover);
         if ($event) {
             return to_route('admin.events.index')->with([
                 'type' => 'success',
@@ -144,7 +150,7 @@ class EventController extends Controller
 
         $program_cover = $request->file('program_cover');
         $validated = $request->validated();
-        $event = $this->eventService->updateEvent($validated, $event, $program_cover);
+        $event = $this->eventCrudService->updateEvent($validated, $event, $program_cover);
 
         if ($event) {
             return to_route('admin.events.index')->with([
@@ -162,7 +168,7 @@ class EventController extends Controller
     {
         $this->authorize('delete', $event);
 
-        if ($this->eventService->deleteEvent($event)) {
+        if ($this->eventCrudService->deleteEvent($event)) {
             return redirect()->route('admin.events.index')->with([
                 'type' => 'success',
                 'message' => 'Event deleted successfully.'
@@ -185,7 +191,7 @@ class EventController extends Controller
             'selected_events' => 'required|array',
             'selected_events.*' => 'exists:events,id'
         ]);
-        if ($this->eventService->deleteMany($validated['selected_events'])) {
+        if ($this->eventCrudService->deleteMany($validated['selected_events'])) {
             return redirect()->route('admin.events.index')->with([
                 'type' => 'success',
                 'message' => 'Selected events deleted successfully.'
@@ -201,7 +207,7 @@ class EventController extends Controller
     {
         $this->authorize('manageSpeakers', $event);
 
-        $invitation = $this->eventService->inviteSpeakerToEvent($event, $request->validated());
+        $invitation = $this->eventSpeakerInvitationService->inviteSpeakerToEvent($event, $request->validated());
         if ($invitation === true) {
             return redirect()->back()->with([
                 'type' => 'success',
@@ -224,7 +230,7 @@ class EventController extends Controller
     {
         $this->authorize('manageWaitlist', $event);
 
-        $result = $this->eventService->promoteWaitlistedAttendee($event, $user->id);
+        $result = $this->eventRegistrationService->promoteWaitlistedAttendee($event, $user->id);
 
         if ($result === true) {
             return redirect()->back()->with([

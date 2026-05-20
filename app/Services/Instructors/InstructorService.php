@@ -4,6 +4,7 @@ namespace App\Services\Instructors;
 
 use App\Enums\ApplicationStatus;
 use App\Enums\RoleEnum;
+use App\Enums\UserRoles;
 use App\Models\ApplicationLog;
 use App\Models\InstructorProfile;
 use App\Traits\HasFileUpload;
@@ -62,10 +63,23 @@ class InstructorService
 
                 $data['is_approved'] = $data["application_status"] === ApplicationStatus::APPROVED->value;
 
-                match ($data["application_status"]) {
-                    ApplicationStatus::APPROVED->value => $user->syncRoles([RoleEnum::Instructor->value]),
-                    default => $user->syncRoles([RoleEnum::Student->value]),
-                };
+                if ($data["application_status"] === ApplicationStatus::APPROVED->value) {
+                    if (! $user->hasRole(RoleEnum::Instructor->value)) {
+                        $user->assignRole(RoleEnum::Instructor->value);
+                    }
+
+                    if ($user->hasRole(RoleEnum::Student->value)) {
+                        $user->removeRole(RoleEnum::Student->value);
+                    }
+                } else {
+                    if ($user->hasRole(RoleEnum::Instructor->value)) {
+                        $user->removeRole(RoleEnum::Instructor->value);
+                    }
+
+                    if (! $user->hasAnyRole([UserRoles::STUDENT->value, UserRoles::ADMIN->value, UserRoles::SUPER_ADMIN->value])) {
+                        $user->assignRole(RoleEnum::Student->value);
+                    }
+                }
 
                 $data['approved_at'] = $data['is_approved'] ? now() : null;
 
@@ -118,7 +132,14 @@ class InstructorService
         $user = $instructorProfile->user;
         try {
         DB::transaction(function () use ($instructorProfile, $user) {
-            $user->syncRoles([RoleEnum::Student]);
+            if ($user->hasRole(RoleEnum::Instructor->value)) {
+                $user->removeRole(RoleEnum::Instructor->value);
+            }
+
+            if (! $user->hasAnyRole([UserRoles::STUDENT->value, UserRoles::ADMIN->value, UserRoles::SUPER_ADMIN->value])) {
+                $user->assignRole(RoleEnum::Student->value);
+            }
+
             $instructorProfile->delete();
         });
 

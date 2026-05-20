@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Event;
+use App\Models\Course;
 use App\Models\Transaction;
 use App\Models\InstructorPayout;
 use Illuminate\Http\Request;
@@ -17,14 +19,20 @@ class TransactionController extends Controller
         $user = auth()->user();
 
         $transactions = Transaction::where('user_id', $user->id)
-            ->with(['course:id,title,slug,thumbnail_path'])
+            ->with(['course:id,title,slug,thumbnail_path', 'payable'])
             ->orderBy('created_at', 'desc')
             ->paginate(15, ['*'], 'transactions_page');
 
         // Format transactions for display
         $formattedTransactions = $transactions->through(function ($transaction) {
             $metadata = $transaction->metadata ?? [];
-            $isCartPurchase = isset($metadata['type']) && $metadata['type'] === 'cart';
+            $subjectType = $metadata['subject_type']
+                ?? ($transaction->payable_type === Event::class ? 'event' : (($metadata['type'] ?? null) === 'cart' ? 'cart' : 'course'));
+            $checkoutContext = $metadata['checkout_context'] ?? (($metadata['type'] ?? null) === 'cart' ? 'cart' : 'direct');
+            $isCartPurchase = $checkoutContext === 'cart';
+            $payable = $transaction->payable;
+            $event = $payable instanceof Event ? $payable : null;
+            $course = $transaction->course ?? ($payable instanceof Course ? $payable : null);
 
             return [
                 'id' => $transaction->id,
@@ -36,12 +44,18 @@ class TransactionController extends Controller
                 'payment_type' => $transaction->payment_type,
                 'created_at' => $transaction->created_at->format('M d, Y h:i A'),
                 'paid_at' => $transaction->paid_at?->format('M d, Y h:i A'),
-                'type' => $isCartPurchase ? 'cart' : 'course',
-                'course' => $transaction->course ? [
-                    'id' => $transaction->course->id,
-                    'title' => $transaction->course->title,
-                    'slug' => $transaction->course->slug,
-                    'thumbnail_path' => $transaction->course->thumbnail_path,
+                'type' => $subjectType,
+                'checkout_context' => $checkoutContext,
+                'course' => $course ? [
+                    'id' => $course->id,
+                    'title' => $course->title,
+                    'slug' => $course->slug,
+                    'thumbnail_path' => $course->thumbnail_path,
+                ] : null,
+                'event' => $event ? [
+                    'id' => $event->id,
+                    'title' => $event->title,
+                    'slug' => $event->slug,
                 ] : null,
                 'items' => $isCartPurchase ? ($metadata['items'] ?? []) : null,
                 'item_count' => $isCartPurchase ? count($metadata['items'] ?? []) : 1,
@@ -69,7 +83,11 @@ class TransactionController extends Controller
             abort(403, 'Unauthorized to view this receipt.');
         }
 
-        $transaction->load(['user', 'course']); // Eager load relations for receipt details
+        $transaction->load(['user', 'course', 'payable']); // Eager load relations for receipt details
+
+        $payable = $transaction->payable;
+        $event = $payable instanceof Event ? $payable : null;
+        $course = $transaction->course ?? ($payable instanceof Course ? $payable : null);
 
         return Inertia::render('Dashboard/Transactions/Receipt', [
             'transaction' => [
@@ -87,8 +105,11 @@ class TransactionController extends Controller
                     'name' => $transaction->user->name,
                     'email' => $transaction->user->email,
                 ],
-                'course' => $transaction->course ? [
-                    'title' => $transaction->course->title,
+                'course' => $course ? [
+                    'title' => $course->title,
+                ] : null,
+                'event' => $event ? [
+                    'title' => $event->title,
                 ] : null,
             ],
             // Pass company details from config if available (e.g., config('app.company_name'))

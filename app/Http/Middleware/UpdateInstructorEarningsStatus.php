@@ -30,7 +30,7 @@ class UpdateInstructorEarningsStatus
         // Only run for authenticated users who are instructors
         // Update their pending earnings to available if holding period has passed
         // This happens silently in the background
-        if ($request->user()?->hasRole('instructor')) {
+        if ($request->user()?->canAccessInstructorArea()) {
             $this->earningsService->markPendingEarningsAsAvailable($request->user()->id);
         }
 

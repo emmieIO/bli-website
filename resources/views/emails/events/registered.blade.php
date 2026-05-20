@@ -119,7 +119,7 @@
                         <td style="padding:14px 40px 36px 40px;">
                             <div style="border-top:1px solid #e2e8f0;padding-top:18px;">
                                 <p style="margin:0;font-size:14px;line-height:1.7;color:#475569;">
-                                    Need help or need to make a change? Visit your event workspace or reply to this email@if($contactEmail) using {{ $contactEmail }}@endif.
+                                    Need help or need to make a change? Visit your event workspace or reply to this email{{ $contactEmail ? ' using '.$contactEmail : '' }}.
                                 </p>
                                 <p style="margin:16px 0 0 0;font-size:14px;line-height:1.7;color:#475569;">
                                     Best regards,<br>{{ $appName }} Team

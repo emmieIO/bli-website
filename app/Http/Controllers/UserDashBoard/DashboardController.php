@@ -162,7 +162,7 @@ class DashboardController extends Controller
 
         // Check if user is admin or instructor
         $isAdmin = $user->hasRole(['admin', 'super-admin']);
-        $isInstructor = $user->hasRole('instructor');
+        $isInstructor = $user->canAccessInstructorArea();
 
         $adminStats = null;
         $instructorStats = null;

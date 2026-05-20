@@ -21,6 +21,9 @@ interface Transaction {
     course: {
         title: string;
     } | null;
+    event: {
+        title: string;
+    } | null;
 }
 
 interface CompanyDetails {
@@ -58,11 +61,24 @@ export default function Receipt() {
         });
     };
 
-    const isCartPurchase = transaction.metadata && transaction.metadata.type === 'cart';
-    const items = isCartPurchase ? transaction.metadata.items : (transaction.course ? [{
-        course_title: transaction.course.title,
-        price: transaction.amount,
-    }] : []);
+    const subjectType = transaction.metadata?.subject_type
+        ?? (transaction.metadata?.type === 'cart' ? 'cart' : (transaction.event ? 'event' : 'course'));
+    const checkoutContext = transaction.metadata?.checkout_context
+        ?? (transaction.metadata?.type === 'cart' ? 'cart' : 'direct');
+    const isCartPurchase = checkoutContext === 'cart';
+    const items = isCartPurchase
+        ? (transaction.metadata?.items ?? [])
+        : transaction.course
+            ? [{
+                title: transaction.course.title,
+                price: transaction.amount,
+            }]
+            : transaction.event
+                ? [{
+                    title: transaction.event.title,
+                    price: transaction.amount,
+                }]
+                : [];
 
     useEffect(() => {
         // Apply print-specific styles
@@ -150,14 +166,16 @@ export default function Receipt() {
                             <table className="min-w-full divide-y divide-gray-200">
                                 <thead className="bg-gray-50">
                                     <tr>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider font-montserrat">Item</th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider font-montserrat">
+                                            {subjectType === 'event' ? 'Event' : 'Item'}
+                                        </th>
                                         <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider font-montserrat">Amount</th>
                                     </tr>
                                 </thead>
                                 <tbody className="bg-white divide-y divide-gray-200">
                                     {items.map((item: any, index: number) => (
                                         <tr key={index}>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 font-lato">{item.course_title}</td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 font-lato">{item.title ?? item.course_title}</td>
                                             <td className="px-6 py-4 whitespace-nowrap text-right text-sm text-gray-900 font-lato">{formatCurrency(item.price, transaction.currency)}</td>
                                         </tr>
                                     ))}

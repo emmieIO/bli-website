@@ -2,12 +2,17 @@
 
 namespace App\Http\Controllers;
 
+use App\Contracts\Services\PaymentGatewayInterface;
 use App\Models\Course;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
 class CartController extends Controller
 {
+    public function __construct(
+        private PaymentGatewayInterface $paymentGateway
+    ) {}
+
     /**
      * Display the user's cart
      */
@@ -190,7 +195,7 @@ class CartController extends Controller
                 'total' => $cart->total,
                 'itemCount' => $cart->item_count,
             ],
-            'paystackPublicKey' => config('services.paystack.public_key'),
+            'paystackPublicKey' => $this->paymentGateway->getPublicKey(),
         ]);
     }
 }

@@ -6,6 +6,8 @@ interface Instructor {
     id: number;
     name: string;
     avatar_url?: string;
+    ratings_received_avg_rating?: number | null;
+    ratings_received_count?: number;
 }
 
 interface Category {
@@ -13,15 +15,33 @@ interface Category {
     name: string;
 }
 
+interface Lesson {
+    id: number;
+}
+
+interface Module {
+    id: number;
+    lessons?: Lesson[];
+}
+
 interface Course {
     id: number;
     slug: string;
     title: string;
+    subtitle?: string;
     description?: string;
     price: number;
-    thumbnail_path: string;
+    is_free?: boolean;
+    language?: string;
+    updated_at?: string;
+    thumbnail_path?: string;
+    level?: {
+        value: string;
+    };
     category: Category;
     instructor: Instructor;
+    modules?: Module[];
+    students?: { id: number }[];
 }
 
 interface CoursesIndexProps {
@@ -32,191 +52,239 @@ export default function CoursesIndex({ courses }: CoursesIndexProps) {
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedCategory, setSelectedCategory] = useState('');
 
-    // Extract unique categories from courses
-    const categories = Array.from(
-        new Set(courses.map(course => course.category.name))
-    );
+    const categories = Array.from(new Set(courses.map((course) => course.category.name))).sort();
 
-    // Filter courses based on search and category
-    const filteredCourses = courses.filter(course => {
-        // If no search query, show all courses (only filter by category)
-        const matchesSearch = !searchQuery.trim() ||
-            course.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            (course.description && course.description.toLowerCase().includes(searchQuery.toLowerCase())) ||
-            (course.instructor.name && course.instructor.name.toLowerCase().includes(searchQuery.toLowerCase())) ||
-            course.category.name.toLowerCase().includes(searchQuery.toLowerCase());
+    const filteredCourses = courses.filter((course) => {
+        const query = searchQuery.trim().toLowerCase();
+        const matchesSearch =
+            !query ||
+            course.title.toLowerCase().includes(query) ||
+            course.subtitle?.toLowerCase().includes(query) ||
+            course.description?.toLowerCase().includes(query) ||
+            course.instructor.name.toLowerCase().includes(query) ||
+            course.category.name.toLowerCase().includes(query);
 
         const matchesCategory = !selectedCategory || course.category.name === selectedCategory;
 
         return matchesSearch && matchesCategory;
     });
 
+    const getLessonCount = (course: Course) =>
+        course.modules?.reduce((total, module) => total + (module.lessons?.length || 0), 0) || 0;
+
+    const formatPrice = (course: Course) => {
+        if (course.is_free || Number(course.price) === 0) {
+            return 'Free';
+        }
+
+        return `₦${Number(course.price).toLocaleString()}`;
+    };
+
+    const formatLevel = (course: Course) => {
+        if (!course.level?.value) {
+            return 'All levels';
+        }
+
+        return `${course.level.value.charAt(0).toUpperCase()}${course.level.value.slice(1)}`;
+    };
+
+    const formatDate = (dateString?: string) => {
+        if (!dateString) {
+            return 'Recently updated';
+        }
+
+        return new Date(dateString).toLocaleDateString('en-US', {
+            month: 'short',
+            year: 'numeric',
+        });
+    };
+
     return (
         <GuestLayout>
-            <Head title="Explore Our Courses" />
+            <Head title="Courses" />
 
-            {/* Hero Section */}
-            <section className="public-hero">
+            <section className="bg-white py-16 md:py-20">
                 <div className="section-shell">
-                    <div className="text-center max-w-4xl mx-auto">
-                        {/* Badge */}
-                        <div className="mb-8 inline-flex items-center gap-2 rounded-full border border-accent/15 bg-accent/5 px-6 py-3">
-                            <i className="fas fa-graduation-cap text-sm text-accent"></i>
-                            <span className="text-sm font-medium tracking-wide text-primary">
-                                Professional Development
-                            </span>
+                    <div className="mx-auto max-w-4xl space-y-8">
+                        <div className="inline-flex items-center rounded-full bg-primary/10 px-4 py-2 text-primary">
+                            <i className="fas fa-book-open mr-2 text-accent"></i>
+                            <span className="text-sm font-semibold font-montserrat">Courses</span>
                         </div>
 
-                        {/* Main Heading */}
-                        <h1 className="public-hero-title mb-6">
-                            Explore Our <span className="text-accent">Courses</span>
-                        </h1>
+                        <div className="space-y-4">
+                            <h1 className="max-w-3xl text-4xl font-bold leading-tight text-primary font-montserrat md:text-5xl">
+                                Explore available courses
+                            </h1>
+                            <p className="max-w-2xl text-lg leading-8 text-gray-600 font-lato md:text-xl">
+                                Browse published courses, review the curriculum, and choose the one that fits your learning goals.
+                            </p>
+                        </div>
 
-                        <p className="public-hero-copy mx-auto mb-8">
-                            Browse our curated selection of courses designed to upskill, learn new technologies, and advance
-                            your leadership career. New courses added regularly.
-                        </p>
-
-                        {/* Search and Filter Section */}
-                        <div className="public-card mx-auto max-w-2xl p-6">
-                            <div className="flex flex-col md:flex-row gap-4">
-                                <div className="flex-1 relative">
-                                    <i className="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-                                    <input
-                                        type="text"
-                                        placeholder="Search courses..."
-                                        value={searchQuery}
-                                        onChange={(e) => setSearchQuery(e.target.value)}
-                                        className="public-input pl-12"
-                                    />
-                                </div>
-                                <select
-                                    value={selectedCategory}
-                                    onChange={(e) => setSelectedCategory(e.target.value)}
-                                    className="public-input md:w-48"
-                                >
-                                    <option value="">All Categories</option>
-                                    {categories.map((category, index) => (
-                                        <option key={index} value={category}>
-                                            {category}
-                                        </option>
-                                    ))}
-                                </select>
+                        <div className="grid gap-4 rounded-2xl border border-gray-200 bg-gray-50 p-5 md:grid-cols-[minmax(0,1fr)_220px]">
+                            <div className="relative">
+                                <i className="fas fa-search pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                                <input
+                                    type="text"
+                                    placeholder="Search by title, topic, instructor, or category"
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                    className="public-input pl-12"
+                                />
                             </div>
+                            <select
+                                value={selectedCategory}
+                                onChange={(e) => setSelectedCategory(e.target.value)}
+                                className="public-input"
+                            >
+                                <option value="">All categories</option>
+                                {categories.map((category) => (
+                                    <option key={category} value={category}>
+                                        {category}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+
+                        <div className="flex flex-wrap items-center gap-4 border-t border-gray-200 pt-6 text-sm text-gray-600">
+                            <span>
+                                <span className="font-semibold text-primary">{filteredCourses.length}</span>{' '}
+                                {filteredCourses.length === 1 ? 'course' : 'courses'}
+                            </span>
+                            <span className="hidden h-1 w-1 rounded-full bg-gray-300 sm:block"></span>
+                            <span>Search and filter use live course data only</span>
                         </div>
                     </div>
                 </div>
             </section>
 
-            {/* Courses Grid Section */}
-            <section className="public-section bg-white">
+            <section className="public-section bg-gray-50">
                 <div className="section-shell">
                     {filteredCourses.length > 0 ? (
-                        <>
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-                                {filteredCourses.map((course, index) => (
-                                    <div
-                                        key={course.id}
-                                        className="public-card group overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:border-accent/20 hover:shadow-xl"
-                                    >
-                                        {/* Course Image */}
-                                        <div className="relative h-48 overflow-hidden">
-                                            <img
-                                                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                                                src={`/storage/${course.thumbnail_path}`}
-                                                alt={course.title}
-                                            />
+                        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
+                            {filteredCourses.map((course) => {
+                                const lessonCount = getLessonCount(course);
+                                const studentCount = course.students?.length || 0;
+                                const instructorRating = course.instructor.ratings_received_avg_rating;
+                                const ratingCount = course.instructor.ratings_received_count || 0;
 
-                                            {/* Category Badge */}
-                                            <div className="absolute top-4 left-4">
-                                                <span className="rounded-full bg-accent px-3 py-1.5 text-xs font-semibold text-white">
+                                return (
+                                    <article
+                                        key={course.id}
+                                        className="overflow-hidden rounded-[26px] border border-gray-200 bg-white shadow-[0_16px_40px_rgba(15,23,42,0.06)] transition duration-200 hover:-translate-y-1 hover:shadow-[0_20px_50px_rgba(15,23,42,0.09)]"
+                                    >
+                                        <Link href={route('courses.show', course.slug)} className="block">
+                                            <div className="aspect-[16/10] overflow-hidden bg-gray-100">
+                                                {course.thumbnail_path ? (
+                                                    <img
+                                                        className="h-full w-full object-cover transition duration-300 hover:scale-[1.03]"
+                                                        src={`/storage/${course.thumbnail_path}`}
+                                                        alt={course.title}
+                                                    />
+                                                ) : (
+                                                    <div className="flex h-full items-center justify-center bg-primary/5 text-primary">
+                                                        <i className="fas fa-book-open text-3xl"></i>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </Link>
+
+                                        <div className="space-y-5 p-6">
+                                            <div className="flex items-start justify-between gap-3">
+                                                <span className="rounded-full bg-accent/10 px-3 py-1 text-xs font-semibold text-accent">
                                                     {course.category.name}
                                                 </span>
+                                                <span className="text-sm font-semibold text-primary">{formatPrice(course)}</span>
                                             </div>
 
-                                            {/* Price Badge */}
-                                            <div className="absolute top-4 right-4">
-                                                <span className="rounded-full bg-white px-3 py-1.5 text-sm font-bold text-primary shadow-sm">
-                                                    ₦{course.price.toLocaleString()}
-                                                </span>
+                                            <div className="space-y-2">
+                                                <h2 className="text-xl font-bold leading-snug text-primary font-montserrat">
+                                                    <Link href={route('courses.show', course.slug)}>{course.title}</Link>
+                                                </h2>
+                                                <p className="line-clamp-3 text-sm leading-6 text-gray-600 font-lato">
+                                                    {course.subtitle || course.description || 'Course details available on the course page.'}
+                                                </p>
                                             </div>
-                                        </div>
 
-                                        {/* Course Content */}
-                                        <div className="p-6">
-                                            {/* Course Title */}
-                                            <h3 className="mb-3 line-clamp-2 text-xl font-bold text-primary transition-colors duration-300 group-hover:text-accent">
-                                                <Link href={route('courses.show', course.slug)}>
-                                                    {course.title}
+                                            <div className="grid grid-cols-2 gap-3 rounded-2xl bg-gray-50 p-4 text-sm text-gray-600">
+                                                <div>
+                                                    <p className="font-semibold text-primary">Level</p>
+                                                    <p className="mt-1">{formatLevel(course)}</p>
+                                                </div>
+                                                <div>
+                                                    <p className="font-semibold text-primary">Lessons</p>
+                                                    <p className="mt-1">{lessonCount}</p>
+                                                </div>
+                                                <div>
+                                                    <p className="font-semibold text-primary">Students</p>
+                                                    <p className="mt-1">{studentCount}</p>
+                                                </div>
+                                                <div>
+                                                    <p className="font-semibold text-primary">Updated</p>
+                                                    <p className="mt-1">{formatDate(course.updated_at)}</p>
+                                                </div>
+                                            </div>
+
+                                            <div className="flex items-center justify-between gap-4">
+                                                <div className="flex min-w-0 items-center gap-3">
+                                                    <div className="h-9 w-9 overflow-hidden rounded-full bg-gray-100">
+                                                        {course.instructor.avatar_url ? (
+                                                            <img
+                                                                src={course.instructor.avatar_url}
+                                                                alt={course.instructor.name}
+                                                                className="h-full w-full object-cover"
+                                                            />
+                                                        ) : (
+                                                            <img
+                                                                src={`https://ui-avatars.com/api/?name=${encodeURIComponent(
+                                                                    course.instructor.name || 'Instructor'
+                                                                )}&background=002147&color=fff&size=36`}
+                                                                alt={course.instructor.name}
+                                                                className="h-full w-full object-cover"
+                                                            />
+                                                        )}
+                                                    </div>
+                                                    <div className="min-w-0">
+                                                        <p className="truncate text-sm font-semibold text-primary">{course.instructor.name}</p>
+                                                        <p className="text-xs text-gray-500">
+                                                            {instructorRating && ratingCount > 0
+                                                                ? `${instructorRating.toFixed(1)} instructor rating`
+                                                                : course.language || 'English'}
+                                                        </p>
+                                                    </div>
+                                                </div>
+
+                                                <Link
+                                                    href={route('courses.show', course.slug)}
+                                                    className="inline-flex items-center gap-2 text-sm font-semibold text-accent hover:text-accent/80"
+                                                >
+                                                    View course
+                                                    <i className="fas fa-arrow-right text-xs"></i>
                                                 </Link>
-                                            </h3>
-
-                                            {/* Course Stats */}
-                                            <div className="flex items-center justify-between mb-4 text-sm text-gray-600">
-                                                <div className="flex items-center gap-1">
-                                                    <i className="fas fa-star text-yellow-400"></i>
-                                                    <span className="font-semibold">4.8</span>
-                                                    <span className="text-gray-500">(1.2k)</span>
-                                                </div>
-                                                <div className="flex items-center gap-1">
-                                                    <i className="fas fa-users text-gray-400"></i>
-                                                    <span>12.5k students</span>
-                                                </div>
                                             </div>
-
-                                            {/* Instructor */}
-                                            <div className="flex items-center gap-3 mb-4">
-                                                <div className="w-8 h-8 rounded-full overflow-hidden">
-                                                    <img
-                                                        src={
-                                                            course.instructor.avatar_url ||
-                                                            `https://ui-avatars.com/api/?name=${encodeURIComponent(
-                                                                course.instructor.name || 'Instructor'
-                                                            )}&background=00a651&color=fff&size=32`
-                                                        }
-                                                        alt="Instructor"
-                                                        className="w-full h-full object-cover"
-                                                    />
-                                                </div>
-                                                <span className="text-sm text-gray-600 font-lato">
-                                                    {course.instructor.name || 'BLI Instructor'}
-                                                </span>
-                                            </div>
-
-                                            {/* Enroll Button */}
-                                            <Link
-                                                href={route('courses.show', course.slug)}
-                                                className="enterprise-button enterprise-button-primary w-full"
-                                            >
-                                                <span>Enroll Now</span>
-                                                <i className="fas fa-arrow-right text-sm group-hover:translate-x-1 transition-transform"></i>
-                                            </Link>
                                         </div>
-                                    </div>
-                                ))}
-                            </div>
-                        </>
+                                    </article>
+                                );
+                            })}
+                        </div>
                     ) : (
-                        /* No Courses State */
-                        <div className="text-center py-20">
-                            <div className="mb-8">
-                                <i className="fas fa-graduation-cap text-6xl text-gray-300"></i>
+                        <div className="rounded-[28px] border border-gray-200 bg-white px-6 py-16 text-center shadow-[0_16px_40px_rgba(15,23,42,0.06)]">
+                            <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 text-primary">
+                                <i className="fas fa-book-open text-2xl"></i>
                             </div>
-                            <h3 className="text-2xl font-bold mb-4 font-montserrat text-primary">
-                                {courses.length === 0 ? 'No Courses Available' : 'No Courses Found'}
-                            </h3>
-                            <p className="text-gray-600 font-lato mb-8">
+                            <h2 className="text-2xl font-bold text-primary font-montserrat">
+                                {courses.length === 0 ? 'No courses available yet' : 'No courses match your search'}
+                            </h2>
+                            <p className="mx-auto mt-3 max-w-xl text-gray-600 font-lato">
                                 {courses.length === 0
-                                    ? "We're working hard to bring you amazing courses. Check back soon!"
-                                    : 'Try adjusting your search or filters.'}
+                                    ? 'Published courses will appear here when they are ready.'
+                                    : 'Try a different keyword or clear the category filter.'}
                             </p>
-                            <Link
-                                href={route('homepage')}
-                                className="enterprise-button enterprise-button-primary"
-                            >
-                                <i className="fas fa-home"></i>
-                                <span>Back to Home</span>
-                            </Link>
+                            <div className="mt-8">
+                                <Link href={route('homepage')} className="enterprise-button enterprise-button-primary rounded-xl px-6 py-3">
+                                    <i className="fas fa-home"></i>
+                                    Back to Home
+                                </Link>
+                            </div>
                         </div>
                     )}
                 </div>

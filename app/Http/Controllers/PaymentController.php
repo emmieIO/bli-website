@@ -2,9 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Event;
+use App\Contracts\Services\PaymentGatewayInterface;
 use App\Models\Course;
-use App\Services\Payment\PaystackService;
+use App\Models\Event;
+use App\Services\Event\EventParticipantStateService;
 use App\Services\Payment\PaymentService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -13,13 +14,14 @@ use Inertia\Inertia;
 /**
  * Controller for handling payment HTTP requests
  * Responsible for: Request validation, response formatting, routing
- * Business logic delegated to: PaymentService, PaystackService
+ * Business logic delegated to: PaymentService, PaymentGatewayInterface
  */
 class PaymentController extends Controller
 {
     public function __construct(
         private PaymentService $paymentService,
-        private PaystackService $paystackService
+        private PaymentGatewayInterface $paymentGateway,
+        private EventParticipantStateService $participantStateService
     ) {}
 
     /**
@@ -52,7 +54,7 @@ class PaymentController extends Controller
 
         return Inertia::render('Courses/Checkout', [
             'course' => $course,
-            'paystackPublicKey' => $this->paystackService->getPublicKey(),
+            'paystackPublicKey' => $this->paymentGateway->getPublicKey(),
         ]);
     }
 
@@ -156,7 +158,7 @@ class PaymentController extends Controller
 
         return Inertia::render('Events/Checkout', [
             'event' => $event,
-            'paystackPublicKey' => $this->paystackService->getPublicKey(),
+            'paystackPublicKey' => $this->paymentGateway->getPublicKey(),
         ]);
     }
 
@@ -320,7 +322,9 @@ class PaymentController extends Controller
             // If already successful, redirect to appropriate page
             if ($transaction->status === 'successful') {
                 if ($transaction->payable_type === Event::class) {
-                    $registrationStatus = $transaction->payable?->registrationStatusForUser(auth()->id());
+                    $registrationStatus = $transaction->payable
+                        ? $this->participantStateService->registrationStatusForUser($transaction->payable, auth()->id())
+                        : null;
                     $message = $registrationStatus === 'waitlisted'
                         ? 'Your payment was successful and you are currently on the event waitlist.'
                         : 'Your registration for this event is already confirmed.';

@@ -2,16 +2,21 @@
 
 namespace App\Services\Payment;
 
+use App\Contracts\Services\PaymentGatewayInterface;
+use Illuminate\Http\Client\RequestException;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
 /**
  * Service for interacting with Paystack API
  * Responsible for: Payment gateway communication
  */
-class PaystackService
+class PaystackService implements PaymentGatewayInterface
 {
     private string $secretKey;
+
     private string $publicKey;
+
     private string $baseUrl;
 
     public function __construct()
@@ -26,40 +31,7 @@ class PaystackService
      */
     public function initializePayment(array $data): array
     {
-        $curl = curl_init();
-
-        curl_setopt_array($curl, [
-            CURLOPT_URL => "{$this->baseUrl}/transaction/initialize",
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_ENCODING => "",
-            CURLOPT_MAXREDIRS => 10,
-            CURLOPT_TIMEOUT => 30,
-            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-            CURLOPT_CUSTOMREQUEST => "POST",
-            CURLOPT_POSTFIELDS => json_encode($data),
-            CURLOPT_HTTPHEADER => [
-                "Authorization: Bearer {$this->secretKey}",
-                "Content-Type: application/json"
-            ],
-        ]);
-
-        $response = curl_exec($curl);
-        $err = curl_error($curl);
-        curl_close($curl);
-
-        if ($err) {
-            Log::error("Paystack API Error", ['error' => $err]);
-            throw new \Exception("cURL Error: {$err}");
-        }
-
-        $result = json_decode($response, true);
-
-        if (!$result || !isset($result['status'])) {
-            Log::error("Invalid Paystack response", ['response' => $response]);
-            throw new \Exception("Invalid response from Paystack");
-        }
-
-        return $result;
+        return $this->sendRequest('post', '/transaction/initialize', $data);
     }
 
     /**
@@ -67,39 +39,7 @@ class PaystackService
      */
     public function verifyTransaction(string $reference): array
     {
-        $curl = curl_init();
-
-        curl_setopt_array($curl, [
-            CURLOPT_URL => "{$this->baseUrl}/transaction/verify/{$reference}",
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_ENCODING => "",
-            CURLOPT_MAXREDIRS => 10,
-            CURLOPT_TIMEOUT => 30,
-            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-            CURLOPT_CUSTOMREQUEST => "GET",
-            CURLOPT_HTTPHEADER => [
-                "Authorization: Bearer {$this->secretKey}",
-                "Content-Type: application/json"
-            ],
-        ]);
-
-        $response = curl_exec($curl);
-        $err = curl_error($curl);
-        curl_close($curl);
-
-        if ($err) {
-            Log::error("Paystack API Error", ['error' => $err]);
-            throw new \Exception("cURL Error: {$err}");
-        }
-
-        $result = json_decode($response, true);
-
-        if (!$result || !isset($result['status'])) {
-            Log::error("Invalid Paystack response", ['response' => $response]);
-            throw new \Exception("Invalid response from Paystack");
-        }
-
-        return $result;
+        return $this->sendRequest('get', "/transaction/verify/{$reference}");
     }
 
     /**
@@ -116,5 +56,49 @@ class PaystackService
     public function getPublicKey(): string
     {
         return $this->publicKey;
+    }
+
+    private function sendRequest(string $method, string $uri, array $payload = []): array
+    {
+        $method = strtoupper($method);
+
+        $options = match ($method) {
+            'GET' => $payload === [] ? [] : ['query' => $payload],
+            default => $payload === [] ? [] : ['json' => $payload],
+        };
+
+        try {
+            $response = Http::baseUrl($this->baseUrl)
+                ->withToken($this->secretKey)
+                ->acceptJson()
+                ->asJson()
+                ->timeout(60)
+                ->send($method, $uri, $options)
+                ->throw();
+        } catch (RequestException $exception) {
+            Log::error('Paystack API request failed', [
+                'method' => $method,
+                'uri' => $uri,
+                'status' => $exception->response?->status(),
+                'response' => $exception->response?->json(),
+                'error' => $exception->getMessage(),
+            ]);
+
+            throw $exception;
+        }
+
+        $result = $response->json();
+
+        if (! is_array($result) || ! array_key_exists('status', $result) || ! is_bool($result['status'])) {
+            Log::error('Invalid Paystack response', [
+                'method' => $method,
+                'uri' => $uri,
+                'response' => $response->body(),
+            ]);
+
+            throw new \RuntimeException('Invalid response from Paystack');
+        }
+
+        return $result;
     }
 }

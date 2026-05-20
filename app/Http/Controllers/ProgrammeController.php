@@ -5,7 +5,8 @@ namespace App\Http\Controllers;
 use App\Contracts\ProgramRepositoryInterface;
 use App\Enums\EventStatus;
 use App\Models\Event;
-use App\Services\Event\EventService;
+use App\Services\Event\EventParticipantStateService;
+use App\Services\Event\EventQueryService;
 use App\Services\Event\PublicEventCtaResolver;
 use Illuminate\Http\Request;
 
@@ -13,8 +14,9 @@ class ProgrammeController extends Controller
 {
     public function __construct(
         protected ProgramRepositoryInterface $programRepository,
-        protected EventService $eventService,
-        protected PublicEventCtaResolver $publicEventCtaResolver
+        protected EventQueryService $eventQueryService,
+        protected PublicEventCtaResolver $publicEventCtaResolver,
+        protected EventParticipantStateService $participantStateService
     ){}
     /**
      * Display a listing of the resource.
@@ -22,16 +24,14 @@ class ProgrammeController extends Controller
     public function index(Request $request)
     {
         $searchQuery = $request->input('q', null);
-        $events = $this->eventService->getPublishedEvents($searchQuery);
+        $events = $this->eventQueryService->getPublishedEvents($searchQuery);
 
         $events->setCollection(
             $events->getCollection()->map(function (Event $event) {
-                $slotsRemaining = $event->slotsRemaining();
+                $slotsRemaining = $this->participantStateService->slotsRemaining($event);
                 $segment = $this->resolvePublicSegment($event, $slotsRemaining);
 
-                $event->slots_remaining = $slotsRemaining === 'Unlimited'
-                    ? null
-                    : ($slotsRemaining === 'Full' ? 0 : $slotsRemaining);
+                $event->slots_remaining = $this->participantStateService->normalizedSlotsRemaining($event);
                 $event->public_segment = $segment['key'];
                 $event->public_status_label = $segment['label'];
                 $event->availability_note = $segment['note'];
@@ -177,28 +177,23 @@ class ProgrammeController extends Controller
             $event->load('speakers.user');
 
             // Calculate slots remaining
-            $slotsRemaining = $event->slotsRemaining();
+            $slotsRemaining = $this->participantStateService->slotsRemaining($event);
 
             // Check if user is registered
             $isRegistered = false;
             $registrationStatus = null;
             $revokeCount = 0;
             if (auth()->check()) {
-                $isRegistered = $event->isRegistered();
-                $registrationStatus = $event->registrationStatusForUser();
-                $revokeCount = $event->getRevokeCount();
+                $userId = auth()->id();
+                $isRegistered = $this->participantStateService->isRegistered($event, $userId);
+                $registrationStatus = $this->participantStateService->registrationStatusForUser($event, $userId);
+                $revokeCount = $this->participantStateService->getRevokeCount($event, $userId);
             }
 
             // Append calculated values to event
             // Transform 'Unlimited' to null for frontend to interpret as truly unlimited
             // Transform 'Full' to 0 for frontend to interpret as no slots
-            if ($slotsRemaining === 'Unlimited') {
-                $event->slots_remaining = null;
-            } elseif ($slotsRemaining === 'Full') {
-                $event->slots_remaining = 0;
-            } else {
-                $event->slots_remaining = $slotsRemaining; // It's already a number
-            }
+            $event->slots_remaining = $this->participantStateService->normalizedSlotsRemaining($event);
             $event->is_registered = $isRegistered;
             $event->registration_status = $registrationStatus;
             $event->revoke_count = $revokeCount;

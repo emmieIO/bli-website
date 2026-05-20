@@ -6,7 +6,7 @@ use App\Enums\EventRegistrationStatus;
 use App\Enums\EventStatus;
 use App\Models\Event;
 use App\Models\User;
-use App\Services\Event\EventService;
+use App\Services\Event\EventRegistrationService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -23,7 +23,7 @@ class EventTransitionAuditTest extends TestCase
 
         $this->actingAs($user);
 
-        $result = app(EventService::class)->registerOrWaitlist($event, $user->id);
+        $result = app(EventRegistrationService::class)->registerOrWaitlist($event, $user->id);
 
         $this->assertSame(EventRegistrationStatus::REGISTERED, $result);
 
@@ -49,7 +49,7 @@ class EventTransitionAuditTest extends TestCase
 
         $this->actingAs($user);
 
-        $result = app(EventService::class)->revokeRsvp($event->slug);
+        $result = app(EventRegistrationService::class)->revokeRsvp($event->slug);
 
         $this->assertTrue($result);
 
@@ -78,7 +78,7 @@ class EventTransitionAuditTest extends TestCase
 
         $this->actingAs($admin);
 
-        $result = app(EventService::class)->promoteWaitlistedAttendee($event, $attendee->id);
+        $result = app(EventRegistrationService::class)->promoteWaitlistedAttendee($event, $attendee->id);
 
         $this->assertTrue($result);
 
@@ -102,7 +102,7 @@ class EventTransitionAuditTest extends TestCase
             'revoke_count' => 0,
         ]);
 
-        $result = app(EventService::class)->refundRegistration($event, $user->id);
+        $result = app(EventRegistrationService::class)->refundRegistration($event, $user->id);
 
         $this->assertTrue($result);
 

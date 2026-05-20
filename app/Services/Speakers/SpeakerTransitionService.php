@@ -6,6 +6,7 @@ use App\Enums\ApplicationStatus;
 use App\Enums\SpeakerInviteStatus;
 use App\Enums\SpeakerStatus;
 use App\Enums\SpeakerWorkspaceStage;
+use App\Enums\UserRoles;
 use App\Events\SpeakerApplicationApprovedEvent;
 use App\Models\Speaker;
 use App\Models\SpeakerApplication;
@@ -49,6 +50,11 @@ class SpeakerTransitionService
             $application->speaker->update([
                 'status' => SpeakerStatus::ACTIVE->value,
             ]);
+
+            $user = $application->speaker->user;
+            if ($user && ! $user->hasRole(UserRoles::SPEAKER->value)) {
+                $user->assignRole(UserRoles::SPEAKER->value);
+            }
 
             $application->event->speakers()->syncWithoutDetaching([
                 $application->speaker->id,

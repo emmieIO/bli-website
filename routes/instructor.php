@@ -38,7 +38,7 @@ Route::get('/instructor/apply', [InstructorsController::class, 'showApplicationF
     ->name('instructor.application-form');
 
 // Authenticated instructor dashboard and courses
-Route::prefix('instructor')->name('instructor.')->middleware(['auth', 'role:instructor'])->group(function () {
+Route::prefix('instructor')->name('instructor.')->middleware(['auth', 'instructor.access'])->group(function () {
     Route::get('/my-courses', [InstructorCourseController::class, 'index'])->name('courses.index');
     Route::get('/create-course', [InstructorCourseController::class, 'create'])->name('courses.create');
     Route::post('/create-course', [InstructorCourseController::class, 'store'])->name('courses.store');
@@ -70,4 +70,3 @@ Route::prefix('instructor')->name('instructor.')->middleware(['auth', 'role:inst
         ->middleware('throttle:5,60') // Max 5 payout requests per hour
         ->name('earnings.payout.store');
 });
-

@@ -19,7 +19,7 @@ Route::middleware(['auth', 'role:student'])->prefix('student/mentorship')->name(
 });
 
 // Instructor Mentorship Routes
-Route::middleware(['auth', 'role:instructor'])->prefix('instructor/mentorship')->name('instructor.mentorship.')->group(function () {
+Route::middleware(['auth', 'instructor.access'])->prefix('instructor/mentorship')->name('instructor.mentorship.')->group(function () {
     Route::get('/', [InstructorMentorshipController::class, 'index'])->name('index');
     Route::get('/{id}', [InstructorMentorshipController::class, 'show'])->name('show');
     Route::post('/{id}/approve', [InstructorMentorshipController::class, 'approve'])->name('approve');

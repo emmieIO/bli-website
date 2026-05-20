@@ -23,26 +23,26 @@ export default function AuthLayout({ title, description, wide = false, children 
                         className="absolute inset-0 bg-cover bg-center opacity-15"
                         style={{ backgroundImage: 'url(/images/auth.jpg)' }}
                     />
-                    <div className="absolute -right-20 -top-20 h-72 w-72 rounded-full bg-accent/40 blur-3xl" />
-                    <div className="absolute -bottom-32 -left-20 h-60 w-60 rounded-full bg-accent/30 blur-3xl" />
-                    <div className="absolute left-1/2 top-1/3 h-40 w-40 -translate-x-1/2 -translate-y-1/2 rounded-full bg-accent/10 blur-3xl" />
+                    <div className="absolute -right-20 -top-20 h-72 w-72 rounded-full bg-secondary-400/15 blur-3xl" />
+                    <div className="absolute -bottom-32 -left-20 h-60 w-60 rounded-full bg-white/10 blur-3xl" />
+                    <div className="absolute left-1/2 top-1/3 h-40 w-40 -translate-x-1/2 -translate-y-1/2 rounded-full bg-slate-200/10 blur-3xl" />
 
                     <div className="relative z-10">
                         <Link href={route('homepage')} className="flex items-center gap-3">
                             <img
                                 src="/images/logo.jpg"
                                 alt="BLI"
-                                className="h-11 w-11 rounded-md object-cover ring-2 ring-accent-400/60"
+                                className="h-11 w-11 rounded-md object-cover ring-2 ring-white/20"
                             />
                             <p className="text-base font-bold text-white">Beacon Leadership Institute</p>
                         </Link>
                     </div>
 
                     <div className="relative z-10">
-                        <h2 className="text-4xl font-bold leading-tight text-white">
+                        <h2 className="text-4xl font-bold leading-tight text-secondary">
                             Shape the next generation of leaders.
                         </h2>
-                        <div className="my-5 h-1 w-16 rounded-full bg-accent" />
+                        <div className="my-5 h-1 w-16 rounded-full bg-sky-300" />
                         <p className="mt-4 text-base leading-relaxed text-white/80">
                             Access structured courses, live events, and a community focused on developing leaders
                             with spiritual depth and practical clarity.
@@ -57,7 +57,7 @@ export default function AuthLayout({ title, description, wide = false, children 
                 </div>
 
                 {/* Right: Form Panel */}
-                <div className="flex w-full flex-col overflow-y-auto bg-gradient-to-br from-accent-50 via-white to-primary-50 lg:ml-[50%] lg:w-1/2">
+                <div className="flex w-full flex-col overflow-y-auto bg-white lg:ml-[50%] lg:w-1/2">
                     <header className="flex items-center justify-end border-b border-accent-100 bg-white/80 px-8 py-4 backdrop-blur-sm">
                         <Link
                             href={route('homepage')}
@@ -90,5 +90,3 @@ export default function AuthLayout({ title, description, wide = false, children 
         </>
     );
 }
-
-

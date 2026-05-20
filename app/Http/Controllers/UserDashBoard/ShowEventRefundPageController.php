@@ -3,18 +3,18 @@
 namespace App\Http\Controllers\UserDashBoard;
 
 use App\Http\Controllers\Controller;
-use App\Services\Event\EventService;
+use App\Services\Event\EventRegistrationService;
 use Inertia\Inertia;
 
 class ShowEventRefundPageController extends Controller
 {
     public function __construct(
-        protected EventService $eventService
+        protected EventRegistrationService $eventRegistrationService
     ) {}
 
     public function __invoke(string $slug)
     {
-        $event = $this->eventService->getAttendeeEventWorkspace($slug);
+        $event = $this->eventRegistrationService->getAttendeeEventWorkspace($slug);
 
         abort_unless($event, 404);
 

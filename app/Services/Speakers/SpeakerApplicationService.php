@@ -3,6 +3,8 @@
 namespace App\Services\Speakers;
 
 use App\Enums\ApplicationStatus;
+use App\Enums\SpeakerStatus;
+use App\Enums\UserRoles;
 use App\Events\SpeakerAppliedToEvent;
 use App\Models\Event;
 use App\Models\Speaker;
@@ -24,11 +26,51 @@ class SpeakerApplicationService
     {
     }
 
-    public function createSpeakerAccount(array $data){
+    public function createSpeakerAccount(array $data): ?Speaker
+    {
+        $user = auth()->user();
+
+        if (! $user) {
+            return null;
+        }
+
         try {
-            
+            return DB::transaction(function () use ($data, $user) {
+                $existingSpeaker = $user->speaker;
+
+                $user->update([
+                    'headline' => $data['title'] ?? $user->headline,
+                    'linkedin' => $data['linkedin'] ?? $user->linkedin,
+                    'website' => $data['website'] ?? $user->website,
+                ]);
+
+                $speaker = Speaker::updateOrCreate(
+                    ['user_id' => $user->id],
+                    [
+                        'name' => $user->name,
+                        'email' => $user->email,
+                        'phone' => $user->phone,
+                        'bio' => $data['bio'] ?? $existingSpeaker?->bio,
+                        'organization' => $data['organization'] ?? $existingSpeaker?->organization,
+                        'photo' => $existingSpeaker?->photo,
+                        'status' => $existingSpeaker?->status?->value ?? SpeakerStatus::PENDING->value,
+                        'created_by' => $existingSpeaker?->created_by ?? $user->id,
+                    ]
+                );
+
+                if (! $user->hasRole(UserRoles::SPEAKER->value)) {
+                    $user->assignRole(UserRoles::SPEAKER->value);
+                }
+
+                return $speaker;
+            });
         } catch (\Throwable $th) {
-            //throw $th;
+            Log::error('Speaker account creation failed: ' . $th->getMessage(), [
+                'user_id' => $user->id,
+                'data' => $data,
+            ]);
+
+            return null;
         }
     }
 
@@ -69,16 +111,13 @@ class SpeakerApplicationService
 
     private function upsertSpeaker(array $speakerInfo): Speaker
     {
-        $user = auth()->user();
-        $oldPhoto = $user->speaker?->photo;
+        $speaker = $this->createSpeakerAccount($speakerInfo);
 
-        // Keep existing photo unless new one is uploaded later
-        $speakerInfo['photo'] = $oldPhoto;
+        if (! $speaker) {
+            throw new \RuntimeException('Unable to create or update the speaker account.');
+        }
 
-        return Speaker::updateOrCreate(
-            ['user_id' => $user->id],
-            $speakerInfo
-        );
+        return $speaker;
     }
 
     private function upsertApplication(Speaker $speaker, Event $event, array $applicationInfo): void

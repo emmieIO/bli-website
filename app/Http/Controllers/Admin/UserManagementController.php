@@ -38,7 +38,14 @@ class UserManagementController extends Controller
             'role' => 'required|exists:roles,name',
         ]);
 
-        $user->syncRoles([$request->role]);
+        if ($user->hasRole($request->role)) {
+            return redirect()->back()->with([
+                'message' => "{$user->name} already has the '{$request->role}' role",
+                'type' => 'info',
+            ]);
+        }
+
+        $user->assignRole($request->role);
 
         return redirect()->back()->with([
             'message' => "Role '{$request->role}' assigned to {$user->name} successfully",
@@ -115,6 +122,7 @@ class UserManagementController extends Controller
             'total_users' => User::count(),
             'admins' => User::role('admin')->count(),
             'instructors' => User::role('instructor')->count(),
+            'speakers' => User::role('speaker')->count(),
             'students' => User::role('student')->count(),
             'users_without_roles' => User::doesntHave('roles')->count(),
         ];
@@ -170,6 +178,15 @@ class UserManagementController extends Controller
             'student' => [
                 'course-view',
                 'lesson-view',
+            ],
+            'speaker' => [
+                'track-applications',
+                'view-own-invitations',
+                'event-view',
+                'event-register',
+                'event-view-own-registration',
+                'event-join-waitlist',
+                'event-apply-to-speak',
             ],
         ];
 

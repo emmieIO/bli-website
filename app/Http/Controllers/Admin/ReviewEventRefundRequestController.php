@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\EventRefundRequest;
-use App\Services\Event\EventService;
+use App\Services\Event\EventRegistrationService;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
 
@@ -13,14 +13,14 @@ class ReviewEventRefundRequestController extends Controller
     use AuthorizesRequests;
 
     public function __construct(
-        protected EventService $eventService
+        protected EventRegistrationService $eventRegistrationService
     ) {}
 
     public function approve(EventRefundRequest $refundRequest)
     {
         $this->authorize('manageAttendees', $refundRequest->event);
 
-        if ($this->eventService->approveRefundRequest($refundRequest, auth()->id())) {
+        if ($this->eventRegistrationService->approveRefundRequest($refundRequest, auth()->id())) {
             return back()->with([
                 'type' => 'success',
                 'message' => 'Refund request approved and registration updated.',
@@ -41,7 +41,7 @@ class ReviewEventRefundRequestController extends Controller
             'admin_note' => 'nullable|string|max:1000',
         ]);
 
-        if ($this->eventService->declineRefundRequest($refundRequest, auth()->id(), $validated['admin_note'] ?? null)) {
+        if ($this->eventRegistrationService->declineRefundRequest($refundRequest, auth()->id(), $validated['admin_note'] ?? null)) {
             return back()->with([
                 'type' => 'success',
                 'message' => 'Refund request declined.',

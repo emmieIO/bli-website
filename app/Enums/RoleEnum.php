@@ -7,5 +7,6 @@ enum RoleEnum:string
     case Admin = "admin";
     case Student = "student";
     case Instructor = "instructor";
+    case Speaker = "speaker";
 
 }

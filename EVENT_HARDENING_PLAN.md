@@ -764,7 +764,7 @@ Implementation consequence:
 - [x] Hardened paid event verification so successful payment respects real-time event capacity instead of silently overbooking.
 - [x] Added feature coverage for the pending transaction -> confirmed attendee boundary and the paid confirmation -> waitlist fallback path.
 - [x] Verified reminder dispatch rules so only confirmed attendees are notified and duplicate cron sends are suppressed by cache locks.
-- [x] Added a lightweight `event_transition_audits` trail for confirmation, cancellation, and waitlist promotion transitions directly from `EventService`.
+- [x] Added a lightweight `event_transition_audits` trail for confirmation, cancellation, and waitlist promotion transitions through the event registration workflow.
 - [x] Added feature coverage for registration confirmation, RSVP cancellation, and waitlist promotion audit writes.
 - [x] Extended end-to-end registration journey coverage for free confirmation, full-event waitlisting, and cancelled-attendee re-entry rules.
 - [x] Added speaker journey feature coverage for application submission, invitation acceptance, admin approval, rejection, and reopening.
@@ -779,7 +779,9 @@ Implementation consequence:
 - [x] Segmented the public event list around actual lifecycle and capacity states, so live events, open registration, waitlist-only events, announced events, closed registration, and completed events no longer appear in one undifferentiated grid.
 - [x] Clarified the free public registration flow so guests see an explicit login-to-register path, authenticated users get a true free-registration CTA, and the public event modal stops borrowing paid checkout language.
 - [x] Audited the paid event checkout path against course-era assumptions and centralized event-specific eligibility checks, so checkout and payment initialization now reject already-confirmed, waitlisted, refunded, full-capacity, closed, and duplicate-pending-payment states consistently.
+- [x] Replaced the old `EventService` facade with focused event services for queries, CRUD, participant state, registration flow, and speaker invitations so the event domain now has clearer boundaries.
 - [ ] Next: move to the next unchecked item in `Public Journey`, `Closed registration states are handled clearly`.
+- [ ] Cross-domain consistency pass: apply the same boundary-cleanup pattern used in events to the remaining course, speaker, payment, and identity domains so service usage, naming, and controller dependencies stay consistent across the platform.
 
 ---
 
@@ -814,6 +816,7 @@ This is the recommended execution order after this document.
 3. [x] Normalize speaker workspace stage resolution against the confirmed v1 model.
 4. [x] Create a single CTA resolver for public event pages.
 5. [x] Update tests around payment, registration, waitlist, and workspace redirects.
+6. [ ] Run the next domain-consistency cleanup pass across courses, speakers, payments, and identity boundaries.
 
 This gives us the safest route to implementation because it hardens logic before expanding UI surface area.
 

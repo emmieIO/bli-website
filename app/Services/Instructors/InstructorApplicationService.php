@@ -225,8 +225,14 @@ class InstructorApplicationService
         }
         try {
             DB::transaction(function () use ($user, $application) {
-                // assign instructor role
-                $user->syncRoles([UserRoles::INSTRUCTOR->value]);
+                if (! $user->hasRole(UserRoles::INSTRUCTOR->value)) {
+                    $user->assignRole(UserRoles::INSTRUCTOR->value);
+                }
+
+                if ($user->hasRole(UserRoles::STUDENT->value)) {
+                    $user->removeRole(UserRoles::STUDENT->value);
+                }
+
                 $user->email_verified_at = Carbon::now();
                 $user->save();
                 // update application status to approved
@@ -270,10 +276,14 @@ class InstructorApplicationService
             DB::transaction(function () use ($rejectionData, $application) {
                 $user = $application->user;
 
-                // 1. Revoke instructor role
-                $user->syncRoles([UserRoles::STUDENT->value]);
+                if ($user->hasRole(UserRoles::INSTRUCTOR->value)) {
+                    $user->removeRole(UserRoles::INSTRUCTOR->value);
+                }
 
-                // 2. Update application status
+                if (! $user->hasAnyRole([UserRoles::STUDENT->value, UserRoles::ADMIN->value, UserRoles::SUPER_ADMIN->value])) {
+                    $user->assignRole(UserRoles::STUDENT->value);
+                }
+
                 $application->update([
                     'is_approved' => false,
                     'status' => ApplicationStatus::REJECTED->value,

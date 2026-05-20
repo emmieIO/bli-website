@@ -262,6 +262,13 @@ class RoleAndPermissionsSeeder extends Seeder
                         
             
                         ]
+                        ,
+
+                        'speaker' => [
+                            'track-applications',
+                            'view-own-invitations',
+                            ...$eventUserPermissions,
+                        ]
                         
             
             

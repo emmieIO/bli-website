@@ -3,19 +3,21 @@
 namespace App\Http\Controllers\UserDashBoard;
 
 use App\Http\Controllers\Controller;
-use App\Services\Event\EventService;
+use App\Services\Event\EventParticipantStateService;
+use App\Services\Event\EventRegistrationService;
 use Inertia\Inertia;
 
 class ShowMyEventController extends Controller
 {
     public function __construct(
-        protected EventService $eventService
+        protected EventRegistrationService $eventRegistrationService,
+        protected EventParticipantStateService $participantStateService
     ) {
     }
 
     public function __invoke(string $slug)
     {
-        $event = $this->eventService->getAttendeeEventWorkspace($slug);
+        $event = $this->eventRegistrationService->getAttendeeEventWorkspace($slug);
 
         abort_unless($event, 404);
 
@@ -24,9 +26,7 @@ class ShowMyEventController extends Controller
             : (now()->isAfter($event->end_date) ? 'ended' : 'ongoing');
 
         $event->registration_status = $event->pivot?->status;
-        $event->slots_remaining = $event->slotsRemaining() === 'Unlimited'
-            ? null
-            : ($event->slotsRemaining() === 'Full' ? 0 : $event->slotsRemaining());
+        $event->slots_remaining = $this->participantStateService->normalizedSlotsRemaining($event);
         $event->meeting_link = data_get($event->metadata, 'meeting_link');
         $event->access_notes = data_get($event->metadata, 'access_notes');
         $event->latest_transaction = $event->transactions->first();

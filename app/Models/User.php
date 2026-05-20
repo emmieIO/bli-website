@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\UserRoles;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -29,8 +30,6 @@ class User extends Authenticatable implements MustVerifyEmail
         'website',
         'headline',
         'photo',
-        // Security: email_verified_at should NOT be mass-assignable
-        // It must only be set through Laravel's email verification process
     ];
 
     /**
@@ -118,6 +117,61 @@ class User extends Authenticatable implements MustVerifyEmail
     public function hasInstructorProfile()
     {
         return $this->instructorProfile !== null;
+    }
+
+    public function isInstructorRole(): bool
+    {
+        return $this->hasRole(UserRoles::INSTRUCTOR->value);
+    }
+
+    public function isApprovedInstructor(): bool
+    {
+        return $this->isInstructorRole()
+            && $this->hasInstructorProfile()
+            && (bool) optional($this->instructorProfile)->is_approved;
+    }
+
+    public function canAccessInstructorArea(): bool
+    {
+        return $this->isApprovedInstructor();
+    }
+
+    public function hasSpeakerIdentity(): bool
+    {
+        return $this->speaker !== null;
+    }
+
+    public function isSpeakerRole(): bool
+    {
+        return $this->hasRole(UserRoles::SPEAKER->value);
+    }
+
+    public function canAccessSpeakerArea(): bool
+    {
+        return $this->isSpeakerRole() && $this->hasSpeakerIdentity();
+    }
+
+    public function hasSpeakerEventContext(Event $event): bool
+    {
+        $speakerId = $this->speaker?->id;
+
+        $hasApplication = SpeakerApplication::query()
+            ->where('event_id', $event->id)
+            ->where('user_id', $this->id)
+            ->exists();
+
+        $hasInvite = $speakerId
+            ? SpeakerInvite::query()
+                ->where('event_id', $event->id)
+                ->where('speaker_id', $speakerId)
+                ->exists()
+            : false;
+
+        $isAssignedSpeaker = $speakerId
+            ? $event->speakers()->where('speakers.id', $speakerId)->exists()
+            : false;
+
+        return $this->canAccessSpeakerArea() && ($hasApplication || $hasInvite || $isAssignedSpeaker);
     }
 
     public function certificates()

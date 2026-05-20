@@ -10,6 +10,12 @@ interface Course {
     thumbnail_path: string | null;
 }
 
+interface EventItem {
+    id: number;
+    title: string;
+    slug: string;
+}
+
 interface CartItem {
     course_id: number;
     course_title: string;
@@ -26,8 +32,10 @@ interface Transaction {
     payment_type: string | null;
     created_at: string;
     paid_at: string | null;
-    type: 'course' | 'cart';
+    type: 'course' | 'cart' | 'event';
+    checkout_context: 'direct' | 'cart';
     course: Course | null;
+    event: EventItem | null;
     items: CartItem[] | null;
     item_count: number;
 }
@@ -128,7 +136,7 @@ export default function Index({ transactions, payouts }: Props) {
                         </h1>
                     </div>
                     <p className="text-gray-600 font-lato">
-                        View your course purchases and payout history
+                        View your payment history and instructor payouts
                     </p>
                 </div>
 
@@ -198,7 +206,7 @@ export default function Index({ transactions, payouts }: Props) {
                                                 <div className="flex items-start gap-4">
                                                     {/* Icon */}
                                                     <div className="shrink-0">
-                                                        {transaction.type === 'cart' ? (
+                                                        {transaction.checkout_context === 'cart' ? (
                                                             <Package className="w-10 h-10 text-primary" />
                                                         ) : (
                                                             <CreditCard className="w-10 h-10 text-primary" />
@@ -208,13 +216,15 @@ export default function Index({ transactions, payouts }: Props) {
                                                     {/* Details */}
                                                     <div className="grow">
                                                         <h3 className="text-lg font-bold text-gray-900 font-montserrat mb-1">
-                                                            {transaction.type === 'cart'
+                                                            {transaction.checkout_context === 'cart'
                                                                 ? `Cart Purchase - ${transaction.item_count} Course${transaction.item_count > 1 ? 's' : ''}`
-                                                                : transaction.course?.title || 'Course Purchase'}
+                                                                : transaction.type === 'event'
+                                                                    ? transaction.event?.title || 'Event Registration'
+                                                                    : transaction.course?.title || 'Course Purchase'}
                                                         </h3>
 
                                                         {/* Cart Items */}
-                                                        {transaction.type === 'cart' && transaction.items && (
+                                                        {transaction.checkout_context === 'cart' && transaction.items && (
                                                             <div className="mt-2 space-y-1">
                                                                 {transaction.items.map((item, idx) => (
                                                                     <p key={idx} className="text-sm text-gray-600 font-lato">
@@ -231,6 +241,15 @@ export default function Index({ transactions, payouts }: Props) {
                                                                 className="text-sm text-primary hover:text-primary-600 font-lato"
                                                             >
                                                                 View Course →
+                                                            </Link>
+                                                        )}
+
+                                                        {transaction.type === 'event' && transaction.event && (
+                                                            <Link
+                                                                href={route('events.show', transaction.event.slug)}
+                                                                className="text-sm text-primary hover:text-primary-600 font-lato"
+                                                            >
+                                                                View Event →
                                                             </Link>
                                                         )}
 

@@ -3,7 +3,9 @@
 namespace App\Providers;
 
 use App\Contracts\ProgramRepositoryInterface;
+use App\Contracts\Services\PaymentGatewayInterface;
 use App\Repositories\ProgramRepository;
+use App\Services\Payment\PaystackService;
 use Illuminate\Support\Composer;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\URL;
@@ -23,6 +25,7 @@ class AppServiceProvider extends ServiceProvider
             \App\Contracts\Repositories\MentorshipRepositoryInterface::class,
             \App\Repositories\MentorshipRepository::class
         );
+        $this->app->bind(PaymentGatewayInterface::class, PaystackService::class);
     }
 
     /**

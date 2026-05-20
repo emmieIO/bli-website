@@ -3,13 +3,13 @@
 namespace App\Http\Controllers\UserDashBoard;
 
 use App\Http\Controllers\Controller;
-use App\Services\Event\EventService;
+use App\Services\Event\EventRegistrationService;
 use Illuminate\Http\Request;
 
 class ShowMyEventsController extends Controller
 {
     public function __construct(
-        protected EventService $eventService
+        protected EventRegistrationService $eventRegistrationService
     ) {
     }
     /**
@@ -17,7 +17,7 @@ class ShowMyEventsController extends Controller
      */
     public function __invoke(Request $request)
     {
-        $events = $this->eventService->getEventsImAttending()->map(function ($event) {
+        $events = $this->eventRegistrationService->getEventsImAttending()->map(function ($event) {
             $event->journey_status = now()->isBefore($event->start_date)
                 ? 'upcoming'
                 : (now()->isAfter($event->end_date) ? 'ended' : 'ongoing');

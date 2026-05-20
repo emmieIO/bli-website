@@ -3,13 +3,13 @@
 namespace App\Http\Controllers\UserDashBoard;
 
 use App\Http\Controllers\Controller;
-use App\Services\Event\EventService;
+use App\Services\Event\EventRegistrationService;
 use Illuminate\Http\Request;
 
 class RequestEventRefundAction extends Controller
 {
     public function __construct(
-        protected EventService $eventService
+        protected EventRegistrationService $eventRegistrationService
     ) {}
 
     public function __invoke(Request $request, string $slug)
@@ -18,7 +18,7 @@ class RequestEventRefundAction extends Controller
             'reason' => 'nullable|string|max:1000',
         ]);
 
-        $result = $this->eventService->requestRefund($slug, auth()->id(), $validated['reason'] ?? null);
+        $result = $this->eventRegistrationService->requestRefund($slug, auth()->id(), $validated['reason'] ?? null);
 
         if ($result === 'pending_created') {
             return back()->with([

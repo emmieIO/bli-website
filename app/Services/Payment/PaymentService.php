@@ -2,13 +2,15 @@
 
 namespace App\Services\Payment;
 
+use App\Contracts\Services\PaymentGatewayInterface;
 use App\Models\Cart;
 use App\Models\Course;
 use App\Models\Event;
 use App\Models\EventRefundRequest;
 use App\Models\Transaction;
 use App\Models\User;
-use App\Services\Event\EventService;
+use App\Services\Event\EventParticipantStateService;
+use App\Services\Event\EventRegistrationService;
 use App\Services\Instructor\InstructorEarningsService;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
@@ -16,14 +18,15 @@ use Illuminate\Support\Facades\Log;
 
 /**
  * Service for handling payment business logic
- * Responsible for: Payment processing, transaction management, course enrollment
+ * Responsible for: Payment processing, transaction management, and purchase fulfillment
  */
 class PaymentService
 {
     public function __construct(
-        private PaystackService $paystackService,
+        private PaymentGatewayInterface $paymentGateway,
         private InstructorEarningsService $earningsService,
-        private EventService $eventService
+        private EventRegistrationService $eventRegistrationService,
+        private EventParticipantStateService $eventParticipantStateService
     ) {}
 
     /**
@@ -32,7 +35,8 @@ class PaymentService
     public function generateTransactionReference(User $user, Model $payable): string
     {
         $type = class_basename($payable);
-        return 'BLI_' . strtoupper($type) . '_' . time() . '_' . $user->id . '_' . $payable->id;
+
+        return 'BLI_'.strtoupper($type).'_'.time().'_'.$user->id.'_'.$payable->id;
     }
 
     /**
@@ -53,6 +57,46 @@ class PaymentService
         ]);
     }
 
+    private function getTransactionSubjectType(Transaction $transaction): string
+    {
+        $subjectType = $transaction->metadata['subject_type'] ?? null;
+
+        if (is_string($subjectType) && $subjectType !== '') {
+            return $subjectType;
+        }
+
+        if ($transaction->payable_type === Event::class || ($transaction->metadata['type'] ?? null) === 'event') {
+            return 'event';
+        }
+
+        if ($transaction->metadata['checkout_context'] ?? null === 'cart' || ($transaction->metadata['type'] ?? null) === 'cart') {
+            return 'cart';
+        }
+
+        return 'course';
+    }
+
+    private function getTransactionCheckoutContext(Transaction $transaction): string
+    {
+        $checkoutContext = $transaction->metadata['checkout_context'] ?? null;
+
+        if (is_string($checkoutContext) && $checkoutContext !== '') {
+            return $checkoutContext;
+        }
+
+        return ($transaction->metadata['type'] ?? null) === 'cart' ? 'cart' : 'direct';
+    }
+
+    private function isEventTransaction(Transaction $transaction): bool
+    {
+        return $this->getTransactionSubjectType($transaction) === 'event';
+    }
+
+    private function isCartCheckout(Transaction $transaction): bool
+    {
+        return $this->getTransactionCheckoutContext($transaction) === 'cart';
+    }
+
     /**
      * Initialize payment
      */
@@ -65,7 +109,7 @@ class PaymentService
 
             $transaction = $this->createTransaction($user, $course, $txRef, (float) $course->price);
 
-            $paymentData = $this->paystackService->initializePayment([
+            $paymentData = $this->paymentGateway->initializePayment([
                 'email' => $customerData['email'],
                 'amount' => $course->price * 100, // Convert to kobo
                 'reference' => $txRef,
@@ -78,7 +122,8 @@ class PaymentService
                     'payable_id' => $course->id,
                     'payable_type' => Course::class,
                     'transaction_id' => $transaction->id,
-                    'type' => 'course',
+                    'subject_type' => 'course',
+                    'checkout_context' => 'direct',
                 ],
             ]);
 
@@ -120,7 +165,7 @@ class PaymentService
 
             $transaction = $this->createTransaction($user, $event, $txRef, (float) $event->entry_fee);
 
-            $paymentData = $this->paystackService->initializePayment([
+            $paymentData = $this->paymentGateway->initializePayment([
                 'email' => $customerData['email'],
                 'amount' => $event->entry_fee * 100, // Convert to kobo
                 'reference' => $txRef,
@@ -133,7 +178,8 @@ class PaymentService
                     'payable_id' => $event->id,
                     'payable_type' => Event::class,
                     'transaction_id' => $transaction->id,
-                    'type' => 'event',
+                    'subject_type' => 'event',
+                    'checkout_context' => 'direct',
                 ],
             ]);
 
@@ -186,7 +232,7 @@ class PaymentService
             ];
         }
 
-        $registrationStatus = $event->registrationStatusForUserEnum($user->id);
+        $registrationStatus = $this->eventParticipantStateService->registrationStatusForUserEnum($event, $user->id);
 
         if ($registrationStatus === \App\Enums\EventRegistrationStatus::REGISTERED) {
             return [
@@ -212,7 +258,7 @@ class PaymentService
             ];
         }
 
-        if ($event->maxRevokes()) {
+        if ($this->eventParticipantStateService->hasReachedMaxRevokes($event, $user->id)) {
             return [
                 'can_checkout' => false,
                 'reason' => 'revoke_limit_reached',
@@ -220,7 +266,7 @@ class PaymentService
             ];
         }
 
-        if ($event->slotsRemaining() === 'Full') {
+        if ($this->eventParticipantStateService->slotsRemaining($event) === 'Full') {
             return [
                 'can_checkout' => false,
                 'reason' => 'event_full',
@@ -272,27 +318,31 @@ class PaymentService
     {
         $transaction = Transaction::query()->where('transaction_id', $txRef)->first();
 
-        if (!$transaction) {
+        if (! $transaction) {
             throw new \Exception('Transaction not found');
         }
 
-        if (!$transaction->isPending()) {
+        if (! $transaction->isPending()) {
             if ($transaction->isSuccessful()) {
-                if ($transaction->payable_type === Event::class || ($transaction->metadata['type'] ?? '') === 'event') {
+                $subjectType = $this->getTransactionSubjectType($transaction);
+
+                if ($this->isEventTransaction($transaction)) {
                     $event = $transaction->payable;
 
                     return [
                         'success' => true,
-                        'type' => 'event',
+                        'type' => $subjectType,
                         'event' => $event,
                         'transaction' => $transaction,
-                        'registration_status' => $event?->registrationStatusForUser($transaction->user_id),
+                        'registration_status' => $event
+                            ? $this->eventParticipantStateService->registrationStatusForUser($event, $transaction->user_id)
+                            : null,
                     ];
                 }
 
                 return [
                     'success' => true,
-                    'type' => $transaction->metadata['type'] ?? 'course',
+                    'type' => $subjectType,
                     'course' => $transaction->course,
                     'courses' => isset($transaction->metadata['course_ids'])
                         ? Course::query()->findMany($transaction->metadata['course_ids'])
@@ -305,7 +355,7 @@ class PaymentService
         }
 
         // Verify with Paystack
-        $result = $this->paystackService->verifyTransaction($txRef);
+        $result = $this->paymentGateway->verifyTransaction($txRef);
 
         Log::info('Paystack verification response', [
             'paystack_response' => $result,
@@ -323,7 +373,7 @@ class PaymentService
         $localAmount = (int) ($transaction->amount * 100);
 
         if ($paystackAmount !== $localAmount || $data['currency'] !== $transaction->currency) {
-            throw new \Exception('Payment amount or currency mismatch. Expected: ' . $localAmount . ' ' . $transaction->currency . ', Got: ' . $paystackAmount . ' ' . $data['currency']);
+            throw new \Exception('Payment amount or currency mismatch. Expected: '.$localAmount.' '.$transaction->currency.', Got: '.$paystackAmount.' '.$data['currency']);
         }
 
         DB::beginTransaction();
@@ -339,19 +389,20 @@ class PaymentService
             ])->save();
 
             // Handle Event Payment
-            if ($transaction->payable_type === Event::class || ($transaction->metadata['type'] ?? '') === 'event') {
+            if ($this->isEventTransaction($transaction)) {
                 $event = $transaction->payable;
-                if (!$event && isset($transaction->metadata['event_id'])) {
+                if (! $event && isset($transaction->metadata['event_id'])) {
                     $event = Event::query()->find($transaction->metadata['event_id']);
                 }
 
                 if ($event) {
-                    $registrationStatus = $this->eventService->registerOrWaitlist($event, $transaction->user_id);
+                    $registrationStatus = $this->eventRegistrationService->registerOrWaitlist($event, $transaction->user_id);
                 } else {
                     $registrationStatus = false;
                 }
 
                 DB::commit();
+
                 return [
                     'success' => true,
                     'type' => 'event',
@@ -362,7 +413,7 @@ class PaymentService
             }
 
             // Check if this is a cart purchase or single course purchase
-            $isCartPurchase = isset($transaction->metadata['type']) && $transaction->metadata['type'] === 'cart';
+            $isCartPurchase = $this->isCartCheckout($transaction);
 
             if ($isCartPurchase) {
                 // Enroll user in all courses from cart
@@ -378,7 +429,7 @@ class PaymentService
                 // Record earnings for each course in the cart
                 // Each instructor gets earnings only for their courses
                 $cartItems = $transaction->metadata['items'] ?? [];
-                if (!empty($cartItems)) {
+                if (! empty($cartItems)) {
                     $this->earningsService->recordEarningsFromCart($transaction, $cartItems);
                 }
 
@@ -395,7 +446,7 @@ class PaymentService
 
                 return [
                     'success' => true,
-                    'type' => 'cart',
+                    'type' => $this->getTransactionSubjectType($transaction),
                     'courses' => Course::query()->findMany($courseIds),
                     'transaction' => $transaction,
                 ];
@@ -411,7 +462,7 @@ class PaymentService
 
                 return [
                     'success' => true,
-                    'type' => 'course',
+                    'type' => $this->getTransactionSubjectType($transaction),
                     'course' => $course,
                     'transaction' => $transaction,
                 ];
@@ -434,13 +485,15 @@ class PaymentService
      */
     public function processWebhookPayment(array $payload, string $signature): void
     {
-        if (!$this->paystackService->verifyWebhookSignature(json_encode($payload), $signature)) {
+        if (! $this->paymentGateway->verifyWebhookSignature(json_encode($payload), $signature)) {
             Log::warning('Invalid Paystack webhook signature');
+
             return;
         }
 
         if (($payload['event'] ?? null) === 'refund.processed') {
             $this->processRefundWebhook($payload);
+
             return;
         }
 
@@ -451,7 +504,7 @@ class PaymentService
         $txRef = $payload['data']['reference'];
         $transaction = Transaction::query()->where('transaction_id', $txRef)->first();
 
-        if (!$transaction || !$transaction->isPending()) {
+        if (! $transaction || ! $transaction->isPending()) {
             return;
         }
 
@@ -467,14 +520,14 @@ class PaymentService
             ])->save();
 
             // Handle Event Payment
-            if ($transaction->payable_type === Event::class || ($transaction->metadata['type'] ?? '') === 'event') {
+            if ($this->isEventTransaction($transaction)) {
                 $event = $transaction->payable;
-                if (!$event && isset($transaction->metadata['event_id'])) {
+                if (! $event && isset($transaction->metadata['event_id'])) {
                     $event = Event::query()->find($transaction->metadata['event_id']);
                 }
 
                 if ($event) {
-                    $this->eventService->registerOrWaitlist($event, $transaction->user_id);
+                    $this->eventRegistrationService->registerOrWaitlist($event, $transaction->user_id);
                 }
             } elseif ($transaction->course) {
                 // Single course purchase
@@ -493,7 +546,7 @@ class PaymentService
 
                 // Record earnings for each course in the cart
                 $cartItems = $transaction->metadata['items'] ?? [];
-                if (!empty($cartItems)) {
+                if (! empty($cartItems)) {
                     $this->earningsService->recordEarningsFromCart($transaction, $cartItems);
                 }
             }
@@ -525,6 +578,7 @@ class PaymentService
             Log::warning('Refund webhook missing transaction reference', [
                 'payload' => $payload,
             ]);
+
             return;
         }
 
@@ -544,7 +598,7 @@ class PaymentService
                 ]),
             ])->save();
 
-            if ($transaction->payable_type === Event::class || ($transaction->metadata['type'] ?? '') === 'event') {
+            if ($this->isEventTransaction($transaction)) {
                 $refundRequest = EventRefundRequest::query()
                     ->where('transaction_id', $transaction->id)
                     ->where('status', 'pending')
@@ -552,7 +606,7 @@ class PaymentService
                     ->first();
 
                 if ($refundRequest) {
-                    $this->eventService->approveRefundRequest($refundRequest);
+                    $this->eventRegistrationService->approveRefundRequest($refundRequest);
                 }
             }
 
@@ -579,7 +633,7 @@ class PaymentService
      */
     private function enrollUserInCourse(int $userId, Course $course): void
     {
-        if (!$course->students()->where('user_id', $userId)->exists()) {
+        if (! $course->students()->where('user_id', $userId)->exists()) {
             $course->students()->attach($userId);
         }
     }
@@ -646,15 +700,16 @@ class PaymentService
         DB::beginTransaction();
 
         try {
-            $txRef = 'BLI_CART_' . time() . '_' . $user->id . '_' . $cart->id;
+            $txRef = 'BLI_CART_'.time().'_'.$user->id.'_'.$cart->id;
             $totalAmount = (float) $cart->total;
             $courseIds = $cart->items->pluck('course_id')->toArray();
 
             $metadata = [
-                'type' => 'cart',
+                'subject_type' => 'cart',
+                'checkout_context' => 'cart',
                 'cart_id' => $cart->id,
                 'course_ids' => $courseIds,
-                'items' => $cart->items->filter(fn($item) => $item->course)->map(fn($item) => [
+                'items' => $cart->items->filter(fn ($item) => $item->course)->map(fn ($item) => [
                     'course_id' => $item->course_id,
                     'course_title' => $item->course->title,
                     'price' => $item->price,
@@ -663,7 +718,7 @@ class PaymentService
 
             $transaction = $this->createTransaction($user, null, $txRef, $totalAmount, $metadata);
 
-            $paymentData = $this->paystackService->initializePayment([
+            $paymentData = $this->paymentGateway->initializePayment([
                 'email' => $customerData['email'],
                 'amount' => $totalAmount * 100, // Convert to kobo
                 'reference' => $txRef,
@@ -672,7 +727,8 @@ class PaymentService
                     'user_id' => $user->id,
                     'cart_id' => $cart->id,
                     'transaction_id' => $transaction->id,
-                    'type' => 'cart',
+                    'subject_type' => 'cart',
+                    'checkout_context' => 'cart',
                 ],
             ]);
 

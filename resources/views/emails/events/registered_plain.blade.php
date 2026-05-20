@@ -27,7 +27,7 @@ Open your event workspace:
 
 A calendar invite is attached to this email for quick saving.
 
-Need help or need to make a change? Visit your event workspace or reply to this email@if($contactEmail) using {{ $contactEmail }}@endif.
+Need help or need to make a change? Visit your event workspace or reply to this email{{ $contactEmail ? ' using '.$contactEmail : '' }}.
 
 Best regards,
 {{ $appName }} Team
