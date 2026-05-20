@@ -1,6 +1,7 @@
-import { Head, router, useForm } from '@inertiajs/react';
+import { Head, useForm } from '@inertiajs/react';
 import GuestLayout from '@/Layouts/GuestLayout';
 import { useState, FormEvent } from 'react';
+import { GraduationCap, FileText, Upload, CheckCircle2 } from 'lucide-react';
 
 interface User {
     id: number;
@@ -28,8 +29,14 @@ interface ApplicationFormProps {
     profile: InstructorProfile;
 }
 
+const steps = [
+    { label: 'Personal', icon: 'fa-user' },
+    { label: 'Experience', icon: 'fa-graduation-cap' },
+    { label: 'Documents', icon: 'fa-file-upload' },
+    { label: 'Submit', icon: 'fa-paper-plane' },
+];
+
 export default function ApplicationForm({ user, profile }: ApplicationFormProps) {
-    // Personal Info Form
     const personalForm = useForm({
         name: user.name || '',
         phone: user.phone || '',
@@ -37,7 +44,6 @@ export default function ApplicationForm({ user, profile }: ApplicationFormProps)
         bio: profile.bio || '',
     });
 
-    // Experience Form
     const experienceForm = useForm({
         experience: profile.teaching_history || '',
         experience_years: profile.experience_years?.toString() || '',
@@ -46,18 +52,15 @@ export default function ApplicationForm({ user, profile }: ApplicationFormProps)
         website: user.website || '',
     });
 
-    // Documents Form
     const documentsForm = useForm({
         resume: null as File | null,
         video_url: profile.intro_video_url || '',
     });
 
-    // Final Submit Form
     const finalForm = useForm({
         terms: false,
     });
 
-    // Expertise tags state
     const [expertiseTags, setExpertiseTags] = useState<string[]>(
         profile.area_of_expertise ? profile.area_of_expertise.split(',').map((t) => t.trim()).filter(Boolean) : []
     );
@@ -110,535 +113,380 @@ export default function ApplicationForm({ user, profile }: ApplicationFormProps)
         <GuestLayout>
             <Head title="Instructor Application" />
 
-            <section className="public-section min-h-screen bg-gray-50 font-lato">
-                <div className="section-shell">
-                    {/* Header */}
-                    <div className="text-center mb-12">
-                        <div className="mb-6 inline-flex items-center rounded-full bg-primary/10 px-4 py-2">
-                            <i className="fas fa-file-alt mr-2 text-primary"></i>
-                            <span className="text-sm font-semibold font-montserrat text-primary">Application Form</span>
-                        </div>
-                        <h1 className="mb-4 text-3xl font-bold font-montserrat text-primary md:text-4xl">
-                            Instructor Application
-                        </h1>
-                        <p className="text-gray-600 text-lg max-w-2xl mx-auto font-lato">
-                            Complete all sections below to submit your instructor profile for review
-                        </p>
-
-                        {/* Progress Indicator */}
-                        <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-                            <div className="flex items-center space-x-2 rounded-full bg-white px-3 py-2 shadow-sm border border-gray-200">
-                                <div className="h-3 w-3 rounded-full bg-accent"></div>
-                                <span className="text-sm font-medium text-accent">Personal Info</span>
-                            </div>
-                            <div className="flex items-center space-x-2 rounded-full bg-white px-3 py-2 shadow-sm border border-gray-200">
-                                <div className="h-3 w-3 rounded-full bg-secondary"></div>
-                                <span className="text-sm font-medium text-secondary">Experience</span>
-                            </div>
-                            <div className="flex items-center space-x-2 rounded-full bg-white px-3 py-2 shadow-sm border border-gray-200">
-                                <div className="h-3 w-3 rounded-full bg-primary"></div>
-                                <span className="text-sm font-medium text-primary">Documents</span>
-                            </div>
-                            <div className="flex items-center space-x-2 rounded-full bg-white px-3 py-2 shadow-sm border border-gray-200">
-                                <div className="h-3 w-3 rounded-full bg-accent"></div>
-                                <span className="text-sm font-medium text-accent">Submit</span>
-                            </div>
-                        </div>
+            {/* Hero */}
+            <section className="relative overflow-hidden border-b border-slate-200 bg-gradient-to-br from-primary via-primary-800 to-primary-900 py-16 text-white md:py-20">
+                <div className="absolute -right-20 -top-20 h-80 w-80 rounded-full bg-accent/10 blur-3xl" />
+                <div className="absolute -bottom-20 -left-20 h-60 w-60 rounded-full bg-accent/8 blur-3xl" />
+                <div className="section-shell relative z-10 text-center">
+                    <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-full bg-accent/20">
+                        <GraduationCap className="h-7 w-7 text-accent-300" />
                     </div>
+                    <h1 className="text-3xl font-bold tracking-tight md:text-4xl">
+                        Instructor Application
+                    </h1>
+                    <p className="mx-auto mt-4 max-w-xl text-base leading-relaxed text-slate-300">
+                        Complete all sections below to submit your instructor profile for review.
+                    </p>
 
-                    {/* Main Form Container */}
-                    <div className="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm">
-                        <div className="p-6 md:p-8 lg:p-10">
-                            <div className="grid lg:grid-cols-2 gap-12">
-                                {/* Left Column */}
-                                <div className="space-y-8">
-                                    {/* Personal Information Card */}
-                                    <div className="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm">
-                                        <div className="border-b border-gray-200 bg-primary px-6 py-5">
-                                            <h3 className="text-xl font-bold text-white flex items-center font-montserrat">
-                                                <div className="mr-4 flex h-10 w-10 items-center justify-center rounded-lg bg-white/10">
-                                                    <i className="fas fa-user text-lg"></i>
-                                                </div>
-                                                Personal Information
-                                                <span className="ml-auto rounded-full bg-white/10 px-3 py-1 text-sm">
-                                                    Step 1
-                                                </span>
-                                            </h3>
+                    <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
+                        {steps.map((step, i) => (
+                            <div
+                                key={step.label}
+                                className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs font-semibold backdrop-blur-sm"
+                            >
+                                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-accent text-[10px] font-bold text-white">
+                                    {i + 1}
+                                </span>
+                                <span>{step.label}</span>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </section>
+
+            {/* Main Form */}
+            <section className="bg-gradient-to-b from-slate-50 to-white py-12 md:py-16">
+                <div className="section-shell">
+                    <div className="grid gap-8 lg:grid-cols-2">
+
+                        {/* Left Column */}
+                        <div className="space-y-6">
+
+                            {/* Personal Information */}
+                            <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+                                <div className="border-b border-slate-100 bg-gradient-to-r from-primary to-primary-800 px-6 py-4">
+                                    <div className="flex items-center gap-3">
+                                        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-white/10">
+                                            <i className="fas fa-user text-sm" />
                                         </div>
-                                        <form onSubmit={handlePersonalSubmit} className="space-y-6 p-6">
-                                            {/* Full Name Field */}
-                                            <div>
-                                                <label htmlFor="name" className="block text-sm font-semibold mb-2 font-montserrat text-primary">
-                                                    <i className="fas fa-user mr-2 text-accent"></i>Full Name
-                                                </label>
-                                                <div className="relative">
-                                                    <input
-                                                        type="text"
-                                                        id="name"
-                                                        readOnly
-                                                        className="public-input bg-gray-50"
-                                                        value={personalForm.data.name}
-                                                    />
-                                                    <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-                                                        <i className="fas fa-lock text-gray-400"></i>
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            {/* Phone Number Field */}
-                                            <div>
-                                                <label htmlFor="phone" className="block text-sm font-semibold mb-2 font-montserrat text-primary">
-                                                    <i className="fas fa-phone mr-2 text-secondary"></i>Phone Number *
-                                                </label>
-                                                <input
-                                                    type="tel"
-                                                    id="phone"
-                                                    value={personalForm.data.phone}
-                                                    onChange={(e) => personalForm.setData('phone', e.target.value)}
-                                                    className="public-input"
-                                                    placeholder="e.g. +234 803 123 4567"
-                                                />
-                                                {personalForm.errors.phone && (
-                                                    <p className="mt-2 text-sm flex items-center text-secondary">
-                                                        <i className="fas fa-exclamation-circle mr-1"></i>
-                                                        {personalForm.errors.phone}
-                                                    </p>
-                                                )}
-                                            </div>
-
-                                            {/* Professional Headline Field */}
-                                            <div>
-                                                <label htmlFor="headline" className="block text-sm font-semibold mb-2 font-montserrat text-primary">
-                                                    <i className="fas fa-briefcase mr-2 text-accent"></i>Professional Headline *
-                                                </label>
-                                                <input
-                                                    type="text"
-                                                    id="headline"
-                                                    value={personalForm.data.headline}
-                                                    onChange={(e) => personalForm.setData('headline', e.target.value)}
-                                                    className="public-input"
-                                                    placeholder="e.g. Senior Web Developer & Tech Educator"
-                                                />
-                                                {personalForm.errors.headline && (
-                                                    <p className="mt-2 text-sm flex items-center text-secondary">
-                                                        <i className="fas fa-exclamation-circle mr-1"></i>
-                                                        {personalForm.errors.headline}
-                                                    </p>
-                                                )}
-                                            </div>
-
-                                            {/* Bio Field */}
-                                            <div>
-                                                <label htmlFor="bio" className="block text-sm font-semibold mb-2 font-montserrat text-primary">
-                                                    <i className="fas fa-edit mr-2 text-primary"></i>Professional Bio *
-                                                </label>
-                                                <textarea
-                                                    id="bio"
-                                                    rows={4}
-                                                    value={personalForm.data.bio}
-                                                    onChange={(e) => personalForm.setData('bio', e.target.value)}
-                                                    className="public-input resize-none"
-                                                    placeholder="Share your professional background, achievements, and what makes you a great instructor..."
-                                                />
-                                                {personalForm.errors.bio && (
-                                                    <p className="mt-2 text-sm flex items-center text-secondary">
-                                                        <i className="fas fa-exclamation-circle mr-1"></i>
-                                                        {personalForm.errors.bio}
-                                                    </p>
-                                                )}
-                                            </div>
-
-                                            {/* Save Button */}
-                                            <div className="pt-4">
-                                                <button
-                                                    type="submit"
-                                                    disabled={personalForm.processing}
-                                                    className="enterprise-button enterprise-button-primary w-full justify-center py-3 text-sm disabled:opacity-50"
-                                                >
-                                                    <i className="fas fa-save mr-2"></i>
-                                                    {personalForm.processing ? 'Saving...' : 'Save Personal Information'}
-                                                </button>
-                                            </div>
-                                        </form>
-                                    </div>
-
-                                    {/* Documents Card */}
-                                    <div className="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm">
-                                        <div className="border-b border-gray-200 bg-primary px-6 py-5">
-                                            <h3 className="text-xl font-bold text-white flex items-center font-montserrat">
-                                                <div className="mr-4 flex h-10 w-10 items-center justify-center rounded-lg bg-white/10">
-                                                    <i className="fas fa-file-upload text-lg"></i>
-                                                </div>
-                                                Documents & Media
-                                                <span className="ml-auto rounded-full bg-white/10 px-3 py-1 text-sm">
-                                                    Step 3
-                                                </span>
-                                            </h3>
+                                        <div>
+                                            <h3 className="text-lg font-bold">Personal Information</h3>
+                                            <p className="text-xs text-slate-300">Step 1 of 4</p>
                                         </div>
-                                        <form onSubmit={handleDocumentsSubmit} className="space-y-6 p-6">
-                                            {/* Resume/CV Upload */}
-                                            <div>
-                                                <label htmlFor="resume" className="block text-sm font-semibold mb-2 font-montserrat text-primary">
-                                                    <i className="fas fa-file-alt mr-2 text-secondary"></i>Resume/CV *
-                                                </label>
-                                                <div className="rounded-lg border-2 border-dashed border-gray-300 p-6 transition-all duration-300">
-                                                    <input
-                                                        type="file"
-                                                        id="resume"
-                                                        accept=".pdf,.doc,.docx"
-                                                        className="hidden"
-                                                        onChange={(e) => documentsForm.setData('resume', e.target.files?.[0] || null)}
-                                                    />
-                                                    <div className="text-center">
-                                                        <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-lg bg-secondary/10">
-                                                            <i className="fas fa-cloud-upload-alt text-2xl text-secondary"></i>
-                                                        </div>
-                                                        <label
-                                                            htmlFor="resume"
-                                                            className="enterprise-button enterprise-button-outline cursor-pointer px-6 py-3"
-                                                        >
-                                                            <i className="fas fa-upload mr-2"></i>
-                                                            Choose File
-                                                        </label>
-                                                        <p className="text-sm text-gray-500 mt-2 font-lato">PDF, DOC, or DOCX files only</p>
-                                                    </div>
-                                                    {documentsForm.data.resume && (
-                                                        <div className="mt-4">
-                                                            <div className="flex items-center justify-between rounded-lg bg-gray-50 p-3">
-                                                                <div className="flex items-center">
-                                                                    <i className="fas fa-file text-gray-600 mr-2"></i>
-                                                                    <span className="text-sm font-medium">{documentsForm.data.resume.name}</span>
-                                                                </div>
-                                                                <i className="fas fa-check-circle text-accent"></i>
-                                                            </div>
-                                                        </div>
-                                                    )}
-                                                </div>
-                                                {profile.resume_path && (
-                                                    <div className="mt-3 rounded-lg bg-accent/10 p-3">
-                                                        <p className="text-sm font-medium text-accent">
-                                                            <i className="fas fa-file-check mr-2"></i>
-                                                            Current file: {profile.resume_path.split('/').pop()}
-                                                        </p>
-                                                    </div>
-                                                )}
-                                                {documentsForm.errors.resume && (
-                                                    <p className="mt-2 text-sm flex items-center text-secondary">
-                                                        <i className="fas fa-exclamation-circle mr-1"></i>
-                                                        {documentsForm.errors.resume}
-                                                    </p>
-                                                )}
-                                            </div>
-
-                                            {/* Video URL */}
-                                            <div>
-                                                <label htmlFor="video_url" className="block text-sm font-semibold mb-2 font-montserrat text-primary">
-                                                    <i className="fas fa-video mr-2 text-accent"></i>Introduction Video URL *
-                                                </label>
-                                                <input
-                                                    type="url"
-                                                    id="video_url"
-                                                    value={documentsForm.data.video_url}
-                                                    onChange={(e) => documentsForm.setData('video_url', e.target.value)}
-                                                    className="public-input"
-                                                    placeholder="https://youtube.com/watch?v=your-video"
-                                                />
-                                                <div className="mt-3 rounded-lg bg-accent/10 p-4">
-                                                    <p className="text-sm font-lato text-primary">
-                                                        <i className="fas fa-lightbulb mr-2 text-accent"></i>
-                                                        <strong>Pro Tip:</strong> Create a 1-2 minute introduction video on YouTube, Vimeo, or Loom.
-                                                        This helps us understand your teaching style and communication skills.
-                                                    </p>
-                                                </div>
-                                                {documentsForm.errors.video_url && (
-                                                    <p className="mt-2 text-sm flex items-center text-secondary">
-                                                        <i className="fas fa-exclamation-circle mr-1"></i>
-                                                        {documentsForm.errors.video_url}
-                                                    </p>
-                                                )}
-                                            </div>
-
-                                            {/* Save Button */}
-                                            <div className="pt-4">
-                                                <button
-                                                    type="submit"
-                                                    disabled={documentsForm.processing}
-                                                    className="enterprise-button enterprise-button-primary w-full justify-center py-3 text-sm disabled:opacity-50"
-                                                >
-                                                    <i className="fas fa-save mr-2"></i>
-                                                    {documentsForm.processing ? 'Saving...' : 'Save Documents & Media'}
-                                                </button>
-                                            </div>
-                                        </form>
                                     </div>
                                 </div>
-
-                                {/* Right Column */}
-                                <div className="space-y-8">
-                                    {/* Experience Card */}
-                                    <div className="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm">
-                                        <div className="border-b border-gray-200 bg-secondary px-6 py-5">
-                                            <h3 className="text-xl font-bold text-white flex items-center font-montserrat">
-                                                <div className="mr-4 flex h-10 w-10 items-center justify-center rounded-lg bg-white/10">
-                                                    <i className="fas fa-graduation-cap text-lg"></i>
-                                                </div>
-                                                Experience & Expertise
-                                                <span className="ml-auto rounded-full bg-white/10 px-3 py-1 text-sm">
-                                                    Step 2
-                                                </span>
-                                            </h3>
+                                <form onSubmit={handlePersonalSubmit} className="space-y-5 p-6">
+                                    <div>
+                                        <label className="block text-sm font-semibold mb-1.5">
+                                            <i className="fas fa-user mr-2 text-accent" />Full Name
+                                        </label>
+                                        <div className="relative">
+                                            <input type="text" readOnly value={personalForm.data.name}
+                                                className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-500 cursor-not-allowed" />
                                         </div>
-                                        <form onSubmit={handleExperienceSubmit} className="space-y-6 p-6">
-                                            {/* Teaching Experience */}
-                                            <div>
-                                                <label htmlFor="experience" className="block text-sm font-semibold mb-2 font-montserrat text-primary">
-                                                    <i className="fas fa-chalkboard-teacher mr-2 text-secondary"></i>Teaching Experience *
-                                                </label>
-                                                <textarea
-                                                    id="experience"
-                                                    rows={4}
-                                                    value={experienceForm.data.experience}
-                                                    onChange={(e) => experienceForm.setData('experience', e.target.value)}
-                                                    className="public-input resize-none"
-                                                    placeholder="Describe your teaching or mentorship background. Include courses taught, institutions, duration, or informal mentoring roles..."
-                                                />
-                                                {experienceForm.errors.experience && (
-                                                    <p className="mt-2 text-sm flex items-center text-secondary">
-                                                        <i className="fas fa-exclamation-circle mr-1"></i>
-                                                        {experienceForm.errors.experience}
-                                                    </p>
-                                                )}
-                                            </div>
-
-                                            {/* Years of Experience */}
-                                            <div>
-                                                <label htmlFor="experience_years" className="block text-sm font-semibold mb-2 font-montserrat text-primary">
-                                                    <i className="fas fa-calendar-alt mr-2 text-accent"></i>Years of Experience *
-                                                </label>
-                                                <select
-                                                    id="experience_years"
-                                                    value={experienceForm.data.experience_years}
-                                                    onChange={(e) => experienceForm.setData('experience_years', e.target.value)}
-                                                    className="public-input"
-                                                    required
-                                                >
-                                                    <option value="">Select your years of experience</option>
-                                                    {Array.from({ length: 31 }, (_, i) => (
-                                                        <option key={i} value={i}>
-                                                            {i} {i === 1 ? 'year' : 'years'}
-                                                        </option>
-                                                    ))}
-                                                </select>
-                                                {experienceForm.errors.experience_years && (
-                                                    <p className="mt-2 text-sm flex items-center text-secondary">
-                                                        <i className="fas fa-exclamation-circle mr-1"></i>
-                                                        {experienceForm.errors.experience_years}
-                                                    </p>
-                                                )}
-                                            </div>
-
-                                            {/* Areas of Expertise */}
-                                            <div>
-                                                <label className="block text-sm font-semibold mb-2 font-montserrat text-primary">
-                                                    <i className="fas fa-tags mr-2 text-primary"></i>Areas of Expertise *
-                                                </label>
-
-                                                {/* Tags Display */}
-                                                <div className="flex flex-wrap gap-2 mb-3">
-                                                    {expertiseTags.map((tag, index) => (
-                                                        <div
-                                                            key={index}
-                                                            className="group flex items-center rounded-lg border border-accent/30 bg-accent/5 px-4 py-2 text-sm font-medium text-primary"
-                                                        >
-                                                            <span className="font-montserrat">{tag}</span>
-                                                            <button
-                                                                type="button"
-                                                                onClick={() => removeExpertiseTag(index)}
-                                                                className="ml-2 flex h-5 w-5 items-center justify-center rounded-full bg-secondary text-xs font-bold text-white"
-                                                            >
-                                                                ×
-                                                            </button>
-                                                        </div>
-                                                    ))}
-                                                </div>
-
-                                                {/* Input Field */}
-                                                <div className="relative">
-                                                    <input
-                                                        type="text"
-                                                        value={expertiseInput}
-                                                        onChange={(e) => setExpertiseInput(e.target.value)}
-                                                        onKeyDown={handleExpertiseKeyDown}
-                                                        className="public-input"
-                                                        placeholder="Type an expertise area and press Enter or comma..."
-                                                    />
-                                                    <div className="absolute right-4 top-1/2 transform -translate-y-1/2 pointer-events-none">
-                                                        <span className="text-gray-400 text-sm font-lato">Press ⏎ or ,</span>
-                                                    </div>
-                                                </div>
-
-                                                <div className="mt-3 rounded-lg bg-primary/10 p-4">
-                                                    <p className="text-sm font-lato text-primary">
-                                                        <i className="fas fa-lightbulb mr-2 text-accent"></i>
-                                                        <strong>Examples:</strong> Web Development, Data Science, Digital Marketing, UI/UX Design,
-                                                        Project Management
-                                                    </p>
-                                                </div>
-
-                                                {experienceForm.errors.expertise && (
-                                                    <p className="mt-2 text-sm flex items-center text-secondary">
-                                                        <i className="fas fa-exclamation-circle mr-1"></i>
-                                                        {experienceForm.errors.expertise}
-                                                    </p>
-                                                )}
-                                            </div>
-
-                                            {/* Social Links */}
-                                            <div className="grid md:grid-cols-2 gap-6">
-                                                <div>
-                                                    <label htmlFor="linkedin" className="block text-sm font-semibold mb-2 font-montserrat text-primary">
-                                                        <i className="fab fa-linkedin mr-2 text-blue-600"></i>LinkedIn Profile
-                                                    </label>
-                                                    <input
-                                                        type="url"
-                                                        id="linkedin"
-                                                        value={experienceForm.data.linkedin}
-                                                        onChange={(e) => experienceForm.setData('linkedin', e.target.value)}
-                                                        className="public-input"
-                                                        placeholder="https://linkedin.com/in/yourprofile"
-                                                    />
-                                                </div>
-
-                                                <div>
-                                                    <label htmlFor="website" className="block text-sm font-semibold mb-2 font-montserrat text-primary">
-                                                        <i className="fas fa-globe mr-2 text-accent"></i>Personal Website
-                                                    </label>
-                                                    <input
-                                                        type="url"
-                                                        id="website"
-                                                        value={experienceForm.data.website}
-                                                        onChange={(e) => experienceForm.setData('website', e.target.value)}
-                                                        className="public-input"
-                                                        placeholder="https://yourwebsite.com"
-                                                    />
-                                                    {experienceForm.errors.website && (
-                                                        <p className="mt-2 text-sm flex items-center text-secondary">
-                                                            <i className="fas fa-exclamation-circle mr-1"></i>
-                                                            {experienceForm.errors.website}
-                                                        </p>
-                                                    )}
-                                                </div>
-                                            </div>
-
-                                            {/* Save Button */}
-                                            <div className="pt-4">
-                                                <button
-                                                    type="submit"
-                                                    disabled={experienceForm.processing}
-                                                    className="enterprise-button enterprise-button-primary w-full justify-center py-3 text-sm disabled:opacity-50"
-                                                >
-                                                    <i className="fas fa-save mr-2"></i>
-                                                    {experienceForm.processing ? 'Saving...' : 'Save Experience & Expertise'}
-                                                </button>
-                                            </div>
-                                        </form>
                                     </div>
 
-                                    {/* Enhanced Submission Card */}
-                                    <div className="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm">
-                                        <div className="border-b border-gray-200 bg-secondary px-6 py-5">
-                                            <h3 className="text-xl font-bold text-white flex items-center font-montserrat">
-                                                <div className="mr-4 flex h-10 w-10 items-center justify-center rounded-lg bg-white/10">
-                                                    <i className="fas fa-paper-plane text-lg"></i>
-                                                </div>
-                                                Submit Application
-                                                <span className="ml-auto rounded-full bg-white/10 px-3 py-1 text-sm">
-                                                    Final Step
-                                                </span>
-                                            </h3>
+                                    <div>
+                                        <label className="block text-sm font-semibold mb-1.5">
+                                            <i className="fas fa-phone mr-2 text-accent" />Phone Number
+                                        </label>
+                                        <input type="tel" value={personalForm.data.phone}
+                                            onChange={(e) => personalForm.setData('phone', e.target.value)}
+                                            className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm placeholder-slate-400 transition focus:border-primary focus:ring-2 focus:ring-primary/10 focus:outline-none"
+                                            placeholder="+234 803 123 4567" />
+                                        {personalForm.errors.phone && (
+                                            <p className="mt-1.5 text-xs text-accent-600 flex items-center gap-1">
+                                                <i className="fas fa-exclamation-circle" />{personalForm.errors.phone}
+                                            </p>
+                                        )}
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm font-semibold mb-1.5">
+                                            <i className="fas fa-briefcase mr-2 text-accent" />Professional Headline
+                                        </label>
+                                        <input type="text" value={personalForm.data.headline}
+                                            onChange={(e) => personalForm.setData('headline', e.target.value)}
+                                            className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm placeholder-slate-400 transition focus:border-primary focus:ring-2 focus:ring-primary/10 focus:outline-none"
+                                            placeholder="e.g. Senior Web Developer & Tech Educator" />
+                                        {personalForm.errors.headline && (
+                                            <p className="mt-1.5 text-xs text-accent-600 flex items-center gap-1">
+                                                <i className="fas fa-exclamation-circle" />{personalForm.errors.headline}
+                                            </p>
+                                        )}
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm font-semibold mb-1.5">
+                                            <i className="fas fa-edit mr-2 text-accent" />Professional Bio
+                                        </label>
+                                        <textarea rows={4} value={personalForm.data.bio}
+                                            onChange={(e) => personalForm.setData('bio', e.target.value)}
+                                            className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm placeholder-slate-400 transition focus:border-primary focus:ring-2 focus:ring-primary/10 focus:outline-none resize-none"
+                                            placeholder="Share your professional background and achievements..." />
+                                        {personalForm.errors.bio && (
+                                            <p className="mt-1.5 text-xs text-accent-600 flex items-center gap-1">
+                                                <i className="fas fa-exclamation-circle" />{personalForm.errors.bio}
+                                            </p>
+                                        )}
+                                    </div>
+
+                                    <button type="submit" disabled={personalForm.processing}
+                                        className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3 text-sm font-semibold text-white transition hover:bg-primary-700 disabled:opacity-50">
+                                        <i className="fas fa-save" />
+                                        {personalForm.processing ? 'Saving...' : 'Save Personal Information'}
+                                    </button>
+                                </form>
+                            </div>
+
+                            {/* Documents */}
+                            <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+                                <div className="border-b border-slate-100 bg-gradient-to-r from-primary to-primary-800 px-6 py-4">
+                                    <div className="flex items-center gap-3">
+                                        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-white/10">
+                                            <i className="fas fa-file-upload text-sm" />
                                         </div>
-                                        <form onSubmit={handleFinalSubmit} className="space-y-6 p-6">
-                                            {/* Terms & Conditions */}
-                                            <div className="rounded-lg border border-gray-200 bg-gray-50 p-6">
-                                                <div className="flex items-start space-x-4">
-                                                    <div className="flex items-center h-6">
-                                                        <input
-                                                            id="terms"
-                                                            type="checkbox"
-                                                            checked={finalForm.data.terms}
-                                                            onChange={(e) => finalForm.setData('terms', e.target.checked)}
-                                                            className="h-5 w-5 rounded border-2 transition-all duration-300 accent-accent border-gray-300"
-                                                        />
-                                                    </div>
-                                                    <div className="flex-1">
-                                                        <label htmlFor="terms" className="font-semibold text-gray-700 font-montserrat cursor-pointer">
-                                                            I agree to the terms and conditions
-                                                        </label>
-                                                        <p className="text-sm text-gray-600 mt-2 font-lato">
-                                                            By checking this box, you agree to our{' '}
-                                                            <a href="#" className="font-semibold hover:underline text-primary">
-                                                                Instructor Terms
-                                                            </a>
-                                                            ,{' '}
-                                                            <a href="#" className="font-semibold hover:underline text-primary">
-                                                                Privacy Policy
-                                                            </a>
-                                                            , and{' '}
-                                                            <a href="#" className="font-semibold hover:underline text-primary">
-                                                                Code of Conduct
-                                                            </a>
-                                                            .
-                                                        </p>
-                                                        {finalForm.errors.terms && (
-                                                            <p className="mt-2 text-sm flex items-center text-secondary">
-                                                                <i className="fas fa-exclamation-circle mr-1"></i>
-                                                                {finalForm.errors.terms}
-                                                            </p>
-                                                        )}
-                                                    </div>
+                                        <div>
+                                            <h3 className="text-lg font-bold">Documents & Media</h3>
+                                            <p className="text-xs text-slate-300">Step 3 of 4</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <form onSubmit={handleDocumentsSubmit} className="space-y-5 p-6">
+                                    <div>
+                                        <label className="block text-sm font-semibold mb-1.5">
+                                            <i className="fas fa-file-alt mr-2 text-accent" />Resume/CV
+                                        </label>
+                                        <label htmlFor="resume-file"
+                                            className="flex cursor-pointer flex-col items-center gap-3 rounded-xl border-2 border-dashed border-slate-200 bg-slate-50/50 px-6 py-8 transition hover:border-primary hover:bg-primary/5">
+                                            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-accent/10">
+                                                <Upload className="h-6 w-6 text-accent" />
+                                            </div>
+                                            <div className="text-center">
+                                                <span className="text-sm font-semibold text-primary">Click to upload</span>
+                                                <p className="mt-1 text-xs text-slate-400">PDF, DOC, or DOCX</p>
+                                            </div>
+                                            <input type="file" id="resume-file" accept=".pdf,.doc,.docx"
+                                                className="hidden"
+                                                onChange={(e) => documentsForm.setData('resume', e.target.files?.[0] || null)} />
+                                        </label>
+                                        {documentsForm.data.resume && (
+                                            <div className="mt-3 flex items-center gap-2 rounded-lg border border-accent-100 bg-accent-50 px-3 py-2 text-sm">
+                                                <CheckCircle2 className="h-4 w-4 text-accent" />
+                                                <span className="text-accent-700 font-medium">{documentsForm.data.resume.name}</span>
+                                            </div>
+                                        )}
+                                        {profile.resume_path && (
+                                            <p className="mt-2 text-xs text-slate-400">
+                                                <i className="fas fa-file-check mr-1 text-accent" />
+                                                Current: {profile.resume_path.split('/').pop()}
+                                            </p>
+                                        )}
+                                        {documentsForm.errors.resume && (
+                                            <p className="mt-1.5 text-xs text-accent-600 flex items-center gap-1">
+                                                <i className="fas fa-exclamation-circle" />{documentsForm.errors.resume}
+                                            </p>
+                                        )}
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm font-semibold mb-1.5">
+                                            <i className="fas fa-video mr-2 text-accent" />Introduction Video URL
+                                        </label>
+                                        <input type="url" value={documentsForm.data.video_url}
+                                            onChange={(e) => documentsForm.setData('video_url', e.target.value)}
+                                            className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm placeholder-slate-400 transition focus:border-primary focus:ring-2 focus:ring-primary/10 focus:outline-none"
+                                            placeholder="https://youtube.com/watch?v=..." />
+                                        <div className="mt-3 rounded-xl border border-accent-100 bg-accent-50/50 px-4 py-3">
+                                            <p className="text-xs text-accent-800">
+                                                <i className="fas fa-lightbulb mr-1.5 text-accent" />
+                                                Create a 1-2 minute video on YouTube or Loom showing your teaching style.
+                                            </p>
+                                        </div>
+                                        {documentsForm.errors.video_url && (
+                                            <p className="mt-1.5 text-xs text-accent-600 flex items-center gap-1">
+                                                <i className="fas fa-exclamation-circle" />{documentsForm.errors.video_url}
+                                            </p>
+                                        )}
+                                    </div>
+
+                                    <button type="submit" disabled={documentsForm.processing}
+                                        className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3 text-sm font-semibold text-white transition hover:bg-primary-700 disabled:opacity-50">
+                                        <i className="fas fa-save" />
+                                        {documentsForm.processing ? 'Saving...' : 'Save Documents & Media'}
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+
+                        {/* Right Column */}
+                        <div className="space-y-6">
+
+                            {/* Experience */}
+                            <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+                                <div className="border-b border-slate-100 bg-gradient-to-r from-primary to-primary-800 px-6 py-4">
+                                    <div className="flex items-center gap-3">
+                                        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-white/10">
+                                            <i className="fas fa-graduation-cap text-sm" />
+                                        </div>
+                                        <div>
+                                            <h3 className="text-lg font-bold">Experience & Expertise</h3>
+                                            <p className="text-xs text-slate-300">Step 2 of 4</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <form onSubmit={handleExperienceSubmit} className="space-y-5 p-6">
+                                    <div>
+                                        <label className="block text-sm font-semibold mb-1.5">
+                                            <i className="fas fa-chalkboard-teacher mr-2 text-accent" />Teaching Experience
+                                        </label>
+                                        <textarea rows={4} value={experienceForm.data.experience}
+                                            onChange={(e) => experienceForm.setData('experience', e.target.value)}
+                                            className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm placeholder-slate-400 transition focus:border-primary focus:ring-2 focus:ring-primary/10 focus:outline-none resize-none"
+                                            placeholder="Describe your teaching or mentorship background..." />
+                                        {experienceForm.errors.experience && (
+                                            <p className="mt-1.5 text-xs text-accent-600 flex items-center gap-1">
+                                                <i className="fas fa-exclamation-circle" />{experienceForm.errors.experience}
+                                            </p>
+                                        )}
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm font-semibold mb-1.5">
+                                            <i className="fas fa-calendar-alt mr-2 text-accent" />Years of Experience
+                                        </label>
+                                        <select value={experienceForm.data.experience_years}
+                                            onChange={(e) => experienceForm.setData('experience_years', e.target.value)}
+                                            className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm transition focus:border-primary focus:ring-2 focus:ring-primary/10 focus:outline-none">
+                                            <option value="">Select years</option>
+                                            {Array.from({ length: 31 }, (_, i) => (
+                                                <option key={i} value={i}>{i} {i === 1 ? 'year' : 'years'}</option>
+                                            ))}
+                                        </select>
+                                        {experienceForm.errors.experience_years && (
+                                            <p className="mt-1.5 text-xs text-accent-600 flex items-center gap-1">
+                                                <i className="fas fa-exclamation-circle" />{experienceForm.errors.experience_years}
+                                            </p>
+                                        )}
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm font-semibold mb-1.5">
+                                            <i className="fas fa-tags mr-2 text-accent" />Areas of Expertise
+                                        </label>
+                                        <div className="flex flex-wrap gap-1.5 mb-2">
+                                            {expertiseTags.map((tag, i) => (
+                                                <div key={i} className="flex items-center gap-1 rounded-lg border border-accent-200 bg-accent-50 px-3 py-1 text-xs font-medium text-accent-800">
+                                                    {tag}
+                                                    <button type="button" onClick={() => removeExpertiseTag(i)}
+                                                        className="ml-1 flex h-4 w-4 items-center justify-center rounded-full bg-accent text-[10px] text-white hover:bg-accent-700">x</button>
                                                 </div>
-                                            </div>
+                                            ))}
+                                        </div>
+                                        <input type="text" value={expertiseInput}
+                                            onChange={(e) => setExpertiseInput(e.target.value)}
+                                            onKeyDown={handleExpertiseKeyDown}
+                                            className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm placeholder-slate-400 transition focus:border-primary focus:ring-2 focus:ring-primary/10 focus:outline-none"
+                                            placeholder="Type and press Enter or comma to add..." />
+                                        <div className="mt-3 rounded-xl border border-slate-100 bg-slate-50 px-4 py-3">
+                                            <p className="text-xs text-slate-500">
+                                                <i className="fas fa-lightbulb mr-1.5 text-accent" />
+                                                Examples: Web Development, Data Science, Digital Marketing, UI/UX Design
+                                            </p>
+                                        </div>
+                                        {experienceForm.errors.expertise && (
+                                            <p className="mt-1.5 text-xs text-accent-600 flex items-center gap-1">
+                                                <i className="fas fa-exclamation-circle" />{experienceForm.errors.expertise}
+                                            </p>
+                                        )}
+                                    </div>
 
-                                            {/* Application Summary */}
-                                            <div className="rounded-lg bg-accent/10 p-6">
-                                                <h4 className="font-bold mb-3 font-montserrat flex items-center text-primary">
-                                                    <i className="fas fa-clipboard-list mr-2 text-accent"></i>
-                                                    Application Review Process
-                                                </h4>
-                                                <ul className="space-y-2 text-sm font-lato text-primary">
-                                                    <li className="flex items-center">
-                                                        <i className="fas fa-check-circle mr-2 text-xs text-accent"></i>
-                                                        Immediate confirmation email sent
-                                                    </li>
-                                                    <li className="flex items-center">
-                                                        <i className="fas fa-clock mr-2 text-xs text-secondary"></i>
-                                                        Review within 5-7 business days
-                                                    </li>
-                                                    <li className="flex items-center">
-                                                        <i className="fas fa-envelope mr-2 text-xs text-primary"></i>
-                                                        Updates sent via email
-                                                    </li>
-                                                </ul>
-                                            </div>
-
-                                            {/* Submit Button */}
-                                            <div className="pt-4">
-                                                <button
-                                                    type="submit"
-                                                    disabled={!finalForm.data.terms || finalForm.processing}
-                                                    className="enterprise-button enterprise-button-primary w-full justify-center py-4 text-lg disabled:cursor-not-allowed disabled:opacity-50"
-                                                >
-                                                    <i className="fas fa-rocket mr-2"></i>
-                                                    {finalForm.processing ? 'Submitting...' : 'Submit My Application'}
-                                                </button>
-                                                <p className="text-center text-sm text-gray-500 mt-3 font-lato">
-                                                    <i className="fas fa-shield-alt mr-1 text-accent"></i>
-                                                    Your information is secure and will only be used for application review
+                                    <div className="grid gap-4 md:grid-cols-2">
+                                        <div>
+                                            <label className="block text-sm font-semibold mb-1.5">
+                                                <i className="fab fa-linkedin mr-2 text-blue-600" />LinkedIn
+                                            </label>
+                                            <input type="url" value={experienceForm.data.linkedin}
+                                                onChange={(e) => experienceForm.setData('linkedin', e.target.value)}
+                                                className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm placeholder-slate-400 transition focus:border-primary focus:ring-2 focus:ring-primary/10 focus:outline-none"
+                                                placeholder="https://linkedin.com/in/you" />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-semibold mb-1.5">
+                                                <i className="fas fa-globe mr-2 text-accent" />Website
+                                            </label>
+                                            <input type="url" value={experienceForm.data.website}
+                                                onChange={(e) => experienceForm.setData('website', e.target.value)}
+                                                className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm placeholder-slate-400 transition focus:border-primary focus:ring-2 focus:ring-primary/10 focus:outline-none"
+                                                placeholder="https://yourwebsite.com" />
+                                            {experienceForm.errors.website && (
+                                                <p className="mt-1.5 text-xs text-accent-600 flex items-center gap-1">
+                                                    <i className="fas fa-exclamation-circle" />{experienceForm.errors.website}
                                                 </p>
-                                            </div>
-                                        </form>
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    <button type="submit" disabled={experienceForm.processing}
+                                        className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3 text-sm font-semibold text-white transition hover:bg-primary-700 disabled:opacity-50">
+                                        <i className="fas fa-save" />
+                                        {experienceForm.processing ? 'Saving...' : 'Save Experience & Expertise'}
+                                    </button>
+                                </form>
+                            </div>
+
+                            {/* Submit */}
+                            <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+                                <div className="border-b border-slate-100 bg-gradient-to-r from-primary to-primary-800 px-6 py-4">
+                                    <div className="flex items-center gap-3">
+                                        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-white/10">
+                                            <i className="fas fa-paper-plane text-sm" />
+                                        </div>
+                                        <div>
+                                            <h3 className="text-lg font-bold">Submit Application</h3>
+                                            <p className="text-xs text-slate-300">Step 4 of 4</p>
+                                        </div>
                                     </div>
                                 </div>
+                                <form onSubmit={handleFinalSubmit} className="space-y-5 p-6">
+                                    <label className="flex items-start gap-3 rounded-xl border border-slate-100 bg-slate-50 p-4">
+                                        <input type="checkbox" checked={finalForm.data.terms}
+                                            onChange={(e) => finalForm.setData('terms', e.target.checked)}
+                                            className="mt-0.5 rounded border-slate-300 text-primary focus:ring-primary" />
+                                        <div>
+                                            <span className="text-sm font-semibold">I agree to the terms</span>
+                                            <p className="text-xs text-slate-500 mt-1">
+                                                By checking this box, you agree to our{' '}
+                                                <a href="#" className="font-semibold text-primary hover:text-accent">Instructor Terms</a>,{' '}
+                                                <a href="#" className="font-semibold text-primary hover:text-accent">Privacy Policy</a>, and{' '}
+                                                <a href="#" className="font-semibold text-primary hover:text-accent">Code of Conduct</a>.
+                                            </p>
+                                            {finalForm.errors.terms && (
+                                                <p className="mt-1.5 text-xs text-accent-600 flex items-center gap-1">
+                                                    <i className="fas fa-exclamation-circle" />{finalForm.errors.terms}
+                                                </p>
+                                            )}
+                                        </div>
+                                    </label>
+
+                                    <div className="rounded-xl border border-accent-100 bg-accent-50/50 px-4 py-4">
+                                        <h4 className="text-sm font-bold flex items-center gap-2 mb-2">
+                                            <i className="fas fa-clipboard-list text-accent" />
+                                            Review Process
+                                        </h4>
+                                        <ul className="space-y-1.5 text-xs text-slate-600">
+                                            <li className="flex items-center gap-2">
+                                                <CheckCircle2 className="h-3.5 w-3.5 text-accent" /> Confirmation email sent
+                                            </li>
+                                            <li className="flex items-center gap-2">
+                                                <i className="fas fa-clock text-xs text-slate-400" /> Review within 5-7 business days
+                                            </li>
+                                            <li className="flex items-center gap-2">
+                                                <i className="fas fa-envelope text-xs text-slate-400" /> Updates via email
+                                            </li>
+                                        </ul>
+                                    </div>
+
+                                    <button type="submit" disabled={!finalForm.data.terms || finalForm.processing}
+                                        className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3.5 text-base font-semibold text-white transition hover:bg-primary-700 disabled:opacity-50">
+                                        <i className="fas fa-rocket" />
+                                        {finalForm.processing ? 'Submitting...' : 'Submit My Application'}
+                                    </button>
+                                    <p className="text-center text-xs text-slate-400">
+                                        <i className="fas fa-shield-alt mr-1 text-accent" />
+                                        Your information is secure and only used for application review
+                                    </p>
+                                </form>
                             </div>
                         </div>
                     </div>
