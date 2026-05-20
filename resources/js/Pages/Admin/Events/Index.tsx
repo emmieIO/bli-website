@@ -96,7 +96,7 @@ export default function EventsIndex({ events, capabilities }: EventsProps) {
                             <div className="flex flex-wrap gap-3">
                                 <Link
                                     href={route('admin.events.create')}
-                                    className="inline-flex items-center gap-2 rounded-2xl bg-slate-900 px-4 py-3 text-sm font-semibold text-white transition hover:bg-slate-800"
+                                    className="inline-flex items-center gap-2 whitespace-nowrap rounded-2xl bg-slate-900 px-4 py-3 text-sm font-semibold text-white transition hover:bg-slate-800"
                                 >
                                     <i className="fas fa-plus w-4 h-4"></i>
                                     New Event
@@ -133,7 +133,7 @@ export default function EventsIndex({ events, capabilities }: EventsProps) {
 
                 <div className="workspace-card overflow-hidden">
                     <div className="overflow-x-auto">
-                        <table className="min-w-full divide-y divide-slate-200">
+                        <table className="min-w-[960px] divide-y divide-slate-200">
                             <thead className="bg-slate-50">
                                 <tr>
                                     <HeaderCell>Event</HeaderCell>
@@ -172,34 +172,34 @@ export default function EventsIndex({ events, capabilities }: EventsProps) {
                                                     </div>
                                                 </div>
                                             </td>
-                                            <td className="px-6 py-4 text-sm text-slate-700 font-lato">
+                                            <td className="whitespace-nowrap px-6 py-4 text-sm text-slate-700 font-lato">
                                                 <p>{formatDate(event.start_date)}</p>
                                                 <p className="text-xs text-slate-500">Ends {formatDate(event.end_date)}</p>
                                             </td>
                                             <td className="px-6 py-4">
                                                 <div className="space-y-2">
-                                                    <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ${statusColorMap[event.status]}`}>
+                                                    <span className={`inline-flex whitespace-nowrap rounded-full px-2.5 py-1 text-xs font-semibold ${statusColorMap[event.status]}`}>
                                                         {statusLabelMap[event.status]}
                                                     </span>
                                                     {event.is_featured && (
-                                                        <div className="text-xs font-medium text-amber-700 font-lato">Featured event</div>
+                                                        <div className="whitespace-nowrap text-xs font-medium text-amber-700 font-lato">Featured event</div>
                                                     )}
                                                 </div>
                                             </td>
-                                            <td className="px-6 py-4 text-sm text-slate-700 font-lato">
+                                            <td className="whitespace-nowrap px-6 py-4 text-sm text-slate-700 font-lato">
                                                 <p>{event.speakers_count || 0} assigned</p>
                                                 <p className="text-xs text-slate-500">{event.speaker_applications_count || 0} applications</p>
                                             </td>
-                                            <td className="px-6 py-4 text-sm text-slate-700 font-lato">
+                                            <td className="whitespace-nowrap px-6 py-4 text-sm text-slate-700 font-lato">
                                                 <p>{event.attendees_count || 0} attendees</p>
                                             </td>
                                             {capabilities.canViewPayments && (
-                                                <td className="px-6 py-4 text-sm text-slate-700 font-lato">
+                                                <td className="whitespace-nowrap px-6 py-4 text-sm text-slate-700 font-lato">
                                                     <p>{event.successful_transactions_count || 0} paid orders</p>
                                                 </td>
                                             )}
                                             <td className="px-6 py-4">
-                                                <div className="flex items-center justify-end gap-3 text-sm">
+                                                <div className="flex items-center justify-end gap-3 whitespace-nowrap text-sm">
                                                     <Link href={route('admin.events.show', event.slug)} className="font-medium text-primary hover:text-primary-600">
                                                         Open
                                                     </Link>

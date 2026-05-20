@@ -48,10 +48,15 @@ interface EventsIndexProps {
 
 export default function EventsIndex({ events, searchQuery: initialSearchQuery = '', segmentCounts, sections }: EventsIndexProps) {
     const [searchQuery, setSearchQuery] = useState(initialSearchQuery);
+    const [isSearching, setIsSearching] = useState(false);
 
     const handleSearch = (e: FormEvent) => {
         e.preventDefault();
-        router.get(route('events.index'), { q: searchQuery }, { preserveState: true });
+        setIsSearching(true);
+        router.get(route('events.index'), { q: searchQuery }, {
+            preserveState: true,
+            onFinish: () => setIsSearching(false),
+        });
     };
 
     const formatDate = (dateString: string) => {
@@ -111,10 +116,11 @@ export default function EventsIndex({ events, searchQuery: initialSearchQuery = 
                                 </div>
                                 <button
                                     type="submit"
-                                    className="enterprise-button enterprise-button-primary"
+                                    disabled={isSearching}
+                                    className="enterprise-button enterprise-button-primary disabled:cursor-not-allowed disabled:opacity-50"
                                 >
-                                    <i className="fas fa-search mr-2"></i>
-                                    Search
+                                    <i className={`mr-2 fas ${isSearching ? 'fa-spinner animate-spin' : 'fa-search'}`}></i>
+                                    {isSearching ? 'Searching...' : 'Search'}
                                 </button>
                             </div>
                         </div>

@@ -2,6 +2,7 @@ import { Head, Link, router } from '@inertiajs/react';
 import GuestLayout from '@/Layouts/GuestLayout';
 import { ShoppingCart, Trash2, ArrowRight, BookOpen } from 'lucide-react';
 import { Course } from '@/types';
+import { useState } from 'react';
 
 interface CartItem {
     id: number;
@@ -20,15 +21,23 @@ interface Props {
 }
 
 export default function Index({ cart }: Props) {
+    const [processingAction, setProcessingAction] = useState<string | null>(null);
+
     const handleRemove = (courseSlug: string) => {
         if (confirm('Are you sure you want to remove this course from your cart?')) {
-            router.delete(route('cart.remove', courseSlug));
+            setProcessingAction(`remove:${courseSlug}`);
+            router.delete(route('cart.remove', courseSlug), {
+                onFinish: () => setProcessingAction(null),
+            });
         }
     };
 
     const handleClearCart = () => {
         if (confirm('Are you sure you want to clear your entire cart?')) {
-            router.delete(route('cart.clear'));
+            setProcessingAction('clear');
+            router.delete(route('cart.clear'), {
+                onFinish: () => setProcessingAction(null),
+            });
         }
     };
 
@@ -118,10 +127,11 @@ export default function Index({ cart }: Props) {
                                             </p>
                                             <button
                                                 onClick={() => handleRemove(item.course.slug)}
-                                                className="mt-4 inline-flex items-center gap-2 text-red-600 hover:text-red-700 font-medium text-sm transition-colors"
+                                                disabled={processingAction !== null}
+                                                className="mt-4 inline-flex items-center gap-2 text-red-600 hover:text-red-700 font-medium text-sm transition-colors disabled:cursor-not-allowed disabled:opacity-50"
                                             >
                                                 <Trash2 className="w-4 h-4" />
-                                                Remove
+                                                {processingAction === `remove:${item.course.slug}` ? 'Removing...' : 'Remove'}
                                             </button>
                                         </div>
                                     </div>
@@ -131,9 +141,10 @@ export default function Index({ cart }: Props) {
                             {/* Clear Cart Button */}
                             <button
                                 onClick={handleClearCart}
-                                className="text-red-600 hover:text-red-700 font-medium text-sm transition-colors"
+                                disabled={processingAction !== null}
+                                className="text-red-600 hover:text-red-700 font-medium text-sm transition-colors disabled:cursor-not-allowed disabled:opacity-50"
                             >
-                                Clear entire cart
+                                {processingAction === 'clear' ? 'Clearing...' : 'Clear entire cart'}
                             </button>
                         </div>
 
