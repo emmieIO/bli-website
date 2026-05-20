@@ -90,3 +90,5 @@ export default function AuthLayout({ title, description, wide = false, children 
         </>
     );
 }
+
+

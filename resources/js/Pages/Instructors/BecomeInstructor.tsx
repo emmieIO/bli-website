@@ -131,13 +131,33 @@ export default function BecomeInstructor({ auth }: BecomeInstructorProps) {
                             </div>
 
                             <div className="flex flex-col gap-3 sm:flex-row">
-                                <a href="#apply-now" className="enterprise-button enterprise-button-primary justify-center px-8 py-4">
-                                    <i className="fas fa-paper-plane"></i>
-                                    Start instructor application
+                                <a
+                                    href="#apply-now"
+                                    className="group inline-flex min-h-[4.25rem] items-center justify-between gap-4 rounded-2xl border border-white/15 bg-gradient-to-r from-accent via-secondary to-accent px-6 py-4 text-left text-white shadow-[0_18px_45px_rgba(185,28,28,0.35)] transition duration-200 hover:-translate-y-0.5 hover:shadow-[0_24px_55px_rgba(185,28,28,0.42)] focus:outline-none focus:ring-2 focus:ring-white/70 sm:min-w-[20rem]"
+                                >
+                                    <span className="flex items-center gap-4">
+                                        <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-white/15 ring-1 ring-white/20">
+                                            <i className="fas fa-paper-plane text-base"></i>
+                                        </span>
+                                        <span className="flex flex-col">
+                                            <span className="text-[11px] font-semibold uppercase tracking-[0.22em] text-white/70">
+                                                Begin here
+                                            </span>
+                                            <span className="font-montserrat text-base font-bold sm:text-lg">
+                                                Start Instructor Application
+                                            </span>
+                                        </span>
+                                    </span>
+                                    <span className="flex h-10 w-10 items-center justify-center rounded-full bg-white text-accent transition duration-200 group-hover:translate-x-1">
+                                        <i className="fas fa-arrow-right text-sm"></i>
+                                    </span>
                                 </a>
-                                <a href="#how-it-works" className="enterprise-button justify-center border border-white/20 bg-white/10 px-8 py-4 text-white hover:bg-white/15">
-                                    <i className="fas fa-list-check"></i>
-                                    Review process
+                                <a
+                                    href="#how-it-works"
+                                    className="inline-flex min-h-[4.25rem] items-center justify-center gap-3 rounded-2xl border border-white/20 bg-white/10 px-8 py-4 text-white backdrop-blur-sm transition duration-200 hover:bg-white/15 focus:outline-none focus:ring-2 focus:ring-white/50"
+                                >
+                                    <i className="fas fa-list-check text-sm"></i>
+                                    <span className="font-semibold">Review process</span>
                                 </a>
                             </div>
 
