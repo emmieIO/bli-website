@@ -149,7 +149,7 @@ export default function MyEvents({ events }: MyEventsProps) {
                                 <tbody className="divide-y divide-slate-100 bg-white">
                                     {events.map((event) => (
                                         <tr key={event.id} className="align-top transition hover:bg-slate-50/70">
-                                            <td className="px-6 py-5">
+                                            <td className="min-w-[280px] px-6 py-5">
                                                 <div className="space-y-1">
                                                     <p className="text-sm font-semibold text-slate-900">{event.title}</p>
                                                     <p className="text-sm text-slate-500">
@@ -179,7 +179,7 @@ export default function MyEvents({ events }: MyEventsProps) {
                                             <td className="whitespace-nowrap px-6 py-5 text-sm text-slate-700">
                                                 {event.latest_transaction ? event.latest_transaction.status : 'No payment required'}
                                             </td>
-                                            <td className="px-6 py-5 text-sm text-slate-700">
+                                            <td className="min-w-[180px] px-6 py-5 text-sm text-slate-700">
                                                 {event.location || 'Shared in workspace'}
                                             </td>
                                             <td className="px-6 py-5">
