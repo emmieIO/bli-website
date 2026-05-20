@@ -18,8 +18,8 @@ class AdminSeeder extends Seeder
             [
                 'name' => 'Nnaemeka Mark Onuoha',
                 'email_verified_at' => now(),
-                'phone' => '123-456-7890',
-                'password' =>'password', // Change to a secure password
+                'phone' => '08105037568',
+                'password' =>'Beaconinst@222', // Change to a secure password
             ]
         );
 
@@ -28,10 +28,10 @@ class AdminSeeder extends Seeder
             $user->assignRole('admin');
         }
 
-        $roles = ['instructor', 'student'];
+        // $roles = ['instructor', 'student'];
 
-        User::factory(4)->create()->each(function ($user) use ($roles) {
-            $user->assignRole($roles[array_rand($roles)]);
-        });
+        // User::factory(4)->create()->each(function ($user) use ($roles) {
+        //     $user->assignRole($roles[array_rand($roles)]);
+        // });
     }
 }
