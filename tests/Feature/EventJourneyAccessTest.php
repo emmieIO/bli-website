@@ -70,43 +70,6 @@ class EventJourneyAccessTest extends TestCase
         $response->assertNotFound();
     }
 
-    public function test_refunded_attendee_cannot_open_event_workspace(): void
-    {
-        $user = User::factory()->create();
-        $event = $this->makeEvent([
-            'entry_fee' => 5000,
-        ]);
-
-        $event->attendees()->attach($user->id, [
-            'status' => EventRegistrationStatus::REFUNDED->value,
-            'revoke_count' => 0,
-        ]);
-
-        $response = $this->actingAs($user)->get(route('user.events.show', $event->slug));
-
-        $response->assertNotFound();
-    }
-
-    public function test_refunded_attendee_does_not_appear_in_my_events_registry(): void
-    {
-        $user = User::factory()->create();
-        $event = $this->makeEvent([
-            'entry_fee' => 5000,
-        ]);
-
-        $event->attendees()->attach($user->id, [
-            'status' => EventRegistrationStatus::REFUNDED->value,
-            'revoke_count' => 0,
-        ]);
-
-        $response = $this->actingAs($user)->get(route('user.events'));
-
-        $response->assertOk();
-        $response->assertInertia(fn ($page) => $page
-            ->component('MyEvents/Index')
-            ->has('events', 0));
-    }
-
     public function test_speaker_workspace_requires_real_speaker_context(): void
     {
         $user = User::factory()->create();

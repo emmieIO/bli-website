@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Contracts\Services\PaymentGatewayInterface;
-use App\Models\Course;
 use App\Models\Event;
 use App\Services\Event\EventParticipantStateService;
 use App\Services\Payment\PaymentService;
@@ -23,111 +22,6 @@ class PaymentController extends Controller
         private PaymentGatewayInterface $paymentGateway,
         private EventParticipantStateService $participantStateService
     ) {}
-
-    /**
-     * Show checkout page for a course
-     */
-    public function checkout(Course $course)
-    {
-        if (!auth()->check()) {
-            return redirect()->route('login')->with([
-                'message' => 'Please login to purchase this course',
-                'type' => 'info'
-            ]);
-        }
-
-        $user = auth()->user();
-        $checkoutStatus = $this->paymentService->canCheckout($user, $course);
-
-        if (!$checkoutStatus['can_checkout']) {
-            $redirectRoute = $checkoutStatus['reason'] === 'free_course'
-                ? route('courses.show', $course->slug)
-                : route('courses.learn', $course->slug);
-
-            return redirect($redirectRoute)->with([
-                'message' => $checkoutStatus['message'],
-                'type' => 'info'
-            ]);
-        }
-
-        $course->load(['category', 'instructor']);
-
-        return Inertia::render('Courses/Checkout', [
-            'course' => $course,
-            'paystackPublicKey' => $this->paymentGateway->getPublicKey(),
-        ]);
-    }
-
-    /**
-     * Initialize payment with Paystack
-     */
-    public function initializePayment(Request $request, Course $course)
-    {
-        $validated = $request->validate([
-            'name' => 'required|string',
-            'email' => 'required|email',
-            'phone' => 'nullable|string',
-        ]);
-
-        $user = auth()->user();
-
-        try {
-            $result = $this->paymentService->initializePayment($user, $course, $validated);
-
-            return response()->json($result);
-
-        } catch (\Exception $e) {
-            Log::error('Payment initialization failed', [
-                'error' => $e->getMessage(),
-                'user_id' => $user->id,
-                'course_id' => $course->id,
-            ]);
-
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to initialize payment. Please try again.',
-            ], 500);
-        }
-    }
-
-    /**
-     * Initialize cart payment with Paystack
-     */
-    public function initializeCartPayment(Request $request)
-    {
-        $validated = $request->validate([
-            'email' => 'required|email',
-            'phone' => 'nullable|string',
-        ]);
-
-        $user = auth()->user();
-        $cart = $user->cart()->with('items.course')->first();
-
-        if (!$cart || $cart->items->isEmpty()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Your cart is empty',
-            ], 400);
-        }
-
-        try {
-            $result = $this->paymentService->initializeCartPayment($user, $cart, $validated);
-
-            return response()->json($result);
-
-        } catch (\Exception $e) {
-            Log::error('Cart payment initialization failed', [
-                'error' => $e->getMessage(),
-                'user_id' => $user->id,
-                'cart_id' => $cart->id,
-            ]);
-
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to initialize payment. Please try again.',
-            ], 500);
-        }
-    }
 
     /**
      * Show checkout page for an event
@@ -212,7 +106,7 @@ class PaymentController extends Controller
 
         if (!$txRef) {
             return redirect()
-                ->route('dashboard')
+                ->route('user_dashboard')
                 ->with([
                     'message' => 'Payment reference not found.',
                     'type' => 'error'
@@ -226,7 +120,7 @@ class PaymentController extends Controller
 
         if (!$transaction) {
             return redirect()
-                ->route('dashboard')
+                ->route('user_dashboard')
                 ->with([
                     'message' => 'Transaction not found or unauthorized.',
                     'type' => 'error'
@@ -236,14 +130,7 @@ class PaymentController extends Controller
         try {
             $result = $this->paymentService->verifyAndProcessPayment($txRef);
 
-            if ($result['type'] === 'cart') {
-                return redirect()
-                    ->route('dashboard')
-                    ->with([
-                        'message' => 'Payment successful! You are now enrolled in ' . count($result['courses']) . ' course(s).',
-                        'type' => 'success'
-                    ]);
-            } elseif ($result['type'] === 'event') {
+            if ($result['type'] === 'event') {
                 $message = ($result['registration_status'] ?? null) === 'waitlisted'
                     ? 'Payment successful! You have been added to the event waitlist.'
                     : 'Payment successful! Your event registration is now confirmed.';
@@ -254,14 +141,12 @@ class PaymentController extends Controller
                         'message' => $message,
                         'type' => 'success'
                     ]);
-            } else {
-                return redirect()
-                    ->route('courses.learn', $result['course']->slug)
-                    ->with([
-                        'message' => 'Payment successful! You are now enrolled in the course.',
-                        'type' => 'success'
-                    ]);
             }
+
+            return redirect()->route('transactions.index')->with([
+                'message' => 'Payment processed.',
+                'type' => 'success',
+            ]);
 
         } catch (\Exception $e) {
             Log::error('Payment verification failed', [
@@ -271,7 +156,7 @@ class PaymentController extends Controller
 
             $this->paymentService->markTransactionAsFailed($txRef);
 
-            return $this->redirectToCoursePage($txRef, [
+            return $this->redirectAfterPaymentFailure($txRef, [
                 'message' => 'Payment verification failed. Please contact support.',
                 'type' => 'error'
             ]);
@@ -334,13 +219,7 @@ class PaymentController extends Controller
                         'type' => 'info'
                     ]);
                 }
-                if ($transaction->course) {
-                    return redirect()->route('courses.learn', $transaction->course->slug)->with([
-                        'message' => 'You are already enrolled in this course.',
-                        'type' => 'info'
-                    ]);
-                }
-                return redirect()->route('dashboard')->with([
+                return redirect()->route('transactions.index')->with([
                     'message' => 'This payment has already been completed.',
                     'type' => 'info'
                 ]);
@@ -349,14 +228,7 @@ class PaymentController extends Controller
             // Try to verify the payment with Paystack
             $result = $this->paymentService->verifyAndProcessPayment($reference);
 
-            if ($result['type'] === 'cart') {
-                return redirect()
-                    ->route('dashboard')
-                    ->with([
-                        'message' => 'Payment successful! You are now enrolled in ' . count($result['courses']) . ' course(s).',
-                        'type' => 'success'
-                    ]);
-            } elseif ($result['type'] === 'event') {
+            if ($result['type'] === 'event') {
                 $message = ($result['registration_status'] ?? null) === 'waitlisted'
                     ? 'Payment successful! You have been added to the event waitlist.'
                     : 'Payment successful! Your event registration is now confirmed.';
@@ -367,14 +239,12 @@ class PaymentController extends Controller
                         'message' => $message,
                         'type' => 'success'
                     ]);
-            } else {
-                return redirect()
-                    ->route('courses.learn', $result['course']->slug)
-                    ->with([
-                        'message' => 'Payment successful! You are now enrolled in the course.',
-                        'type' => 'success'
-                    ]);
             }
+
+            return redirect()->route('transactions.index')->with([
+                'message' => 'Payment successful.',
+                'type' => 'success',
+            ]);
 
         } catch (\Exception $e) {
             Log::error('Payment verification failed', [
@@ -390,9 +260,9 @@ class PaymentController extends Controller
     }
 
     /**
-     * Helper to redirect to course page based on transaction
+     * Helper to redirect after payment failures.
      */
-    private function redirectToCoursePage(string $txRef, array $flashData)
+    private function redirectAfterPaymentFailure(string $txRef, array $flashData)
     {
         $transaction = \App\Models\Transaction::where('transaction_id', $txRef)->first();
 
@@ -400,10 +270,6 @@ class PaymentController extends Controller
             return redirect()->route('user.events.show', $transaction->payable->slug)->with($flashData);
         }
 
-        $route = $transaction && $transaction->course
-            ? route('courses.show', $transaction->course->slug)
-            : route('courses.index');
-
-        return redirect($route)->with($flashData);
+        return redirect()->route('transactions.index')->with($flashData);
     }
 }

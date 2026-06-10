@@ -15,13 +15,12 @@ return new class extends Migration
             $table->id();
             $table->foreignId('instructor_id')->constrained('users')->onDelete('cascade');
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
-            $table->foreignId('course_id')->nullable()->constrained('courses')->onDelete('set null');
             $table->tinyInteger('rating')->unsigned()->comment('1-5 star rating');
             $table->text('review')->nullable();
             $table->timestamps();
 
-            // Ensure a user can only rate an instructor once per course
-            $table->unique(['instructor_id', 'user_id', 'course_id']);
+            // Ensure a user can only rate an instructor once.
+            $table->unique(['instructor_id', 'user_id']);
 
             // Indexes for performance
             $table->index(['instructor_id', 'rating']);

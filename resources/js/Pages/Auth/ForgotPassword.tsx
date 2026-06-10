@@ -1,13 +1,9 @@
 import { FormEventHandler } from 'react';
 import { Head, Link, useForm } from '@inertiajs/react';
 import AuthLayout from '@/Layouts/AuthLayout';
-import Input from '@/Components/UI/Input';
-import Button from '@/Components/UI/Button';
 
 export default function ForgotPassword({ status }: { status?: string }) {
-    const { data, setData, post, processing, errors } = useForm({
-        email: '',
-    });
+    const { data, setData, post, processing, errors } = useForm({ email: '' });
 
     const submit: FormEventHandler = (e) => {
         e.preventDefault();
@@ -15,63 +11,31 @@ export default function ForgotPassword({ status }: { status?: string }) {
     };
 
     return (
-        <AuthLayout
-            title="Forgot Password"
-            description="Enter your email and we'll send a reset link."
-        >
+        <AuthLayout title="Forgot Password" description="Enter your email and we'll send a reset link.">
             <Head title="Forgot Password" />
 
             {status && (
-                <div className="mb-6 flex items-start gap-3 rounded-lg border border-green-200 bg-green-50 p-4 text-sm text-green-800">
-                    <i className="fas fa-check-circle w-5 h-5 mt-0.5 text-green-600"></i>
-                    <div>
-                        <p className="font-semibold font-montserrat">Email Sent Successfully!</p>
-                        <p className="font-lato">{status}</p>
-                    </div>
+                <div className="mb-5 rounded-md bg-lime-50 border border-lime-200 px-4 py-3 text-sm text-lime-700">
+                    {status}
                 </div>
             )}
 
-            <div className="mb-6 rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm leading-6 text-gray-600">
-                Use the email address attached to your account.
-            </div>
+            <form onSubmit={submit} className="space-y-4">
+                <div>
+                    <label htmlFor="email" className="block text-[13px] font-medium text-slate-700 mb-1.5">Email Address</label>
+                    <input type="email" id="email" value={data.email} onChange={(e) => setData('email', e.target.value)} required autoFocus placeholder="Enter your registered email"
+                        className="w-full rounded-md border border-slate-300 px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 outline-none transition focus:border-primary-300 focus:ring-2 focus:ring-primary-500/10" />
+                    {errors.email && <p className="mt-1.5 text-[13px] text-accent">{errors.email}</p>}
+                </div>
 
-            <form onSubmit={submit} className="space-y-6">
-                {/* Email Input */}
-                <Input
-                    type="email"
-                    name="email"
-                    label="Email Address"
-                    icon="fas fa-envelope"
-                    placeholder="Enter your registered email address"
-                    value={data.email}
-                    onChange={(e) => setData('email', e.target.value)}
-                    error={errors.email}
-                    required
-                />
-
-                {/* Submit Button */}
-                <Button
-                    type="submit"
-                    variant="primary"
-                    fullWidth
-                    isLoading={processing}
-                    icon={!processing ? 'fas fa-paper-plane' : undefined}
-                    className="font-montserrat py-3.5"
-                >
-                    Send Password Reset Link
-                </Button>
+                <button type="submit" disabled={processing} className="w-full rounded-md bg-accent px-4 py-3 text-sm font-semibold text-white transition hover:bg-accent-600 disabled:opacity-50 shadow-sm">
+                    {processing ? 'Sending...' : 'Send Reset Link'}
+                </button>
             </form>
 
-            <div className="mt-8 border-t border-gray-100 pt-4 text-center">
-                <Link
-                    href={route('login')}
-                    className="inline-flex items-center gap-2 text-sm font-lato text-gray-600 transition-colors"
-                    style={{ color: '#002147' }}
-                >
-                    <i className="fas fa-arrow-left w-4 h-4"></i>
-                    Back to sign in
-                </Link>
-            </div>
+            <p className="mt-6 text-center text-sm text-slate-500">
+                <Link href={route('login')} className="font-semibold text-primary hover:text-accent">Back to sign in</Link>
+            </p>
         </AuthLayout>
     );
 }

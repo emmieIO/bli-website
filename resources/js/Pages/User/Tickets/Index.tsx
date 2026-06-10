@@ -31,93 +31,72 @@ export default function Index({ tickets }: TicketsProps) {
         <DashboardLayout>
             <Head title="My Support Tickets" />
 
-            <div className="workspace-stack">
-                <section className="workspace-header-card px-6 py-6 lg:px-8">
-                    <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
-                        <div className="max-w-3xl">
-                            <p className="workspace-muted-label">Support</p>
-                            <h1 className="mt-3 text-3xl font-semibold tracking-tight text-slate-900">My Support Tickets</h1>
-                            <p className="mt-3 text-sm leading-7 text-slate-600">
-                                Track open issues, follow responses, and keep all support conversations in one clean queue.
-                            </p>
-                        </div>
-                        <Link href={route('user.tickets.create')} className="inline-flex items-center gap-2 rounded-2xl bg-slate-900 px-4 py-3 text-sm font-semibold text-white transition hover:bg-slate-800">
-                            <Plus className="h-4 w-4" />
-                            New Ticket
-                        </Link>
+            <div className="space-y-5">
+                <section className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+                    <div>
+                        <h1 className="text-xl font-semibold tracking-tight text-slate-900">My Support Tickets</h1>
+                        <p className="mt-1 text-sm text-slate-500">Track open issues, follow responses, and keep all support conversations in one clean queue.</p>
                     </div>
+                    <Link href={route('user.tickets.create')} className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2.5 text-sm font-medium text-white transition hover:bg-primary-600 shadow-sm">
+                        <Plus size={15} />
+                        New Ticket
+                    </Link>
                 </section>
 
-                <section className="workspace-card p-5 lg:p-6">
+                <section className="rounded-lg border border-slate-200 bg-white p-4">
                     <form onSubmit={handleSearch}>
-                        <div className="relative max-w-xl">
+                        <div className="relative max-w-md">
                             <input
                                 type="text"
                                 value={search}
                                 onChange={(e) => setSearch(e.target.value)}
                                 placeholder="Search by reference code or subject..."
-                                className="w-full border border-slate-200 bg-slate-50 py-3 pl-10 pr-4 text-sm text-slate-900 focus:border-emerald-300 focus:bg-white focus:outline-none focus:ring-4 focus:ring-emerald-100"
+                                className="h-9 w-full rounded-md border border-slate-200 bg-slate-50 pl-9 pr-3 text-sm text-slate-900 placeholder:text-slate-400 outline-none transition focus:border-primary-300 focus:bg-white focus:ring-2 focus:ring-primary-500/10"
                             />
-                            <Search className="absolute left-3 top-3.5 h-4 w-4 text-slate-400" />
+                            <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
                         </div>
                     </form>
                 </section>
 
-                <section className="workspace-card overflow-hidden">
+                <section className="overflow-hidden rounded-lg border border-slate-200 bg-white">
                     <div className="overflow-x-auto">
                         <table className="min-w-full divide-y divide-slate-200">
-                            <thead className="bg-slate-50/90">
+                            <thead className="bg-slate-50/80">
                                 <tr>
-                                    <th scope="col" className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
-                                        Reference
-                                    </th>
-                                    <th scope="col" className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
-                                        Subject
-                                    </th>
-                                    <th scope="col" className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
-                                        Status
-                                    </th>
-                                    <th scope="col" className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
-                                        Priority
-                                    </th>
-                                    <th scope="col" className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
-                                        Created
-                                    </th>
-                                    <th scope="col" className="px-6 py-3 text-right text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
-                                        Actions
-                                    </th>
+                                    <th className="px-5 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">Reference</th>
+                                    <th className="px-5 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">Subject</th>
+                                    <th className="px-5 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">Status</th>
+                                    <th className="px-5 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">Priority</th>
+                                    <th className="px-5 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">Created</th>
+                                    <th className="px-5 py-3 text-right text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">Actions</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-slate-100 bg-white">
                                 {tickets.data.map(ticket => (
-                                    <tr key={ticket.id}>
-                                        <td className="px-6 py-4 whitespace-nowrap">
-                                            <span className="font-mono text-sm text-slate-900">
-                                                {ticket.reference_code}
-                                            </span>
+                                    <tr key={ticket.id} className="transition hover:bg-slate-50/70">
+                                        <td className="px-5 py-3.5 whitespace-nowrap">
+                                            <span className="font-mono text-[13px] text-slate-900">{ticket.reference_code}</span>
                                         </td>
-                                        <td className="px-6 py-4 whitespace-nowrap">
-                                            <Link href={route('user.tickets.show', ticket.id)} className="text-sm font-medium text-primary hover:underline">
+                                        <td className="px-5 py-3.5 whitespace-nowrap">
+                                            <Link href={route('user.tickets.show', ticket.id)} className="text-[13px] font-medium text-primary hover:text-primary-600">
                                                 {ticket.subject}
                                             </Link>
                                         </td>
-                                        <td className="px-6 py-4 whitespace-nowrap">
-                                            <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ${
-                                                ticket.status === 'open' ? 'bg-green-100 text-green-800' :
-                                                ticket.status === 'in_progress' ? 'bg-yellow-100 text-yellow-800' :
-                                                'bg-red-100 text-red-800'
+                                        <td className="px-5 py-3.5 whitespace-nowrap">
+                                            <span className={`inline-flex rounded-md px-2 py-0.5 text-[11px] font-semibold ${
+                                                ticket.status === 'open' ? 'bg-lime-100 text-lime-700' :
+                                                ticket.status === 'in_progress' ? 'bg-amber-100 text-amber-700' :
+                                                'bg-accent-50 text-accent'
                                             }`}>
                                                 {ticket.status}
                                             </span>
                                         </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm capitalize text-slate-500">
-                                            {ticket.priority}
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
+                                        <td className="px-5 py-3.5 whitespace-nowrap text-[13px] capitalize text-slate-500">{ticket.priority}</td>
+                                        <td className="px-5 py-3.5 whitespace-nowrap text-[13px] text-slate-500">
                                             {new Date(ticket.created_at).toLocaleDateString()}
                                         </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                            <Link href={route('user.tickets.show', ticket.id)} className="text-primary hover:text-primary-700">
+                                        <td className="px-5 py-3.5 whitespace-nowrap text-right">
+                                            <Link href={route('user.tickets.show', ticket.id)} className="text-[13px] font-medium text-primary hover:text-primary-600">
                                                 View
                                             </Link>
                                         </td>
@@ -126,9 +105,7 @@ export default function Index({ tickets }: TicketsProps) {
                             </tbody>
                         </table>
                         {tickets.data.length === 0 && (
-                            <div className="px-6 py-14 text-center text-slate-500">
-                                No support tickets yet.
-                            </div>
+                            <div className="px-6 py-14 text-center text-sm text-slate-400">No support tickets yet.</div>
                         )}
                     </div>
                 </section>

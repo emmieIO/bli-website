@@ -9,7 +9,6 @@ class Transaction extends Model
 {
     protected $fillable = [
         'user_id',
-        'course_id', // Kept for backward compatibility, but prefer payable_id/type
         'payable_id',
         'payable_type',
         'transaction_id',
@@ -39,19 +38,11 @@ class Transaction extends Model
     }
 
     /**
-     * Get the parent payable model (course, event, etc.).
+     * Get the parent payable model.
      */
     public function payable()
     {
         return $this->morphTo();
-    }
-
-    /**
-     * Get the course that was purchased
-     */
-    public function course(): BelongsTo
-    {
-        return $this->belongsTo(Course::class);
     }
 
     /**
@@ -78,11 +69,6 @@ class Transaction extends Model
         return $this->status === 'failed';
     }
 
-    public function isRefunded(): bool
-    {
-        return $this->status === 'refunded';
-    }
-
     /**
      * Mark transaction as successful
      */
@@ -102,8 +88,4 @@ class Transaction extends Model
         $this->update(['status' => 'failed']);
     }
 
-    public function markAsRefunded(): void
-    {
-        $this->update(['status' => 'refunded']);
-    }
 }

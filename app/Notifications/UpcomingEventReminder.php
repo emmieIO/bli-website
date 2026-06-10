@@ -37,18 +37,7 @@ class UpcomingEventReminder extends Notification implements ShouldQueue
     {
         $startDate = \Carbon\Carbon::parse($this->event->start_date);
         $endDate = \Carbon\Carbon::parse($this->event->end_date);
-        $now = \Carbon\Carbon::now();
-
-        // Calculate time until event
-        $hoursUntil = $now->diffInHours($startDate);
-        $daysUntil = $now->diffInDays($startDate);
-
-        $timeUntil = match(true) {
-            $hoursUntil < 2 => 'in less than 2 hours',
-            $hoursUntil < 24 => "in {$hoursUntil} hours",
-            $daysUntil === 1 => 'tomorrow',
-            default => "in {$daysUntil} days"
-        };
+        $timeUntil = $this->timeUntilStart($startDate);
 
         // Format dates
         $dateRange = $startDate->isSameDay($endDate)
@@ -116,18 +105,7 @@ The " . config('app.name') . " Team");
     public function toArray(object $notifiable): array
     {
         $startDate = \Carbon\Carbon::parse($this->event->start_date);
-        $now = \Carbon\Carbon::now();
-
-        // Calculate time until event
-        $hoursUntil = $now->diffInHours($startDate);
-        $daysUntil = $now->diffInDays($startDate);
-
-        $timeUntil = match(true) {
-            $hoursUntil < 2 => 'in less than 2 hours',
-            $hoursUntil < 24 => "in {$hoursUntil} hours",
-            $daysUntil === 1 => 'tomorrow',
-            default => "in {$daysUntil} days"
-        };
+        $timeUntil = $this->timeUntilStart($startDate);
 
         return [
             'event_id' => $this->event->id,
@@ -151,5 +129,25 @@ The " . config('app.name') . " Team");
             'hybrid' => 'Hybrid Event - Online & ' . ($this->event->physical_address ?? 'Physical venue TBA'),
             default => $this->event->location ?? 'Location TBA',
         };
+    }
+
+    private function timeUntilStart(\Carbon\Carbon $startDate): string
+    {
+        $now = \Carbon\Carbon::now();
+        $minutesUntil = max(0, (int) ceil($now->diffInMinutes($startDate)));
+
+        if ($minutesUntil < 120) {
+            return 'in less than 2 hours';
+        }
+
+        if ($minutesUntil < 1440) {
+            $hoursUntil = (int) round($minutesUntil / 60);
+
+            return 'in '.$hoursUntil.' hour'.($hoursUntil === 1 ? '' : 's');
+        }
+
+        $daysUntil = (int) round($minutesUntil / 1440);
+
+        return $daysUntil === 1 ? 'tomorrow' : 'in '.$daysUntil.' days';
     }
 }

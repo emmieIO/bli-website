@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Course;
 use App\Models\InstructorRating;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -15,7 +14,6 @@ class InstructorRatingController extends Controller
     public function store(Request $request, User $instructor)
     {
         $request->validate([
-            'course_id' => 'nullable|exists:courses,id',
             'rating' => 'required|integer|min:1|max:5',
             'review' => 'nullable|string|max:1000',
         ]);
@@ -29,35 +27,11 @@ class InstructorRatingController extends Controller
             ]);
         }
 
-        // Check if user has completed a course with this instructor
-        $hasCompletedCourse = false;
-        if ($request->course_id) {
-            $course = Course::find($request->course_id);
-            if ($course && $course->instructor_id === $instructor->id) {
-                $hasCompletedCourse = $course->students()->where('user_id', $user->id)->exists();
-            }
-        } else {
-            // Check if user has completed any course with this instructor
-            $hasCompletedCourse = Course::where('instructor_id', $instructor->id)
-                ->whereHas('students', function ($query) use ($user) {
-                    $query->where('user_id', $user->id);
-                })
-                ->exists();
-        }
-
-        if (!$hasCompletedCourse) {
-            return redirect()->back()->with([
-                'message' => 'You can only rate instructors whose courses you have enrolled in',
-                'type' => 'error'
-            ]);
-        }
-
         // Update or create rating
         InstructorRating::updateOrCreate(
             [
                 'instructor_id' => $instructor->id,
                 'user_id' => $user->id,
-                'course_id' => $request->course_id,
             ],
             [
                 'rating' => $request->rating,
@@ -77,7 +51,7 @@ class InstructorRatingController extends Controller
     public function index(User $instructor)
     {
         $ratings = $instructor->ratingsReceived()
-            ->with(['user', 'course'])
+            ->with(['user'])
             ->latest()
             ->paginate(10);
 

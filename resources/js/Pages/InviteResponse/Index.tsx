@@ -1,8 +1,6 @@
 import { Head, router, usePage } from '@inertiajs/react';
 import DashboardLayout from '@/Layouts/DashboardLayout';
 import { useState, FormEvent } from 'react';
-import Button from '@/Components/Button';
-import Textarea from '@/Components/Textarea';
 
 interface Event {
     id: number;
@@ -43,26 +41,16 @@ export default function InviteResponse({ event, invite }: InviteResponseProps) {
     const isExpired = new Date(invite.expires_at) < new Date();
 
     const formatDate = (dateString: string) => {
-        const date = new Date(dateString);
-        return date.toLocaleDateString('en-US', {
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric',
-            hour: 'numeric',
-            minute: '2-digit',
-        });
+        return new Date(dateString).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
     };
 
     const getExpiresIn = (dateString: string) => {
         const now = new Date();
         const expires = new Date(dateString);
         const diff = expires.getTime() - now.getTime();
-
         if (diff < 0) return 'expired';
-
         const days = Math.floor(diff / (1000 * 60 * 60 * 24));
         const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-
         if (days > 0) return `in ${days} day${days !== 1 ? 's' : ''}`;
         if (hours > 0) return `in ${hours} hour${hours !== 1 ? 's' : ''}`;
         return 'soon';
@@ -71,254 +59,156 @@ export default function InviteResponse({ event, invite }: InviteResponseProps) {
     const handleAccept = (e: FormEvent) => {
         e.preventDefault();
         setIsProcessing(true);
-        router.post(
-            route('invitations.accept', { event: event.slug, invite: invite.id }),
-            {},
-            {
-                preserveScroll: true,
-                onFinish: () => {
-                    setIsProcessing(false);
-                    setShowAcceptModal(false);
-                },
-            }
-        );
+        router.post(route('invitations.accept', { event: event.slug, invite: invite.id }), {}, {
+            preserveScroll: true,
+            onFinish: () => { setIsProcessing(false); setShowAcceptModal(false); },
+        });
     };
 
     const handleDecline = (e: FormEvent) => {
         e.preventDefault();
         if (!declineFeedback.trim()) return;
-
         setIsProcessing(true);
-        router.patch(
-            route('invitations.accept', { event: event.slug, invite: invite.id }),
-            { feedback: declineFeedback },
-            {
-                preserveScroll: true,
-                onFinish: () => {
-                    setIsProcessing(false);
-                    setShowDeclineModal(false);
-                    setDeclineFeedback('');
-                },
-            }
-        );
+        router.patch(route('invitations.accept', { event: event.slug, invite: invite.id }), { feedback: declineFeedback }, {
+            preserveScroll: true,
+            onFinish: () => { setIsProcessing(false); setShowDeclineModal(false); setDeclineFeedback(''); },
+        });
     };
 
     return (
         <DashboardLayout sideLinks={sideLinks}>
             <Head title={`Invitation: ${event.title}`} />
 
-            <div className="py-10">
-                {/* Event Card */}
-                <div className="bg-white rounded-3xl shadow-xl border border-gray-50 overflow-hidden mb-10 transition-all duration-300 hover:shadow-2xl">
-                    <div className="p-8">
-                        <div className="flex items-start sm:items-center space-x-4 mb-6">
-                            <div className="p-3 bg-primary/10 rounded-xl">
-                                <i className="fas fa-calendar w-6 h-6 text-primary"></i>
-                            </div>
-                            <div>
-                                <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight leading-tight font-montserrat">
-                                    {event.title}
-                                </h1>
-                                <span
-                                    className={`inline-flex items-center mt-2 px-3 py-1 rounded-full text-xs font-medium font-montserrat ${
-                                        event.mode === 'offline'
-                                            ? 'bg-blue-100 text-blue-800'
-                                            : 'bg-purple-100 text-purple-800'
-                                    }`}
-                                >
-                                    <i
-                                        className={`fas fa-${
-                                            event.mode === 'offline' ? 'map-marker-alt' : 'globe'
-                                        } w-3 h-3 mr-1`}
-                                    ></i>
-                                    {event.mode === 'offline' ? 'In-Person Event' : 'Online Event'}
-                                </span>
-                            </div>
-                        </div>
-
-                        {event.description && (
-                            <p className="text-gray-700 leading-relaxed mb-8 text-lg font-lato">
-                                {event.description.substring(0, 280)}
-                                {event.description.length > 280 ? '...' : ''}
-                            </p>
-                        )}
-
-                        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5 text-sm">
-                            <div className="flex items-start space-x-3 p-4 bg-gray-50 rounded-xl">
-                                <i className="fas fa-map-marker-alt w-5 h-5 text-gray-500 mt-0.5 shrink-0"></i>
-                                <div>
-                                    <p className="font-medium text-gray-900 font-montserrat">Location</p>
-                                    <p className="text-gray-600 mt-1 font-lato">
-                                        {event.mode === 'offline' ? event.physical_address : event.location}
-                                    </p>
-                                </div>
-                            </div>
-
-                            {event.contact_email && (
-                                <div className="flex items-start space-x-3 p-4 bg-gray-50 rounded-xl">
-                                    <i className="fas fa-envelope w-5 h-5 text-gray-500 mt-0.5 shrink-0"></i>
-                                    <div>
-                                        <p className="font-medium text-gray-900 font-montserrat">Contact</p>
-                                        <p className="text-gray-600 mt-1 break-all font-lato">{event.contact_email}</p>
-                                    </div>
-                                </div>
-                            )}
-
-                            <div className="flex items-start space-x-3 p-4 bg-gray-50 rounded-xl">
-                                <i className="fas fa-clock w-5 h-5 text-gray-500 mt-0.5 shrink-0"></i>
-                                <div>
-                                    <p className="font-medium text-gray-900 font-montserrat">Date & Time</p>
-                                    <p className="text-gray-600 mt-1 font-lato">
-                                        {formatDate(event.start_date)}
-                                        <br />
-                                        <span className="text-xs text-gray-500">to</span>
-                                        <br />
-                                        {formatDate(event.end_date)}
-                                    </p>
-                                </div>
-                            </div>
+            <div className="space-y-5">
+                <section className="rounded-lg border border-slate-200 bg-white p-6">
+                    <div className="flex items-start gap-4 mb-5">
+                        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary-50 text-primary">
+                            <i className="fas fa-calendar text-sm"></i>
+                        </span>
+                        <div>
+                            <h1 className="text-xl font-semibold tracking-tight text-slate-900">{event.title}</h1>
+                            <span className={`mt-1.5 inline-flex items-center rounded-md px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-wider ${
+                                event.mode === 'offline' ? 'bg-primary-50 text-primary' : 'bg-lime-50 text-lime-700'
+                            }`}>
+                                <i className={`fas fa-${event.mode === 'offline' ? 'map-marker-alt' : 'globe'} mr-1 text-[10px]`}></i>
+                                {event.mode === 'offline' ? 'In-Person Event' : 'Online Event'}
+                            </span>
                         </div>
                     </div>
-                </div>
 
-                {/* Invitation Card */}
-                <div className="bg-white rounded-3xl shadow-xl border border-gray-50 overflow-hidden transition-all duration-300 hover:shadow-2xl">
-                    <div className="p-8">
-                        <div className="flex items-start sm:items-center space-x-4 mb-8">
-                            <div className="p-3 bg-primary/10 rounded-xl">
-                                <i className="fas fa-user w-6 h-6 text-primary"></i>
-                            </div>
-                            <div>
-                                <h2 className="text-2xl font-bold text-gray-900 font-montserrat">
-                                    Your Invitation Details
-                                </h2>
-                                <p className="text-gray-600 mt-1 font-lato">
-                                    Please review the details below before responding.
-                                </p>
-                            </div>
-                        </div>
+                    {event.description && (
+                        <p className="text-sm leading-relaxed text-slate-500 mb-5">
+                            {event.description.length > 280 ? event.description.substring(0, 280) + '...' : event.description}
+                        </p>
+                    )}
 
-                        <div className="space-y-6 mb-8">
-                            {invite.suggested_topic && (
-                                <InviteDetail label="Suggested Topic" value={invite.suggested_topic} />
-                            )}
-                            {invite.suggested_duration && (
-                                <InviteDetail
-                                    label="Suggested Duration"
-                                    value={`${invite.suggested_duration} minutes`}
-                                />
-                            )}
-                            {invite.audience_expectations && (
-                                <InviteDetail label="Audience Expectations" value={invite.audience_expectations} />
-                            )}
-                            {invite.expected_format && (
-                                <InviteDetail label="Expected Format" value={invite.expected_format} />
-                            )}
-                            {invite.special_instructions && (
-                                <InviteDetail label="Special Instructions" value={invite.special_instructions} />
-                            )}
-
-                            <div className="pt-4 border-t border-gray-100">
-                                <div className="flex items-center space-x-2">
-                                    <i className="fas fa-hourglass-half w-4 h-4 text-amber-500"></i>
-                                    <span className="text-sm font-medium text-gray-700 font-lato">
-                                        Expires {getExpiresIn(invite.expires_at)}
-                                    </span>
-                                    {isExpired && (
-                                        <span className="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 font-montserrat">
-                                            Expired
-                                        </span>
-                                    )}
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Action Buttons */}
-                        {isExpired ? (
-                            <div className="bg-amber-50 border border-amber-200 rounded-xl p-5 text-center">
-                                <i className="fas fa-exclamation-triangle w-10 h-10 text-amber-500 mx-auto mb-3"></i>
-                                <h3 className="font-semibold text-amber-800 font-montserrat">
-                                    This invitation has expired
-                                </h3>
-                                <p className="text-amber-700 mt-1 text-sm font-lato">
-                                    You can no longer respond to this invitation.
-                                </p>
-                            </div>
-                        ) : (
-                            <div className="flex flex-col sm:flex-row justify-center sm:justify-start gap-4 pt-6 border-t border-gray-100">
-                                <Button
-                                    onClick={() => setShowAcceptModal(true)}
-                                    className="bg-green-600 hover:bg-green-700 px-8 py-3.5"
-                                    icon="check"
-                                >
-                                    Accept Invitation
-                                </Button>
-
-                                <Button
-                                    onClick={() => setShowDeclineModal(true)}
-                                    variant="danger"
-                                    className="px-8 py-3.5"
-                                    icon="times"
-                                >
-                                    Decline Invitation
-                                </Button>
-                            </div>
-                        )}
+                    <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                        <DetailItem icon="map-marker-alt" label="Location" value={event.mode === 'offline' ? event.physical_address : event.location} />
+                        {event.contact_email && <DetailItem icon="envelope" label="Contact" value={event.contact_email} />}
+                        <DetailItem icon="clock" label="Date & Time" value={`${formatDate(event.start_date)} to ${formatDate(event.end_date)}`} />
                     </div>
-                </div>
+                </section>
+
+                <section className="rounded-lg border border-slate-200 bg-white p-6">
+                    <div className="flex items-start gap-4 mb-5">
+                        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary-50 text-primary">
+                            <i className="fas fa-user text-sm"></i>
+                        </span>
+                        <div>
+                            <h2 className="text-lg font-semibold tracking-tight text-slate-900">Your Invitation Details</h2>
+                            <p className="mt-1 text-sm text-slate-500">Please review the details below before responding.</p>
+                        </div>
+                    </div>
+
+                    <div className="space-y-4">
+                        {invite.suggested_topic && <InviteDetail label="Suggested Topic" value={invite.suggested_topic} />}
+                        {invite.suggested_duration && <InviteDetail label="Suggested Duration" value={`${invite.suggested_duration} minutes`} />}
+                        {invite.audience_expectations && <InviteDetail label="Audience Expectations" value={invite.audience_expectations} />}
+                        {invite.expected_format && <InviteDetail label="Expected Format" value={invite.expected_format} />}
+                        {invite.special_instructions && <InviteDetail label="Special Instructions" value={invite.special_instructions} />}
+
+                        <div className="flex items-center gap-2 pt-4 border-t border-slate-100">
+                            <i className="fas fa-hourglass-half text-xs text-amber-500"></i>
+                            <span className="text-sm text-slate-600">Expires {getExpiresIn(invite.expires_at)}</span>
+                            {isExpired && (
+                                <span className="inline-flex items-center rounded-md bg-accent-50 px-2 py-0.5 text-[11px] font-semibold text-accent">Expired</span>
+                            )}
+                        </div>
+                    </div>
+
+                    {isExpired ? (
+                        <div className="mt-5 rounded-md border border-amber-200 bg-amber-50 p-5 text-center">
+                            <i className="fas fa-exclamation-triangle text-amber-500 text-lg mx-auto mb-2"></i>
+                            <h3 className="text-sm font-semibold text-amber-800">This invitation has expired</h3>
+                            <p className="mt-1 text-[13px] text-amber-700">You can no longer respond to this invitation.</p>
+                        </div>
+                    ) : (
+                        <div className="flex flex-col sm:flex-row gap-3 pt-5 border-t border-slate-100">
+                            <button onClick={() => setShowAcceptModal(true)}
+                                className="inline-flex items-center justify-center gap-2 rounded-md bg-lime-600 px-6 py-2.5 text-sm font-medium text-white transition hover:bg-lime-700 shadow-sm">
+                                <i className="fas fa-check text-xs"></i>
+                                Accept Invitation
+                            </button>
+                            <button onClick={() => setShowDeclineModal(true)}
+                                className="inline-flex items-center justify-center gap-2 rounded-md border border-accent-200 bg-white px-6 py-2.5 text-sm font-medium text-accent transition hover:bg-accent-50">
+                                <i className="fas fa-times text-xs"></i>
+                                Decline Invitation
+                            </button>
+                        </div>
+                    )}
+                </section>
             </div>
 
-            {/* Accept Modal */}
             {showAcceptModal && (
-                <Modal
-                    title="Accept Invitation"
-                    icon="check-circle"
-                    iconColor="text-green-600"
-                    onClose={() => setShowAcceptModal(false)}
-                >
-                    <p className="text-gray-700 mb-6 font-lato">
-                        Are you sure you want to accept this invitation? This action cannot be undone.
-                    </p>
-                    <form onSubmit={handleAccept} className="flex justify-end gap-3">
-                        <Button type="button" variant="secondary" onClick={() => setShowAcceptModal(false)}>
-                            Cancel
-                        </Button>
-                        <Button type="submit" className="bg-green-600 hover:bg-green-700" loading={isProcessing}>
-                            Accept Invitation
-                        </Button>
-                    </form>
-                </Modal>
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/30 px-4 backdrop-blur-sm">
+                    <div className="w-full max-w-md rounded-lg border border-slate-200 bg-white p-6 shadow-lg">
+                        <button type="button" onClick={() => setShowAcceptModal(false)} className="absolute right-4 top-4 text-slate-400 hover:text-slate-600">
+                            <i className="fas fa-times text-sm"></i>
+                        </button>
+                        <div className="text-center mb-5">
+                            <i className="fas fa-check-circle text-lime-600 text-3xl mx-auto mb-3"></i>
+                            <h3 className="text-base font-semibold text-slate-900">Accept Invitation</h3>
+                        </div>
+                        <p className="text-sm text-slate-500 text-center mb-5">Are you sure you want to accept this invitation? This action cannot be undone.</p>
+                        <form onSubmit={handleAccept} className="flex justify-end gap-3">
+                            <button type="button" onClick={() => setShowAcceptModal(false)} className="rounded-md border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50">Cancel</button>
+                            <button type="submit" disabled={isProcessing} className="rounded-md bg-lime-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-lime-700 shadow-sm disabled:opacity-50">
+                                {isProcessing ? 'Accepting...' : 'Accept Invitation'}
+                            </button>
+                        </form>
+                    </div>
+                </div>
             )}
 
-            {/* Decline Modal */}
             {showDeclineModal && (
-                <Modal
-                    title="Decline Invitation"
-                    icon="times-circle"
-                    iconColor="text-red-600"
-                    onClose={() => setShowDeclineModal(false)}
-                >
-                    <p className="text-gray-700 mb-4 font-lato">
-                        We appreciate your consideration. Kindly share your reason for declining this invitation:
-                    </p>
-                    <form onSubmit={handleDecline} className="space-y-4">
-                        <Textarea
-                            rows={4}
-                            value={declineFeedback}
-                            onChange={(e) => setDeclineFeedback(e.target.value)}
-                            placeholder="Please provide your reason..."
-                            required
-                        />
-                        <div className="flex justify-end gap-3">
-                            <Button type="button" variant="secondary" onClick={() => setShowDeclineModal(false)}>
-                                Cancel
-                            </Button>
-                            <Button type="submit" variant="danger" loading={isProcessing}>
-                                Decline Invitation
-                            </Button>
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/30 px-4 backdrop-blur-sm">
+                    <div className="w-full max-w-md rounded-lg border border-slate-200 bg-white p-6 shadow-lg">
+                        <button type="button" onClick={() => setShowDeclineModal(false)} className="absolute right-4 top-4 text-slate-400 hover:text-slate-600">
+                            <i className="fas fa-times text-sm"></i>
+                        </button>
+                        <div className="text-center mb-5">
+                            <i className="fas fa-times-circle text-accent text-3xl mx-auto mb-3"></i>
+                            <h3 className="text-base font-semibold text-slate-900">Decline Invitation</h3>
                         </div>
-                    </form>
-                </Modal>
+                        <p className="text-sm text-slate-500 mb-4">We appreciate your consideration. Kindly share your reason for declining:</p>
+                        <form onSubmit={handleDecline} className="space-y-4">
+                            <textarea
+                                rows={4}
+                                value={declineFeedback}
+                                onChange={(e) => setDeclineFeedback(e.target.value)}
+                                placeholder="Please provide your reason..."
+                                required
+                                className="w-full rounded-md border border-slate-300 px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 outline-none transition focus:border-accent-300 focus:ring-2 focus:ring-accent-500/10 resize-none"
+                            />
+                            <div className="flex justify-end gap-3">
+                                <button type="button" onClick={() => setShowDeclineModal(false)} className="rounded-md border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50">Cancel</button>
+                                <button type="submit" disabled={isProcessing} className="rounded-md bg-accent px-4 py-2 text-sm font-medium text-white transition hover:bg-accent-600 shadow-sm disabled:opacity-50">
+                                    {isProcessing ? 'Declining...' : 'Decline Invitation'}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
             )}
         </DashboardLayout>
     );
@@ -326,43 +216,21 @@ export default function InviteResponse({ event, invite }: InviteResponseProps) {
 
 function InviteDetail({ label, value }: { label: string; value: string }) {
     return (
-        <div className="border-l-4 border-primary/20 pl-5 py-2">
-            <p className="text-sm font-semibold text-gray-500 uppercase tracking-wide font-montserrat">{label}</p>
-            <p className="text-gray-800 mt-1 leading-relaxed font-lato">{value}</p>
+        <div className="border-l-2 border-primary/30 pl-4 py-1.5">
+            <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">{label}</p>
+            <p className="mt-0.5 text-sm text-slate-700">{value}</p>
         </div>
     );
 }
 
-function Modal({
-    title,
-    icon,
-    iconColor,
-    children,
-    onClose,
-}: {
-    title: string;
-    icon: string;
-    iconColor: string;
-    children: React.ReactNode;
-    onClose: () => void;
-}) {
+function DetailItem({ icon, label, value }: { icon: string; label: string; value?: string }) {
+    if (!value) return null;
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
-            <div className="relative bg-white rounded-lg shadow-xl p-6 w-full max-w-md mx-4">
-                <button
-                    type="button"
-                    onClick={onClose}
-                    className="absolute top-3 right-3 text-gray-400 hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 inline-flex justify-center items-center"
-                >
-                    <i className="fas fa-times w-3 h-3"></i>
-                </button>
-
-                <div className="text-center mb-6">
-                    <i className={`fas fa-${icon} w-12 h-12 ${iconColor} mx-auto mb-4`}></i>
-                    <h3 className="text-lg font-semibold text-gray-800 font-montserrat">{title}</h3>
-                </div>
-
-                {children}
+        <div className="flex items-start gap-3 rounded-md bg-slate-50 p-3.5">
+            <i className={`fas fa-${icon} text-sm text-slate-400 mt-0.5 shrink-0`}></i>
+            <div>
+                <p className="text-xs font-medium text-slate-900">{label}</p>
+                <p className="mt-0.5 text-[13px] text-slate-500 leading-relaxed">{value}</p>
             </div>
         </div>
     );

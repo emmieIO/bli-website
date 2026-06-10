@@ -8,9 +8,7 @@ use App\Http\Controllers\SearchController;
 use App\Http\Controllers\SpeakerApplicationController;
 use App\Http\Controllers\SpeakerInvitationController;
 use App\Http\Controllers\UserDashBoard\DashboardController;
-use App\Http\Controllers\UserDashBoard\RequestEventRefundAction;
 use App\Http\Controllers\UserDashBoard\RevokeRsvpAction;
-use App\Http\Controllers\UserDashBoard\ShowEventRefundPageController;
 use App\Http\Controllers\UserDashBoard\ShowMyEventController;
 use App\Http\Controllers\UserDashBoard\ShowMyEventsController;
 use Illuminate\Support\Facades\Route;
@@ -31,14 +29,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/notifications/{id}/mark-as-read', [NotificationController::class, 'markAsRead'])->name('notifications.mark-as-read');
     Route::post('/notifications/mark-all-as-read', [NotificationController::class, 'markAllAsRead'])->name('notifications.mark-all-as-read');
     Route::delete('/notifications/{id}', [NotificationController::class, 'destroy'])->name('notifications.destroy');
+    Route::delete('/notifications', [NotificationController::class, 'clearAll'])->name('notifications.clear-all');
 
     // User's events management
     Route::get('/user/events', ShowMyEventsController::class)->name('user.events');
     Route::get('/user/events/{slug}', ShowMyEventController::class)->name('user.events.show');
-    Route::get('/user/events/{slug}/refund', ShowEventRefundPageController::class)->name('user.events.refund');
     Route::post('/events/{slug}/join', JoinEventAction::class)->name('events.join');
     Route::delete('/events/user/{slug}/revoke-rsvp', RevokeRsvpAction::class)->name('user.revoke.event');
-    Route::post('/events/user/{slug}/request-refund', RequestEventRefundAction::class)->name('user.request-event-refund');
 
     // Event utilities
     Route::get('/events/{event}/calendar', [EventCalenderController::class, 'download'])->name('events.calendar');

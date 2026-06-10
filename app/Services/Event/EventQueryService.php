@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Auth;
 
 class EventQueryService
 {
-    public function getPublishedEvents(?string $q = null)
+    public function getPublishedEvents(?string $q = null, ?string $status = null)
     {
         return Event::publiclyVisible()
             ->when($q, function ($query, $searchQuery) {
@@ -21,6 +21,9 @@ class EventQueryService
                         ->orWhere('theme', 'like', $like)
                         ->orWhere('physical_address', 'like', $like);
                 });
+            })
+            ->when($status, function ($query, $status) {
+                $query->where('status', $status);
             })
             ->orderBy('created_at', 'asc')
             ->paginate()

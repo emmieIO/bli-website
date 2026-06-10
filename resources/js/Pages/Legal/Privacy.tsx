@@ -38,7 +38,7 @@ export default function Privacy() {
                             <p className="text-gray-700 leading-relaxed mb-4">We collect personal information that you voluntarily provide to us when you:</p>
                             <ul className="list-disc pl-6 space-y-2 text-gray-700 mb-4">
                                 <li>Register for an account</li>
-                                <li>Enroll in courses or events</li>
+                                <li>Register for events or mentorship opportunities</li>
                                 <li>Apply to become an instructor or speaker</li>
                                 <li>Subscribe to our newsletter</li>
                                 <li>Contact us with inquiries</li>
@@ -69,10 +69,9 @@ export default function Privacy() {
                             <p className="text-gray-700 leading-relaxed mb-4">We use the information we collect for the following purposes:</p>
                             <ul className="list-disc pl-6 space-y-2 text-gray-700">
                                 <li><strong>Account Management:</strong> To create and manage your user account</li>
-                                <li><strong>Course Delivery:</strong> To provide access to courses, events, and educational content</li>
+                                <li><strong>Program Delivery:</strong> To provide access to events, mentorship, speaker sessions, and educational content</li>
                                 <li><strong>Communication:</strong> To send you important updates, notifications, and marketing materials (with your consent)</li>
-                                <li><strong>Payment Processing:</strong> To process course enrollments and event registrations</li>
-                                <li><strong>Certificates:</strong> To generate and verify course completion certificates</li>
+                                <li><strong>Payment Processing:</strong> To process paid event registrations</li>
                                 <li><strong>Analytics:</strong> To understand how users interact with our platform and improve our services</li>
                                 <li><strong>Security:</strong> To protect against fraud, unauthorized access, and maintain platform security</li>
                                 <li><strong>Legal Compliance:</strong> To comply with applicable laws and regulations</li>
@@ -85,7 +84,7 @@ export default function Privacy() {
                             <p className="text-gray-700 leading-relaxed mb-4">We may share your information in the following situations:</p>
                             <ul className="list-disc pl-6 space-y-2 text-gray-700">
                                 <li><strong>Service Providers:</strong> With third-party vendors who perform services on our behalf (e.g., payment processing, email delivery, analytics)</li>
-                                <li><strong>Instructors:</strong> Course enrollment information may be shared with instructors for educational purposes</li>
+                                <li><strong>Program Facilitators:</strong> Event, mentorship, or speaker participation details may be shared with assigned facilitators for program delivery</li>
                                 <li><strong>Legal Requirements:</strong> When required by law or to protect our rights and safety</li>
                                 <li><strong>Business Transfers:</strong> In connection with a merger, sale, or acquisition of all or part of our organization</li>
                             </ul>

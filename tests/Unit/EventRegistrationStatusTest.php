@@ -24,12 +24,9 @@ test('seat occupancy registration states are explicit', function () {
 test('event registration transitions are constrained', function () {
     expect(EventRegistrationStatus::REGISTERED->canTransitionTo(EventRegistrationStatus::WAITLISTED))->toBeFalse();
     expect(EventRegistrationStatus::REGISTERED->canTransitionTo(EventRegistrationStatus::CANCELLED))->toBeTrue();
-    expect(EventRegistrationStatus::REGISTERED->canTransitionTo(EventRegistrationStatus::REFUNDED))->toBeTrue();
     expect(EventRegistrationStatus::WAITLISTED->canTransitionTo(EventRegistrationStatus::REGISTERED))->toBeTrue();
-    expect(EventRegistrationStatus::WAITLISTED->canTransitionTo(EventRegistrationStatus::REFUNDED))->toBeTrue();
     expect(EventRegistrationStatus::WAITLISTED->canTransitionTo(EventRegistrationStatus::ATTENDED))->toBeFalse();
     expect(EventRegistrationStatus::CANCELLED->canTransitionTo(EventRegistrationStatus::REGISTERED))->toBeTrue();
-    expect(EventRegistrationStatus::REFUNDED->canTransitionTo(EventRegistrationStatus::REGISTERED))->toBeFalse();
     expect(EventRegistrationStatus::ATTENDED->canTransitionTo(EventRegistrationStatus::REGISTERED))->toBeFalse();
 });
 

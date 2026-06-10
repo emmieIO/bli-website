@@ -54,7 +54,7 @@ export default function Terms() {
                             <ul className="list-disc pl-6 space-y-2 text-gray-700">
                                 <li>Violate any laws or regulations</li>
                                 <li>Infringe on intellectual property rights</li>
-                                <li>Share copyrighted course materials without permission</li>
+                                <li>Share copyrighted program materials without permission</li>
                                 <li>Upload viruses or malicious code</li>
                                 <li>Attempt to gain unauthorized access to our systems</li>
                                 <li>Harass, abuse, or harm other users</li>
@@ -63,33 +63,28 @@ export default function Terms() {
                             </ul>
                         </section>
 
-                        {/* Courses and Content */}
+                        {/* Programs and Content */}
                         <section className="mb-10">
-                            <h2 className="text-2xl font-bold font-montserrat mb-4" style={{ color: '#002147' }}>3. Courses and Educational Content</h2>
+                            <h2 className="text-2xl font-bold font-montserrat mb-4" style={{ color: '#002147' }}>3. Programs and Educational Content</h2>
 
-                            <h3 className="text-xl font-semibold font-montserrat mb-3 mt-6" style={{ color: '#002147' }}>3.1 Course Enrollment</h3>
+                            <h3 className="text-xl font-semibold font-montserrat mb-3 mt-6" style={{ color: '#002147' }}>3.1 Event Registration</h3>
                             <p className="text-gray-700 leading-relaxed mb-4">
-                                When you enroll in a course, you receive a limited, non-exclusive, non-transferable license to access and view the course content for personal, non-commercial use only.
+                                When you register for an event or program, you receive a limited, non-exclusive, non-transferable right to access the related content and participation materials for personal, non-commercial use only.
                             </p>
 
-                            <h3 className="text-xl font-semibold font-montserrat mb-3 mt-6" style={{ color: '#002147' }}>3.2 Course Access</h3>
+                            <h3 className="text-xl font-semibold font-montserrat mb-3 mt-6" style={{ color: '#002147' }}>3.2 Program Access</h3>
                             <p className="text-gray-700 leading-relaxed mb-4">
-                                Course access is granted upon successful payment and remains active for the duration specified in the course description. We reserve the right to modify course content, instructors, or availability at any time.
-                            </p>
-
-                            <h3 className="text-xl font-semibold font-montserrat mb-3 mt-6" style={{ color: '#002147' }}>3.3 Certificates</h3>
-                            <p className="text-gray-700 leading-relaxed mb-4">
-                                Certificates of completion are awarded upon successful completion of course requirements. Certificates are for recognition purposes only and do not constitute professional certification or accreditation unless explicitly stated.
+                                Access is granted according to the event, mentorship, or speaker program details. We reserve the right to modify program content, facilitators, schedules, or availability at any time.
                             </p>
                         </section>
 
-                        {/* Payment and Refunds */}
+                        {/* Payments */}
                         <section className="mb-10">
-                            <h2 className="text-2xl font-bold font-montserrat mb-4" style={{ color: '#002147' }}>4. Payment and Refunds</h2>
+                            <h2 className="text-2xl font-bold font-montserrat mb-4" style={{ color: '#002147' }}>4. Payments</h2>
 
                             <h3 className="text-xl font-semibold font-montserrat mb-3 mt-6" style={{ color: '#002147' }}>4.1 Pricing</h3>
                             <p className="text-gray-700 leading-relaxed mb-4">
-                                All prices are displayed in Nigerian Naira (NGN) unless otherwise stated. We reserve the right to change prices at any time. Price changes will not affect existing enrollments.
+                                All prices are displayed in Nigerian Naira (NGN) unless otherwise stated. We reserve the right to change prices at any time. Price changes will not affect registrations already completed.
                             </p>
 
                             <h3 className="text-xl font-semibold font-montserrat mb-3 mt-6" style={{ color: '#002147' }}>4.2 Payment Methods</h3>
@@ -97,25 +92,13 @@ export default function Terms() {
                                 We accept various payment methods as displayed at checkout. All payments are processed securely through third-party payment processors.
                             </p>
 
-                            <h3 className="text-xl font-semibold font-montserrat mb-3 mt-6" style={{ color: '#002147' }}>4.3 Refund Policy</h3>
-                            <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-r-lg mb-4">
-                                <p className="text-gray-700 leading-relaxed mb-3">
-                                    <strong>Course Refunds:</strong> You may request a full refund within 14 days of purchase if you have completed less than 25% of the course content.
-                                </p>
-                                <p className="text-gray-700 leading-relaxed">
-                                    <strong>Event Refunds:</strong> Event registration refunds are available up to 7 days before the event date, minus a 10% processing fee.
-                                </p>
-                            </div>
-                            <p className="text-gray-700 leading-relaxed mt-4">
-                                To request a refund, contact us at <a href="mailto:support@beaconleadership.org" className="font-semibold text-primary underline hover:no-underline">support@beaconleadership.org</a>. Refunds are processed within 7-10 business days.
-                            </p>
                         </section>
 
                         {/* Intellectual Property */}
                         <section className="mb-10">
                             <h2 className="text-2xl font-bold font-montserrat mb-4" style={{ color: '#002147' }}>5. Intellectual Property Rights</h2>
                             <p className="text-gray-700 leading-relaxed mb-4">
-                                All content on the Platform, including but not limited to text, graphics, logos, videos, audio, software, and course materials, is the property of Beacon Leadership Institute or its content suppliers and is protected by intellectual property laws.
+                                All content on the Platform, including but not limited to text, graphics, logos, videos, audio, software, and program materials, is the property of Beacon Leadership Institute or its content suppliers and is protected by intellectual property laws.
                             </p>
                             <p className="text-gray-700 leading-relaxed mb-4">
                                 You may not reproduce, distribute, modify, create derivative works, publicly display, or otherwise use our content without express written permission, except as explicitly allowed for personal educational use.
@@ -141,8 +124,8 @@ export default function Terms() {
                             </p>
                             <ul className="list-disc pl-6 space-y-2 text-gray-700">
                                 <li>You must submit accurate professional credentials</li>
-                                <li>All course materials must be original or properly licensed</li>
-                                <li>You grant us rights to promote and distribute your courses</li>
+                                <li>All program materials must be original or properly licensed</li>
+                                <li>You grant us rights to promote and deliver approved programs, talks, and sessions</li>
                                 <li>Revenue sharing terms will be specified in a separate agreement</li>
                                 <li>We reserve the right to remove content that violates our quality standards</li>
                             </ul>
@@ -156,7 +139,7 @@ export default function Terms() {
                                     <strong>No Warranties:</strong> The Platform and all content are provided "AS IS" and "AS AVAILABLE" without warranties of any kind, either express or implied.
                                 </p>
                                 <p className="text-gray-700 leading-relaxed mb-3">
-                                    <strong>Educational Content:</strong> While we strive for accuracy, we do not guarantee that course content is complete, accurate, or current. Educational outcomes depend on individual effort and circumstances.
+                                    <strong>Educational Content:</strong> While we strive for accuracy, we do not guarantee that program content is complete, accurate, or current. Educational outcomes depend on individual effort and circumstances.
                                 </p>
                                 <p className="text-gray-700 leading-relaxed">
                                     <strong>No Professional Advice:</strong> Content on our Platform is for educational purposes only and does not constitute professional advice. Consult appropriate professionals for specific guidance.

@@ -48,11 +48,6 @@ class EventCalendarService
         // Generate ICS string with proper CRLF endings
         $ics = $calendar->get();
 
-        return $ics;
-
-        // return response($ics, 200, [
-        //     'Content-Type' => 'text/calendar; charset=utf-8',
-        //     'Content-Disposition' => 'attachment; filename="' . ($event->title ?? 'event') . '.ics"',
-        // ]);
+        return $calendar->get();
     }
 }

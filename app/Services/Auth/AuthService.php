@@ -2,7 +2,6 @@
 
 namespace App\Services\Auth;
 
-use App\Http\Controllers\CourseController;
 use App\Http\Requests\LoginRequest;
 use App\Http\Requests\UpdateUserProfileRequest;
 use App\Models\User;

@@ -3,15 +3,10 @@
 namespace App\Services\Event;
 
 use App\Enums\EventRegistrationStatus;
-use App\Enums\Permissions\EventPermissionsEnum;
 use App\Events\EventRegisterEvent;
 use App\Models\Event;
-use App\Models\EventRefundRequest;
 use App\Models\EventTransitionAudit;
-use App\Models\Transaction;
 use App\Models\User;
-use App\Notifications\EventRefundRequestedNotification;
-use App\Notifications\EventRefundRequestReviewedNotification;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -78,85 +73,10 @@ class EventRegistrationService
                 'resources',
                 'speakers.user',
                 'transactions' => fn ($query) => $query->where('user_id', $user->id)->latest(),
-                'refundRequests' => fn ($query) => $query->where('user_id', $user->id)->latest(),
             ])
             ->where('events.slug', $slug)
             ->wherePivotIn('status', EventRegistrationStatus::workspaceAccessibleValues())
             ->first();
-    }
-
-    public function requestRefund(string $slug, ?int $userId = null, ?string $reason = null): string|false
-    {
-        $userId = $userId ?? Auth::id();
-
-        if (! $userId) {
-            return false;
-        }
-
-        $event = Event::findBySlug($slug)->firstOrFail();
-        $registrationStatus = $this->participantStateService->registrationStatusForUserEnum($event, $userId);
-
-        if (! $registrationStatus || ! in_array($registrationStatus, [
-            EventRegistrationStatus::REGISTERED,
-            EventRegistrationStatus::WAITLISTED,
-        ], true)) {
-            return false;
-        }
-
-        $existingPendingRequest = EventRefundRequest::query()
-            ->where('event_id', $event->id)
-            ->where('user_id', $userId)
-            ->where('status', 'pending')
-            ->first();
-
-        if ($existingPendingRequest) {
-            return 'already_pending';
-        }
-
-        $transaction = Transaction::query()
-            ->where('user_id', $userId)
-            ->where('payable_id', $event->id)
-            ->where('payable_type', Event::class)
-            ->where('status', 'successful')
-            ->latest()
-            ->first();
-
-        if (! $transaction) {
-            return false;
-        }
-
-        $refundRequest = EventRefundRequest::query()->create([
-            'event_id' => $event->id,
-            'user_id' => $userId,
-            'transaction_id' => $transaction->id,
-            'status' => 'pending',
-            'reason' => $reason,
-            'requested_at' => now(),
-        ]);
-
-        $refundRequest->load(['event', 'user']);
-
-        $event->creator?->notify(new EventRefundRequestedNotification($refundRequest));
-
-        User::query()
-            ->whereHas('permissions', fn ($query) => $query->where('name', EventPermissionsEnum::VIEW_ANY->value))
-            ->where('id', '!=', $event->creator_id)
-            ->get()
-            ->each(fn (User $user) => $user->notify(new EventRefundRequestedNotification($refundRequest)));
-
-        $this->recordRegistrationAudit(
-            event: $event,
-            userId: $userId,
-            action: 'refund_requested',
-            fromStatus: $registrationStatus,
-            toStatus: $registrationStatus,
-            actorUserId: $userId,
-            context: [
-                'refund_request_id' => $refundRequest->id,
-            ],
-        );
-
-        return 'pending_created';
     }
 
     public function revokeRsvp(string $slug): bool
@@ -253,146 +173,6 @@ class EventRegistrationService
             Log::error('Failed to promote waitlisted attendee.', [
                 'event_id' => $event->id,
                 'user_id' => $userId,
-                'exception' => $exception->getMessage(),
-            ]);
-
-            return false;
-        }
-    }
-
-    public function refundRegistration(Event $event, int $userId, ?int $actorUserId = null): bool
-    {
-        try {
-            return DB::transaction(function () use ($event, $userId, $actorUserId) {
-                $registration = $event->attendees()->where('user_id', $userId)->first();
-
-                if (! $registration) {
-                    return false;
-                }
-
-                $currentStatus = EventRegistrationStatus::fromValue($registration->pivot->status);
-
-                if (! $currentStatus?->canTransitionTo(EventRegistrationStatus::REFUNDED)) {
-                    return false;
-                }
-
-                $releasedSeat = $currentStatus->occupiesSeat();
-
-                $event->attendees()->updateExistingPivot($userId, [
-                    'status' => EventRegistrationStatus::REFUNDED->value,
-                    'updated_at' => now(),
-                ]);
-
-                $this->recordRegistrationAudit(
-                    event: $event,
-                    userId: $userId,
-                    action: 'registration_refunded',
-                    fromStatus: $currentStatus,
-                    toStatus: EventRegistrationStatus::REFUNDED,
-                    actorUserId: $actorUserId,
-                );
-
-                if ($releasedSeat) {
-                    $this->promoteOldestWaitlistedAttendee($event, $actorUserId);
-                }
-
-                return true;
-            });
-        } catch (Throwable $exception) {
-            Log::error('Failed to refund event registration.', [
-                'event_id' => $event->id,
-                'user_id' => $userId,
-                'exception' => $exception->getMessage(),
-            ]);
-
-            return false;
-        }
-    }
-
-    public function approveRefundRequest(EventRefundRequest $refundRequest, ?int $actorUserId = null): bool
-    {
-        try {
-            return DB::transaction(function () use ($refundRequest, $actorUserId) {
-                $refundRequest->loadMissing(['event', 'user', 'transaction']);
-
-                if (! $refundRequest->isPending()) {
-                    return false;
-                }
-
-                if ($refundRequest->transaction) {
-                    $refundRequest->transaction->forceFill([
-                        'status' => 'refunded',
-                        'metadata' => array_merge($refundRequest->transaction->metadata ?? [], [
-                            'refund_request_id' => $refundRequest->id,
-                            'refund_source' => 'admin_review',
-                        ]),
-                    ])->save();
-                }
-
-                $refunded = $this->refundRegistration($refundRequest->event, $refundRequest->user_id, $actorUserId);
-
-                if (! $refunded) {
-                    return false;
-                }
-
-                $refundRequest->update([
-                    'status' => 'approved',
-                    'reviewed_by' => $actorUserId,
-                    'reviewed_at' => now(),
-                ]);
-
-                $refundRequest->user->notify(new EventRefundRequestReviewedNotification($refundRequest->fresh(['event'])));
-
-                return true;
-            });
-        } catch (Throwable $exception) {
-            Log::error('Failed to approve event refund request.', [
-                'refund_request_id' => $refundRequest->id,
-                'exception' => $exception->getMessage(),
-            ]);
-
-            return false;
-        }
-    }
-
-    public function declineRefundRequest(EventRefundRequest $refundRequest, ?int $actorUserId = null, ?string $adminNote = null): bool
-    {
-        try {
-            return DB::transaction(function () use ($refundRequest, $actorUserId, $adminNote) {
-                $refundRequest->loadMissing(['event', 'user']);
-
-                if (! $refundRequest->isPending()) {
-                    return false;
-                }
-
-                $refundRequest->update([
-                    'status' => 'declined',
-                    'reviewed_by' => $actorUserId,
-                    'reviewed_at' => now(),
-                    'admin_note' => $adminNote,
-                ]);
-
-                $currentStatus = $this->participantStateService->registrationStatusForUserEnum($refundRequest->event, $refundRequest->user_id);
-
-                $this->recordRegistrationAudit(
-                    event: $refundRequest->event,
-                    userId: $refundRequest->user_id,
-                    action: 'refund_declined',
-                    fromStatus: $currentStatus,
-                    toStatus: $currentStatus,
-                    actorUserId: $actorUserId,
-                    context: [
-                        'refund_request_id' => $refundRequest->id,
-                    ],
-                );
-
-                $refundRequest->user->notify(new EventRefundRequestReviewedNotification($refundRequest->fresh(['event'])));
-
-                return true;
-            });
-        } catch (Throwable $exception) {
-            Log::error('Failed to decline event refund request.', [
-                'refund_request_id' => $refundRequest->id,
                 'exception' => $exception->getMessage(),
             ]);
 

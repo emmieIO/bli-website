@@ -14,7 +14,6 @@ return new class extends Migration
         Schema::create('transactions', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->foreignId('course_id')->nullable()->constrained()->nullOnDelete();
             $table->nullableMorphs('payable');
             $table->string('transaction_id')->unique(); // Flutterwave transaction ID
             $table->string('payment_ref')->nullable()->unique();
@@ -27,7 +26,7 @@ return new class extends Migration
             $table->timestamps();
 
             $table->index('status');
-            $table->index(['user_id', 'course_id', 'status']);
+            $table->index(['user_id', 'status']);
         });
     }
 

@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\UserDashBoard;
 
 use App\Http\Controllers\Controller;
-use App\Models\Course;
 use App\Models\Event;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -20,144 +19,10 @@ class DashboardController extends Controller
     {
         $user = $request->user();
 
-        // Get enrolled courses
-        $enrolledCourses = $user->courseEnrollments()
-            ->with(['modules.lessons', 'instructor', 'category'])
-            ->get();
-
-        $totalCourses = $enrolledCourses->count();
-
-        // Performance: Pre-fetch all lesson progress data to avoid N+1 queries
-        $courseIds = $enrolledCourses->pluck('id');
-        $allLessonProgress = $user->lessonProgress()
-            ->whereIn('course_id', $courseIds)
-            ->with('lesson')
-            ->get()
-            ->groupBy('course_id');
-
-        // Calculate course statistics
-        $inProgress = 0;
-        $completed = 0;
-        $totalLessons = 0;
-        $completedLessons = 0;
-        $totalWatchDuration = 0;
-        $coursesWithProgress = [];
-
-        foreach ($enrolledCourses as $course) {
-            $courseLessons = $course->modules->flatMap(function ($module) {
-                return $module->lessons;
-            });
-            $courseLessonCount = $courseLessons->count();
-            $totalLessons += $courseLessonCount;
-
-            // Skip courses without lessons, but still add them to the array for display
-            if ($courseLessonCount === 0) {
-                $coursesWithProgress[] = [
-                    'id' => $course->id,
-                    'title' => $course->title,
-                    'slug' => $course->slug,
-                    'thumbnail_path' => $course->thumbnail_path,
-                    'instructor' => [
-                        'name' => $course->instructor->name ?? 'Unknown Instructor',
-                    ],
-                    'category' => [
-                        'name' => $course->category->name ?? 'Uncategorized',
-                    ],
-                    'total_lessons' => 0,
-                    'completed_lessons' => 0,
-                    'completion_percentage' => 0,
-                    'status' => 'not_started',
-                    'next_lesson' => null,
-                ];
-                continue;
-            }
-
-            // Get progress data for this course from pre-fetched collection
-            $courseProgress = $allLessonProgress->get($course->id, collect());
-
-            // Get completed lessons count
-            $courseCompletedLessons = $courseProgress->where('is_completed', true)->count();
-            $completedLessons += $courseCompletedLessons;
-
-            // Get watch duration for this course
-            $courseWatchDuration = $courseProgress->sum('watch_duration');
-            $totalWatchDuration += $courseWatchDuration;
-
-            // Determine course status
-            $completionPercentage = $courseLessonCount > 0
-                ? round(($courseCompletedLessons / $courseLessonCount) * 100)
-                : 0;
-
-            // Get the next lesson to continue from
-            $nextLesson = null;
-            $lastProgressedLesson = $courseProgress
-                ->sortByDesc('updated_at')
-                ->first();
-
-            if ($lastProgressedLesson && !$lastProgressedLesson->is_completed && $lastProgressedLesson->lesson) {
-                $nextLesson = $lastProgressedLesson->lesson;
-            } else {
-                // Find the first incomplete lesson
-                $completedLessonIds = $courseProgress->where('is_completed', true)->pluck('lesson_id')->toArray();
-
-                foreach ($course->modules as $module) {
-                    foreach ($module->lessons as $lesson) {
-                        if (!in_array($lesson->id, $completedLessonIds)) {
-                            $nextLesson = $lesson;
-                            break 2;
-                        }
-                    }
-                }
-            }
-
-            $status = 'not_started';
-            if ($completionPercentage == 100) {
-                $completed++;
-                $status = 'completed';
-            } elseif ($completionPercentage > 0) {
-                $inProgress++;
-                $status = 'in_progress';
-            }
-
-            $coursesWithProgress[] = [
-                'id' => $course->id,
-                'title' => $course->title,
-                'slug' => $course->slug,
-                'thumbnail_path' => $course->thumbnail_path,
-                'instructor' => [
-                    'name' => $course->instructor->name ?? 'Unknown Instructor',
-                ],
-                'category' => [
-                    'name' => $course->category->name ?? 'Uncategorized',
-                ],
-                'total_lessons' => $courseLessonCount,
-                'completed_lessons' => $courseCompletedLessons,
-                'completion_percentage' => $completionPercentage,
-                'status' => $status,
-                'next_lesson' => $nextLesson ? [
-                    'id' => $nextLesson->id,
-                    'title' => $nextLesson->title,
-                    'slug' => $nextLesson->slug,
-                ] : null,
-            ];
-        }
-
-        // Sort courses: in_progress first, then not_started, then completed
-        usort($coursesWithProgress, function ($a, $b) {
-            $statusOrder = ['in_progress' => 1, 'not_started' => 2, 'completed' => 3];
-            return $statusOrder[$a['status']] <=> $statusOrder[$b['status']];
-        });
-
-        // Calculate hours spent (watch_duration is in seconds)
-        $hoursSpent = round($totalWatchDuration / 3600, 1);
-
         $stats = [
-            'totalCourses' => $totalCourses,
-            'inProgress' => $inProgress,
-            'completed' => $completed,
-            'hoursSpent' => $hoursSpent,
-            'totalLessons' => $totalLessons,
-            'completedLessons' => $completedLessons,
+            'myEvents' => $user->events()->count(),
+            'upcomingEvents' => $user->events()->where('end_date', '>=', now())->count(),
+            'speakerInvitations' => DB::table('speaker_invites')->where('email', $user->email)->count(),
         ];
 
         // Check if user is admin or instructor
@@ -177,7 +42,6 @@ class DashboardController extends Controller
 
         return Inertia::render('Dashboard/Index', [
             'stats' => $stats,
-            'courses' => $coursesWithProgress,
             'adminStats' => $adminStats,
             'instructorStats' => $instructorStats,
         ]);
@@ -204,10 +68,6 @@ class DashboardController extends Controller
             ? round(($activeUsers / $totalUsers) * 100)
             : 0;
 
-        // Total courses and development status
-        $totalCourses = Course::count();
-        $coursesInDevelopment = Course::where('status', 'draft')->count();
-
         // Events scheduled
         $eventsScheduled = Event::where('end_date', '>=', $now)->count();
         $eventsToday = Event::whereDate('start_date', '<=', $now->toDateString())
@@ -228,10 +88,6 @@ class DashboardController extends Controller
             'totalUsersBadgeColor' => $userGrowthPercentage > 0 ? '#00a651' : '#6b7280',
             'activeUsers' => $activeUsers,
             'activeUsersBadge' => "{$engagementRate}% engagement",
-            'totalCourses' => $totalCourses,
-            'totalCoursesBadge' => $coursesInDevelopment > 0
-                ? "{$coursesInDevelopment} in development"
-                : 'All courses published',
             'eventsScheduled' => $eventsScheduled,
             'eventsScheduledBadge' => $eventsToday > 0
                 ? "{$eventsToday} happening today"
@@ -253,54 +109,6 @@ class DashboardController extends Controller
         $now = now();
         $monthStart = $now->copy()->startOfMonth();
         $weekStart = $now->copy()->startOfWeek();
-
-        // Courses taught by this instructor
-        $coursesTaught = Course::where('instructor_id', $instructor->id)->count();
-        $coursesThisMonth = Course::where('instructor_id', $instructor->id)
-            ->where('created_at', '>=', $monthStart)
-            ->count();
-
-        // Active students (enrolled in instructor's courses)
-        $activeStudents = DB::table('course_user')
-            ->join('courses', 'course_user.course_id', '=', 'courses.id')
-            ->where('courses.instructor_id', $instructor->id)
-            ->distinct()
-            ->count('course_user.user_id');
-
-        $activeStudentsThisWeek = DB::table('course_user')
-            ->join('courses', 'course_user.course_id', '=', 'courses.id')
-            ->where('courses.instructor_id', $instructor->id)
-            ->where('course_user.created_at', '>=', $weekStart)
-            ->distinct()
-            ->count('course_user.user_id');
-
-        // Get instructor's courses with lesson completion data
-        $instructorCourses = Course::where('instructor_id', $instructor->id)
-            ->with(['modules.lessons'])
-            ->get();
-
-        $totalAssignments = 0;
-        $completedAssignments = 0;
-
-        foreach ($instructorCourses as $course) {
-            foreach ($course->modules as $module) {
-                foreach ($module->lessons as $lesson) {
-                    if ($lesson->assignment_instructions) {
-                        $totalAssignments++;
-                        // Count as graded if lesson is completed by any student
-                        $completedCount = DB::table('lesson_progress')
-                            ->where('lesson_id', $lesson->id)
-                            ->where('is_completed', true)
-                            ->count();
-                        if ($completedCount > 0) {
-                            $completedAssignments++;
-                        }
-                    }
-                }
-            }
-        }
-
-        $assignmentsThisWeek = 20;
 
         // Upcoming sessions (events where instructor is speaking)
         $upcomingSessions = DB::table('event_speaker')
@@ -328,18 +136,6 @@ class DashboardController extends Controller
             ->count();
 
         return [
-            'coursesTaught' => $coursesTaught,
-            'coursesTaughtDescription' => $coursesThisMonth > 0
-                ? "{$coursesThisMonth} new courses this month"
-                : 'No new courses this month',
-            'activeStudents' => $activeStudents,
-            'activeStudentsDescription' => $activeStudentsThisWeek > 0
-                ? "+{$activeStudentsThisWeek} active this week"
-                : 'No new students this week',
-            'assignmentsGraded' => $completedAssignments,
-            'assignmentsGradedDescription' => $assignmentsThisWeek > 0
-                ? "{$assignmentsThisWeek} graded this week"
-                : 'No assignments graded this week',
             'upcomingSessions' => $upcomingSessions,
             'upcomingSessionsDescription' => $nextSession
                 ? 'Next session: ' . \Carbon\Carbon::parse($nextSession->start_date)->format('l ga')

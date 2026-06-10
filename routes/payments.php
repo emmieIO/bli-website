@@ -5,9 +5,6 @@ use Illuminate\Support\Facades\Route;
 
 // Payment routes
 Route::middleware(['auth'])->group(function () {
-    // Checkout page for a course
-    Route::get('/courses/{course}/checkout', [PaymentController::class, 'checkout'])->name('payment.checkout');
-    
     // Checkout page for an event
     Route::get('/events/{event}/checkout', [PaymentController::class, 'checkoutEvent'])->name('events.checkout');
 
@@ -20,14 +17,8 @@ Route::middleware(['auth'])->group(function () {
 
 // Rate-limited payment initialization routes (10 requests per minute)
 Route::middleware(['auth', 'throttle:10,1'])->group(function () {
-    // Initialize payment
-    Route::post('/courses/{course}/payment/initialize', [PaymentController::class, 'initializePayment'])->name('payment.initialize');
-    
     // Initialize event payment
     Route::post('/events/{event}/payment/initialize', [PaymentController::class, 'initializeEventPayment'])->name('payment.event.initialize');
-
-    // Initialize cart payment
-    Route::post('/cart/payment/initialize', [PaymentController::class, 'initializeCartPayment'])->name('payment.cart.initialize');
 });
 
 // Webhook endpoint (no auth required - Flutterwave will call this)

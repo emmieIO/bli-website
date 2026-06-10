@@ -1,27 +1,17 @@
-import { Head, Link, usePage, router } from '@inertiajs/react';
+import { Head, Link, usePage } from '@inertiajs/react';
 import DashboardLayout from '@/Layouts/DashboardLayout';
-
-interface Course {
-    id: number;
-    title: string;
-    slug: string;
-    thumbnail_path: string | null;
-    instructor: {
-        name: string;
-    };
-    category: {
-        name: string;
-    };
-    total_lessons: number;
-    completed_lessons: number;
-    completion_percentage: number;
-    status: 'not_started' | 'in_progress' | 'completed';
-    next_lesson: {
-        id: number;
-        title: string;
-        slug: string;
-    } | null;
-}
+import {
+    ArrowRight,
+    CalendarDays,
+    CheckCircle2,
+    Clock3,
+    CreditCard,
+    MessageSquareText,
+    Send,
+    Sparkles,
+    UserRoundCheck,
+    Users,
+} from 'lucide-react';
 
 interface AdminStats {
     totalUsers: number;
@@ -29,8 +19,6 @@ interface AdminStats {
     totalUsersBadgeColor: string;
     activeUsers: number;
     activeUsersBadge: string;
-    totalCourses: number;
-    totalCoursesBadge: string;
     eventsScheduled: number;
     eventsScheduledBadge: string;
     eventsScheduledBadgeColor: string;
@@ -40,29 +28,23 @@ interface AdminStats {
 }
 
 interface InstructorStats {
-    coursesTaught: number;
-    coursesTaughtDescription: string;
-    activeStudents: number;
-    activeStudentsDescription: string;
+    upcomingSessions: number;
+    upcomingSessionsDescription: string;
     feedbackReceived: number;
     feedbackReceivedDescription: string;
 }
 
 interface DashboardProps {
     stats?: {
-        totalCourses?: number;
-        inProgress?: number;
-        completed?: number;
-        hoursSpent?: number;
-        totalLessons?: number;
-        completedLessons?: number;
+        myEvents?: number;
+        upcomingEvents?: number;
+        speakerInvitations?: number;
     };
-    courses?: Course[];
     adminStats?: AdminStats | null;
     instructorStats?: InstructorStats | null;
 }
 
-export default function Dashboard({ stats, courses, adminStats, instructorStats }: DashboardProps) {
+export default function Dashboard({ stats, adminStats, instructorStats }: DashboardProps) {
     const { auth, sideLinks } = usePage().props as any;
     const user = auth?.user;
     const isAdmin = user?.roles?.some((role: string) => ['admin', 'super-admin'].includes(role));
@@ -72,16 +54,40 @@ export default function Dashboard({ stats, courses, adminStats, instructorStats 
         <DashboardLayout sideLinks={sideLinks}>
             <Head title="Dashboard" />
 
-            <div className="workspace-stack">
-                <section className="workspace-header-card px-6 py-6 lg:px-8">
-                    <div className="max-w-3xl">
-                        <p className="workspace-muted-label">Workspace Home</p>
-                        <h1 className="mt-3 text-3xl font-semibold tracking-tight text-slate-900">Dashboard</h1>
-                        <p className="mt-3 text-sm leading-7 text-slate-600">
-                            {isAdmin
-                                ? 'Monitor platform activity, manage operations, and keep an eye on the health of courses and events from one calmer overview.'
-                                : 'Pick up your work quickly, track momentum, and move straight into the learning or delivery tasks that matter next.'}
-                        </p>
+            <div className="space-y-6">
+                <section className="overflow-hidden rounded-lg border border-slate-200 bg-white">
+                    <div className="grid gap-0 lg:grid-cols-[1fr_320px]">
+                        <div className="p-6 lg:p-8">
+                            <div className="inline-flex items-center gap-1.5 rounded-md bg-lime-100 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wider text-lime-700">
+                                <Sparkles size={12} />
+                                Overview
+                            </div>
+                            <h1 className="mt-4 text-2xl font-semibold tracking-tight text-slate-900">
+                                Welcome back{user?.name ? `, ${user.name.split(' ')[0]}` : ''}
+                            </h1>
+                            <p className="mt-2 max-w-xl text-sm leading-relaxed text-slate-500">
+                                {isAdmin
+                                    ? 'Monitor people, events, payments, and operational tasks from one clean control surface.'
+                                    : 'Keep your leadership journey, invitations, and upcoming programs easy to scan and act on.'}
+                            </p>
+                            <div className="mt-5 flex flex-wrap gap-2.5">
+                                <ActionLink href={route('events.index')} icon={CalendarDays} variant="primary">
+                                    Browse events
+                                </ActionLink>
+                                <ActionLink href={route('transactions.index')} icon={CreditCard} variant="secondary">
+                                    Transactions
+                                </ActionLink>
+                            </div>
+                        </div>
+
+                        <div className="border-l border-slate-100 bg-gradient-to-br from-slate-50 to-primary-50/30 p-6 lg:p-8">
+                            <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-400">Today at a glance</p>
+                            <div className="mt-5 space-y-4">
+                                <StatusRow icon={CheckCircle2} label="Platform" value="Operational" status="ok" />
+                                <StatusRow icon={Clock3} label="Focus" value={isAdmin ? 'Review event activity' : 'Check upcoming events'} />
+                                <StatusRow icon={Send} label="Invitations" value={`${stats?.speakerInvitations ?? 0} pending`} />
+                            </div>
+                        </div>
                     </div>
                 </section>
 
@@ -90,7 +96,7 @@ export default function Dashboard({ stats, courses, adminStats, instructorStats 
                 ) : isInstructor ? (
                     <InstructorDashboard instructorStats={instructorStats} />
                 ) : (
-                    <StudentDashboard stats={stats} courses={courses} />
+                    <StudentDashboard stats={stats} />
                 )}
             </div>
         </DashboardLayout>
@@ -98,490 +104,232 @@ export default function Dashboard({ stats, courses, adminStats, instructorStats 
 }
 
 function AdminDashboard({ adminStats }: { adminStats?: AdminStats | null }) {
-    if (!adminStats) {
-        return (
-            <div className="text-center py-12">
-                <p className="text-gray-600 font-lato">Loading admin statistics...</p>
-            </div>
-        );
-    }
-
-    const statsArray = [
-        {
-            title: 'Total Users',
-            value: adminStats.totalUsers.toLocaleString(),
-            icon: 'fa-users',
-            color: '#002147',
-            badge: adminStats.totalUsersBadge,
-            badgeColor: adminStats.totalUsersBadgeColor
-        },
-        {
-            title: 'Active Users',
-            value: adminStats.activeUsers.toLocaleString(),
-            icon: 'fa-chart-line',
-            color: '#00a651',
-            badge: adminStats.activeUsersBadge
-        },
-        {
-            title: 'Total Courses',
-            value: adminStats.totalCourses.toLocaleString(),
-            icon: 'fa-book-open',
-            color: '#002147',
-            badge: adminStats.totalCoursesBadge
-        },
-        {
-            title: 'Events Scheduled',
-            value: adminStats.eventsScheduled.toLocaleString(),
-            icon: 'fa-calendar',
-            color: '#002147',
-            badge: adminStats.eventsScheduledBadge,
-            badgeColor: adminStats.eventsScheduledBadgeColor
-        },
-        {
-            title: 'Total Attendees',
-            value: adminStats.totalAttendees.toLocaleString(),
-            icon: 'fa-user-check',
-            color: '#00a651',
-            badge: adminStats.totalAttendeesBadge,
-            badgeColor: adminStats.totalAttendeesBadgeColor
-        },
-    ];
-
-    return (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {statsArray.map((stat, index) => (
-                <StatCard key={index} {...stat} />
-            ))}
-        </div>
-    );
-}
-
-function InstructorDashboard({ instructorStats }: { instructorStats?: InstructorStats | null }) {
-    if (!instructorStats) {
-        return (
-            <div className="text-center py-12">
-                <p className="text-gray-600 font-lato">Loading instructor statistics...</p>
-            </div>
-        );
-    }
-
-    const statsArray = [
-        {
-            title: 'Courses Taught',
-            value: instructorStats.coursesTaught.toString(),
-            icon: 'fa-book-open',
-            color: '#002147',
-            description: instructorStats.coursesTaughtDescription
-        },
-        {
-            title: 'Active Students',
-            value: instructorStats.activeStudents.toLocaleString(),
-            icon: 'fa-users',
-            color: '#00a651',
-            description: instructorStats.activeStudentsDescription
-        },
-
-        {
-            title: 'Feedback Received',
-            value: instructorStats.feedbackReceived.toString(),
-            icon: 'fa-comment',
-            color: '#00a651',
-            description: instructorStats.feedbackReceivedDescription
-        },
-    ];
-
-    return (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {statsArray.map((stat, index) => (
-                <StatCard key={index} {...stat} />
-            ))}
-        </div>
-    );
-}
-
-function StudentDashboard({ stats, courses }: DashboardProps) {
-    const totalCourses = stats?.totalCourses || 0;
-    const inProgress = stats?.inProgress || 0;
-    const completed = stats?.completed || 0;
-    const hoursSpent = stats?.hoursSpent || 0;
-    const totalLessons = stats?.totalLessons || 0;
-    const completedLessons = stats?.completedLessons || 0;
-
-    const completionRate = totalLessons > 0 ? Math.round((completedLessons / totalLessons) * 100) : 0;
-    const notStarted = totalCourses - inProgress - completed;
-
-    const studentStats = [
-        {
-            title: 'Enrolled Courses',
-            value: totalCourses.toString(),
-            icon: 'fa-book-open',
-            color: '#002147',
-            description: totalCourses > 0 ? `${notStarted} not started` : 'Browse courses to get started'
-        },
-        {
-            title: 'In Progress',
-            value: inProgress.toString(),
-            icon: 'fa-clock',
-            color: '#00a651',
-            description: inProgress > 0 ? 'Keep up the momentum!' : 'Start a course today'
-        },
-        {
-            title: 'Completed',
-            value: completed.toString(),
-            icon: 'fa-check-circle',
-            color: '#00a651',
-            description: completed > 0 ? `${completionRate}% overall completion` : 'Complete your first course'
-        },
-        {
-            title: 'Hours Spent',
-            value: hoursSpent.toFixed(1),
-            icon: 'fa-stopwatch',
-            color: '#002147',
-            description: hoursSpent > 0 ? 'Time invested in learning' : 'Start learning today'
-        },
-    ];
+    if (!adminStats) return <LoadingPanel label="Loading admin statistics..." />;
 
     return (
         <>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                {studentStats.map((stat, index) => (
-                    <StatCard key={index} {...stat} />
-                ))}
-            </div>
+            <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                <MetricCard icon={Users} label="Total users" value={adminStats.totalUsers.toLocaleString()} meta={adminStats.totalUsersBadge} accent="navy" />
+                <MetricCard icon={UserRoundCheck} label="Active users" value={adminStats.activeUsers.toLocaleString()} meta={adminStats.activeUsersBadge} accent="lime" />
+                <MetricCard icon={CalendarDays} label="Events scheduled" value={adminStats.eventsScheduled.toLocaleString()} meta={adminStats.eventsScheduledBadge} accent="red" />
+                <MetricCard icon={CheckCircle2} label="Total attendees" value={adminStats.totalAttendees.toLocaleString()} meta={adminStats.totalAttendeesBadge} accent="navy" />
+            </section>
 
-            {/* Continue Learning Section */}
-            {courses && courses.length > 0 ? (
-                <div className="workspace-card mt-8 p-8">
-                    <div className="flex items-center justify-between mb-6">
-                        <div>
-                            <h2 className="text-2xl font-bold font-montserrat" style={{ color: '#002147' }}>
-                                Continue Learning
-                            </h2>
-                            <p className="text-gray-600 mt-1 font-lato">
-                                Pick up where you left off
-                            </p>
-                        </div>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {courses.slice(0, 6).map((course) => (
-                            <CourseCard key={course.id} course={course} />
-                        ))}
-                    </div>
-
-                    {courses.length > 6 && (
-                        <div className="mt-6 text-center">
-                            <Link
-                                href={route('courses.index')}
-                                className="inline-flex items-center gap-2 text-sm font-medium font-lato"
-                                style={{ color: '#002147' }}
-                            >
-                                View All Courses
-                                <i className="fas fa-arrow-right"></i>
-                            </Link>
-                        </div>
-                    )}
+            <section className="space-y-4">
+                <h2 className="text-sm font-semibold tracking-tight text-slate-900">Quick actions</h2>
+                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                    <FocusPanel
+                        title="Events"
+                        description="Review events, speaker assignments, and event management."
+                        href={route('admin.events.index')}
+                        action="Open event manager"
+                        accent="navy"
+                    />
+                    <FocusPanel
+                        title="Payments"
+                        description="Audit paid event activity and receipt history."
+                        href={route('admin.transactions-audit.index')}
+                        action="View transaction audit"
+                        accent="red"
+                    />
+                    <FocusPanel
+                        title="People"
+                        description="Manage applications, ratings, roles, and permissions."
+                        href={route('admin.users.index')}
+                        action="Manage users"
+                        accent="lime"
+                    />
                 </div>
-            ) : null}
-
-            {/* Progress Summary */}
-            {totalCourses > 0 && (
-                <div className="workspace-card mt-8 p-8">
-                    <div className="flex items-center justify-between mb-6">
-                        <div>
-                            <h2 className="text-2xl font-bold font-montserrat" style={{ color: '#002147' }}>
-                                Learning Progress
-                            </h2>
-                            <p className="text-gray-600 mt-1 font-lato">
-                                Track your course completion and achievements
-                            </p>
-                        </div>
-                        <Link
-                            href="/courses"
-                            className="px-6 py-2.5 text-white rounded-lg font-medium font-lato transition-all duration-300 hover:shadow-md"
-                            style={{ backgroundColor: '#00a651' }}
-                        >
-                            <i className="fas fa-plus mr-2"></i>
-                            Browse Courses
-                        </Link>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        {/* Overall Progress */}
-                        <div className="bg-linear-to-br from-primary-50 to-white rounded-xl p-6 border border-primary-100">
-                            <div className="flex items-center justify-between mb-4">
-                                <h3 className="text-lg font-bold font-montserrat" style={{ color: '#002147' }}>
-                                    Overall Progress
-                                </h3>
-                                <span className="text-3xl font-bold font-montserrat" style={{ color: '#00a651' }}>
-                                    {completionRate}%
-                                </span>
-                            </div>
-                            <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
-                                <div
-                                    className="h-3 rounded-full transition-all duration-500"
-                                    style={{
-                                        width: `${completionRate}%`,
-                                        backgroundColor: '#00a651'
-                                    }}
-                                ></div>
-                            </div>
-                            <p className="text-sm text-gray-600 mt-3 font-lato">
-                                {completedLessons} of {totalLessons} lessons completed
-                            </p>
-                        </div>
-
-                        {/* Course Status Breakdown */}
-                        <div className="bg-linear-to-br from-green-50 to-white rounded-xl p-6 border border-green-100">
-                            <h3 className="text-lg font-bold font-montserrat mb-4" style={{ color: '#002147' }}>
-                                Course Status
-                            </h3>
-                            <div className="space-y-3">
-                                <div className="flex items-center justify-between">
-                                    <span className="text-sm font-lato text-gray-600">Completed</span>
-                                    <span className="font-bold font-montserrat" style={{ color: '#00a651' }}>
-                                        {completed}
-                                    </span>
-                                </div>
-                                <div className="flex items-center justify-between">
-                                    <span className="text-sm font-lato text-gray-600">In Progress</span>
-                                    <span className="font-bold font-montserrat text-yellow-600">
-                                        {inProgress}
-                                    </span>
-                                </div>
-                                <div className="flex items-center justify-between">
-                                    <span className="text-sm font-lato text-gray-600">Not Started</span>
-                                    <span className="font-bold font-montserrat text-gray-500">
-                                        {notStarted}
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Learning Time */}
-                        <div className="bg-linear-to-br from-blue-50 to-white rounded-xl p-6 border border-blue-100">
-                            <h3 className="text-lg font-bold font-montserrat mb-4" style={{ color: '#002147' }}>
-                                Learning Time
-                            </h3>
-                            <div className="flex items-center justify-center py-4">
-                                <div className="text-center">
-                                    <div className="text-4xl font-bold font-montserrat" style={{ color: '#002147' }}>
-                                        {hoursSpent.toFixed(1)}
-                                    </div>
-                                    <div className="text-sm text-gray-600 font-lato mt-1">
-                                        hours invested
-                                    </div>
-                                </div>
-                            </div>
-                            <p className="text-xs text-gray-500 text-center mt-2 font-lato">
-                                Keep learning to unlock more achievements
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            )}
-
-            {/* Empty State */}
-            {totalCourses === 0 && (
-                <div className="workspace-card mt-8 p-12 text-center">
-                    <div className="max-w-md mx-auto">
-                        <div className="w-20 h-20 rounded-full mx-auto mb-6 flex items-center justify-center" style={{ backgroundColor: '#00265115' }}>
-                            <i className="fas fa-graduation-cap text-4xl" style={{ color: '#002147' }}></i>
-                        </div>
-                        <h3 className="text-2xl font-bold font-montserrat mb-3" style={{ color: '#002147' }}>
-                            Start Your Learning Journey
-                        </h3>
-                        <p className="text-gray-600 mb-6 font-lato">
-                            You haven't enrolled in any courses yet. Browse our catalog and start learning today!
-                        </p>
-                        <Link
-                            href="/courses"
-                            className="inline-flex items-center gap-2 px-8 py-3 text-white rounded-lg font-medium font-lato transition-all duration-300 hover:shadow-lg"
-                            style={{ backgroundColor: '#00a651' }}
-                        >
-                            <i className="fas fa-search"></i>
-                            Browse Courses
-                        </Link>
-                    </div>
-                </div>
-            )}
+            </section>
         </>
     );
 }
 
-interface StatCardProps {
-    title: string;
-    value: string;
-    icon: string;
-    color: string;
-    badge?: string;
-    badgeColor?: string;
-    description?: string;
+function InstructorDashboard({ instructorStats }: { instructorStats?: InstructorStats | null }) {
+    if (!instructorStats) return <LoadingPanel label="Loading instructor statistics..." />;
+
+    return (
+        <>
+            <section className="grid gap-4 sm:grid-cols-2">
+                <MetricCard
+                    icon={CalendarDays}
+                    label="Upcoming sessions"
+                    value={instructorStats.upcomingSessions.toString()}
+                    meta={instructorStats.upcomingSessionsDescription}
+                    accent="navy"
+                />
+                <MetricCard
+                    icon={MessageSquareText}
+                    label="Feedback received"
+                    value={instructorStats.feedbackReceived.toString()}
+                    meta={instructorStats.feedbackReceivedDescription}
+                    accent="lime"
+                />
+            </section>
+
+            <FocusPanel
+                title="Mentorship"
+                description="Review active mentorship sessions, milestones, and resources from one focused space."
+                href={route('instructor.mentorship.index')}
+                action="Open mentorship"
+                accent="navy"
+            />
+        </>
+    );
 }
 
-function StatCard({ title, value, icon, color, badge, badgeColor, description }: StatCardProps) {
+function StudentDashboard({ stats }: DashboardProps) {
+    const myEvents = stats?.myEvents || 0;
+    const upcomingEvents = stats?.upcomingEvents || 0;
+    const speakerInvitations = stats?.speakerInvitations || 0;
+
     return (
-        <div className="workspace-card p-6 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl group">
-            <div className="flex items-center justify-between">
-                <div>
-                    <p className="text-sm font-medium text-slate-500 font-lato">{title}</p>
-                    <h3 className="mt-1 text-2xl font-bold font-montserrat" style={{ color }}>
-                        {value}
-                    </h3>
+        <>
+            <section className="grid gap-4 sm:grid-cols-3">
+                <MetricCard
+                    icon={CalendarDays}
+                    label="My events"
+                    value={myEvents.toString()}
+                    meta={myEvents > 0 ? 'Open your event workspace' : 'Join an event to get started'}
+                    accent="navy"
+                />
+                <MetricCard
+                    icon={Clock3}
+                    label="Upcoming"
+                    value={upcomingEvents.toString()}
+                    meta={upcomingEvents > 0 ? 'Events ahead' : 'No upcoming events yet'}
+                    accent="lime"
+                />
+                <MetricCard
+                    icon={Send}
+                    label="Invitations"
+                    value={speakerInvitations.toString()}
+                    meta={speakerInvitations > 0 ? 'Review pending invitations' : 'No invitations waiting'}
+                    accent="red"
+                />
+            </section>
+
+            <section className="rounded-lg border border-primary-100 bg-gradient-to-r from-primary-50/50 to-white p-6">
+                <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                        <h2 className="text-lg font-semibold tracking-tight text-primary">Join a leadership experience</h2>
+                        <p className="mt-1.5 max-w-xl text-sm leading-relaxed text-slate-500">
+                            Your workspace centers on live events, invitations, mentorship, and formation experiences.
+                        </p>
+                    </div>
+                    <ActionLink href={route('events.index')} icon={CalendarDays} variant="primary">
+                        Browse events
+                    </ActionLink>
                 </div>
-                <div
-                    className="rounded-2xl p-3 group-hover:opacity-90 transition-all"
-                    style={{ backgroundColor: `${color}15` }}
-                >
-                    <i className={`fas ${icon} w-6 h-6`} style={{ color }}></i>
+            </section>
+        </>
+    );
+}
+
+function MetricCard({ icon: Icon, label, value, meta, accent = 'navy' }: { icon: any; label: string; value: string; meta?: string; accent?: 'navy' | 'red' | 'lime' }) {
+    const accentColors = {
+        navy: {
+            hover: 'group-hover:bg-primary-50 group-hover:text-primary group-hover:border-primary-200',
+            bar: 'bg-primary',
+        },
+        red: {
+            hover: 'group-hover:bg-accent-50 group-hover:text-accent group-hover:border-accent-200',
+            bar: 'bg-accent',
+        },
+        lime: {
+            hover: 'group-hover:bg-lime-50 group-hover:text-lime-600 group-hover:border-lime-200',
+            bar: 'bg-lime-500',
+        },
+    };
+
+    const colors = accentColors[accent];
+
+    return (
+        <article className={`group relative overflow-hidden rounded-lg border border-slate-200 bg-white p-5 transition hover:border-slate-300 hover:shadow-sm`}>
+            <div className={`absolute inset-x-0 top-0 h-0.5 ${colors.bar}`} />
+            <div className="flex items-start justify-between">
+                <div className="min-w-0">
+                    <p className="text-xs font-medium uppercase tracking-wider text-slate-400">{label}</p>
+                    <p className="mt-2 text-[28px] font-semibold tracking-tight text-slate-900">{value}</p>
                 </div>
+                <span className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-500 transition ${colors.hover}`}>
+                    <Icon size={18} />
+                </span>
             </div>
-            {badge && (
-                <div className="mt-4 flex items-center">
-                    <span
-                        className="text-xs font-medium px-3 py-1.5 rounded-full flex items-center gap-1 font-lato"
-                        style={{
-                            backgroundColor: `${badgeColor || color}15`,
-                            color: badgeColor || color,
-                        }}
-                    >
-                        <i className="fas fa-arrow-up w-3 h-3"></i>
-                        {badge}
-                    </span>
-                </div>
+            {meta && (
+                <p className="mt-3 text-[13px] leading-relaxed text-slate-500">{meta}</p>
             )}
-            {description && (
-                <p className="mt-3 text-xs text-slate-500 font-lato">{description}</p>
-            )}
+        </article>
+    );
+}
+
+function FocusPanel({ title, description, href, action, accent = 'navy' }: { title: string; description: string; href: string; action: string; accent?: 'navy' | 'red' | 'lime' }) {
+    const accentColors = {
+        navy: {
+            border: 'border-l-primary',
+            hover: 'group-hover:text-primary',
+        },
+        red: {
+            border: 'border-l-accent',
+            hover: 'group-hover:text-accent',
+        },
+        lime: {
+            border: 'border-l-lime-500',
+            hover: 'group-hover:text-lime-600',
+        },
+    };
+
+    const colors = accentColors[accent];
+
+    return (
+        <article className={`group rounded-lg border border-l-[3px] border-slate-200 ${colors.border} bg-white p-5 transition hover:border-slate-300 hover:shadow-sm`}>
+            <h3 className="text-sm font-semibold tracking-tight text-slate-900">{title}</h3>
+            <p className="mt-1.5 text-[13px] leading-relaxed text-slate-500">{description}</p>
+            <Link
+                href={href}
+                className={`mt-3 inline-flex items-center gap-1.5 text-[13px] font-medium text-slate-900 transition ${colors.hover}`}
+            >
+                {action}
+                <ArrowRight size={14} />
+            </Link>
+        </article>
+    );
+}
+
+function ActionLink({ href, icon: Icon, variant, children }: { href: string; icon: any; variant: 'primary' | 'secondary'; children: React.ReactNode }) {
+    return (
+        <Link
+            href={href}
+            className={`inline-flex items-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium transition ${
+                variant === 'primary'
+                    ? 'bg-primary text-white hover:bg-primary-600 shadow-sm'
+                    : 'border border-slate-200 bg-white text-slate-700 hover:border-primary-200 hover:bg-primary-50 hover:text-primary'
+            }`}
+        >
+            <Icon size={16} />
+            {children}
+        </Link>
+    );
+}
+
+function StatusRow({ icon: Icon, label, value, status }: { icon: any; label: string; value: string; status?: 'ok' }) {
+    return (
+        <div className="flex items-center gap-3">
+            <span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${status === 'ok' ? 'bg-lime-100 text-lime-600' : 'bg-white text-slate-500'}`}>
+                <Icon size={15} />
+            </span>
+            <div className="min-w-0">
+                <p className="text-[11px] font-medium uppercase tracking-wider text-slate-400">{label}</p>
+                <p className="truncate text-[13px] font-medium text-slate-700">{value}</p>
+            </div>
         </div>
     );
 }
 
-function CourseCard({ course }: { course: Course }) {
-    const statusColors = {
-        in_progress: { bg: '#fef3c7', text: '#f59e0b', icon: 'fa-clock' },
-        completed: { bg: '#d1fae5', text: '#10b981', icon: 'fa-check-circle' },
-        not_started: { bg: '#e5e7eb', text: '#6b7280', icon: 'fa-play-circle' },
-    };
-
-    const status = statusColors[course.status];
-
-    // Always go to learn page with the next lesson if available
-    const learnUrl = course.next_lesson
-        ? `/courses/${course.slug}/learn/${course.next_lesson.slug}`
-        : course.total_lessons > 0
-            ? `/courses/${course.slug}/learn` // Will redirect to first lesson
-            : `/courses/${course.slug}`; // No lessons, go to course detail page
-
+function LoadingPanel({ label }: { label: string }) {
     return (
-        <div className="bg-white border border-gray-200 rounded-xl overflow-hidden hover:shadow-lg transition-all duration-300 group">
-            {/* Thumbnail */}
-            <div className="relative h-40 bg-linear-to-br from-primary-100 to-primary-50 overflow-hidden">
-                {course.thumbnail_path ? (
-                    <img
-                        src={`/storage/${course.thumbnail_path}`}
-                        alt={course.title}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                    />
-                ) : (
-                    <div className="w-full h-full flex items-center justify-center">
-                        <i className="fas fa-book-open text-4xl" style={{ color: '#002147', opacity: 0.3 }}></i>
-                    </div>
-                )}
-
-                {/* Status Badge */}
-                <div className="absolute top-3 right-3">
-                    <span
-                        className="px-3 py-1 rounded-full text-xs font-medium font-lato flex items-center gap-1.5"
-                        style={{ backgroundColor: status.bg, color: status.text }}
-                    >
-                        <i className={`fas ${status.icon}`}></i>
-                        {course.status === 'in_progress' && 'In Progress'}
-                        {course.status === 'completed' && 'Completed'}
-                        {course.status === 'not_started' && 'Not Started'}
-                    </span>
-                </div>
-            </div>
-
-            {/* Content */}
-            <div className="p-5">
-                {/* Course Title */}
-                <h3 className="font-bold font-montserrat text-lg mb-2 line-clamp-2" style={{ color: '#002147' }}>
-                    {course.title}
-                </h3>
-
-                {/* Instructor & Category */}
-                <div className="flex items-center gap-4 text-xs text-gray-500 mb-4 font-lato">
-                    <span className="flex items-center gap-1">
-                        <i className="fas fa-user"></i>
-                        {course.instructor.name}
-                    </span>
-                    <span className="flex items-center gap-1">
-                        <i className="fas fa-tag"></i>
-                        {course.category.name}
-                    </span>
-                </div>
-
-                {/* Progress Bar */}
-                <div className="mb-4">
-                    <div className="flex items-center justify-between text-xs text-gray-600 mb-2 font-lato">
-                        <span>Progress</span>
-                        <span className="font-bold" style={{ color: '#00a651' }}>
-                            {course.completion_percentage}%
-                        </span>
-                    </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
-                        <div
-                            className="h-2 rounded-full transition-all duration-500"
-                            style={{
-                                width: `${course.completion_percentage}%`,
-                                backgroundColor: '#00a651'
-                            }}
-                        ></div>
-                    </div>
-                    <p className="text-xs text-gray-500 mt-1.5 font-lato">
-                        {course.completed_lessons} of {course.total_lessons} lessons completed
-                    </p>
-                </div>
-
-                {/* Action Button */}
-                {course.status === 'completed' ? (
-                    <div className="flex space-x-2">
-                        <button
-                            onClick={() => router.post(route('certificates.generate', { course: course.slug }))}
-                            className="w-full flex items-center justify-center gap-2 px-4 py-2.5 text-white rounded-lg font-medium font-lato transition-all duration-300 hover:shadow-md"
-                            style={{ backgroundColor: '#00a651' }}
-                        >
-                            <i className="fas fa-certificate"></i>
-                            Get Certificate
-                        </button>
-                        <Link
-                            href={route('courses.show', { slug: course.slug })}
-                            className="w-full flex items-center justify-center gap-2 px-4 py-2.5 text-white rounded-lg font-medium font-lato transition-all duration-300 hover:shadow-md"
-                            style={{ backgroundColor: '#6b7280' }}
-                        >
-                            <i className="fas fa-star"></i>
-                            Leave a Review
-                        </Link>
-                    </div>
-                ) : course.status === 'in_progress' ? (                    <Link
-                        href={learnUrl}
-                        className="w-full flex items-center justify-center gap-2 px-4 py-2.5 text-white rounded-lg font-medium font-lato transition-all duration-300 hover:shadow-md"
-                        style={{ backgroundColor: '#00a651' }}
-                    >
-                        <i className="fas fa-play"></i>
-                        Continue: {course.next_lesson?.title}
-                    </Link>
-                ) : (
-                    <Link
-                        href={learnUrl}
-                        className="w-full flex items-center justify-center gap-2 px-4 py-2.5 text-white rounded-lg font-medium font-lato transition-all duration-300 hover:shadow-md"
-                        style={{ backgroundColor: '#00a651' }}
-                    >
-                        <i className="fas fa-play"></i>
-                        Start Course
-                    </Link>
-                )}            </div>
+        <div className="rounded-lg border border-slate-200 bg-white p-10 text-center text-sm text-slate-400">
+            {label}
         </div>
     );
 }

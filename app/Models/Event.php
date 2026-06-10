@@ -140,11 +140,6 @@ class Event extends Model
         return $this->hasMany(EventResource::class);
     }
 
-    public function refundRequests()
-    {
-        return $this->hasMany(EventRefundRequest::class);
-    }
-
     public function recentRegistrations()
     {
         return $this->attendees()

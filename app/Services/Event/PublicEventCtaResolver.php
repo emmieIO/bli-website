@@ -20,112 +20,42 @@ class PublicEventCtaResolver
 
     public function resolve(Event $event, ?User $user = null): array
     {
-        $speakerContext = $user ? $this->speakerWorkspaceContext($event, $user) : null;
+        return match (true) {
+            $event->lifecycleStatus() === EventStatus::CANCELLED => $this->status('cancelled', 'Event cancelled', 'This event is no longer accepting participation.'),
+            $event->lifecycleStatus() === EventStatus::ARCHIVED   => $this->status('archived', 'Event archived', 'This event has been archived and is no longer active.'),
+            $this->isFinished($event)                            => $this->status('completed', 'Event completed', 'This event has already concluded.'),
+            $user && $this->participantStateService->userHasAttendeeWorkspace($event, $user->id) => $this->action('view_attendee_workspace', 'Open attendee workspace', 'Your registration is already on file.', route('user.events.show', $event->slug)),
+            $this->speakerContext($event, $user) !== null        => $this->action('view_speaker_workspace', 'Open speaker workspace', 'Continue your speaker journey.', route('speaker.events.show', $event->slug)),
+            $this->isLive($event)                                => $this->status('live', 'Event is live', 'Registration is not the primary action while the event is in progress.'),
+            ! $event->isRegistrationOpen()                       => $this->resolveClosedRegistration($event, $user),
+            $this->participantStateService->slotsRemaining($event) === 'Full' => $this->joinAction('join_waitlist', $event, $user, 'Join waitlist', 'This event is full, but you can claim the next available seat.'),
+            (float) $event->entry_fee > 0                        => $this->resolvePaidEvent($event, $user),
+            default                                              => $this->joinAction('register_now', $event, $user, 'Register now', 'Reserve your seat and move into the attendee journey.'),
+        };
+    }
 
-        if ($event->lifecycleStatus() === EventStatus::CANCELLED) {
-            return $this->status('cancelled', 'Event cancelled', 'This event is no longer accepting participation.');
-        }
+    private function resolveClosedRegistration(Event $event, ?User $user): array
+    {
+        $speakerUrl = $this->speakerApplyUrl($event, $user);
 
-        if ($event->lifecycleStatus() === EventStatus::ARCHIVED) {
-            return $this->status('archived', 'Event archived', 'This event has been archived and is no longer active.');
-        }
+        return $speakerUrl
+            ? $this->action('apply_to_speak', 'Apply to speak', 'Attendee registration is unavailable, but speaking applications are still open.', $speakerUrl)
+            : $this->status('registration_closed', 'Registration closed', 'Registration is not currently available for this event.');
+    }
 
-        if (
-            $event->lifecycleStatus() === EventStatus::COMPLETED
-            || ($event->end_date !== null && now()->gt($event->end_date))
-        ) {
-            return $this->status('completed', 'Event completed', 'This event has already concluded.');
-        }
-
-        if ($user && $this->participantStateService->userHasAttendeeWorkspace($event, $user->id)) {
-            return $this->action(
-                'view_attendee_workspace',
-                'Open attendee workspace',
-                'Your registration is already on file. Use your attendee workspace for event access and updates.',
-                route('user.events.show', $event->slug)
-            );
-        }
-
-        if ($speakerContext !== null) {
-            return $this->action(
-                'view_speaker_workspace',
-                'Open speaker workspace',
-                'Continue your speaker journey from the dedicated workspace for this event.',
-                route('speaker.events.show', $event->slug)
-            );
-        }
-
-        if ($this->isLive($event)) {
-            return $this->status('live', 'Event is live', 'Registration is no longer the primary action while this event is in progress.');
-        }
-
-        if (! $event->isRegistrationOpen()) {
-            $speakerApplyUrl = $this->speakerApplyUrl($event, $user);
-
-            if ($speakerApplyUrl !== null) {
-                return $this->action(
-                    'apply_to_speak',
-                    'Apply to speak',
-                    'Attendee registration is unavailable, but speaking applications are still open.',
-                    $speakerApplyUrl
-                );
-            }
-
-            return $this->status(
-                'registration_closed',
-                'Registration closed',
-                'Registration is not currently available for this event.'
-            );
-        }
-
-        if ($this->participantStateService->slotsRemaining($event) === 'Full') {
-            return $this->joinAction(
-                'join_waitlist',
-                $event,
-                $user,
-                'Join waitlist',
-                'This event is full right now, but you can still claim the next available seat.'
-            );
-        }
-
-        if ((float) $event->entry_fee > 0) {
-            if (! $user) {
-                return $this->action(
-                    'buy_ticket',
-                    'Log in to buy ticket',
-                    'Sign in to continue to ticket checkout.',
-                    route('login'),
-                    ['requires_auth' => true]
-                );
-            }
-
-            return $this->action(
-                'buy_ticket',
-                'Buy ticket',
-                'Continue to checkout to secure your place at this event.',
-                route('events.checkout', $event->slug)
-            );
-        }
-
-        return $this->joinAction(
-            'register_now',
-            $event,
-            $user,
-            'Register now',
-            'Reserve your seat and move straight into the attendee journey.'
-        );
+    private function resolvePaidEvent(Event $event, ?User $user): array
+    {
+        return $user
+            ? $this->action('buy_ticket', 'Buy ticket', 'Continue to checkout.', route('events.checkout', $event->slug))
+            : $this->action('buy_ticket', 'Log in to buy ticket', 'Sign in to continue to checkout.', route('login'), ['requires_auth' => true]);
     }
 
     private function joinAction(string $key, Event $event, ?User $user, string $label, string $description): array
     {
         if (! $user) {
-            $guestLabel = $key === 'join_waitlist'
-                ? 'Log in to join waitlist'
-                : 'Log in to register';
+            $guestLabel = $key === 'join_waitlist' ? 'Log in to join waitlist' : 'Log in to register';
 
-            return $this->action($key, $guestLabel, $description, route('login'), [
-                'requires_auth' => true,
-            ]);
+            return $this->action($key, $guestLabel, $description, route('login'), ['requires_auth' => true]);
         }
 
         return $this->action($key, $label, $description, route('events.join', $event->slug), [
@@ -140,51 +70,35 @@ class PublicEventCtaResolver
             return null;
         }
 
-        if ($user) {
-            return route('speaker.events.apply', $event->slug);
-        }
-
-        return URL::signedRoute('event.speakers.apply', [$event]);
+        return $user
+            ? route('speaker.events.apply', $event->slug)
+            : URL::signedRoute('event.speakers.apply', [$event]);
     }
 
-    private function speakerWorkspaceContext(Event $event, User $user): ?SpeakerWorkspaceStage
+    private function speakerContext(Event $event, User $user): ?SpeakerWorkspaceStage
     {
         $speakerId = $user->speaker?->id;
-        $application = SpeakerApplication::query()
-            ->where('event_id', $event->id)
-            ->where('user_id', $user->id)
-            ->first();
-        $invite = $speakerId
-            ? SpeakerInvite::query()
-                ->where('event_id', $event->id)
-                ->where('speaker_id', $speakerId)
-                ->first()
-            : null;
-        $isAssignedSpeaker = $speakerId
-            ? $event->speakers()->where('speakers.id', $speakerId)->exists()
-            : false;
+        $application = SpeakerApplication::query()->where('event_id', $event->id)->where('user_id', $user->id)->first();
+        $invite = $speakerId ? SpeakerInvite::query()->where('event_id', $event->id)->where('speaker_id', $speakerId)->first() : null;
+        $isAssignedSpeaker = $speakerId && $event->speakers()->where('speakers.id', $speakerId)->exists();
 
         return $this->speakerTransitionService->resolveWorkspaceStage($application, $invite, $isAssignedSpeaker);
     }
 
     private function isLive(Event $event): bool
     {
-        if ($event->lifecycleStatus() === EventStatus::LIVE) {
-            return true;
-        }
-
-        return $event->start_date !== null
-            && $event->end_date !== null
-            && now()->between($event->start_date, $event->end_date);
+        return $event->lifecycleStatus() === EventStatus::LIVE
+            || ($event->start_date && $event->end_date && now()->between($event->start_date, $event->end_date));
     }
 
-    private function action(
-        string $key,
-        string $label,
-        string $description,
-        string $href,
-        array $overrides = []
-    ): array {
+    private function isFinished(Event $event): bool
+    {
+        return $event->lifecycleStatus() === EventStatus::COMPLETED
+            || ($event->end_date && now()->gt($event->end_date));
+    }
+
+    private function action(string $key, string $label, string $description, string $href, array $overrides = []): array
+    {
         return array_merge([
             'key' => $key,
             'kind' => 'action',

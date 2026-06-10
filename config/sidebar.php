@@ -23,32 +23,6 @@ return [
             'variant' => 'accent',
         ],
         [
-            'section' => 'Learning',
-            'title' => 'Course Management',
-            'icon' => 'book-open',
-            'permission' => ['course-view-own', 'course-create'],
-            'exclude_permission' => ['course-view-any'], // Hide from admins who have course-view-any
-            'children' => [
-                [
-                    'title' => 'My Courses',
-                    'route' => 'instructor.courses.index',
-                    'permission' => ['course-view-own'],
-                ],
-                [
-                    'title' => 'Create Course',
-                    'route' => 'instructor.courses.create',
-                    'permission' => ['course-create'],
-                ],
-            ],
-        ],
-        [
-            'section' => 'Learning',
-            'title' => 'Earnings & Payouts',
-            'icon' => 'wallet',
-            'route' => 'instructor.earnings.index',
-            'permission' => 'earnings-view-own',
-        ],
-        [
             'section' => 'Events',
             'title' => 'My Events',
             'icon' => 'calendar-heart',
@@ -123,24 +97,6 @@ return [
         ],
         [
             'section' => 'Administration',
-            'title' => 'Course Manager',
-            'icon' => 'graduation-cap',
-            'permission' => ['course-view-any'],
-            'children' => [
-                [
-                    'title' => 'All Courses',
-                    'route' => 'admin.courses.index',
-                    'permission' => ['course-view-any'],
-                ],
-                [
-                    'title' => 'Course Categories',
-                    'route' => 'admin.category.index',
-                    'permission' => ['category-view'],
-                ],
-            ],
-        ],
-        [
-            'section' => 'Administration',
             'title' => 'Instructor Manager',
             'icon' => 'users',
             'route' => 'admin.instructors.index',
@@ -159,13 +115,6 @@ return [
             'icon' => 'star',
             'route' => 'admin.ratings.index',
             'permission' => 'manage-ratings',
-        ],
-        [
-            'section' => 'Administration',
-            'title' => 'Payout Manager',
-            'icon' => 'banknote',
-            'route' => 'admin.payouts.index',
-            'permission' => 'earnings-manage-any',
         ],
         [
             'section' => 'Administration',

@@ -1,25 +1,11 @@
 import { Head, Link, usePage } from '@inertiajs/react';
 import DashboardLayout from '@/Layouts/DashboardLayout';
-import { Receipt, CreditCard, Package, CheckCircle, XCircle, Clock, Wallet, FileText } from 'lucide-react';
-import { useState } from 'react';
-
-interface Course {
-    id: number;
-    title: string;
-    slug: string;
-    thumbnail_path: string | null;
-}
+import { CalendarDays, CheckCircle, Clock, CreditCard, FileText, Receipt, XCircle } from 'lucide-react';
 
 interface EventItem {
     id: number;
     title: string;
     slug: string;
-}
-
-interface CartItem {
-    course_id: number;
-    course_title: string;
-    price: number;
 }
 
 interface Transaction {
@@ -32,22 +18,8 @@ interface Transaction {
     payment_type: string | null;
     created_at: string;
     paid_at: string | null;
-    type: 'course' | 'cart' | 'event';
-    checkout_context: 'direct' | 'cart';
-    course: Course | null;
+    type: 'event' | 'payment';
     event: EventItem | null;
-    items: CartItem[] | null;
-    item_count: number;
-}
-
-interface Payout {
-    id: number;
-    payout_reference: string;
-    amount: number;
-    currency: string;
-    status: string;
-    requested_at: string;
-    completed_at: string | null;
 }
 
 interface PaginatedData<T> {
@@ -65,56 +37,43 @@ interface PaginatedData<T> {
 
 interface Props {
     transactions: PaginatedData<Transaction>;
-    payouts: PaginatedData<Payout>;
 }
 
-export default function Index({ transactions, payouts }: Props) {
+export default function Index({ transactions }: Props) {
     const { sideLinks } = usePage().props as any;
-    const [activeTab, setActiveTab] = useState<'purchases' | 'payouts'>('purchases');
 
     const formatCurrency = (amount: number, currency: string) => {
         const currencySymbols: { [key: string]: string } = {
-            'USD': '$',
-            'NGN': '₦',
-            'GBP': '£',
-            'EUR': '€',
+            USD: '$',
+            NGN: '₦',
+            GBP: '£',
+            EUR: '€',
         };
         const symbol = currencySymbols[currency] || currency;
         return `${symbol}${Number(amount).toFixed(2)}`;
     };
 
-    const formatDate = (dateString: string) => {
-        return new Date(dateString).toLocaleDateString('en-US', {
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric',
-        });
-    };
-
     const getStatusBadge = (status: string) => {
         switch (status) {
             case 'successful':
-            case 'completed':
                 return (
-                    <span className="inline-flex items-center gap-1 px-3 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-full">
+                    <span className="inline-flex items-center gap-1 rounded-md bg-lime-100 px-2.5 py-1 text-xs font-medium text-lime-700">
                         <CheckCircle className="w-3 h-3" />
                         Successful
                     </span>
                 );
             case 'failed':
-            case 'cancelled':
                 return (
-                    <span className="inline-flex items-center gap-1 px-3 py-1 bg-red-100 text-red-800 text-xs font-medium rounded-full">
+                    <span className="inline-flex items-center gap-1 rounded-md bg-accent-50 px-2.5 py-1 text-xs font-medium text-accent">
                         <XCircle className="w-3 h-3" />
-                        {status}
+                        Failed
                     </span>
                 );
             case 'pending':
-            case 'processing':
                 return (
-                    <span className="inline-flex items-center gap-1 px-3 py-1 bg-yellow-100 text-yellow-800 text-xs font-medium rounded-full">
+                    <span className="inline-flex items-center gap-1 rounded-md bg-amber-50 px-2.5 py-1 text-xs font-medium text-amber-700">
                         <Clock className="w-3 h-3" />
-                        {status}
+                        Pending
                     </span>
                 );
             default:
@@ -126,263 +85,121 @@ export default function Index({ transactions, payouts }: Props) {
         <DashboardLayout sideLinks={sideLinks}>
             <Head title="Transaction History" />
 
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                {/* Header */}
-                <div className="mb-8">
-                    <div className="flex items-center gap-3 mb-2">
-                        <Receipt className="w-8 h-8 text-primary" />
-                        <h1 className="text-3xl font-bold text-gray-900 font-montserrat">
-                            Transaction History
-                        </h1>
-                    </div>
-                    <p className="text-gray-600 font-lato">
-                        View your payment history and instructor payouts
-                    </p>
+            <div className="space-y-6">
+                <div>
+                    <h1 className="text-xl font-semibold tracking-tight text-slate-900">Transaction History</h1>
+                    <p className="mt-1 text-sm text-slate-500">View your event payment history and receipts.</p>
                 </div>
 
-                {/* Tabs */}
-                {payouts.data.length > 0 && (
-                    <div className="mb-6 border-b border-gray-200">
-                        <nav className="-mb-px flex space-x-8">
-                            <button
-                                onClick={() => setActiveTab('purchases')}
-                                className={`py-4 px-1 border-b-2 font-medium text-sm font-montserrat flex items-center gap-2 ${
-                                    activeTab === 'purchases'
-                                        ? 'border-primary text-primary'
-                                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                                }`}
+                {transactions.data.length === 0 ? (
+                    <div className="rounded-lg border border-slate-200 bg-white p-12 text-center">
+                        <div className="mx-auto max-w-md">
+                            <div className="mb-5 flex h-16 w-16 items-center justify-center rounded-lg bg-slate-100 text-slate-400 mx-auto">
+                                <Receipt size={32} strokeWidth={1.5} />
+                            </div>
+                            <h2 className="text-lg font-semibold text-slate-900">No transactions yet</h2>
+                            <p className="mt-2 text-sm text-slate-500">
+                                Your payment history will appear here after you register for an event.
+                            </p>
+                            <Link
+                                href={route('events.index')}
+                                className="mt-5 inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-white transition hover:bg-primary-600 shadow-sm"
                             >
-                                <CreditCard className="w-4 h-4" />
-                                My Purchases
-                            </button>
-                            <button
-                                onClick={() => setActiveTab('payouts')}
-                                className={`py-4 px-1 border-b-2 font-medium text-sm font-montserrat flex items-center gap-2 ${
-                                    activeTab === 'payouts'
-                                        ? 'border-primary text-primary'
-                                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                                }`}
-                            >
-                                <Wallet className="w-4 h-4" />
-                                Instructor Payouts
-                            </button>
-                        </nav>
+                                <CalendarDays size={15} />
+                                Browse Events
+                            </Link>
+                        </div>
                     </div>
-                )}
-
-                {activeTab === 'purchases' && (
-                    <>
-                        {transactions.data.length === 0 ? (
-                            /* Empty State */
-                            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-12 text-center">
-                                <div className="max-w-md mx-auto">
-                                    <div className="mb-6">
-                                        <Receipt className="w-24 h-24 text-gray-300 mx-auto" strokeWidth={1} />
-                                    </div>
-                                    <h2 className="text-2xl font-bold text-gray-900 mb-3 font-montserrat">
-                                        No transactions yet
-                                    </h2>
-                                    <p className="text-gray-600 mb-6 font-lato">
-                                        Your purchase history will appear here once you enroll in courses.
-                                    </p>
-                                    <Link
-                                        href={route('courses.index')}
-                                        className="inline-flex items-center gap-2 px-6 py-3 bg-linear-to-r from-primary to-primary-600 text-white rounded-lg font-semibold font-montserrat hover:from-primary-600 hover:to-primary-700 transition-all duration-300 shadow-md hover:shadow-lg"
-                                    >
-                                        Browse Courses
-                                    </Link>
-                                </div>
-                            </div>
-                        ) : (
-                            <div className="space-y-4">
-                                {transactions.data.map((transaction) => (
-                                    <div
-                                        key={transaction.id}
-                                        className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow"
-                                    >
-                                        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                                            {/* Transaction Info */}
-                                            <div className="flex-1">
-                                                <div className="flex items-start gap-4">
-                                                    {/* Icon */}
-                                                    <div className="shrink-0">
-                                                        {transaction.checkout_context === 'cart' ? (
-                                                            <Package className="w-10 h-10 text-primary" />
-                                                        ) : (
-                                                            <CreditCard className="w-10 h-10 text-primary" />
-                                                        )}
-                                                    </div>
-
-                                                    {/* Details */}
-                                                    <div className="grow">
-                                                        <h3 className="text-lg font-bold text-gray-900 font-montserrat mb-1">
-                                                            {transaction.checkout_context === 'cart'
-                                                                ? `Cart Purchase - ${transaction.item_count} Course${transaction.item_count > 1 ? 's' : ''}`
-                                                                : transaction.type === 'event'
-                                                                    ? transaction.event?.title || 'Event Registration'
-                                                                    : transaction.course?.title || 'Course Purchase'}
-                                                        </h3>
-
-                                                        {/* Cart Items */}
-                                                        {transaction.checkout_context === 'cart' && transaction.items && (
-                                                            <div className="mt-2 space-y-1">
-                                                                {transaction.items.map((item, idx) => (
-                                                                    <p key={idx} className="text-sm text-gray-600 font-lato">
-                                                                        • {item.course_title} - {formatCurrency(item.price, transaction.currency)}
-                                                                    </p>
-                                                                ))}
-                                                            </div>
-                                                        )}
-
-                                                        {/* Single Course Link */}
-                                                        {transaction.type === 'course' && transaction.course && (
-                                                            <Link
-                                                                href={route('courses.show', transaction.course.slug)}
-                                                                className="text-sm text-primary hover:text-primary-600 font-lato"
-                                                            >
-                                                                View Course →
-                                                            </Link>
-                                                        )}
-
-                                                        {transaction.type === 'event' && transaction.event && (
-                                                            <Link
-                                                                href={route('events.show', transaction.event.slug)}
-                                                                className="text-sm text-primary hover:text-primary-600 font-lato"
-                                                            >
-                                                                View Event →
-                                                            </Link>
-                                                        )}
-
-                                                        <div className="mt-3 flex flex-wrap items-center gap-4 text-sm text-gray-600 font-lato">
-                                                            <span>ID: {transaction.transaction_id}</span>
-                                                            <span>•</span>
-                                                            <span>{transaction.created_at}</span>
-                                                            {transaction.payment_type && (
-                                                                <>
-                                                                    <span>•</span>
-                                                                    <span className="capitalize">{transaction.payment_type}</span>
-                                                                </>
-                                                            )}
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            {/* Amount & Status */}
-                                            <div className="shrink-0 text-right space-y-2">
-                                                <p className="text-2xl font-bold text-gray-900 font-montserrat mb-2">
-                                                    {formatCurrency(transaction.amount, transaction.currency)}
-                                                </p>
-                                                {getStatusBadge(transaction.status)}
-
-                                                {/* Complete Payment Button for Pending Transactions */}
-                                                {transaction.status === 'pending' && transaction.payment_ref && (
-                                                    <Link
-                                                        href={route('payment.verify', transaction.payment_ref)}
-                                                        className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-white text-sm font-medium rounded-lg hover:bg-primary-600 transition-colors shadow-sm"
-                                                    >
-                                                        <CreditCard className="w-4 h-4" />
-                                                        Complete Payment
-                                                    </Link>
-                                                )}
-                                                {transaction.status === 'successful' && (
-                                                    <Link
-                                                        href={route('transactions.show-receipt', transaction.id)}
-                                                        target="_blank"
-                                                        className="inline-flex items-center gap-2 px-4 py-2 bg-blue-500 text-white text-sm font-medium rounded-lg hover:bg-blue-600 transition-colors shadow-sm"
-                                                    >
-                                                        <FileText className="w-4 h-4" />
-                                                        View Receipt
-                                                    </Link>
-                                                )}
-                                            </div>
-                                        </div>
-                                    </div>
-                                ))}
-
-                                {/* Pagination */}
-                                {transactions.last_page > 1 && (
-                                    <div className="flex justify-center mt-8">
-                                        <nav className="flex items-center gap-2">
-                                            {transactions.links.map((link, index) => (
-                                                <Link
-                                                    key={index}
-                                                    href={link.url || '#'}
-                                                    preserveScroll
-                                                    className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
-                                                        link.active
-                                                            ? 'bg-primary text-white'
-                                                            : link.url
-                                                            ? 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
-                                                            : 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                                                    }`}
-                                                    dangerouslySetInnerHTML={{ __html: link.label }}
-                                                />
-                                            ))}
-                                        </nav>
-                                    </div>
-                                )}
-                            </div>
-                        )}
-                    </>
-                )}
-
-                {activeTab === 'payouts' && (
-                    <div className="space-y-4">
-                        {payouts.data.map((payout) => (
-                             <div
-                                key={payout.id}
-                                className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow"
+                ) : (
+                    <div className="space-y-3">
+                        {transactions.data.map((transaction) => (
+                            <div
+                                key={transaction.id}
+                                className="rounded-lg border border-slate-200 bg-white p-5 transition hover:border-slate-300 hover:shadow-sm"
                             >
-                                <div className="flex items-center justify-between">
-                                    <div>
-                                        <h3 className="text-lg font-bold text-gray-900 font-montserrat mb-1">
-                                            Payout Request
-                                        </h3>
-                                        <div className="text-sm text-gray-600 font-lato">
-                                            Ref: {payout.payout_reference}
-                                        </div>
-                                        <div className="text-sm text-gray-500 font-lato mt-1">
-                                            Requested: {formatDate(payout.requested_at)}
+                                <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                                    <div className="flex items-start gap-4">
+                                        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary-50 text-primary">
+                                            <CreditCard size={18} />
+                                        </span>
+                                        <div>
+                                            <h3 className="text-sm font-semibold text-slate-900">
+                                                {transaction.event?.title || 'Event Payment'}
+                                            </h3>
+                                            {transaction.event && (
+                                                <Link
+                                                    href={route('events.show', transaction.event.slug)}
+                                                    className="text-[13px] text-primary hover:text-primary-600"
+                                                >
+                                                    View Event
+                                                </Link>
+                                            )}
+                                            <div className="mt-2 flex flex-wrap items-center gap-2 text-[13px] text-slate-500">
+                                                <span className="font-mono text-xs">{transaction.transaction_id}</span>
+                                                <span className="text-slate-300">|</span>
+                                                <span>{transaction.created_at}</span>
+                                                {transaction.payment_type && (
+                                                    <>
+                                                        <span className="text-slate-300">|</span>
+                                                        <span className="capitalize">{transaction.payment_type}</span>
+                                                    </>
+                                                )}
+                                            </div>
                                         </div>
                                     </div>
-                                    <div className="text-right space-y-2">
-                                        <p className="text-2xl font-bold text-gray-900 font-montserrat">
-                                            {formatCurrency(payout.amount, payout.currency)}
+
+                                    <div className="flex items-center gap-4 md:flex-col md:items-end md:gap-2">
+                                        <p className="text-lg font-semibold tracking-tight text-slate-900">
+                                            {formatCurrency(transaction.amount, transaction.currency)}
                                         </p>
-                                        {getStatusBadge(payout.status)}
+                                        {getStatusBadge(transaction.status)}
+
+                                        <div className="flex items-center gap-2">
+                                            {transaction.status === 'pending' && transaction.payment_ref && (
+                                                <Link
+                                                    href={route('payment.verify', transaction.payment_ref)}
+                                                    className="inline-flex items-center gap-1.5 rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-white transition hover:bg-primary-600"
+                                                >
+                                                    <CreditCard size={13} />
+                                                    Complete Payment
+                                                </Link>
+                                            )}
+                                            {transaction.status === 'successful' && (
+                                                <Link
+                                                    href={route('transactions.show-receipt', transaction.id)}
+                                                    target="_blank"
+                                                    className="inline-flex items-center gap-1.5 rounded-md border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 transition hover:bg-slate-50"
+                                                >
+                                                    <FileText size={13} />
+                                                    Receipt
+                                                </Link>
+                                            )}
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         ))}
 
-                        {/* Pagination for Payouts */}
-                        {payouts.last_page > 1 && (
-                            <div className="flex justify-center mt-8">
-                                <nav className="flex items-center gap-2">
-                                    {payouts.links.map((link, index) => (
+                        {transactions.last_page > 1 && (
+                            <div className="flex justify-center pt-4">
+                                <nav className="flex items-center gap-1.5">
+                                    {transactions.links.map((link, index) => (
                                         <Link
                                             key={index}
                                             href={link.url || '#'}
                                             preserveScroll
-                                            className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
+                                            className={`rounded-md px-3 py-1.5 text-xs font-medium transition ${
                                                 link.active
                                                     ? 'bg-primary text-white'
                                                     : link.url
-                                                    ? 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
-                                                    : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                                                        ? 'border border-slate-200 bg-white text-slate-700 hover:bg-slate-50'
+                                                        : 'bg-slate-50 text-slate-300 cursor-not-allowed'
                                             }`}
                                             dangerouslySetInnerHTML={{ __html: link.label }}
                                         />
                                     ))}
                                 </nav>
                             </div>
-                        )}
-
-                        {payouts.data.length === 0 && (
-                             <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-12 text-center">
-                                <p className="text-gray-600 font-lato">No payout history available.</p>
-                             </div>
                         )}
                     </div>
                 )}

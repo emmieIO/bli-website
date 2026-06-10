@@ -15,10 +15,10 @@
                     Developing visionary leaders to drive positive change in organizations and communities.
                 </p>
                 <div class="flex space-x-2 justify-center items-center">
-                    <a href="{{ route('courses.index') }}"
+                    <a href="{{ route('events.index') }}"
                         class=" btn btn-primary btn-lg flex items-center gap-2 px-4 py-3 bg-[#00275e] hover:bg-blue-800">
-                        <i data-lucide="book" class="w-5 h-5"></i>
-                        Browse Courses
+                        <i data-lucide="calendar" class="w-5 h-5"></i>
+                        Browse Events
                     </a>
                     <a href="{{ route('events.index') }}"
                         class="btn btn-primary text-white btn-lg flex items-center gap-2  bg-[#ff0000]  hover:bg-red-700">
@@ -35,7 +35,7 @@
     <!-- Why Choose Us -->
     <section class="py-16 bg-white">
         <div class="max-w-6xl mx-auto px-5 text-center space-y-10" data-aos="zoom-in">
-            <h2 class="text-3xl font-bold text-black">Why Choose Beacon LMS?</h2>
+            <h2 class="text-3xl font-bold text-black">Why Choose Beacon Leadership Institute?</h2>
             <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6 text-left">
                 <div class="p-6 border rounded-lg bg-gray-50 shadow">
                     <i data-lucide="brain" class="w-6 h-6 text-[#00275e] mb-2 "></i>
@@ -44,52 +44,52 @@
                 </div>
                 <div class="p-6 border rounded-lg bg-gray-50 shadow">
                     <i data-lucide="layout-dashboard" class="w-6 h-6 text-[#00275e] mb-2"></i>
-                    <h4 class="text-lg font-semibold">Personal Dashboard</h4>
-                    <p>Track progress, receive recommendations, and pick up where you left off.</p>
+                    <h4 class="text-lg font-semibold">Event Dashboard</h4>
+                    <p>Track registrations, invitations, and leadership formation opportunities.</p>
                 </div>
                 <div class="p-6 border rounded-lg bg-gray-50 shadow">
                     <i data-lucide="graduation-cap" class="w-6 h-6 text-[#ff0000] mb-2"></i>
-                    <h4 class="text-lg font-semibold">Certificates & Credentials</h4>
-                    <p>Earn respected credentials that equip and empower your leadership journey.</p>
+                    <h4 class="text-lg font-semibold">Guided Formation</h4>
+                    <p>Join events and community pathways that equip and empower your leadership journey.</p>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Featured Courses -->
-    <section id="courses" class="py-16 bg-gray-100">
+    <!-- Featured Events -->
+    <section id="events" class="py-16 bg-gray-100">
         <div class="max-w-6xl mx-auto px-5">
-            <h2 class="text-3xl font-bold text-center text-[#00275e] mb-8">Featured Courses</h2>
+            <h2 class="text-3xl font-bold text-center text-[#00275e] mb-8">Featured Events</h2>
             <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                 <div class="bg-white border rounded-lg shadow-sm overflow-hidden">
-                    <img src="{{ asset('images/logo.jpg') }}" alt="Course 1" class="w-full h-40 object-cover" />
+                    <img src="{{ asset('assets/img/banner.png') }}" alt="Leadership event" class="w-full h-40 object-cover" />
                     <div class="p-4">
                         <h3 class="font-semibold text-lg text-gray-800">Foundations of Leadership</h3>
                         <p class="text-gray-600 text-sm mt-2">Learn the core principles of faith-driven leadership.</p>
-                        <a href="#"
+                        <a href="{{ route('events.index') }}"
                             class="text-[#ff0000] text-sm font-medium mt-4 inline-block hover:text-red-700 transition">View
-                            Course</a>
+                            Events</a>
                     </div>
                 </div>
                 <div class="bg-white border rounded-lg shadow-sm overflow-hidden">
-                    <img src="{{ asset('images/logo.jpg') }}" alt="Course 2" class="w-full h-40 object-cover" />
+                    <img src="{{ asset('assets/img/banner.png') }}" alt="Leadership event" class="w-full h-40 object-cover" />
                     <div class="p-4">
                         <h3 class="font-semibold text-lg text-gray-800">Spiritual Leadership in the Marketplace</h3>
                         <p class="text-gray-600 text-sm mt-2">Equip yourself to lead with integrity in business.</p>
-                        <a href="#"
+                        <a href="{{ route('events.index') }}"
                             class="text-[#ff0000] text-sm font-medium mt-4 inline-block hover:text-red-700 transition">View
-                            Course</a>
+                            Events</a>
                     </div>
                 </div>
                 <div class="bg-white border rounded-lg shadow-sm overflow-hidden">
-                    <img src="{{ asset('images/logo.jpg') }}" alt="Course 3" class="w-full h-40 object-cover" />
+                    <img src="{{ asset('assets/img/banner.png') }}" alt="Leadership event" class="w-full h-40 object-cover" />
                     <div class="p-4">
                         <h3 class="font-semibold text-lg text-gray-800">Vision Clarity Bootcamp</h3>
                         <p class="text-gray-600 text-sm mt-2">Gain clarity, confidence, and spiritual focus as a leader.
                         </p>
-                        <a href="#"
+                        <a href="{{ route('events.index') }}"
                             class="text-[#ff0000] text-sm font-medium mt-4 inline-block hover:text-red-700 transition">View
-                            Course</a>
+                            Events</a>
                     </div>
                 </div>
             </div>

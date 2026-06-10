@@ -2,6 +2,7 @@ import { Head, useForm, usePage } from '@inertiajs/react';
 import DashboardLayout from '@/Layouts/DashboardLayout';
 import RichTextEditor from '@/Components/RichTextEditor';
 import { FormEvent } from 'react';
+import { ArrowLeft, Save } from 'lucide-react';
 
 export default function CreatePost() {
     const { sideLinks } = usePage().props as any;
@@ -20,10 +21,7 @@ export default function CreatePost() {
     };
 
     const generateSlug = () => {
-        const slug = data.title
-            .toLowerCase()
-            .replace(/[^a-z0-9]+/g, '-')
-            .replace(/^-+|-+$/g, '');
+        const slug = data.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
         setData('slug', slug);
     };
 
@@ -31,54 +29,77 @@ export default function CreatePost() {
         <DashboardLayout sideLinks={sideLinks}>
             <Head title="Create Blog Post" />
 
-            <div className="py-8">
-                <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="mb-6">
-                        <h1 className="text-3xl font-bold text-gray-900">Create Blog Post</h1>
-                        <p className="mt-1 text-sm text-gray-600">
-                            Write a new blog post for your audience
-                        </p>
+            <div className="mx-auto max-w-4xl space-y-6">
+                <div className="flex items-center justify-between">
+                    <div>
+                        <h1 className="text-xl font-semibold tracking-tight text-slate-900">Create Blog Post</h1>
+                        <p className="mt-1 text-sm text-slate-500">Write and publish a new article for your audience.</p>
                     </div>
+                    <a href={route('admin.posts.index')} className="inline-flex items-center gap-1.5 rounded-md border border-slate-200 bg-white px-3.5 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-50">
+                        <ArrowLeft size={16} /> Back
+                    </a>
+                </div>
 
-                    <form onSubmit={handleSubmit} className="space-y-6">
-                        <div className="bg-white shadow-md rounded-lg p-6 space-y-6">
-                            {/* Title */}
+                <form onSubmit={handleSubmit}>
+                    <div className="rounded-lg border border-slate-200 bg-white">
+                        <div className="border-b border-slate-100 px-6 py-4">
+                            <h2 className="text-sm font-semibold tracking-tight text-slate-900">Post Content</h2>
+                            <p className="mt-0.5 text-[13px] text-slate-500">The main body of your blog post.</p>
+                        </div>
+
+                        <div className="p-6 space-y-5">
                             <div>
-                                <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-2">
-                                    Title *
+                                <label htmlFor="title" className="block text-[13px] font-medium text-slate-700 mb-1.5">
+                                    Title <span className="text-accent">*</span>
                                 </label>
                                 <input
-                                    type="text"
-                                    id="title"
+                                    type="text" id="title"
                                     value={data.title}
                                     onChange={(e) => setData('title', e.target.value)}
                                     onBlur={generateSlug}
-                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent"
+                                    placeholder="Enter post title..."
                                     required
+                                    className="w-full rounded-md border border-slate-300 px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 outline-none transition focus:border-primary-300 focus:ring-2 focus:ring-primary-500/10"
                                 />
-                                {errors.title && <p className="mt-1 text-sm text-red-600">{errors.title}</p>}
+                                {errors.title && <p className="mt-1.5 text-[13px] text-accent">{errors.title}</p>}
                             </div>
 
-                            {/* Slug */}
-                            <div>
-                                <label htmlFor="slug" className="block text-sm font-medium text-gray-700 mb-2">
-                                    Slug
-                                </label>
-                                <input
-                                    type="text"
-                                    id="slug"
-                                    value={data.slug}
-                                    onChange={(e) => setData('slug', e.target.value)}
-                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent"
-                                    placeholder="auto-generated-from-title"
-                                />
-                                <p className="mt-1 text-xs text-gray-500">Leave blank to auto-generate from title</p>
-                                {errors.slug && <p className="mt-1 text-sm text-red-600">{errors.slug}</p>}
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                                <div>
+                                    <label htmlFor="slug" className="block text-[13px] font-medium text-slate-700 mb-1.5">
+                                        Slug
+                                    </label>
+                                    <input
+                                        type="text" id="slug"
+                                        value={data.slug}
+                                        onChange={(e) => setData('slug', e.target.value)}
+                                        placeholder="auto-generated-from-title"
+                                        className="w-full rounded-md border border-slate-300 px-3.5 py-2.5 text-sm font-mono text-slate-900 placeholder:text-slate-400 outline-none transition focus:border-primary-300 focus:ring-2 focus:ring-primary-500/10"
+                                    />
+                                    <p className="mt-1 text-[11px] text-slate-400">Leave blank to auto-generate from title.</p>
+                                    {errors.slug && <p className="mt-1.5 text-[13px] text-accent">{errors.slug}</p>}
+                                </div>
+
+                                <div>
+                                    <label htmlFor="status" className="block text-[13px] font-medium text-slate-700 mb-1.5">
+                                        Status <span className="text-accent">*</span>
+                                    </label>
+                                    <select
+                                        id="status"
+                                        value={data.status}
+                                        onChange={(e) => setData('status', e.target.value as 'draft' | 'published')}
+                                        required
+                                        className="w-full rounded-md border border-slate-300 px-3.5 py-2.5 text-sm outline-none transition focus:border-primary-300 focus:ring-2 focus:ring-primary-500/10"
+                                    >
+                                        <option value="draft">Draft — save without publishing</option>
+                                        <option value="published">Published — visible to everyone</option>
+                                    </select>
+                                    {errors.status && <p className="mt-1.5 text-[13px] text-accent">{errors.status}</p>}
+                                </div>
                             </div>
 
-                            {/* Excerpt */}
                             <div>
-                                <label htmlFor="excerpt" className="block text-sm font-medium text-gray-700 mb-2">
+                                <label htmlFor="excerpt" className="block text-[13px] font-medium text-slate-700 mb-1.5">
                                     Excerpt
                                 </label>
                                 <textarea
@@ -86,13 +107,12 @@ export default function CreatePost() {
                                     value={data.excerpt}
                                     onChange={(e) => setData('excerpt', e.target.value)}
                                     rows={3}
-                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent"
-                                    placeholder="A brief summary of the post..."
+                                    placeholder="A brief summary of the post — appears in previews and social cards..."
+                                    className="w-full rounded-md border border-slate-300 px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 outline-none transition focus:border-primary-300 focus:ring-2 focus:ring-primary-500/10 resize-none"
                                 />
-                                {errors.excerpt && <p className="mt-1 text-sm text-red-600">{errors.excerpt}</p>}
+                                {errors.excerpt && <p className="mt-1.5 text-[13px] text-accent">{errors.excerpt}</p>}
                             </div>
 
-                            {/* Content */}
                             <div>
                                 <RichTextEditor
                                     label="Content"
@@ -103,59 +123,39 @@ export default function CreatePost() {
                                     required
                                 />
                             </div>
-
-                            {/* Featured Image */}
-                            <div>
-                                <label htmlFor="featured_image" className="block text-sm font-medium text-gray-700 mb-2">
-                                    Featured Image
-                                </label>
-                                <input
-                                    type="file"
-                                    id="featured_image"
-                                    onChange={(e) => setData('featured_image', e.target.files?.[0] || null)}
-                                    accept="image/*"
-                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent"
-                                />
-                                {errors.featured_image && <p className="mt-1 text-sm text-red-600">{errors.featured_image}</p>}
-                            </div>
-
-                            {/* Status */}
-                            <div>
-                                <label htmlFor="status" className="block text-sm font-medium text-gray-700 mb-2">
-                                    Status *
-                                </label>
-                                <select
-                                    id="status"
-                                    value={data.status}
-                                    onChange={(e) => setData('status', e.target.value as 'draft' | 'published')}
-                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent"
-                                    required
-                                >
-                                    <option value="draft">Draft</option>
-                                    <option value="published">Published</option>
-                                </select>
-                                {errors.status && <p className="mt-1 text-sm text-red-600">{errors.status}</p>}
-                            </div>
                         </div>
+                    </div>
 
-                        {/* Action Buttons */}
-                        <div className="flex items-center justify-end gap-4">
-                            <a
-                                href={route('admin.posts.index')}
-                                className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
-                            >
-                                Cancel
-                            </a>
-                            <button
-                                type="submit"
-                                disabled={processing}
-                                className="px-6 py-2 bg-accent text-white rounded-lg hover:bg-accent/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                            >
-                                {processing ? 'Creating...' : 'Create Post'}
-                            </button>
+                    <div className="mt-5 rounded-lg border border-slate-200 bg-white">
+                        <div className="border-b border-slate-100 px-6 py-4">
+                            <h2 className="text-sm font-semibold tracking-tight text-slate-900">Featured Image</h2>
+                            <p className="mt-0.5 text-[13px] text-slate-500">Add a cover image for your post.</p>
                         </div>
-                    </form>
-                </div>
+                        <div className="p-6">
+                            <label htmlFor="featured_image" className="block text-[13px] font-medium text-slate-700 mb-1.5">
+                                Upload Image
+                            </label>
+                            <input
+                                type="file" id="featured_image"
+                                onChange={(e) => setData('featured_image', e.target.files?.[0] || null)}
+                                accept="image/*"
+                                className="w-full text-sm text-slate-500 file:mr-3 file:rounded-md file:border-0 file:bg-primary file:px-4 file:py-2.5 file:text-xs file:font-medium file:text-white hover:file:bg-primary-600 cursor-pointer"
+                            />
+                            <p className="mt-2 text-[11px] text-slate-400">Recommended: 1200 x 630px. JPG or PNG. Max 5 MB.</p>
+                            {errors.featured_image && <p className="mt-1.5 text-[13px] text-accent">{errors.featured_image}</p>}
+                        </div>
+                    </div>
+
+                    <div className="mt-5 flex items-center justify-end gap-3">
+                        <a href={route('admin.posts.index')} className="rounded-md border border-slate-200 bg-white px-5 py-2.5 text-sm font-medium text-slate-600 transition hover:bg-slate-50">
+                            Cancel
+                        </a>
+                        <button type="submit" disabled={processing} className="inline-flex items-center gap-2 rounded-md bg-primary px-5 py-2.5 text-sm font-medium text-white transition hover:bg-primary-600 disabled:opacity-50 shadow-sm">
+                            <Save size={15} />
+                            {processing ? 'Publishing...' : 'Publish Post'}
+                        </button>
+                    </div>
+                </form>
             </div>
         </DashboardLayout>
     );

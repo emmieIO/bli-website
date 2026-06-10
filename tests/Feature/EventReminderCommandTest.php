@@ -95,4 +95,23 @@ class EventReminderCommandTest extends TestCase
 
         Notification::assertSentToTimes($confirmedUser, UpcomingEventReminder::class, 1);
     }
+
+    public function test_reminder_notification_uses_human_readable_time_until_event(): void
+    {
+        Carbon::setTestNow('2026-05-01 10:00:00');
+
+        $creator = User::factory()->create();
+        $event = Event::factory()->create([
+            'creator_id' => $creator->id,
+            'theme' => 'Beacon Summit',
+            'start_date' => Carbon::now()->addHours(2)->addMinutes(5),
+            'end_date' => Carbon::now()->addHours(4),
+        ]);
+        $user = User::factory()->create();
+
+        $payload = (new UpcomingEventReminder($event))->toArray($user);
+
+        $this->assertSame('in 2 hours', $payload['time_until']);
+        $this->assertSame("Reminder: {$event->title} is starting in 2 hours!", $payload['message']);
+    }
 }

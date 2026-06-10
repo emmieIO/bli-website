@@ -1,5 +1,6 @@
 import { Head, Link, usePage } from '@inertiajs/react';
 import DashboardLayout from '@/Layouts/DashboardLayout';
+import { CalendarDays, MapPin, Clock, Globe, Inbox, ArrowRight, CheckCircle2, XCircle, AlertCircle } from 'lucide-react';
 
 interface Event {
     id: number;
@@ -28,46 +29,45 @@ export default function MyInvitations({ invitations }: MyInvitationsProps) {
 
     const stats = {
         total: invitations.length,
+        pending: invitations.filter((inv) => inv.status === 'pending').length,
         accepted: invitations.filter((inv) => inv.status === 'accepted').length,
         declined: invitations.filter((inv) => inv.status === 'rejected').length,
-        pending: invitations.filter((inv) => inv.status === 'pending').length,
     };
 
     return (
         <DashboardLayout sideLinks={sideLinks}>
             <Head title="My Invitations" />
 
-            <div className="max-w-7xl mx-auto py-10">
-                {/* Header Section */}
-                <div className="mb-12 text-center">
-                    <h1 className="text-4xl font-bold text-primary font-montserrat tracking-tight">
-                        Your Event Invitations
-                    </h1>
-                    <p className="mt-4 text-lg text-gray-600 max-w-2xl mx-auto font-lato leading-relaxed">
-                        Review and manage the exclusive event invitations you've received from Beacon Leadership
-                        Institute
-                    </p>
+            <div className="space-y-6">
+                <div>
+                    <h1 className="text-xl font-semibold tracking-tight text-slate-900">Your Event Invitations</h1>
+                    <p className="mt-1 text-sm text-slate-500">Review and respond to exclusive event invitations you've received.</p>
                 </div>
 
                 {invitations.length === 0 ? (
-                    <EmptyState />
+                    <div className="rounded-lg border border-slate-200 bg-white p-16 text-center">
+                        <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-lg bg-slate-100">
+                            <Inbox size={24} className="text-slate-300" />
+                        </div>
+                        <h3 className="mt-4 text-sm font-semibold text-slate-900">No invitations yet</h3>
+                        <p className="mt-1 text-sm text-slate-500">You'll see exclusive event invitations here when organizers send them your way.</p>
+                        <Link href={route('events.index')} className="mt-5 inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2.5 text-sm font-medium text-white transition hover:bg-primary-600 shadow-sm">
+                            Browse Public Events
+                        </Link>
+                    </div>
                 ) : (
                     <>
-                        {/* Invitations Grid */}
-                        <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-                            {invitations.map((invitation, index) => (
-                                <InvitationCard key={invitation.id} invitation={invitation} delay={index * 100} />
-                            ))}
+                        <div className="grid grid-cols-4 gap-4">
+                            <SummaryPill label="Total" value={stats.total} active />
+                            <SummaryPill label="Pending" value={stats.pending} color="amber" />
+                            <SummaryPill label="Accepted" value={stats.accepted} color="lime" />
+                            <SummaryPill label="Declined" value={stats.declined} color="accent" />
                         </div>
 
-                        {/* Footer Stats */}
-                        <div className="mt-12 bg-white rounded-2xl shadow-sm border border-primary-100 p-6">
-                            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 text-center">
-                                <StatCard label="Total Invitations" value={stats.total} color="text-primary" />
-                                <StatCard label="Accepted" value={stats.accepted} color="text-accent" />
-                                <StatCard label="Declined" value={stats.declined} color="text-red-600" />
-                                <StatCard label="Pending" value={stats.pending} color="text-primary" />
-                            </div>
+                        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                            {invitations.map((invitation) => (
+                                <InvitationCard key={invitation.id} invitation={invitation} />
+                            ))}
                         </div>
                     </>
                 )}
@@ -76,177 +76,117 @@ export default function MyInvitations({ invitations }: MyInvitationsProps) {
     );
 }
 
-function InvitationCard({ invitation, delay }: { invitation: Invitation; delay: number }) {
+function SummaryPill({ label, value, color, active }: { label: string; value: number; color?: string; active?: boolean }) {
+    const barColors: Record<string, string> = {
+        amber: 'bg-amber-500',
+        lime: 'bg-lime-500',
+        accent: 'bg-accent',
+    };
+
+    return (
+        <div className={`rounded-lg border border-slate-200 bg-white p-3 ${active ? 'ring-1 ring-primary-200' : ''}`}>
+            <div className="flex items-center gap-2.5">
+                {color && <span className={`h-1.5 w-1.5 rounded-full ${barColors[color] || 'bg-primary'}`} />}
+                <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">{label}</span>
+            </div>
+            <p className="mt-1 text-xl font-semibold tracking-tight text-slate-900">{value}</p>
+        </div>
+    );
+}
+
+function InvitationCard({ invitation }: { invitation: Invitation }) {
     const isExpired = new Date(invitation.expires_at) < new Date();
     const status = isExpired ? 'expired' : invitation.status;
 
     const formatDate = (dateString: string) => {
-        const date = new Date(dateString);
-        return date.toLocaleDateString('en-US', {
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric',
-            hour: 'numeric',
-            minute: '2-digit',
-        });
+        return new Date(dateString).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
     };
 
     const getExpiresIn = (dateString: string) => {
         const now = new Date();
-        const expires = new Date(dateString);
-        const diff = expires.getTime() - now.getTime();
-
-        if (diff < 0) return 'expired';
-
+        const diff = new Date(dateString).getTime() - now.getTime();
+        if (diff < 0) return 'Expired';
         const days = Math.floor(diff / (1000 * 60 * 60 * 24));
         const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-
-        if (days > 0) return `in ${days} day${days !== 1 ? 's' : ''}`;
-        if (hours > 0) return `in ${hours} hour${hours !== 1 ? 's' : ''}`;
-        return 'soon';
+        if (days > 0) return `${days}d remaining`;
+        if (hours > 0) return `${hours}h remaining`;
+        return 'Expiring soon';
     };
 
-    const getStatusConfig = (status: string) => {
-        switch (status) {
-            case 'accepted':
-                return {
-                    bg: 'bg-accent/10',
-                    text: 'text-accent',
-                    border: 'border-accent/20',
-                    icon: 'check-circle',
-                };
-            case 'rejected':
-                return {
-                    bg: 'bg-red-100',
-                    text: 'text-red-700',
-                    border: 'border-red-200',
-                    icon: 'times-circle',
-                };
-            case 'expired':
-                return {
-                    bg: 'bg-gray-100',
-                    text: 'text-gray-600',
-                    border: 'border-gray-200',
-                    icon: 'clock',
-                };
-            default:
-                return {
-                    bg: 'bg-primary/10',
-                    text: 'text-primary',
-                    border: 'border-primary/20',
-                    icon: 'envelope',
-                };
-        }
+    const statusConfig: Record<string, { bg: string; text: string; icon: any; label: string }> = {
+        accepted: { bg: 'bg-lime-50', text: 'text-lime-700', icon: CheckCircle2, label: 'Accepted' },
+        rejected: { bg: 'bg-accent-50', text: 'text-accent', icon: XCircle, label: 'Declined' },
+        expired: { bg: 'bg-slate-100', text: 'text-slate-500', icon: Clock, label: 'Expired' },
+        pending: { bg: 'bg-amber-50', text: 'text-amber-700', icon: AlertCircle, label: 'Pending' },
     };
 
-    const statusConfig = getStatusConfig(status);
+    const sc = statusConfig[status] || statusConfig.expired;
+    const StatusIcon = sc.icon;
+
+    const isActionable = status === 'pending';
 
     return (
-        <div className="bg-white rounded-2xl shadow-lg border border-primary-100 overflow-hidden hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 flex flex-col group">
-            {/* Card Header */}
-            <div className="p-6 grow">
-                <div className="flex items-start justify-between mb-4">
-                    {/* Event Type Icon */}
-                    <div className="p-3 rounded-xl bg-primary/10 text-primary group-hover:bg-primary/20 transition-colors">
-                        <i
-                            className={`fas fa-${
-                                invitation.event.mode === 'offline' ? 'map-marker-alt' : 'globe'
-                            } w-5 h-5`}
-                        ></i>
-                    </div>
-
-                    {/* Status Badge */}
-                    <span
-                        className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold font-montserrat ${statusConfig.bg} ${statusConfig.text} border ${statusConfig.border}`}
-                    >
-                        <i className={`fas fa-${statusConfig.icon} w-3 h-3 mr-1.5`}></i>
-                        {status.charAt(0).toUpperCase() + status.slice(1)}
+        <div className={`group flex flex-col rounded-lg border bg-white transition hover:shadow-sm ${
+            isActionable ? 'border-amber-200 ring-1 ring-amber-100' : 'border-slate-200 hover:border-slate-300'
+        }`}>
+            <div className="flex-1 p-5">
+                <div className="flex items-start justify-between mb-3">
+                    <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary-50 text-primary">
+                        {invitation.event.mode === 'offline' ? <MapPin size={16} /> : <Globe size={16} />}
+                    </span>
+                    <span className={`inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[11px] font-semibold ${sc.bg} ${sc.text}`}>
+                        <StatusIcon size={12} />
+                        {sc.label}
                     </span>
                 </div>
 
-                {/* Event Title */}
-                <h3 className="text-xl font-bold text-primary font-montserrat mb-3 leading-tight group-hover:text-primary-600 transition-colors">
-                    {invitation.event.title.substring(0, 50)}
-                    {invitation.event.title.length > 50 ? '...' : ''}
+                <h3 className="text-sm font-semibold text-slate-900 leading-snug">
+                    {invitation.event.title.length > 55 ? invitation.event.title.substring(0, 55) + '...' : invitation.event.title}
                 </h3>
 
-                {/* Event Date */}
-                <div className="flex items-center text-sm text-gray-600 mb-3 font-lato">
-                    <i className="fas fa-calendar w-4 h-4 mr-2 text-primary/60"></i>
-                    {formatDate(invitation.event.event_date)}
-                </div>
-
-                {/* Event Location */}
-                <div className="flex items-start text-sm text-gray-600 mb-4 font-lato">
-                    <i className="fas fa-map-marker-alt w-4 h-4 mr-2 mt-0.5 shrink-0 text-primary/60"></i>
-                    <span className="break-words leading-relaxed">
-                        {invitation.event.mode === 'online'
-                            ? invitation.event.location
-                            : invitation.event.physical_address}
-                    </span>
-                </div>
-
-                {/* Additional Info */}
-                <div className="mt-auto space-y-3">
-                    {/* Expiration */}
-                    <div className="flex items-center text-xs text-gray-500 font-lato">
-                        <i className="fas fa-hourglass-half w-3.5 h-3.5 mr-1.5 text-primary/50"></i>
-                        Expires {getExpiresIn(invitation.expires_at)}
+                <div className="mt-3 space-y-2 text-[13px] text-slate-500">
+                    <div className="flex items-center gap-2">
+                        <CalendarDays size={13} className="text-slate-400 shrink-0" />
+                        <span>{formatDate(invitation.event.event_date)}</span>
                     </div>
-
-                    {/* Suggested Topic */}
-                    {invitation.suggested_topic && (
-                        <div className="text-sm text-gray-700 font-lato leading-relaxed bg-primary/5 rounded-lg p-3 border border-primary/10">
-                            <span className="font-semibold text-primary font-montserrat">Suggested Topic:</span>
-                            <span className="block mt-1">
-                                {invitation.suggested_topic.substring(0, 100)}
-                                {invitation.suggested_topic.length > 100 ? '...' : ''}
-                            </span>
-                        </div>
-                    )}
+                    <div className="flex items-start gap-2">
+                        <MapPin size={13} className="text-slate-400 shrink-0 mt-0.5" />
+                        <span className="leading-relaxed line-clamp-1">
+                            {invitation.event.mode === 'online' ? invitation.event.location : invitation.event.physical_address}
+                        </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <Clock size={13} className={`shrink-0 ${isActionable ? 'text-amber-500' : 'text-slate-400'}`} />
+                        <span className={isActionable ? 'text-amber-600 font-medium' : ''}>{getExpiresIn(invitation.expires_at)}</span>
+                    </div>
                 </div>
+
+                {invitation.suggested_topic && (
+                    <div className="mt-3 rounded-md bg-primary-50/50 border border-primary-100 p-3">
+                        <p className="text-[11px] font-semibold uppercase tracking-wider text-primary">Suggested Topic</p>
+                        <p className="mt-1 text-[13px] leading-relaxed text-slate-600">
+                            {invitation.suggested_topic.length > 100 ? invitation.suggested_topic.substring(0, 100) + '...' : invitation.suggested_topic}
+                        </p>
+                    </div>
+                )}
             </div>
 
-            {/* Action Button */}
-            <div className="px-6 pb-6 pt-4 border-t border-primary-100 bg-gray-50/50">
+            <div className={`border-t px-5 py-3.5 ${isActionable ? 'bg-amber-50/50 border-amber-100' : 'bg-slate-50/50 border-slate-100'}`}>
                 <Link
                     href={route('speaker.events.show', invitation.event.slug)}
-                    className="w-full inline-flex items-center justify-center px-5 py-3 rounded-xl bg-primary hover:bg-primary-600 text-white font-semibold text-sm shadow-md hover:shadow-lg transition-all duration-300 transform hover:scale-105 font-montserrat group/btn"
+                    className={`flex w-full items-center justify-center gap-2 rounded-md px-4 py-2.5 text-sm font-medium transition shadow-sm ${
+                        isActionable
+                            ? 'bg-primary text-white hover:bg-primary-600'
+                            : 'border border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
+                    }`}
                 >
-                    <i className="fas fa-eye w-4 h-4 mr-2 group-hover/btn:scale-110 transition-transform"></i>
-                    Open Speaker Workspace
+                    {isActionable ? (
+                        <>Respond to invitation <ArrowRight size={14} /></>
+                    ) : (
+                        <>Open workspace</>
+                    )}
                 </Link>
             </div>
-        </div>
-    );
-}
-
-function StatCard({ label, value, color }: { label: string; value: number; color: string }) {
-    return (
-        <div>
-            <div className={`text-2xl font-bold ${color} font-montserrat`}>{value}</div>
-            <div className="text-sm text-gray-600 font-lato">{label}</div>
-        </div>
-    );
-}
-
-function EmptyState() {
-    return (
-        <div className="bg-white rounded-2xl shadow-sm border border-primary-100 p-16 text-center max-w-2xl mx-auto">
-            <div className="w-20 h-20 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-6">
-                <i className="fas fa-inbox w-10 h-10 text-primary"></i>
-            </div>
-            <h3 className="text-2xl font-bold text-primary font-montserrat mb-3">No invitations yet</h3>
-            <p className="text-gray-600 font-lato leading-relaxed mb-6">
-                You'll see exclusive event invitations here when organizers send them your way.
-            </p>
-            <Link
-                href={route('events.index')}
-                className="inline-flex items-center gap-2 bg-primary hover:bg-primary-600 text-white font-semibold px-6 py-3 rounded-xl transition-all duration-300 transform hover:scale-105 font-montserrat"
-            >
-                <i className="fas fa-calendar w-4 h-4"></i>
-                Browse Public Events
-            </Link>
         </div>
     );
 }

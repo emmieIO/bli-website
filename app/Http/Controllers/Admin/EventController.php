@@ -80,9 +80,6 @@ class EventController extends Controller
             'attendees',
             'speakerApplications.user',
             'speakerApplications.speaker.user',
-            'refundRequests' => fn ($query) => $query->latest('requested_at'),
-            'refundRequests.user',
-            'refundRequests.transaction',
         ]);
 
         if ($capabilities['canViewPayments']) {

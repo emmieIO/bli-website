@@ -4,7 +4,6 @@ use App\Http\Middleware\AdminGuestMiddleware;
 use App\Http\Middleware\CheckMentorshipExpirations;
 use App\Http\Middleware\EnsureInstructorAccess;
 use App\Http\Middleware\EnsureSpeakerWorkspaceAccess;
-use App\Http\Middleware\UpdateInstructorEarningsStatus;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -21,7 +20,6 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->web(append: [
             \App\Http\Middleware\HandleInertiaRequests::class,
             CheckMentorshipExpirations::class,
-            UpdateInstructorEarningsStatus::class, // Auto-update earnings status on each request
         ]);
 
         $middleware->alias([

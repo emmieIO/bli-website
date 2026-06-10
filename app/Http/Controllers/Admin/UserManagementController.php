@@ -89,7 +89,7 @@ class UserManagementController extends Controller
     {
         $roles = Role::with('permissions')->get();
         $permissions = Permission::all()->groupBy(function ($permission) {
-            return explode('-', $permission->name)[0]; // Group by prefix (course, category, etc.)
+            return explode('-', $permission->name)[0];
         });
 
         return \Inertia\Inertia::render('Admin/Roles/Index', compact('roles', 'permissions'));
@@ -166,18 +166,24 @@ class UserManagementController extends Controller
         $defaults = [
             'admin' => Permission::all()->pluck('name')->toArray(),
             'instructor' => [
-                'course-create',
-                'course-edit',
-                'course-view',
-                'course-delete',
-                'lesson-create',
-                'lesson-edit',
-                'lesson-view',
-                'lesson-delete',
+                'track-applications',
+                'view-own-transaction-history',
+                'view-own-invitations',
+                'event-view',
+                'event-register',
+                'event-view-own-registration',
+                'event-join-waitlist',
+                'event-apply-to-speak',
             ],
             'student' => [
-                'course-view',
-                'lesson-view',
+                'track-applications',
+                'view-own-transaction-history',
+                'view-own-invitations',
+                'event-view',
+                'event-register',
+                'event-view-own-registration',
+                'event-join-waitlist',
+                'event-apply-to-speak',
             ],
             'speaker' => [
                 'track-applications',

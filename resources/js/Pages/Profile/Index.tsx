@@ -43,67 +43,36 @@ export default function Profile({ user }: ProfileProps) {
     };
 
     const formatMemberSince = (date: string) => {
-        return new Date(date).toLocaleDateString('en-US', {
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric'
-        });
+        return new Date(date).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
     };
 
     return (
         <DashboardLayout sideLinks={sideLinks}>
             <Head title="Profile" />
 
-            <section className="max-w-5xl mx-auto">
-                {/* Profile Header */}
+            <div className="mx-auto max-w-4xl space-y-6">
                 <ProfileHeader user={user} formatMemberSince={formatMemberSince} />
 
-                {/* Tab Navigation */}
-                <div className="mb-6 border-b border-gray-200">
+                <div className="border-b border-slate-200">
                     <nav className="-mb-px flex space-x-6">
-                        <TabButton
-                            active={activeTab === 'profile'}
-                            onClick={() => handleTabChange('profile')}
-                        >
-                            Profile
-                        </TabButton>
-                        <TabButton
-                            active={activeTab === 'security'}
-                            onClick={() => handleTabChange('security')}
-                        >
-                            Security
-                        </TabButton>
+                        <TabButton active={activeTab === 'profile'} onClick={() => handleTabChange('profile')}>Profile</TabButton>
+                        <TabButton active={activeTab === 'security'} onClick={() => handleTabChange('security')}>Security</TabButton>
                         {hasInstructorProfile && (
-                            <TabButton
-                                active={activeTab === 'instructor'}
-                                onClick={() => handleTabChange('instructor')}
-                            >
-                                Instructor Information
-                            </TabButton>
+                            <TabButton active={activeTab === 'instructor'} onClick={() => handleTabChange('instructor')}>Instructor</TabButton>
                         )}
                         {hasSpeakerProfile && (
-                            <TabButton
-                                active={activeTab === 'speaker'}
-                                onClick={() => handleTabChange('speaker')}
-                            >
-                                Speaker Information
-                            </TabButton>
+                            <TabButton active={activeTab === 'speaker'} onClick={() => handleTabChange('speaker')}>Speaker</TabButton>
                         )}
                     </nav>
                 </div>
 
-                {/* Tab Content */}
                 {activeTab === 'profile' && <ProfileTab user={user} />}
                 {activeTab === 'security' && <SecurityTab />}
                 {activeTab === 'instructor' && hasInstructorProfile && <InstructorTab user={user} />}
                 {activeTab === 'speaker' && hasSpeakerProfile && <SpeakerTab user={user} />}
 
-                {/* Danger Zone */}
-                <DangerZone
-                    showModal={showDeleteModal}
-                    setShowModal={setShowDeleteModal}
-                />
-            </section>
+                <DangerZone showModal={showDeleteModal} setShowModal={setShowDeleteModal} />
+            </div>
         </DashboardLayout>
     );
 }
@@ -112,52 +81,38 @@ function ProfileHeader({ user, formatMemberSince }: { user: User; formatMemberSi
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     const getAvatarUrl = () => {
-        if (user.photo) {
-            return `/storage/${user.photo}`;
-        }
+        if (user.photo) return `/storage/${user.photo}`;
         return `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=002147&color=fff`;
     };
 
     const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
-            router.post(route('profile.photo.update'), {
-                photo: file,
-            }, {
-                preserveScroll: true,
-            });
+            router.post(route('profile.photo.update'), { photo: file }, { preserveScroll: true });
         }
     };
 
     return (
-        <div className="bg-linear-to-r from-primary to-primary-700 rounded-xl shadow-lg p-6 text-white mb-10">
-            <div className="flex items-center gap-6">
+        <div className="rounded-lg bg-primary p-6 text-white">
+            <div className="flex items-center gap-5">
                 <div className="relative group">
                     <img
-                        className="w-20 h-20 rounded-full object-cover border-2 border-white/50 group-hover:opacity-80 transition-opacity"
+                        className="h-16 w-16 rounded-lg object-cover ring-2 ring-white/20"
                         src={getAvatarUrl()}
                         alt={`${user.name}'s profile photo`}
                     />
-                    <input
-                        ref={fileInputRef}
-                        type="file"
-                        className="hidden"
-                        accept="image/png, image/jpeg, image/gif"
-                        onChange={handlePhotoChange}
-                    />
-                    <label
+                    <input ref={fileInputRef} type="file" className="hidden" accept="image/png, image/jpeg, image/gif" onChange={handlePhotoChange} />
+                    <button
                         onClick={() => fileInputRef.current?.click()}
-                        className="absolute bottom-0 right-0 bg-white rounded-full p-1.5 cursor-pointer shadow-md transform transition-transform group-hover:scale-110"
+                        className="absolute -bottom-1 -right-1 rounded-md bg-white p-1 text-primary shadow-sm transition hover:bg-slate-100"
                     >
-                        <i className="fas fa-camera w-4 h-4 text-primary"></i>
-                    </label>
+                        <i className="fas fa-camera text-xs"></i>
+                    </button>
                 </div>
                 <div>
-                    <h2 className="text-2xl font-bold font-montserrat">{user.name}</h2>
-                    <p className="text-sm opacity-90 font-lato">{user.email}</p>
-                    <p className="text-xs text-white/70 mt-1 font-lato">
-                        Member since {formatMemberSince(user.created_at)}
-                    </p>
+                    <h2 className="text-lg font-semibold">{user.name}</h2>
+                    <p className="text-sm text-primary-200">{user.email}</p>
+                    <p className="mt-0.5 text-xs text-primary-300">Member since {formatMemberSince(user.created_at)}</p>
                 </div>
             </div>
         </div>
@@ -168,13 +123,9 @@ function TabButton({ active, onClick, children }: { active: boolean; onClick: ()
     return (
         <button
             onClick={onClick}
-            className={`
-                whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm font-montserrat transition-colors
-                ${active
-                    ? 'border-primary text-primary'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                }
-            `}
+            className={`whitespace-nowrap border-b-2 px-1 pb-3 pt-1 text-sm font-medium transition ${
+                active ? 'border-primary text-primary' : 'border-transparent text-slate-500 hover:text-slate-700'
+            }`}
         >
             {children}
         </button>
@@ -194,104 +145,22 @@ function ProfileTab({ user }: { user: User }) {
 
     const handleSubmit = (e: FormEvent) => {
         e.preventDefault();
-        patch(route('profile.update'), {
-            preserveScroll: true,
-            onSuccess: () => {
-                setData('current_password', '');
-            },
-        });
+        patch(route('profile.update'), { preserveScroll: true, onSuccess: () => setData('current_password', '') });
     };
 
-    const isStudent = user.roles?.includes('student') || user.roles?.includes('user') || user.roles?.includes('instructor');
-
     return (
-        <div className="bg-white border border-primary-100 rounded-xl shadow-sm p-6">
-            <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2 font-montserrat">
-                <i className="fas fa-user w-5 h-5 text-primary-600"></i>
-                Personal Information
-            </h3>
-
-            <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <Input
-                    label="Full Name"
-                    type="text"
-                    name="name"
-                    value={data.name}
-                    onChange={(e) => setData('name', e.target.value)}
-                    icon="user"
-                    required
-                    autoFocus
-                    error={errors.name}
-                />
-
-                <Input
-                    label="Headline"
-                    type="text"
-                    name="headline"
-                    value={data.headline}
-                    onChange={(e) => setData('headline', e.target.value)}
-                    icon="user"
-                    placeholder="Your professional headline"
-                    error={errors.headline}
-                />
-
-                <Input
-                    label="Phone"
-                    type="text"
-                    name="phone"
-                    value={data.phone}
-                    onChange={(e) => setData('phone', e.target.value)}
-                    icon="phone"
-                    error={errors.phone}
-                />
-
-                <Input
-                    label="Email"
-                    type="email"
-                    name="email"
-                    value={data.email}
-                    onChange={(e) => setData('email', e.target.value)}
-                    icon="envelope"
-                    readOnly={isStudent}
-                    required
-                    error={errors.email}
-                />
-
-                <Input
-                    label="Current Password"
-                    type="password"
-                    name="current_password"
-                    value={data.current_password}
-                    onChange={(e) => setData('current_password', e.target.value)}
-                    icon="lock"
-                    required
-                    error={errors.current_password}
-                />
-
-                <Input
-                    label="LinkedIn Profile"
-                    type="text"
-                    name="linkedin"
-                    value={data.linkedin}
-                    onChange={(e) => setData('linkedin', e.target.value)}
-                    icon="linkedin"
-                    error={errors.linkedin}
-                />
-
-                <Input
-                    label="Website"
-                    type="text"
-                    name="website"
-                    value={data.website}
-                    onChange={(e) => setData('website', e.target.value)}
-                    icon="globe"
-                    error={errors.website}
-                />
-
-                <div className="md:col-span-2 mt-4">
-                    <Button type="submit" icon="save" loading={processing}>
-                        Save Changes
-                    </Button>
+        <div className="rounded-lg border border-slate-200 bg-white p-6">
+            <h3 className="text-sm font-semibold tracking-tight text-slate-900 mb-5">Personal Information</h3>
+            <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <Input label="Full Name" type="text" name="name" value={data.name} onChange={(e) => setData('name', e.target.value)} icon="user" required autoFocus error={errors.name} />
+                <Input label="Headline" type="text" name="headline" value={data.headline} onChange={(e) => setData('headline', e.target.value)} icon="user" placeholder="Your professional headline" error={errors.headline} />
+                <Input label="Phone" type="text" name="phone" value={data.phone} onChange={(e) => setData('phone', e.target.value)} icon="phone" error={errors.phone} />
+                <Input label="Email" type="email" name="email" value={data.email} onChange={(e) => setData('email', e.target.value)} icon="envelope" readOnly={!!(user.roles?.includes('student') || user.roles?.includes('user') || user.roles?.includes('instructor'))} required error={errors.email} />
+                <Input label="Current Password" type="password" name="current_password" value={data.current_password} onChange={(e) => setData('current_password', e.target.value)} icon="lock" required error={errors.current_password} />
+                <Input label="LinkedIn Profile" type="text" name="linkedin" value={data.linkedin} onChange={(e) => setData('linkedin', e.target.value)} icon="linkedin" error={errors.linkedin} />
+                <Input label="Website" type="text" name="website" value={data.website} onChange={(e) => setData('website', e.target.value)} icon="globe" error={errors.website} />
+                <div className="md:col-span-2">
+                    <Button type="submit" icon="save" loading={processing}>Save Changes</Button>
                 </div>
             </form>
         </div>
@@ -307,57 +176,18 @@ function SecurityTab() {
 
     const handleSubmit = (e: FormEvent) => {
         e.preventDefault();
-        patch(route('profile.update_password'), {
-            preserveScroll: true,
-            onSuccess: () => reset(),
-        });
+        patch(route('profile.update_password'), { preserveScroll: true, onSuccess: () => reset() });
     };
 
     return (
-        <div className="bg-white border border-primary-100 rounded-xl shadow-sm p-6">
-            <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2 font-montserrat">
-                <i className="fas fa-shield-alt w-5 h-5 text-primary-600"></i>
-                Account Security
-            </h3>
-
-            <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <Input
-                    label="Current Password"
-                    type="password"
-                    name="current_password"
-                    value={data.current_password}
-                    onChange={(e) => setData('current_password', e.target.value)}
-                    icon="lock"
-                    autoComplete="current-password"
-                    error={errors.current_password}
-                />
-
-                <Input
-                    label="New Password"
-                    type="password"
-                    name="password"
-                    value={data.password}
-                    onChange={(e) => setData('password', e.target.value)}
-                    icon="lock"
-                    autoComplete="new-password"
-                    error={errors.password}
-                />
-
-                <Input
-                    label="Confirm Password"
-                    type="password"
-                    name="password_confirmation"
-                    value={data.password_confirmation}
-                    onChange={(e) => setData('password_confirmation', e.target.value)}
-                    icon="lock"
-                    autoComplete="new-password"
-                    error={errors.password_confirmation}
-                />
-
-                <div className="md:col-span-2 mt-4">
-                    <Button type="submit" icon="lock" loading={processing}>
-                        Update Password
-                    </Button>
+        <div className="rounded-lg border border-slate-200 bg-white p-6">
+            <h3 className="text-sm font-semibold tracking-tight text-slate-900 mb-5">Account Security</h3>
+            <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <Input label="Current Password" type="password" name="current_password" value={data.current_password} onChange={(e) => setData('current_password', e.target.value)} icon="lock" autoComplete="current-password" error={errors.current_password} />
+                <Input label="New Password" type="password" name="password" value={data.password} onChange={(e) => setData('password', e.target.value)} icon="lock" autoComplete="new-password" error={errors.password} />
+                <Input label="Confirm Password" type="password" name="password_confirmation" value={data.password_confirmation} onChange={(e) => setData('password_confirmation', e.target.value)} icon="lock" autoComplete="new-password" error={errors.password_confirmation} />
+                <div className="md:col-span-2">
+                    <Button type="submit" icon="lock" loading={processing}>Update Password</Button>
                 </div>
             </form>
         </div>
@@ -373,55 +203,17 @@ function InstructorTab({ user }: { user: User }) {
 
     const handleSubmit = (e: FormEvent) => {
         e.preventDefault();
-        patch(route('profile.update'), {
-            preserveScroll: true,
-        });
+        patch(route('profile.update'), { preserveScroll: true });
     };
 
     return (
-        <div className="bg-white border border-primary-100 rounded-xl shadow-sm p-6">
-            <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2 font-montserrat">
-                <i className="fas fa-book-open w-5 h-5 text-primary-600"></i>
-                Instructor Information
-            </h3>
-
-            <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-6">
-                <Textarea
-                    label="Biography"
-                    name="bio"
-                    rows={10}
-                    value={data.bio}
-                    onChange={(e) => setData('bio', e.target.value)}
-                    placeholder="Write a short professional bio..."
-                    required
-                    error={errors.bio}
-                />
-
-                <Textarea
-                    label="Areas of Expertise"
-                    name="area_of_expertise"
-                    rows={3}
-                    value={data.area_of_expertise}
-                    onChange={(e) => setData('area_of_expertise', e.target.value)}
-                    placeholder="List your areas of specialization (e.g. Leadership, Communication, Management)..."
-                    error={errors.area_of_expertise}
-                />
-
-                <Input
-                    label="LinkedIn Profile"
-                    type="url"
-                    name="linkedin"
-                    value={data.linkedin}
-                    onChange={(e) => setData('linkedin', e.target.value)}
-                    placeholder="https://linkedin.com/in/username"
-                    error={errors.linkedin}
-                />
-
-                <div className="mt-4">
-                    <Button type="submit" icon="save" loading={processing}>
-                        Save Changes
-                    </Button>
-                </div>
+        <div className="rounded-lg border border-slate-200 bg-white p-6">
+            <h3 className="text-sm font-semibold tracking-tight text-slate-900 mb-5">Instructor Information</h3>
+            <form onSubmit={handleSubmit} className="space-y-5">
+                <Textarea label="Biography" name="bio" rows={10} value={data.bio} onChange={(e) => setData('bio', e.target.value)} placeholder="Write a short professional bio..." required error={errors.bio} />
+                <Textarea label="Areas of Expertise" name="area_of_expertise" rows={3} value={data.area_of_expertise} onChange={(e) => setData('area_of_expertise', e.target.value)} placeholder="List your areas of specialization..." error={errors.area_of_expertise} />
+                <Input label="LinkedIn Profile" type="url" name="linkedin" value={data.linkedin} onChange={(e) => setData('linkedin', e.target.value)} placeholder="https://linkedin.com/in/username" error={errors.linkedin} />
+                <Button type="submit" icon="save" loading={processing}>Save Changes</Button>
             </form>
         </div>
     );
@@ -437,73 +229,19 @@ function SpeakerTab({ user }: { user: User }) {
 
     const handleSubmit = (e: FormEvent) => {
         e.preventDefault();
-        patch(route('profile.update'), {
-            preserveScroll: true,
-            onSuccess: () => {
-                setData('current_password', '');
-            },
-        });
+        patch(route('profile.update'), { preserveScroll: true, onSuccess: () => setData('current_password', '') });
     };
 
-    const isStudent = user.roles?.includes('student') || user.roles?.includes('user') || user.roles?.includes('instructor');
-
     return (
-        <div className="bg-white border border-primary-100 rounded-xl shadow-sm p-6">
-            <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2 font-montserrat">
-                <i className="fas fa-microphone w-5 h-5 text-primary-600"></i>
-                Speaker Information
-            </h3>
-
-            <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <Input
-                    label="Full Name"
-                    type="text"
-                    name="name"
-                    value={data.name}
-                    onChange={(e) => setData('name', e.target.value)}
-                    icon="user"
-                    required
-                    autoFocus
-                    error={errors.name}
-                />
-
-                <Input
-                    label="Phone"
-                    type="text"
-                    name="phone"
-                    value={data.phone}
-                    onChange={(e) => setData('phone', e.target.value)}
-                    icon="phone"
-                    error={errors.phone}
-                />
-
-                <Input
-                    label="Email"
-                    type="email"
-                    name="email"
-                    value={data.email}
-                    onChange={(e) => setData('email', e.target.value)}
-                    icon="envelope"
-                    readOnly={isStudent}
-                    required
-                    error={errors.email}
-                />
-
-                <Input
-                    label="Current Password"
-                    type="password"
-                    name="current_password"
-                    value={data.current_password}
-                    onChange={(e) => setData('current_password', e.target.value)}
-                    icon="lock"
-                    required
-                    error={errors.current_password}
-                />
-
-                <div className="md:col-span-2 mt-4">
-                    <Button type="submit" icon="save" loading={processing}>
-                        Save Changes
-                    </Button>
+        <div className="rounded-lg border border-slate-200 bg-white p-6">
+            <h3 className="text-sm font-semibold tracking-tight text-slate-900 mb-5">Speaker Information</h3>
+            <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <Input label="Full Name" type="text" name="name" value={data.name} onChange={(e) => setData('name', e.target.value)} icon="user" required autoFocus error={errors.name} />
+                <Input label="Phone" type="text" name="phone" value={data.phone} onChange={(e) => setData('phone', e.target.value)} icon="phone" error={errors.phone} />
+                <Input label="Email" type="email" name="email" value={data.email} onChange={(e) => setData('email', e.target.value)} icon="envelope" readOnly={!!(user.roles?.includes('student') || user.roles?.includes('user') || user.roles?.includes('instructor'))} required error={errors.email} />
+                <Input label="Current Password" type="password" name="current_password" value={data.current_password} onChange={(e) => setData('current_password', e.target.value)} icon="lock" required error={errors.current_password} />
+                <div className="md:col-span-2">
+                    <Button type="submit" icon="save" loading={processing}>Save Changes</Button>
                 </div>
             </form>
         </div>
@@ -517,69 +255,32 @@ function DangerZone({ showModal, setShowModal }: { showModal: boolean; setShowMo
 
     const handleDelete = (e: FormEvent) => {
         e.preventDefault();
-        destroy(route('account.destroy'), {
-            preserveScroll: true,
-            onSuccess: () => setShowModal(false),
-        });
+        destroy(route('account.destroy'), { preserveScroll: true, onSuccess: () => setShowModal(false) });
     };
 
     return (
         <>
-            <div className="mt-10">
-                <div className="bg-white border border-red-200 rounded-xl shadow-sm p-6">
-                    <h3 className="text-lg font-semibold text-red-700 mb-4 flex items-center gap-2 font-montserrat">
-                        <i className="fas fa-exclamation-triangle w-5 h-5"></i>
-                        Danger Zone
-                    </h3>
-                    <p className="text-sm text-gray-600 mb-4 font-lato">
-                        Permanently delete your account. This action cannot be undone.
-                    </p>
-                    <button
-                        onClick={() => setShowModal(true)}
-                        className="text-red-700 border border-red-500 hover:bg-red-600 hover:text-white font-semibold px-5 py-2 rounded-lg transition-all duration-200 font-montserrat"
-                    >
-                        <i className="fas fa-trash w-4 h-4 inline-block mr-2"></i>
-                        Deactivate Account
-                    </button>
-                </div>
+            <div className="rounded-lg border border-accent-200 bg-white p-6">
+                <h3 className="text-sm font-semibold tracking-tight text-accent mb-2">Danger Zone</h3>
+                <p className="text-sm text-slate-500 mb-4">Permanently delete your account. This action cannot be undone.</p>
+                <button
+                    onClick={() => setShowModal(true)}
+                    className="rounded-md border border-accent bg-white px-4 py-2 text-sm font-medium text-accent transition hover:bg-accent hover:text-white"
+                >
+                    Deactivate Account
+                </button>
             </div>
 
-            {/* Delete Modal */}
             {showModal && (
-                <div className="fixed inset-0 flex items-center justify-center z-50 bg-black/30">
-                    <div className="bg-white rounded-xl shadow-xl p-6 w-full max-w-md mx-4">
-                        <h2 className="text-lg font-bold mb-4 text-red-700 font-montserrat">
-                            Confirm Account Deactivation
-                        </h2>
-                        <p className="mb-6 text-gray-700 font-lato">
-                            Are you sure you want to deactivate your account? This action cannot be undone.
-                        </p>
-                        <form onSubmit={handleDelete} className="space-y-4">
-                            <Input
-                                label="Current Password"
-                                type="password"
-                                name="current_password_destroy"
-                                value={data.current_password_destroy}
-                                onChange={(e) => setData('current_password_destroy', e.target.value)}
-                                icon="lock"
-                                required
-                                error={errors.current_password_destroy}
-                            />
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/30 px-4 backdrop-blur-sm">
+                    <div className="w-full max-w-md rounded-lg border border-slate-200 bg-white p-6 shadow-lg">
+                        <h2 className="text-base font-semibold text-accent">Confirm Account Deactivation</h2>
+                        <p className="mt-2 text-sm text-slate-500">Are you sure you want to deactivate your account? This action cannot be undone.</p>
+                        <form onSubmit={handleDelete} className="mt-5 space-y-4">
+                            <Input label="Current Password" type="password" name="current_password_destroy" value={data.current_password_destroy} onChange={(e) => setData('current_password_destroy', e.target.value)} icon="lock" required error={errors.current_password_destroy} />
                             <div className="flex justify-end gap-3">
-                                <Button
-                                    type="button"
-                                    variant="secondary"
-                                    onClick={() => setShowModal(false)}
-                                >
-                                    Cancel
-                                </Button>
-                                <Button
-                                    type="submit"
-                                    variant="danger"
-                                    loading={processing}
-                                >
-                                    Deactivate
-                                </Button>
+                                <Button type="button" variant="secondary" onClick={() => setShowModal(false)}>Cancel</Button>
+                                <Button type="submit" variant="danger" loading={processing}>Deactivate</Button>
                             </div>
                         </form>
                     </div>

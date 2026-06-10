@@ -30,7 +30,6 @@ class ShowMyEventController extends Controller
         $event->meeting_link = data_get($event->metadata, 'meeting_link');
         $event->access_notes = data_get($event->metadata, 'access_notes');
         $event->latest_transaction = $event->transactions->first();
-        $event->refund_request = $event->refundRequests->first();
         $event->program_profile = [
             'program_type' => data_get($event->metadata, 'program_type', 'general_event'),
             'program_code' => data_get($event->metadata, 'program_code'),

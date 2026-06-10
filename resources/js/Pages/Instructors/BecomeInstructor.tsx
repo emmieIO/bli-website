@@ -38,11 +38,11 @@ export default function BecomeInstructor({ auth }: BecomeInstructorProps) {
     const faqData = [
         {
             q: 'What qualifications do I need?',
-            a: 'We look for clear subject knowledge, practical experience, and the ability to explain your topic well. Formal certificates can help, but they are not the only factor in our review.',
+            a: 'We look for clear subject knowledge, practical experience, and the ability to explain your topic well. Formal credentials can help, but they are not the only factor in our review.',
         },
         {
-            q: 'How does payment work?',
-            a: 'If your application is approved, any payout structure or commercial terms will be shared with you during onboarding or in a separate agreement.',
+            q: 'How do program terms work?',
+            a: 'If your application is approved, any facilitation structure or commercial terms will be shared with you during onboarding or in a separate agreement.',
         },
         {
             q: 'How long is the review process?',

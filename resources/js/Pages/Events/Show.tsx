@@ -728,9 +728,6 @@ export default function EventShow({ event, auth, primary_cta }: EventShowProps) 
                                             <Link href={route('homepage')} className="block text-sm font-medium text-slate-900 hover:text-emerald-700">
                                                 Return to homepage
                                             </Link>
-                                            <Link href={route('courses.index')} className="block text-sm font-medium text-slate-900 hover:text-emerald-700">
-                                                Browse courses
-                                            </Link>
                                         </div>
                                     </div>
                                 </div>

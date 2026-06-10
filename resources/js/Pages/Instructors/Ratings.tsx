@@ -10,9 +10,6 @@ interface Rating {
     user: {
         name: string;
     };
-    course: {
-        title: string;
-    };
     created_at: string;
 }
 
@@ -61,8 +58,6 @@ export default function Ratings({ instructor, ratings, averageRating, totalRatin
                                         <p className="text-gray-600 mb-2">{rating.review}</p>
                                         <div className="text-sm text-gray-500">
                                             <span>{new Date(rating.created_at).toLocaleDateString()}</span>
-                                            <span className="mx-2">|</span>
-                                            <span>Course: {rating.course.title}</span>
                                         </div>
                                     </div>
                                 ))}

@@ -4,7 +4,6 @@ namespace Tests\Feature;
 
 use App\Enums\EventRegistrationStatus;
 use App\Models\Event;
-use App\Models\EventRefundRequest;
 use App\Models\Transaction;
 use App\Models\User;
 use App\Services\Payment\PaystackService;
@@ -382,97 +381,4 @@ class EventPaymentTest extends TestCase
         $response->assertSessionHas('message', 'Your payment was successful and you are currently on the event waitlist.');
     }
 
-    public function test_refund_processed_webhook_completes_pending_refund_request_and_promotes_waitlist(): void
-    {
-        $registeredUser = User::factory()->create();
-        $waitlistedUser = User::factory()->create();
-        $creator = User::factory()->create();
-        $event = Event::factory()->create([
-            'entry_fee' => 5000,
-            'attendee_slots' => 1,
-            'status' => 'registration_open',
-            'theme' => 'Test Theme',
-            'creator_id' => $creator->id,
-        ]);
-
-        $transaction = Transaction::create([
-            'user_id' => $registeredUser->id,
-            'payable_id' => $event->id,
-            'payable_type' => Event::class,
-            'transaction_id' => 'BLI_EVENT_REFUND_' . time(),
-            'payment_ref' => 'REFUND_REF_' . time(),
-            'amount' => 5000,
-            'currency' => 'NGN',
-            'status' => 'successful',
-            'paid_at' => now(),
-            'metadata' => ['type' => 'event', 'event_id' => $event->id],
-        ]);
-
-        $event->attendees()->attach($registeredUser->id, [
-            'status' => EventRegistrationStatus::REGISTERED->value,
-            'revoke_count' => 0,
-            'created_at' => now()->subHour(),
-            'updated_at' => now()->subHour(),
-        ]);
-
-        $event->attendees()->attach($waitlistedUser->id, [
-            'status' => EventRegistrationStatus::WAITLISTED->value,
-            'revoke_count' => 0,
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
-
-        EventRefundRequest::query()->create([
-            'event_id' => $event->id,
-            'user_id' => $registeredUser->id,
-            'transaction_id' => $transaction->id,
-            'status' => 'pending',
-            'requested_at' => now(),
-        ]);
-
-        $this->mock(PaystackService::class, function ($mock) {
-            $mock->shouldReceive('verifyWebhookSignature')
-                ->once()
-                ->andReturn(true);
-        });
-
-        $payload = [
-            'event' => 'refund.processed',
-            'data' => [
-                'status' => 'processed',
-                'transaction_reference' => $transaction->transaction_id,
-                'amount' => '500000',
-                'currency' => 'NGN',
-            ],
-        ];
-
-        $response = $this->postJson(route('payment.webhook'), $payload, [
-            'x-paystack-signature' => 'test-signature',
-        ]);
-
-        $response->assertOk();
-
-        $this->assertDatabaseHas('transactions', [
-            'id' => $transaction->id,
-            'status' => 'refunded',
-        ]);
-
-        $this->assertDatabaseHas('event_refund_requests', [
-            'event_id' => $event->id,
-            'user_id' => $registeredUser->id,
-            'status' => 'approved',
-        ]);
-
-        $this->assertDatabaseHas('event_attendees', [
-            'event_id' => $event->id,
-            'user_id' => $registeredUser->id,
-            'status' => EventRegistrationStatus::REFUNDED->value,
-        ]);
-
-        $this->assertDatabaseHas('event_attendees', [
-            'event_id' => $event->id,
-            'user_id' => $waitlistedUser->id,
-            'status' => EventRegistrationStatus::REGISTERED->value,
-        ]);
-    }
 }

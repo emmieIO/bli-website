@@ -7,7 +7,6 @@ enum EventRegistrationStatus: string
     case REGISTERED = 'registered';
     case WAITLISTED = 'waitlisted';
     case CANCELLED = 'cancelled';
-    case REFUNDED = 'refunded';
     case ATTENDED = 'attended';
     case NO_SHOW = 'no_show';
 
@@ -94,20 +93,18 @@ enum EventRegistrationStatus: string
         return match ($this) {
             self::REGISTERED => in_array($target, [
                 self::CANCELLED,
-                self::REFUNDED,
                 self::ATTENDED,
                 self::NO_SHOW,
             ], true),
             self::WAITLISTED => in_array($target, [
                 self::REGISTERED,
                 self::CANCELLED,
-                self::REFUNDED,
             ], true),
             self::CANCELLED => in_array($target, [
                 self::REGISTERED,
                 self::WAITLISTED,
             ], true),
-            self::REFUNDED, self::ATTENDED, self::NO_SHOW => false,
+            self::ATTENDED, self::NO_SHOW => false,
         };
     }
 
@@ -117,7 +114,6 @@ enum EventRegistrationStatus: string
             self::REGISTERED => 'confirmed',
             self::WAITLISTED => 'waitlisted',
             self::CANCELLED => 'cancelled',
-            self::REFUNDED => 'refunded',
             self::ATTENDED => 'attended',
             self::NO_SHOW => 'no show',
         };

@@ -3,15 +3,11 @@
 namespace App\Services\Payment;
 
 use App\Contracts\Services\PaymentGatewayInterface;
-use App\Models\Cart;
-use App\Models\Course;
 use App\Models\Event;
-use App\Models\EventRefundRequest;
 use App\Models\Transaction;
 use App\Models\User;
 use App\Services\Event\EventParticipantStateService;
 use App\Services\Event\EventRegistrationService;
-use App\Services\Instructor\InstructorEarningsService;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -24,7 +20,6 @@ class PaymentService
 {
     public function __construct(
         private PaymentGatewayInterface $paymentGateway,
-        private InstructorEarningsService $earningsService,
         private EventRegistrationService $eventRegistrationService,
         private EventParticipantStateService $eventParticipantStateService
     ) {}
@@ -48,7 +43,6 @@ class PaymentService
             'user_id' => $user->id,
             'payable_id' => $payable?->id,
             'payable_type' => $payable ? get_class($payable) : null,
-            'course_id' => ($payable instanceof Course) ? $payable->id : null,
             'transaction_id' => $txRef,
             'amount' => $amount,
             'currency' => config('services.paystack.currency', 'NGN'),
@@ -69,82 +63,12 @@ class PaymentService
             return 'event';
         }
 
-        if ($transaction->metadata['checkout_context'] ?? null === 'cart' || ($transaction->metadata['type'] ?? null) === 'cart') {
-            return 'cart';
-        }
-
-        return 'course';
-    }
-
-    private function getTransactionCheckoutContext(Transaction $transaction): string
-    {
-        $checkoutContext = $transaction->metadata['checkout_context'] ?? null;
-
-        if (is_string($checkoutContext) && $checkoutContext !== '') {
-            return $checkoutContext;
-        }
-
-        return ($transaction->metadata['type'] ?? null) === 'cart' ? 'cart' : 'direct';
+        return 'payment';
     }
 
     private function isEventTransaction(Transaction $transaction): bool
     {
         return $this->getTransactionSubjectType($transaction) === 'event';
-    }
-
-    private function isCartCheckout(Transaction $transaction): bool
-    {
-        return $this->getTransactionCheckoutContext($transaction) === 'cart';
-    }
-
-    /**
-     * Initialize payment
-     */
-    public function initializePayment(User $user, Course $course, array $customerData): array
-    {
-        DB::beginTransaction();
-
-        try {
-            $txRef = $this->generateTransactionReference($user, $course);
-
-            $transaction = $this->createTransaction($user, $course, $txRef, (float) $course->price);
-
-            $paymentData = $this->paymentGateway->initializePayment([
-                'email' => $customerData['email'],
-                'amount' => $course->price * 100, // Convert to kobo
-                'reference' => $txRef,
-                'callback_url' => route('payment.callback'),
-                'first_name' => $customerData['name'] ?? null, // Added name
-                'phone' => $customerData['phone'] ?? null, // Added phone for consistency, though it's already validated as nullable
-                'metadata' => [
-                    'user_id' => $user->id,
-                    'course_id' => $course->id,
-                    'payable_id' => $course->id,
-                    'payable_type' => Course::class,
-                    'transaction_id' => $transaction->id,
-                    'subject_type' => 'course',
-                    'checkout_context' => 'direct',
-                ],
-            ]);
-
-            DB::commit();
-
-            return [
-                'success' => true,
-                'payment_data' => $paymentData,
-            ];
-
-        } catch (\Exception $e) {
-            DB::rollBack();
-
-            Log::error('Payment initialization failed', [
-                'error' => $e->getMessage(),
-                'user_id' => $user->id,
-                'course_id' => $course->id,
-            ]);
-
-            throw $e;
-        }
     }
 
     /**
@@ -250,14 +174,6 @@ class PaymentService
             ];
         }
 
-        if ($registrationStatus === \App\Enums\EventRegistrationStatus::REFUNDED) {
-            return [
-                'can_checkout' => false,
-                'reason' => 'already_refunded',
-                'message' => 'This registration was refunded. Please contact support if you need to register again.',
-            ];
-        }
-
         if ($this->eventParticipantStateService->hasReachedMaxRevokes($event, $user->id)) {
             return [
                 'can_checkout' => false,
@@ -343,10 +259,6 @@ class PaymentService
                 return [
                     'success' => true,
                     'type' => $subjectType,
-                    'course' => $transaction->course,
-                    'courses' => isset($transaction->metadata['course_ids'])
-                        ? Course::query()->findMany($transaction->metadata['course_ids'])
-                        : [],
                     'transaction' => $transaction,
                 ];
             } else {
@@ -412,61 +324,13 @@ class PaymentService
                 ];
             }
 
-            // Check if this is a cart purchase or single course purchase
-            $isCartPurchase = $this->isCartCheckout($transaction);
+            DB::commit();
 
-            if ($isCartPurchase) {
-                // Enroll user in all courses from cart
-                $courseIds = $transaction->metadata['course_ids'] ?? [];
-
-                foreach ($courseIds as $courseId) {
-                    $course = Course::query()->find($courseId);
-                    if ($course) {
-                        $this->enrollUserInCourse($transaction->user_id, $course);
-                    }
-                }
-
-                // Record earnings for each course in the cart
-                // Each instructor gets earnings only for their courses
-                $cartItems = $transaction->metadata['items'] ?? [];
-                if (! empty($cartItems)) {
-                    $this->earningsService->recordEarningsFromCart($transaction, $cartItems);
-                }
-
-                // Clear the cart
-                $cartId = $transaction->metadata['cart_id'] ?? null;
-                if ($cartId) {
-                    $cart = Cart::query()->find($cartId);
-                    if ($cart) {
-                        $cart->clear();
-                    }
-                }
-
-                DB::commit();
-
-                return [
-                    'success' => true,
-                    'type' => $this->getTransactionSubjectType($transaction),
-                    'courses' => Course::query()->findMany($courseIds),
-                    'transaction' => $transaction,
-                ];
-            } else {
-                // Single course purchase
-                $course = $transaction->course;
-                $this->enrollUserInCourse($transaction->user_id, $course);
-
-                // Record instructor earnings
-                $this->earningsService->recordEarningFromTransaction($transaction);
-
-                DB::commit();
-
-                return [
-                    'success' => true,
-                    'type' => $this->getTransactionSubjectType($transaction),
-                    'course' => $course,
-                    'transaction' => $transaction,
-                ];
-            }
+            return [
+                'success' => true,
+                'type' => $this->getTransactionSubjectType($transaction),
+                'transaction' => $transaction,
+            ];
 
         } catch (\Exception $e) {
             DB::rollBack();
@@ -487,12 +351,6 @@ class PaymentService
     {
         if (! $this->paymentGateway->verifyWebhookSignature(json_encode($payload), $signature)) {
             Log::warning('Invalid Paystack webhook signature');
-
-            return;
-        }
-
-        if (($payload['event'] ?? null) === 'refund.processed') {
-            $this->processRefundWebhook($payload);
 
             return;
         }
@@ -529,26 +387,6 @@ class PaymentService
                 if ($event) {
                     $this->eventRegistrationService->registerOrWaitlist($event, $transaction->user_id);
                 }
-            } elseif ($transaction->course) {
-                // Single course purchase
-                $this->enrollUserInCourse($transaction->user_id, $transaction->course);
-                $this->earningsService->recordEarningFromTransaction($transaction);
-            } else {
-                // Handle cart purchase - enroll in all courses
-                $courseIds = $transaction->metadata['course_ids'] ?? [];
-
-                foreach ($courseIds as $courseId) {
-                    $course = Course::query()->find($courseId);
-                    if ($course) {
-                        $this->enrollUserInCourse($transaction->user_id, $course);
-                    }
-                }
-
-                // Record earnings for each course in the cart
-                $cartItems = $transaction->metadata['items'] ?? [];
-                if (! empty($cartItems)) {
-                    $this->earningsService->recordEarningsFromCart($transaction, $cartItems);
-                }
             }
 
             DB::commit();
@@ -570,116 +408,6 @@ class PaymentService
         }
     }
 
-    public function processRefundWebhook(array $payload): void
-    {
-        $txRef = $payload['data']['transaction_reference'] ?? null;
-
-        if (! $txRef) {
-            Log::warning('Refund webhook missing transaction reference', [
-                'payload' => $payload,
-            ]);
-
-            return;
-        }
-
-        $transaction = Transaction::query()->where('transaction_id', $txRef)->first();
-
-        if (! $transaction || $transaction->status === 'refunded') {
-            return;
-        }
-
-        DB::beginTransaction();
-
-        try {
-            $transaction->forceFill([
-                'status' => 'refunded',
-                'metadata' => array_merge($transaction->metadata ?? [], [
-                    'refund_data' => $payload['data'],
-                ]),
-            ])->save();
-
-            if ($this->isEventTransaction($transaction)) {
-                $refundRequest = EventRefundRequest::query()
-                    ->where('transaction_id', $transaction->id)
-                    ->where('status', 'pending')
-                    ->latest()
-                    ->first();
-
-                if ($refundRequest) {
-                    $this->eventRegistrationService->approveRefundRequest($refundRequest);
-                }
-            }
-
-            DB::commit();
-
-            Log::info('Refund processed via Paystack webhook', [
-                'transaction_id' => $txRef,
-                'user_id' => $transaction->user_id,
-            ]);
-        } catch (\Exception $e) {
-            DB::rollBack();
-
-            Log::error('Refund webhook processing failed', [
-                'error' => $e->getMessage(),
-                'transaction_id' => $txRef,
-            ]);
-
-            throw $e;
-        }
-    }
-
-    /**
-     * Enroll user in course (if not already enrolled)
-     */
-    private function enrollUserInCourse(int $userId, Course $course): void
-    {
-        if (! $course->students()->where('user_id', $userId)->exists()) {
-            $course->students()->attach($userId);
-        }
-    }
-
-    /**
-     * Check if user can checkout for a course
-     */
-    public function canCheckout(User $user, Course $course): array
-    {
-        // Check if course is free
-        if ($course->is_free || $course->price <= 0) {
-            return [
-                'can_checkout' => false,
-                'reason' => 'free_course',
-                'message' => 'This is a free course. You can enroll directly.',
-            ];
-        }
-
-        // Check if already enrolled
-        if ($course->students()->where('user_id', $user->id)->exists()) {
-            return [
-                'can_checkout' => false,
-                'reason' => 'already_enrolled',
-                'message' => 'You are already enrolled in this course',
-            ];
-        }
-
-        // Check if already has successful transaction
-        $existingTransaction = Transaction::query()->where('user_id', $user->id)
-            ->where('course_id', $course->id)
-            ->where('status', 'successful')
-            ->first();
-
-        if ($existingTransaction) {
-            return [
-                'can_checkout' => false,
-                'reason' => 'already_purchased',
-                'message' => 'You have already purchased this course',
-            ];
-        }
-
-        return [
-            'can_checkout' => true,
-        ];
-    }
-
     /**
      * Mark transaction as failed
      */
@@ -692,63 +420,4 @@ class PaymentService
         }
     }
 
-    /**
-     * Initialize cart payment
-     */
-    public function initializeCartPayment(User $user, Cart $cart, array $customerData): array
-    {
-        DB::beginTransaction();
-
-        try {
-            $txRef = 'BLI_CART_'.time().'_'.$user->id.'_'.$cart->id;
-            $totalAmount = (float) $cart->total;
-            $courseIds = $cart->items->pluck('course_id')->toArray();
-
-            $metadata = [
-                'subject_type' => 'cart',
-                'checkout_context' => 'cart',
-                'cart_id' => $cart->id,
-                'course_ids' => $courseIds,
-                'items' => $cart->items->filter(fn ($item) => $item->course)->map(fn ($item) => [
-                    'course_id' => $item->course_id,
-                    'course_title' => $item->course->title,
-                    'price' => $item->price,
-                ])->values()->toArray(),
-            ];
-
-            $transaction = $this->createTransaction($user, null, $txRef, $totalAmount, $metadata);
-
-            $paymentData = $this->paymentGateway->initializePayment([
-                'email' => $customerData['email'],
-                'amount' => $totalAmount * 100, // Convert to kobo
-                'reference' => $txRef,
-                'callback_url' => route('payment.callback'),
-                'metadata' => [
-                    'user_id' => $user->id,
-                    'cart_id' => $cart->id,
-                    'transaction_id' => $transaction->id,
-                    'subject_type' => 'cart',
-                    'checkout_context' => 'cart',
-                ],
-            ]);
-
-            DB::commit();
-
-            return [
-                'success' => true,
-                'payment_data' => $paymentData,
-            ];
-
-        } catch (\Exception $e) {
-            DB::rollBack();
-
-            Log::error('Cart payment initialization failed', [
-                'error' => $e->getMessage(),
-                'user_id' => $user->id,
-                'cart_id' => $cart->id,
-            ]);
-
-            throw $e;
-        }
-    }
 }

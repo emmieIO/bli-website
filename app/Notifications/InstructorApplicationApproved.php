@@ -40,7 +40,7 @@ class InstructorApplicationApproved extends Notification implements ShouldQueue
             ->greeting("Hello {$notifiable->name},")
             ->line('Congratulations! Your application to become an instructor has been approved.')
             ->action('Set Your Password', $this->resetUrl)
-            ->line('You can now start building your first course. Welcome aboard!');
+            ->line('You can now participate in instructor-led leadership opportunities. Welcome aboard!');
     }
 
     /**

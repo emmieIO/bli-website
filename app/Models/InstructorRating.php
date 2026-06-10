@@ -13,7 +13,6 @@ class InstructorRating extends Model
     protected $fillable = [
         'instructor_id',
         'user_id',
-        'course_id',
         'rating',
         'review',
     ];
@@ -38,11 +37,4 @@ class InstructorRating extends Model
         return $this->belongsTo(User::class, 'user_id');
     }
 
-    /**
-     * Get the course associated with this rating
-     */
-    public function course(): BelongsTo
-    {
-        return $this->belongsTo(Course::class);
-    }
 }

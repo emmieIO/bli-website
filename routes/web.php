@@ -37,16 +37,6 @@ Route::middleware('auth')->group(function () {
 });
 Route::get('/instructors/{instructor}/ratings', [\App\Http\Controllers\InstructorRatingController::class, 'index'])->name('instructors.ratings');
 
-// Shopping cart (public website)
-Route::get('/cart', [\App\Http\Controllers\CartController::class, 'index'])->name('cart.index');
-Route::middleware('auth')->group(function () {
-    Route::post('/cart/add/{course}', [\App\Http\Controllers\CartController::class, 'add'])->name('cart.add');
-    Route::delete('/cart/remove/{course}', [\App\Http\Controllers\CartController::class, 'remove'])->name('cart.remove');
-    Route::delete('/cart/clear', [\App\Http\Controllers\CartController::class, 'clear'])->name('cart.clear');
-    Route::get('/cart/checkout', [\App\Http\Controllers\CartController::class, 'checkout'])->name('cart.checkout');
-    Route::get('/api/cart/count', [\App\Http\Controllers\CartController::class, 'count'])->name('cart.count');
-});
-
 // Transaction receipt route (User-specific)
 Route::middleware('auth')->group(function () {
     Route::get('/transactions/{transaction}/receipt', [\App\Http\Controllers\TransactionController::class, 'showReceipt'])->name('transactions.show-receipt');
@@ -82,10 +72,7 @@ Route::middleware('web')->group(function () {
     require __DIR__ . '/admin.php';
     require __DIR__ . '/instructor.php';
     require __DIR__ . '/speakers.php';
-    require __DIR__ . '/courses.php';
-    require __DIR__ . '/certificates.php';
     require __DIR__ . '/payments.php';
     require __DIR__ . '/mentorship.php';
     require __DIR__ . '/tickets.php';
 });
-

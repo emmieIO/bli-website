@@ -28,6 +28,7 @@ class DatabaseSeeder extends Seeder
             BackFillApplicationIdsSeeder::class,
             AdminSeeder::class,
             BcciDiscipleshipTrackSeeder::class,
+            BlogPostSeeder::class,
         ]);
     }
 }

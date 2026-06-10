@@ -1,8 +1,6 @@
 import { FormEventHandler, useState } from 'react';
 import { Head, Link, useForm } from '@inertiajs/react';
 import AuthLayout from '@/Layouts/AuthLayout';
-import Input from '@/Components/UI/Input';
-import Button from '@/Components/UI/Button';
 
 export default function Login({ status }: { status?: string }) {
     const { data, setData, post, processing, errors } = useForm({
@@ -19,103 +17,53 @@ export default function Login({ status }: { status?: string }) {
     };
 
     return (
-        <AuthLayout
-            title="Sign in"
-            description="Welcome back — enter your credentials to continue."
-        >
+        <AuthLayout title="Sign in" description="Welcome back — enter your credentials to continue.">
             <Head title="Login" />
 
             {status && (
-                <div className="mb-6 flex items-start gap-2 rounded-lg border border-blue-100 bg-blue-50 px-4 py-3 text-sm text-blue-700">
-                    <span>&#9432;</span>
-                    <span>{status}</span>
+                <div className="mb-5 rounded-md bg-primary-50 px-4 py-3 text-sm text-primary">
+                    {status}
                 </div>
             )}
 
-            <form onSubmit={submit} className="space-y-5">
-                <Input
-                    type="email"
-                    name="email"
-                    label="Email Address"
-                    icon="fas fa-envelope"
-                    placeholder="you@example.com"
-                    value={data.email}
-                    onChange={(e) => setData('email', e.target.value)}
-                    error={errors.email}
-                />
-
-                <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                        <label className="block text-sm font-medium text-gray-700">Password</label>
-                        <Link
-                            href={route('password.request')}
-                            className="text-sm font-medium text-primary hover:text-accent transition-colors"
-                        >
-                            Forgot?
-                        </Link>
-                    </div>
-                    <div className="relative">
-                        <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                            <i className="fas fa-lock text-gray-400" />
-                        </div>
-                        <input
-                            type={showPassword ? 'text' : 'password'}
-                            name="password"
-                            value={data.password}
-                            onChange={(e) => setData('password', e.target.value)}
-                            className={`block w-full rounded-xl border py-3 pl-10 pr-12 text-gray-900 placeholder-gray-500 transition-all duration-200 bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 ${
-                                errors.password
-                                    ? 'border-accent-500 focus:ring-accent-500'
-                                    : 'border-gray-300 focus:border-primary focus:ring-primary'
-                            }`}
-                            placeholder="Enter your password"
-                        />
-                        <button
-                            type="button"
-                            onClick={() => setShowPassword(!showPassword)}
-                            className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600 transition-colors"
-                        >
-                            <i className={`fas ${showPassword ? 'fa-eye-slash' : 'fa-eye'}`} />
-                        </button>
-                    </div>
-                    {errors.password && (
-                        <p className="text-sm text-accent-600">{errors.password}</p>
-                    )}
+            <form onSubmit={submit} className="space-y-4">
+                <div>
+                    <label htmlFor="email" className="block text-[13px] font-medium text-slate-700 mb-1.5">Email Address</label>
+                    <input type="email" id="email" value={data.email} onChange={(e) => setData('email', e.target.value)} required placeholder="you@example.com"
+                        className="w-full rounded-md border border-slate-300 px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 outline-none transition focus:border-primary-300 focus:ring-2 focus:ring-primary-500/10" />
+                    {errors.email && <p className="mt-1.5 text-[13px] text-accent">{errors.email}</p>}
                 </div>
 
-                <label className="flex items-center gap-2">
-                    <input
-                        type="checkbox"
-                        name="remember"
-                        checked={data.remember}
-                        onChange={(e) => setData('remember', e.target.checked)}
-                        className="rounded border-gray-300 text-primary focus:ring-primary"
-                    />
-                    <span className="text-sm text-gray-600">Remember me</span>
+                <div>
+                    <div className="flex items-center justify-between mb-1.5">
+                        <label htmlFor="password" className="text-[13px] font-medium text-slate-700">Password</label>
+                        <Link href={route('password.request')} className="text-[13px] font-medium text-primary hover:text-accent">Forgot?</Link>
+                    </div>
+                    <div className="relative">
+                        <input type={showPassword ? 'text' : 'password'} id="password" value={data.password} onChange={(e) => setData('password', e.target.value)} required placeholder="Enter your password"
+                            className="w-full rounded-md border border-slate-300 px-3.5 py-2.5 pr-10 text-sm text-slate-900 placeholder:text-slate-400 outline-none transition focus:border-primary-300 focus:ring-2 focus:ring-primary-500/10" />
+                        <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400 hover:text-slate-600">
+                            <i className={`fas ${showPassword ? 'fa-eye-slash' : 'fa-eye'} text-sm`} />
+                        </button>
+                    </div>
+                    {errors.password && <p className="mt-1.5 text-[13px] text-accent">{errors.password}</p>}
+                </div>
+
+                <label className="flex items-center gap-2.5 cursor-pointer">
+                    <input type="checkbox" checked={data.remember} onChange={(e) => setData('remember', e.target.checked)}
+                        className="h-4 w-4 rounded border-slate-300 text-primary focus:ring-primary-500/20" />
+                    <span className="text-[13px] text-slate-600">Remember me</span>
                 </label>
 
-                <Button
-                    type="submit"
-                    variant="primary"
-                    fullWidth
-                    isLoading={processing}
-                    className="py-3.5 text-base"
-                >
+                <button type="submit" disabled={processing} className="w-full rounded-md bg-accent px-4 py-3 text-sm font-semibold text-white transition hover:bg-accent-600 disabled:opacity-50 shadow-sm">
                     {processing ? 'Signing in...' : 'Sign in'}
-                </Button>
+                </button>
             </form>
 
-            <div className="mt-6 border-t border-gray-100 pt-5 text-center">
-                <p className="text-gray-600">
-                    Don't have an account?{' '}
-                    <Link
-                        href={route('register')}
-                        className="font-semibold text-primary hover:text-accent transition-colors"
-                    >
-                        Create account
-                    </Link>
-                </p>
-            </div>
+            <p className="mt-6 text-center text-sm text-slate-500">
+                Don't have an account?{' '}
+                <Link href={route('register')} className="font-semibold text-primary hover:text-accent">Create account</Link>
+            </p>
         </AuthLayout>
     );
 }

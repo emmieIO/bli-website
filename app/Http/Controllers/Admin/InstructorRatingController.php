@@ -15,7 +15,7 @@ class InstructorRatingController extends Controller
      */
     public function index(Request $request)
     {
-        $query = InstructorRating::with(['instructor', 'user', 'course']);
+        $query = InstructorRating::with(['instructor', 'user']);
 
         // Filter by instructor if provided
         if ($request->instructor_id) {
@@ -77,7 +77,7 @@ class InstructorRatingController extends Controller
      */
     public function show(InstructorRating $rating)
     {
-        $rating->load(['instructor', 'user', 'course']);
+        $rating->load(['instructor', 'user']);
 
         return Inertia::render('Admin/InstructorRatings/Show', [
             'rating' => $rating,

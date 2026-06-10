@@ -24,7 +24,19 @@ class ProgrammeController extends Controller
     public function index(Request $request)
     {
         $searchQuery = $request->input('q', null);
-        $events = $this->eventQueryService->getPublishedEvents($searchQuery);
+        $statusFilter = $request->input('status');
+
+        $statusMap = [
+            'live_now'             => 'live',
+            'open_registration'    => 'registration_open',
+            'registration_closed'  => 'registration_closed',
+            'completed'            => 'completed',
+            'announced'            => 'published',
+        ];
+
+        $dbStatus = $statusFilter ? ($statusMap[$statusFilter] ?? null) : null;
+
+        $events = $this->eventQueryService->getPublishedEvents($searchQuery, $dbStatus);
 
         $events->setCollection(
             $events->getCollection()->map(function (Event $event) {
@@ -40,33 +52,8 @@ class ProgrammeController extends Controller
             })
         );
 
-        $sections = collect($this->publicSectionDefinitions())
-            ->map(function (array $section) use ($events) {
-                $matches = $events->getCollection()
-                    ->filter(fn (Event $event) => $event->public_segment === $section['key'])
-                    ->values();
-
-                return [
-                    ...$section,
-                    'events' => $matches,
-                ];
-            })
-            ->filter(fn (array $section) => count($section['events']) > 0)
-            ->values();
-
-        $segmentCounts = [
-            'live_now' => $events->getCollection()->where('public_segment', 'live_now')->count(),
-            'open_registration' => $events->getCollection()->where('public_segment', 'open_registration')->count(),
-            'waitlist_open' => $events->getCollection()->where('public_segment', 'waitlist_open')->count(),
-            'announced' => $events->getCollection()->where('public_segment', 'announced')->count(),
-            'registration_closed' => $events->getCollection()->where('public_segment', 'registration_closed')->count(),
-            'completed' => $events->getCollection()->where('public_segment', 'completed')->count(),
-        ];
-
         return \Inertia\Inertia::render("Events/Index", [
             'searchQuery' => $searchQuery,
-            'segmentCounts' => $segmentCounts,
-            'sections' => $sections,
             'events' => $events,
         ]);
     }
@@ -111,42 +98,6 @@ class ProgrammeController extends Controller
                 'note' => 'This event is public.',
             ],
         };
-    }
-
-    private function publicSectionDefinitions(): array
-    {
-        return [
-            [
-                'key' => 'live_now',
-                'title' => 'Live Now',
-                'description' => 'Events that are currently happening and should take top visibility.',
-            ],
-            [
-                'key' => 'open_registration',
-                'title' => 'Open Registration',
-                'description' => 'Events actively accepting new attendee registrations.',
-            ],
-            [
-                'key' => 'waitlist_open',
-                'title' => 'Waitlist Open',
-                'description' => 'Events at capacity where new attendees can still join the queue.',
-            ],
-            [
-                'key' => 'announced',
-                'title' => 'Announced',
-                'description' => 'Publicly visible events that are not yet open for attendee registration.',
-            ],
-            [
-                'key' => 'registration_closed',
-                'title' => 'Registration Closed',
-                'description' => 'Events that remain public, but no longer accept new attendee registration.',
-            ],
-            [
-                'key' => 'completed',
-                'title' => 'Completed',
-                'description' => 'Past public events retained for visibility and reference.',
-            ],
-        ];
     }
 
     /**

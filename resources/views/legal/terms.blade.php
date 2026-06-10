@@ -13,7 +13,7 @@
         <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
             <div class="flex items-center justify-between">
                 <a href="{{ route('homepage') }}" class="flex items-center space-x-3 group">
-                    <img src="/images/logo.jpg" alt="BLI Logo" class="w-12 h-12 rounded-xl object-cover shadow-md group-hover:shadow-lg transition-all">
+                    <img src="/assets/img/logo.jpg" alt="BLI Logo" class="w-12 h-12 rounded-xl object-cover shadow-md group-hover:shadow-lg transition-all">
                     <div>
                         <span class="text-xl font-bold font-montserrat" style="color: #002147;">Beacon Leadership Institute</span>
                     </div>
@@ -44,7 +44,7 @@
                 <section class="mb-10">
                     <h2 class="text-2xl font-bold font-montserrat mb-4" style="color: #002147;">1. Agreement to Terms</h2>
                     <p class="text-gray-700 leading-relaxed mb-4">
-                        Welcome to Beacon Leadership Institute ("Company," "we," "our," or "us"). These Terms of Service ("Terms") govern your access to and use of our website, courses, events, and services (collectively, the "Services").
+                        Welcome to Beacon Leadership Institute ("Company," "we," "our," or "us"). These Terms of Service ("Terms") govern your access to and use of our website, events, mentorship, speaker programs, and services (collectively, the "Services").
                     </p>
                     <p class="text-gray-700 leading-relaxed mb-4">
                         By accessing or using our Services, you agree to be bound by these Terms and our Privacy Policy. If you do not agree to these Terms, you may not access or use our Services.
@@ -97,15 +97,14 @@
                 <section class="mb-10">
                     <h2 class="text-2xl font-bold font-montserrat mb-4" style="color: #002147;">4. Use of Services</h2>
 
-                    <h3 class="text-xl font-semibold font-montserrat mb-3 mt-6" style="color: #002147;">4.1 Courses and Educational Content</h3>
+                    <h3 class="text-xl font-semibold font-montserrat mb-3 mt-6" style="color: #002147;">4.1 Programs and Educational Content</h3>
                     <p class="text-gray-700 leading-relaxed mb-4">
-                        Our platform offers various courses, events, and educational content. When you enroll in a course or event:
+                        Our platform offers events, mentorship, speaker programs, and educational content. When you register for a program or event:
                     </p>
                     <ul class="list-disc pl-6 space-y-2 text-gray-700 mb-4">
                         <li>You receive a limited, non-exclusive, non-transferable license to access the content</li>
-                        <li>You may not share, distribute, or resell course materials</li>
-                        <li>Course access may be time-limited or subject to specific terms</li>
-                        <li>Certificates are awarded upon successful completion of course requirements</li>
+                        <li>You may not share, distribute, or resell program materials</li>
+                        <li>Program access may be time-limited or subject to specific terms</li>
                     </ul>
 
                     <h3 class="text-xl font-semibold font-montserrat mb-3 mt-6" style="color: #002147;">4.2 Events and Registrations</h3>
@@ -116,7 +115,6 @@
                         <li>Registration is subject to availability</li>
                         <li>You may cancel your registration according to our cancellation policy</li>
                         <li>We reserve the right to cancel or reschedule events</li>
-                        <li>Refunds, if applicable, will be processed according to our refund policy</li>
                     </ul>
 
                     <h3 class="text-xl font-semibold font-montserrat mb-3 mt-6" style="color: #002147;">4.3 Instructor and Speaker Applications</h3>
@@ -139,7 +137,7 @@
                         <li>Interfere with or disrupt the Services</li>
                         <li>Scrape, crawl, or use automated tools to access the Services</li>
                         <li>Share account credentials with others</li>
-                        <li>Download or redistribute course content without permission</li>
+                        <li>Download or redistribute program content without permission</li>
                     </ul>
                 </section>
 
@@ -149,7 +147,7 @@
 
                     <h3 class="text-xl font-semibold font-montserrat mb-3 mt-6" style="color: #002147;">6.1 Our Content</h3>
                     <p class="text-gray-700 leading-relaxed mb-4">
-                        All content on our platform, including but not limited to text, graphics, logos, images, videos, audio, software, and course materials, is the property of Beacon Leadership Institute or our content providers and is protected by copyright, trademark, and other intellectual property laws.
+                        All content on our platform, including but not limited to text, graphics, logos, images, videos, audio, software, and program materials, is the property of Beacon Leadership Institute or our content providers and is protected by copyright, trademark, and other intellectual property laws.
                     </p>
 
                     <h3 class="text-xl font-semibold font-montserrat mb-3 mt-6" style="color: #002147;">6.2 User Content</h3>
@@ -161,13 +159,13 @@
                     </p>
                 </section>
 
-                <!-- Payment and Refunds -->
+                <!-- Payments -->
                 <section class="mb-10">
-                    <h2 class="text-2xl font-bold font-montserrat mb-4" style="color: #002147;">7. Payment and Refunds</h2>
+                    <h2 class="text-2xl font-bold font-montserrat mb-4" style="color: #002147;">7. Payments</h2>
 
                     <h3 class="text-xl font-semibold font-montserrat mb-3 mt-6" style="color: #002147;">7.1 Pricing</h3>
                     <p class="text-gray-700 leading-relaxed mb-4">
-                        Course and event prices are displayed on our platform and are subject to change. We reserve the right to modify prices at any time, but price changes will not affect orders already placed.
+                        Event and program prices are displayed on our platform and are subject to change. We reserve the right to modify prices at any time, but price changes will not affect orders already placed.
                     </p>
 
                     <h3 class="text-xl font-semibold font-montserrat mb-3 mt-6" style="color: #002147;">7.2 Payment Processing</h3>
@@ -175,15 +173,6 @@
                         Payments are processed through secure third-party payment processors. By making a payment, you agree to the terms and conditions of the payment processor.
                     </p>
 
-                    <h3 class="text-xl font-semibold font-montserrat mb-3 mt-6" style="color: #002147;">7.3 Refund Policy</h3>
-                    <div class="bg-blue-50 border-l-4 border-blue-400 p-4">
-                        <p class="text-blue-900 mb-2">
-                            <strong>Course Refunds:</strong> Refund requests must be submitted within 14 days of enrollment, provided less than 30% of the course content has been accessed.
-                        </p>
-                        <p class="text-blue-900">
-                            <strong>Event Refunds:</strong> Event cancellations must be made at least 7 days before the event date for a full refund. Cancellations within 7 days may be subject to a processing fee.
-                        </p>
-                    </div>
                 </section>
 
                 <!-- Disclaimers -->

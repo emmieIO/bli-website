@@ -12,25 +12,6 @@ export interface User {
     permissions: string[];
 }
 
-export interface Course {
-    id: number;
-    title: string;
-    subtitle?: string | null;
-    slug: string;
-    description: string;
-    thumbnail_path?: string | null;
-    preview_video_id?: string | null;
-    language?: string | null;
-    level: 'beginner' | 'intermediate' | 'advanced';
-    category_id: number;
-    instructor_id: number;
-    status: 'draft' | 'under_review' | 'approved' | 'rejected';
-    is_free: boolean;
-    price?: string | null;
-    created_at: string;
-    updated_at: string;
-}
-
 export interface Event {
     id: number;
     uuid: string;
@@ -55,28 +36,6 @@ export interface Event {
     is_featured: boolean;
     entry_fee: string;
     metadata?: Record<string, any> | null;
-    created_at: string;
-    updated_at: string;
-}
-
-export interface Lesson {
-    id: number;
-    module_id: number;
-    title: string;
-    slug: string;
-    type?: string | null;
-    description?: string | null;
-    vimeo_id?: string | null;
-    video_status?: 'pending' | 'uploading' | 'processing' | 'ready' | 'failed';
-    video_error?: string | null;
-    video_uploaded_at?: string | null;
-    preview_vimeo_id?: string | null;
-    is_preview: boolean;
-    content_path?: string | null;
-    video_url?: string | null;
-    resource_url?: string | null;
-    assignment_instructions?: string | null;
-    order: number;
     created_at: string;
     updated_at: string;
 }

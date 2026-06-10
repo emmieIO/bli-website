@@ -92,29 +92,6 @@ class EventTransitionAuditTest extends TestCase
         ]);
     }
 
-    public function test_refunded_registration_writes_transition_audit(): void
-    {
-        $user = User::factory()->create();
-        $event = $this->makeEvent();
-
-        $event->attendees()->attach($user->id, [
-            'status' => EventRegistrationStatus::REGISTERED->value,
-            'revoke_count' => 0,
-        ]);
-
-        $result = app(EventRegistrationService::class)->refundRegistration($event, $user->id);
-
-        $this->assertTrue($result);
-
-        $this->assertDatabaseHas('event_transition_audits', [
-            'event_id' => $event->id,
-            'user_id' => $user->id,
-            'action' => 'registration_refunded',
-            'from_status' => EventRegistrationStatus::REGISTERED->value,
-            'to_status' => EventRegistrationStatus::REFUNDED->value,
-        ]);
-    }
-
     private function makeEvent(array $overrides = []): Event
     {
         $creator = User::factory()->create();

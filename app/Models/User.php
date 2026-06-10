@@ -79,11 +79,6 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasOne(InstructorProfile::class, 'user_id');
     }
 
-    public function coursesTeaching()
-    {
-        return $this->hasMany(Course::class, 'instructor_id');
-    }
-
     public function isApproved()
     {
         return optional($this->instructorProfile)->is_approved;
@@ -174,22 +169,6 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->canAccessSpeakerArea() && ($hasApplication || $hasInvite || $isAssignedSpeaker);
     }
 
-    public function certificates()
-    {
-        return $this->hasMany(Certificate::class);
-    }
-
-    public function courseEnrollments()
-    {
-        return $this->belongsToMany(Course::class, 'course_user')
-            ->withTimestamps();
-    }
-
-    public function lessonProgress()
-    {
-        return $this->hasMany(LessonProgress::class);
-    }
-
     /**
      * Ratings given by this user to instructors
      */
@@ -228,22 +207,6 @@ class User extends Authenticatable implements MustVerifyEmail
     public function getTotalRatingsAttribute()
     {
         return $this->ratingsReceived()->count();
-    }
-
-    /**
-     * Get the user's shopping cart
-     */
-    public function cart()
-    {
-        return $this->hasOne(Cart::class);
-    }
-
-    /**
-     * Get or create the user's cart
-     */
-    public function getOrCreateCart(): Cart
-    {
-        return $this->cart()->firstOrCreate(['user_id' => $this->id]);
     }
 
     public function tickets()

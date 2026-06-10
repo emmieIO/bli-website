@@ -1,6 +1,6 @@
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import DashboardLayout from '@/Layouts/DashboardLayout';
-import { Star, Trash2, Search } from 'lucide-react';
+import { Star, Trash2, Search, X } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { useState, FormEvent } from 'react';
 
@@ -9,18 +9,12 @@ interface User {
     name: string;
 }
 
-interface Course {
-    id: number;
-    title: string;
-}
-
 interface Rating {
     id: number;
     rating: number;
     review: string | null;
     instructor: User;
     user: User;
-    course: Course | null;
     created_at: string;
 }
 
@@ -54,11 +48,11 @@ export default function InstructorRatingsIndex({ ratings, instructors, stats, fi
     const [ratingFilter, setRatingFilter] = useState(filters.rating || '');
     const [search, setSearch] = useState(filters.search || '');
 
+    const hasFilters = instructorId || ratingFilter || search;
+
     const handleDelete = (ratingId: number) => {
         if (confirm('Are you sure you want to delete this rating?')) {
-            router.delete(route('admin.ratings.destroy', ratingId), {
-                preserveScroll: true,
-            });
+            router.delete(route('admin.ratings.destroy', ratingId), { preserveScroll: true });
         }
     };
 
@@ -68,10 +62,7 @@ export default function InstructorRatingsIndex({ ratings, instructors, stats, fi
             instructor_id: instructorId || undefined,
             rating: ratingFilter || undefined,
             search: search || undefined,
-        }, {
-            preserveState: true,
-            preserveScroll: true,
-        });
+        }, { preserveState: true, preserveScroll: true });
     };
 
     const clearFilters = () => {
@@ -82,21 +73,17 @@ export default function InstructorRatingsIndex({ ratings, instructors, stats, fi
     };
 
     const formatDate = (dateString: string) => {
-        return new Date(dateString).toLocaleDateString('en-US', {
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric',
-        });
+        return new Date(dateString).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
     };
 
     const renderStars = (rating: number) => {
         return (
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-0.5">
                 {[1, 2, 3, 4, 5].map((star) => (
                     <Star
                         key={star}
-                        size={16}
-                        className={star <= rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}
+                        size={14}
+                        className={star <= rating ? 'fill-amber-400 text-amber-400' : 'text-slate-200'}
                     />
                 ))}
             </div>
@@ -107,191 +94,147 @@ export default function InstructorRatingsIndex({ ratings, instructors, stats, fi
         <DashboardLayout sideLinks={sideLinks}>
             <Head title="Instructor Ratings" />
 
-            <div className="workspace-stack">
-                <section className="workspace-header-card px-6 py-6 lg:px-8">
-                    <div className="max-w-3xl">
-                        <p className="workspace-muted-label">Quality Oversight</p>
-                        <h1 className="mt-3 text-3xl font-semibold tracking-tight text-slate-900">Instructor Ratings</h1>
-                        <p className="mt-3 text-sm leading-7 text-slate-600">
-                            Review student feedback, monitor instructor quality signals, and moderate ratings from one consistent workspace.
-                        </p>
-                    </div>
-                </section>
+            <div className="space-y-5">
+                <div>
+                    <h1 className="text-xl font-semibold tracking-tight text-slate-900">Instructor Ratings</h1>
+                    <p className="mt-1 text-sm text-slate-500">Review student feedback, monitor quality signals, and moderate ratings.</p>
+                </div>
 
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
                     <MetricCard
                         label="Total Ratings"
-                        value={stats.total.toString()}
-                        tone="text-slate-900"
-                        icon={<Star className="text-slate-700" size={20} />}
-                        iconWrap="bg-slate-100"
+                        value={stats.total.toLocaleString()}
+                        icon={<Star size={18} />}
+                        tone="default"
                     />
                     <MetricCard
                         label="Average Rating"
-                        value={stats.average_rating.toString()}
-                        tone="text-yellow-600"
-                        icon={<Star className="fill-yellow-500 text-yellow-500" size={20} />}
-                        iconWrap="bg-yellow-100"
+                        value={stats.average_rating.toFixed(1)}
+                        icon={<Star size={18} className="fill-amber-400 text-amber-400" />}
+                        tone="amber"
                     />
                     <MetricCard
-                        label="5-Star Ratings"
+                        label="5-Star"
                         value={stats.five_star.toString()}
-                        tone="text-green-600"
-                        icon={<Star className="fill-green-600 text-green-600" size={20} />}
-                        iconWrap="bg-green-100"
+                        icon={<Star size={18} className="fill-amber-400 text-amber-400" />}
+                        tone="amber"
                     />
                     <MetricCard
-                        label="1-Star Ratings"
+                        label="1-Star"
                         value={stats.one_star.toString()}
-                        tone="text-red-600"
-                        icon={<Star className="text-red-600" size={20} />}
-                        iconWrap="bg-red-100"
+                        icon={<Star size={18} />}
+                        tone="accent"
                     />
                 </div>
 
-                <section className="workspace-card p-5 lg:p-6">
-                    <form onSubmit={handleFilter} className="grid grid-cols-1 gap-4 md:grid-cols-4">
-                        <div>
-                            <label className="mb-2 block text-sm font-medium text-slate-700">
-                                Instructor
-                            </label>
-                            <select
-                                value={instructorId}
-                                onChange={(e) => setInstructorId(e.target.value)}
-                                className="w-full border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 focus:border-emerald-300 focus:bg-white focus:outline-none focus:ring-4 focus:ring-emerald-100"
-                            >
-                                <option value="">All Instructors</option>
-                                {instructors.map((instructor) => (
-                                    <option key={instructor.id} value={instructor.id}>
-                                        {instructor.name}
-                                    </option>
-                                ))}
-                            </select>
-                        </div>
-                        <div>
-                            <label className="mb-2 block text-sm font-medium text-slate-700">
-                                Rating
-                            </label>
-                            <select
-                                value={ratingFilter}
-                                onChange={(e) => setRatingFilter(e.target.value)}
-                                className="w-full border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 focus:border-emerald-300 focus:bg-white focus:outline-none focus:ring-4 focus:ring-emerald-100"
-                            >
-                                <option value="">All Ratings</option>
-                                <option value="5">5 Stars</option>
-                                <option value="4">4 Stars</option>
-                                <option value="3">3 Stars</option>
-                                <option value="2">2 Stars</option>
-                                <option value="1">1 Star</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label className="mb-2 block text-sm font-medium text-slate-700">
-                                Search
-                            </label>
-                            <input
-                                type="text"
-                                value={search}
-                                onChange={(e) => setSearch(e.target.value)}
-                                placeholder="Search reviews..."
-                                className="w-full border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 focus:border-emerald-300 focus:bg-white focus:outline-none focus:ring-4 focus:ring-emerald-100"
-                            />
-                        </div>
-                        <div className="flex items-end gap-2">
-                            <button
-                                type="submit"
-                                className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-slate-900 px-4 py-3 text-sm font-semibold text-white transition hover:bg-slate-800"
-                            >
-                                <Search size={18} />
-                                Filter
-                            </button>
-                            <button
-                                type="button"
-                                onClick={clearFilters}
-                                className="rounded-lg border border-slate-200 px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
-                            >
-                                Clear
-                            </button>
+                <div className="rounded-lg border border-slate-200 bg-white p-4">
+                    <form onSubmit={handleFilter}>
+                        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                            <div>
+                                <label className="mb-1 block text-[11px] font-semibold uppercase tracking-wider text-slate-400">Instructor</label>
+                                <select
+                                    value={instructorId}
+                                    onChange={(e) => setInstructorId(e.target.value)}
+                                    className="h-9 w-full rounded-md border border-slate-200 bg-white px-3 text-sm text-slate-900 outline-none transition focus:border-primary-300 focus:ring-2 focus:ring-primary-500/10"
+                                >
+                                    <option value="">All Instructors</option>
+                                    {instructors.map((instructor) => (
+                                        <option key={instructor.id} value={instructor.id}>{instructor.name}</option>
+                                    ))}
+                                </select>
+                            </div>
+                            <div>
+                                <label className="mb-1 block text-[11px] font-semibold uppercase tracking-wider text-slate-400">Rating</label>
+                                <select
+                                    value={ratingFilter}
+                                    onChange={(e) => setRatingFilter(e.target.value)}
+                                    className="h-9 w-full rounded-md border border-slate-200 bg-white px-3 text-sm text-slate-900 outline-none transition focus:border-primary-300 focus:ring-2 focus:ring-primary-500/10"
+                                >
+                                    <option value="">All Ratings</option>
+                                    <option value="5">5 Stars</option>
+                                    <option value="4">4 Stars</option>
+                                    <option value="3">3 Stars</option>
+                                    <option value="2">2 Stars</option>
+                                    <option value="1">1 Star</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label className="mb-1 block text-[11px] font-semibold uppercase tracking-wider text-slate-400">Search</label>
+                                <input
+                                    type="text"
+                                    value={search}
+                                    onChange={(e) => setSearch(e.target.value)}
+                                    placeholder="Search reviews..."
+                                    className="h-9 w-full rounded-md border border-slate-200 bg-white px-3 text-sm text-slate-900 placeholder:text-slate-400 outline-none transition focus:border-primary-300 focus:ring-2 focus:ring-primary-500/10"
+                                />
+                            </div>
+                            <div className="flex items-end gap-2">
+                                <button type="submit" className="inline-flex h-9 flex-1 items-center justify-center gap-1.5 rounded-md bg-primary px-4 text-sm font-medium text-white transition hover:bg-primary-600 shadow-sm">
+                                    <Search size={15} /> Filter
+                                </button>
+                                {hasFilters && (
+                                    <button type="button" onClick={clearFilters} className="inline-flex h-9 items-center justify-center gap-1 rounded-md border border-slate-200 bg-white px-3 text-sm font-medium text-slate-600 transition hover:bg-slate-50">
+                                        <X size={15} /> Clear
+                                    </button>
+                                )}
+                            </div>
                         </div>
                     </form>
-                </section>
+                </div>
 
-                <section className="workspace-card overflow-hidden">
+                <div className="overflow-hidden rounded-lg border border-slate-200 bg-white">
                     {ratingsList.length === 0 ? (
-                        <div className="py-14 text-center">
-                            <i className="fas fa-inbox mb-4 text-6xl text-gray-300"></i>
-                            <p className="text-xl text-slate-600">No ratings found.</p>
+                        <div className="p-16 text-center">
+                            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-lg bg-slate-100">
+                                <Star size={24} className="text-slate-300" />
+                            </div>
+                            <h3 className="mt-4 text-sm font-semibold text-slate-900">No ratings found</h3>
+                            <p className="mt-1 text-sm text-slate-500">
+                                {hasFilters ? 'Try adjusting your filters.' : 'Student ratings will appear here.'}
+                            </p>
                         </div>
                     ) : (
                         <div className="overflow-x-auto">
                             <table className="min-w-full divide-y divide-slate-200">
-                                <thead className="bg-slate-50/90">
+                                <thead className="bg-slate-50/80">
                                     <tr>
-                                        <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
-                                            Instructor
-                                        </th>
-                                        <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
-                                            Student
-                                        </th>
-                                        <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
-                                            Course
-                                        </th>
-                                        <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
-                                            Rating
-                                        </th>
-                                        <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
-                                            Review
-                                        </th>
-                                        <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
-                                            Date
-                                        </th>
-                                        <th className="px-6 py-3 text-right text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
-                                            Actions
-                                        </th>
+                                        <th className="px-5 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">Instructor</th>
+                                        <th className="px-5 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">Student</th>
+                                        <th className="px-5 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">Rating</th>
+                                        <th className="px-5 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">Review</th>
+                                        <th className="px-5 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">Date</th>
+                                        <th className="px-5 py-3 text-right text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500"></th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-slate-100 bg-white">
                                     {ratingsList.map((rating) => (
-                                        <tr key={rating.id} className="hover:bg-slate-50">
-                                            <td className="px-6 py-4 whitespace-nowrap">
-                                                <div className="text-sm font-medium text-slate-900">
-                                                    {rating.instructor.name}
-                                                </div>
+                                        <tr key={rating.id} className="transition hover:bg-slate-50/70">
+                                            <td className="px-5 py-3.5 whitespace-nowrap">
+                                                <p className="text-sm font-medium text-slate-900">{rating.instructor.name}</p>
                                             </td>
-                                            <td className="px-6 py-4 whitespace-nowrap">
-                                                <div className="text-sm text-slate-900">{rating.user.name}</div>
+                                            <td className="px-5 py-3.5 whitespace-nowrap">
+                                                <p className="text-sm text-slate-700">{rating.user.name}</p>
                                             </td>
-                                            <td className="px-6 py-4">
-                                                <div className="max-w-xs truncate text-sm text-slate-900">
-                                                    {rating.course?.title || 'N/A'}
-                                                </div>
-                                            </td>
-                                            <td className="px-6 py-4 whitespace-nowrap">
+                                            <td className="px-5 py-3.5 whitespace-nowrap">
                                                 <div className="flex items-center gap-2">
                                                     {renderStars(rating.rating)}
-                                                    <span className="text-sm font-medium text-slate-900">
-                                                        {rating.rating}
-                                                    </span>
+                                                    <span className="text-sm font-semibold text-slate-900">{rating.rating}</span>
                                                 </div>
                                             </td>
-                                            <td className="px-6 py-4">
-                                                <div className="max-w-md truncate text-sm text-slate-900">
-                                                    {rating.review || '-'}
-                                                </div>
+                                            <td className="px-5 py-3.5 max-w-xs">
+                                                <p className="truncate text-sm text-slate-600">{rating.review || '—'}</p>
                                             </td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
+                                            <td className="px-5 py-3.5 whitespace-nowrap text-sm text-slate-500">
                                                 {formatDate(rating.created_at)}
                                             </td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                                <div className="flex items-center justify-end gap-2">
-                                                    <button
-                                                        onClick={() => handleDelete(rating.id)}
-                                                        className="rounded-lg p-2 text-red-600 transition-colors hover:bg-red-50 hover:text-red-900"
-                                                        title="Delete"
-                                                    >
-                                                        <Trash2 size={18} />
-                                                    </button>
-                                                </div>
+                                            <td className="px-5 py-3.5 whitespace-nowrap text-right">
+                                                <button
+                                                    onClick={() => handleDelete(rating.id)}
+                                                    className="rounded-md p-1.5 text-slate-400 transition hover:bg-accent-50 hover:text-accent"
+                                                    title="Delete"
+                                                >
+                                                    <Trash2 size={15} />
+                                                </button>
                                             </td>
                                         </tr>
                                     ))}
@@ -299,20 +242,22 @@ export default function InstructorRatingsIndex({ ratings, instructors, stats, fi
                             </table>
                         </div>
                     )}
-                </section>
+                </div>
 
                 {ratings.links && ratings.links.length > 3 && (
                     <div className="flex justify-center">
-                        <nav className="flex items-center gap-2">
+                        <nav className="flex items-center gap-1.5">
                             {ratings.links.map((link: any, index: number) => (
                                 <Link
                                     key={index}
                                     href={link.url || '#'}
-                                    className={`rounded-lg border px-4 py-2 transition-all ${
+                                    className={`rounded-md px-3 py-1.5 text-xs font-medium transition ${
                                         link.active
-                                            ? 'border-slate-900 bg-slate-900 text-white'
-                                            : 'border-slate-300 bg-white text-gray-700 hover:border-slate-900 hover:text-slate-900'
-                                    } ${!link.url ? 'cursor-not-allowed opacity-50' : ''}`}
+                                            ? 'bg-primary text-white'
+                                            : link.url
+                                                ? 'border border-slate-200 bg-white text-slate-700 hover:bg-slate-50'
+                                                : 'bg-slate-50 text-slate-300 cursor-not-allowed'
+                                    }`}
                                     preserveState
                                     dangerouslySetInnerHTML={{ __html: link.label }}
                                 />
@@ -330,24 +275,30 @@ function MetricCard({
     value,
     tone,
     icon,
-    iconWrap,
 }: {
     label: string;
     value: string;
-    tone: string;
+    tone: 'default' | 'amber' | 'accent';
     icon: ReactNode;
-    iconWrap: string;
 }) {
+    const toneStyles = {
+        default: { bg: 'bg-slate-100 text-slate-600', text: 'text-slate-900' },
+        amber: { bg: 'bg-amber-50 text-amber-600', text: 'text-amber-600' },
+        accent: { bg: 'bg-accent-50 text-accent', text: 'text-accent' },
+    };
+
+    const style = toneStyles[tone];
+
     return (
-        <div className="workspace-card p-6">
-            <div className="flex items-center justify-between">
+        <div className="rounded-lg border border-slate-200 bg-white p-4">
+            <div className="flex items-start justify-between">
                 <div>
-                    <p className="text-sm text-slate-500">{label}</p>
-                    <p className={`mt-2 text-3xl font-bold ${tone}`}>{value}</p>
+                    <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">{label}</p>
+                    <p className={`mt-2 text-2xl font-semibold tracking-tight ${style.text}`}>{value}</p>
                 </div>
-                <div className={`rounded-lg p-3 ${iconWrap}`}>
+                <span className={`flex h-9 w-9 items-center justify-center rounded-lg ${style.bg}`}>
                     {icon}
-                </div>
+                </span>
             </div>
         </div>
     );

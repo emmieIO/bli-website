@@ -5,14 +5,7 @@ use App\Http\Controllers\Admin\EventController;
 use App\Http\Controllers\Admin\EventResourceController;
 use App\Http\Controllers\Admin\InstructorApplicationController;
 use App\Http\Controllers\Admin\InstructorsManagementController;
-use App\Http\Controllers\Admin\ReviewEventRefundRequestController;
 use App\Http\Controllers\Admin\SpeakersController;
-use App\Http\Controllers\Course\CourseCategoryController;
-use App\Http\Controllers\Course\CourseController;
-use App\Http\Controllers\Course\CourseModuleController;
-use App\Http\Controllers\Course\CourseOutcomeController;
-use App\Http\Controllers\Course\CourseResourseController;
-use App\Http\Controllers\Course\LessonController;
 use App\Http\Controllers\SpeakerApplicationController;
 use Illuminate\Support\Facades\Route;
 
@@ -55,10 +48,6 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
     Route::middleware(['permission:event-manage-waitlist|event-manage-attendees'])->group(function () {
         Route::post('/events/{event}/attendees/{user}/promote-waitlist', [EventController::class, 'promoteWaitlistedAttendee'])
             ->name('events.attendees.promote-waitlist');
-        Route::post('/events/refund-requests/{refundRequest}/approve', [ReviewEventRefundRequestController::class, 'approve'])
-            ->name('events.refund-requests.approve');
-        Route::patch('/events/refund-requests/{refundRequest}/decline', [ReviewEventRefundRequestController::class, 'decline'])
-            ->name('events.refund-requests.decline');
     });
 
     // Speakers Management (NOT resource - has custom methods like pendingSpeaker, activateSpeaker)
@@ -125,41 +114,9 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
         Route::delete('/ratings/{rating}', [\App\Http\Controllers\Admin\InstructorRatingController::class, 'destroy'])->name('ratings.destroy');
     });
 
-    // Course Categories (appears to be pure CRUD - can use resource)
-    Route::resource('courses/category', CourseCategoryController::class);
-
-    // Courses (has custom builder method - NOT pure resource)
-    Route::get('/courses', [CourseController::class, 'index'])->name('courses.index');
-    Route::get('/courses/create', [CourseController::class, 'create'])->name('courses.create');
-    Route::post('/courses', [CourseController::class, 'store'])->name('courses.store');
-    Route::get('/courses/{course}', [CourseController::class, 'show'])->name('courses.show');
-    Route::get('/courses/{course}/edit', [CourseController::class, 'edit'])->name('courses.edit');
-    Route::put('/courses/{course}', [CourseController::class, 'update'])->name('courses.update');
-    Route::delete('/courses/{course}', [CourseController::class, 'destroy'])->name('courses.destroy');
-    Route::get('/courses/builder/{course}', [CourseController::class, 'builder'])->name('courses.builder');
-
-    // Course approval/rejection routes
-    Route::post('/courses/{course}/approve', [CourseController::class, 'approve'])->name('courses.approve');
-    Route::post('/courses/{course}/reject', [CourseController::class, 'reject'])->name('courses.reject');
-
-    // Course nested resources (appear to be CRUD)
-    Route::resource('{course}/requirements', CourseResourseController::class);
-    Route::resource('{course}/outcomes', CourseOutcomeController::class);
-    Route::resource('{course}/modules', CourseModuleController::class);
-    Route::resource('{module}/lessons', LessonController::class);
-
-    // Instructor Payout Management
-    Route::middleware(['permission:earnings-manage-any'])->group(function () {
-        Route::get('/payouts', [\App\Http\Controllers\Admin\InstructorPayoutController::class, 'index'])->name('payouts.index');
-        Route::get('/payouts/{payout}', [\App\Http\Controllers\Admin\InstructorPayoutController::class, 'show'])->name('payouts.show');
-        Route::post('/payouts/{payout}/mark-processing', [\App\Http\Controllers\Admin\InstructorPayoutController::class, 'markAsProcessing'])->name('payouts.mark-processing');
-        Route::post('/payouts/{payout}/mark-completed', [\App\Http\Controllers\Admin\InstructorPayoutController::class, 'markAsCompleted'])->name('payouts.mark-completed');
-        Route::post('/payouts/{payout}/mark-failed', [\App\Http\Controllers\Admin\InstructorPayoutController::class, 'markAsFailed'])->name('payouts.mark-failed');
-        Route::post('/payouts/{payout}/cancel', [\App\Http\Controllers\Admin\InstructorPayoutController::class, 'cancel'])->name('payouts.cancel');
-    });
-
     // Transaction Audit
     Route::middleware(['permission:view-transaction-audit'])->group(function () {
         Route::get('/transactions-audit', [\App\Http\Controllers\Admin\TransactionAuditController::class, 'index'])->name('transactions-audit.index');
+        Route::post('/transactions-audit/{transaction}/resolve', [\App\Http\Controllers\Admin\TransactionAuditController::class, 'resolve'])->name('transactions-audit.resolve');
     });
 });

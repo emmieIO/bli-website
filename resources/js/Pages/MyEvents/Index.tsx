@@ -1,7 +1,7 @@
 import { FormEvent, useMemo, useState } from 'react';
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import DashboardLayout from '@/Layouts/DashboardLayout';
-import Button from '@/Components/Button';
+import { CalendarDays, Search, X, ArrowRight, ChevronDown } from 'lucide-react';
 
 interface Event {
     id: number;
@@ -13,191 +13,177 @@ interface Event {
     mode?: string | null;
     journey_status: 'upcoming' | 'ongoing' | 'ended';
     registration_status: 'registered' | 'waitlisted' | 'attended' | 'no_show';
-    latest_transaction?: {
-        status: string;
-        amount: string;
-    } | null;
-    pivot?: {
-        revoke_count?: number;
-    };
+    latest_transaction?: { status: string; amount: string; } | null;
+    pivot?: { revoke_count?: number; };
 }
 
-interface MyEventsProps {
-    events: Event[];
-}
+interface MyEventsProps { events: Event[]; }
 
 const registrationTone: Record<string, string> = {
-    registered: 'border-emerald-200 bg-emerald-50 text-emerald-800',
-    waitlisted: 'border-amber-200 bg-amber-50 text-amber-800',
-    attended: 'border-slate-200 bg-slate-50 text-slate-700',
-    no_show: 'border-rose-200 bg-rose-50 text-rose-700',
+    registered: 'bg-lime-50 text-lime-700',
+    waitlisted: 'bg-amber-50 text-amber-700',
+    attended: 'bg-slate-100 text-slate-600',
+    no_show: 'bg-red-50 text-red-600',
 };
 
 const registrationLabel: Record<string, string> = {
-    registered: 'confirmed',
-    waitlisted: 'waitlisted',
-    attended: 'attended',
-    no_show: 'no show',
+    registered: 'Confirmed',
+    waitlisted: 'Waitlisted',
+    attended: 'Attended',
+    no_show: 'No show',
 };
 
-const journeyTone: Record<string, string> = {
-    upcoming: 'border-slate-200 bg-slate-50 text-slate-700',
-    ongoing: 'border-blue-200 bg-blue-50 text-blue-800',
-    ended: 'border-zinc-200 bg-zinc-50 text-zinc-700',
+const journeyColor: Record<string, string> = {
+    upcoming: 'bg-slate-100 text-slate-600',
+    ongoing: 'bg-primary-50 text-primary',
+    ended: 'bg-zinc-100 text-zinc-600',
 };
 
 export default function MyEvents({ events }: MyEventsProps) {
     const { sideLinks } = usePage().props as any;
+
+    const [search, setSearch] = useState('');
+    const [statusFilter, setStatusFilter] = useState('');
+    const [journeyFilter, setJourneyFilter] = useState('');
     const [showCancelModal, setShowCancelModal] = useState(false);
     const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
     const [isProcessing, setIsProcessing] = useState(false);
 
-    const stats = useMemo(() => ({
-        total: events.length,
-        confirmed: events.filter((event) => event.registration_status === 'registered').length,
-        waitlisted: events.filter((event) => event.registration_status === 'waitlisted').length,
-        live: events.filter((event) => event.journey_status === 'ongoing').length,
-    }), [events]);
+    const filtered = useMemo(() => {
+        return events.filter((event) => {
+            if (search && !event.title.toLowerCase().includes(search.toLowerCase())) return false;
+            if (statusFilter && event.registration_status !== statusFilter) return false;
+            if (journeyFilter && event.journey_status !== journeyFilter) return false;
+            return true;
+        });
+    }, [events, search, statusFilter, journeyFilter]);
 
     const formatDate = (value: string) => new Intl.DateTimeFormat('en-US', {
-        month: 'short',
-        day: 'numeric',
-        year: 'numeric',
+        month: 'short', day: 'numeric', year: 'numeric',
     }).format(new Date(value));
 
-    const handleCancelClick = (event: Event) => {
-        setSelectedEvent(event);
-        setShowCancelModal(true);
-    };
-
+    const handleCancelClick = (event: Event) => { setSelectedEvent(event); setShowCancelModal(true); };
     const handleCancelEvent = (e: FormEvent) => {
         e.preventDefault();
-
-        if (!selectedEvent) {
-            return;
-        }
-
+        if (!selectedEvent) return;
         setIsProcessing(true);
         router.delete(route('user.revoke.event', selectedEvent.slug), {
             preserveScroll: true,
-            onFinish: () => {
-                setIsProcessing(false);
-                setShowCancelModal(false);
-                setSelectedEvent(null);
-            },
+            onFinish: () => { setIsProcessing(false); setShowCancelModal(false); setSelectedEvent(null); },
         });
     };
-
     const getRemainingChances = (event: Event) => 5 - (event.pivot?.revoke_count ?? 0);
 
     return (
         <DashboardLayout sideLinks={sideLinks}>
             <Head title="My Events" />
 
-            <div className="workspace-stack">
-                <section className="workspace-header-card overflow-hidden">
-                    <div className="border-b border-slate-200 px-6 py-7 lg:px-8 lg:py-8">
-                        <div className="flex flex-col gap-6 xl:flex-row xl:items-start xl:justify-between">
-                            <div className="max-w-2xl space-y-3">
-                                <span className="inline-flex items-center rounded-full border border-slate-300 bg-white px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-600">
-                                    Event Registry
-                                </span>
-                                <div>
-                                    <h1 className="text-3xl font-semibold tracking-tight text-slate-900 md:text-[2.35rem]">
-                                        My Events
-                                    </h1>
-                                    <p className="mt-3 text-sm leading-6 text-slate-600 md:text-[15px]">
-                                        Review active registrations, waitlist positions, payment context, and direct workspace access.
-                                    </p>
-                                </div>
-                            </div>
+            <div className="space-y-5">
+                <div>
+                    <h1 className="text-xl font-semibold tracking-tight text-slate-900">My Events</h1>
+                    <p className="mt-1 text-sm text-slate-500">Your registered events, waitlist positions, and workspaces.</p>
+                </div>
 
-                            <div className="min-w-full overflow-x-auto xl:min-w-[620px]">
-                                <div className="grid min-w-[620px] grid-cols-4 divide-x divide-slate-200 rounded-2xl border border-slate-200 bg-white">
-                                    <SummaryItem label="All Events" value={stats.total.toString()} context="Total registrations" />
-                                    <SummaryItem label="Confirmed" value={stats.confirmed.toString()} context="Active attendee seats" />
-                                    <SummaryItem label="Waitlisted" value={stats.waitlisted.toString()} context="Awaiting placement" />
-                                    <SummaryItem label="Live Now" value={stats.live.toString()} context="Currently in session" />
-                                </div>
-                            </div>
-                        </div>
+                <div className="flex flex-col gap-3 sm:flex-row">
+                    <div className="relative flex-1 max-w-sm">
+                        <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                        <input
+                            type="text" value={search} onChange={(e) => setSearch(e.target.value)}
+                            placeholder="Search by title..."
+                            className="h-9 w-full rounded-md border border-slate-200 bg-white pl-9 pr-3 text-sm text-slate-900 placeholder:text-slate-400 outline-none transition focus:border-primary-300 focus:ring-2 focus:ring-primary-500/10"
+                        />
                     </div>
+                    <div className="relative">
+                        <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}
+                            className="h-9 appearance-none rounded-md border border-slate-200 bg-white pl-3 pr-8 text-sm text-slate-700 outline-none transition focus:border-primary-300 focus:ring-2 focus:ring-primary-500/10">
+                            <option value="">All statuses</option>
+                            <option value="registered">Confirmed</option>
+                            <option value="waitlisted">Waitlisted</option>
+                            <option value="attended">Attended</option>
+                            <option value="no_show">No show</option>
+                        </select>
+                        <ChevronDown size={14} className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                    </div>
+                    <div className="relative">
+                        <select value={journeyFilter} onChange={(e) => setJourneyFilter(e.target.value)}
+                            className="h-9 appearance-none rounded-md border border-slate-200 bg-white pl-3 pr-8 text-sm text-slate-700 outline-none transition focus:border-primary-300 focus:ring-2 focus:ring-primary-500/10">
+                            <option value="">All stages</option>
+                            <option value="upcoming">Upcoming</option>
+                            <option value="ongoing">Ongoing</option>
+                            <option value="ended">Ended</option>
+                        </select>
+                        <ChevronDown size={14} className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                    </div>
+                </div>
 
-                    <div className="bg-white px-6 py-4 lg:px-8">
-                        <p className="text-sm leading-6 text-slate-600">
-                            Open any event workspace for schedule, access instructions, resources, refund status, and speaker details.
+                {filtered.length === 0 ? (
+                    <div className="rounded-lg border border-slate-200 bg-white p-16 text-center">
+                        <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-lg bg-slate-100 text-slate-300">
+                            <CalendarDays size={24} />
+                        </div>
+                        <h3 className="mt-4 text-sm font-semibold text-slate-900">
+                            {search || statusFilter || journeyFilter ? 'No events match your filters' : 'No event registrations yet'}
+                        </h3>
+                        <p className="mt-1 text-sm text-slate-500">
+                            {search || statusFilter || journeyFilter ? 'Try adjusting your search or filters.' : 'Once you register for an event, it will appear here.'}
                         </p>
                     </div>
-                </section>
+                ) : (
+                    <>
+                        <p className="text-[13px] text-slate-400">
+                            Showing <span className="font-medium text-slate-700">{filtered.length}</span> of {events.length} event{events.length !== 1 ? 's' : ''}
+                        </p>
 
-                {events.length > 0 ? (
-                    <section className="workspace-card overflow-hidden">
-                        <div className="overflow-x-auto">
-                            <table className="min-w-[1120px] divide-y divide-slate-200">
-                                <thead className="bg-slate-50/80">
+                        <div className="overflow-hidden rounded-lg border border-slate-200 bg-white">
+                            <table className="min-w-full">
+                                <thead className="bg-slate-50/80 border-b border-slate-200">
                                     <tr>
-                                        <TableHead>Event</TableHead>
-                                        <TableHead>Registration</TableHead>
-                                        <TableHead>Journey</TableHead>
-                                        <TableHead>Schedule</TableHead>
-                                        <TableHead>Format</TableHead>
-                                        <TableHead>Payment</TableHead>
-                                        <TableHead>Location</TableHead>
-                                        <TableHead align="right">Actions</TableHead>
+                                        <th className="px-5 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">Event</th>
+                                        <th className="px-5 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">Registration</th>
+                                        <th className="px-5 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">Stage</th>
+                                        <th className="px-5 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">Schedule</th>
+                                        <th className="px-5 py-3 text-right text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500"></th>
                                     </tr>
                                 </thead>
-                                <tbody className="divide-y divide-slate-100 bg-white">
-                                    {events.map((event) => (
-                                        <tr key={event.id} className="align-top transition hover:bg-slate-50/70">
-                                            <td className="min-w-[280px] px-6 py-5">
-                                                <div className="space-y-1">
-                                                    <p className="text-sm font-semibold text-slate-900">{event.title}</p>
-                                                    <p className="text-sm text-slate-500">
-                                                        {event.registration_status === 'waitlisted'
-                                                            ? 'Awaiting the next available seat.'
-                                                            : 'Open workspace for access details and updates.'}
+                                <tbody className="divide-y divide-slate-100">
+                                    {filtered.map((event) => (
+                                        <tr key={event.id} className="transition hover:bg-slate-50/60">
+                                            <td className="px-5 py-3.5">
+                                                <div className="max-w-xs">
+                                                    <p className="text-sm font-semibold text-slate-900 truncate">{event.title}</p>
+                                                    <p className="mt-0.5 text-[13px] text-slate-500 truncate">
+                                                        {event.location || 'Shared in workspace'} &middot; {event.mode ? event.mode.charAt(0).toUpperCase() + event.mode.slice(1) : 'Hybrid'}
                                                     </p>
                                                 </div>
                                             </td>
-                                            <td className="whitespace-nowrap px-6 py-5">
-                                                <span className={`inline-flex whitespace-nowrap rounded-full border px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] ${registrationTone[event.registration_status]}`}>
-                                                    {registrationLabel[event.registration_status] ?? event.registration_status}
+                                            <td className="px-5 py-3.5 whitespace-nowrap">
+                                                <span className={`inline-flex rounded-md px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wider ${registrationTone[event.registration_status]}`}>
+                                                    {registrationLabel[event.registration_status]}
                                                 </span>
                                             </td>
-                                            <td className="whitespace-nowrap px-6 py-5">
-                                                <span className={`inline-flex whitespace-nowrap rounded-full border px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] ${journeyTone[event.journey_status]}`}>
+                                            <td className="px-5 py-3.5 whitespace-nowrap">
+                                                <span className={`inline-flex rounded-md px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wider ${journeyColor[event.journey_status]}`}>
                                                     {event.journey_status}
                                                 </span>
                                             </td>
-                                            <td className="whitespace-nowrap px-6 py-5 text-sm leading-6 text-slate-700">
-                                                <div>{formatDate(event.start_date)}</div>
-                                                <div className="text-slate-500">to {formatDate(event.end_date)}</div>
+                                            <td className="px-5 py-3.5 whitespace-nowrap">
+                                                <div className="flex items-center gap-1.5 text-[13px] text-slate-600">
+                                                    <CalendarDays size={13} className="text-slate-400 shrink-0" />
+                                                    {formatDate(event.start_date)} &ndash; {formatDate(event.end_date)}
+                                                </div>
                                             </td>
-                                            <td className="whitespace-nowrap px-6 py-5 text-sm text-slate-700">
-                                                {event.mode ? event.mode.charAt(0).toUpperCase() + event.mode.slice(1) : 'Hybrid'}
-                                            </td>
-                                            <td className="whitespace-nowrap px-6 py-5 text-sm text-slate-700">
-                                                {event.latest_transaction ? event.latest_transaction.status : 'No payment required'}
-                                            </td>
-                                            <td className="min-w-[180px] px-6 py-5 text-sm text-slate-700">
-                                                {event.location || 'Shared in workspace'}
-                                            </td>
-                                            <td className="px-6 py-5">
-                                                <div className="flex flex-col items-end gap-3 whitespace-nowrap">
-                                                    <Link
-                                                        href={route('user.events.show', event.slug)}
-                                                        className="inline-flex items-center rounded-xl border border-slate-900 bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800"
-                                                    >
-                                                        Open workspace
+                                            <td className="px-5 py-3.5 whitespace-nowrap text-right">
+                                                <div className="flex items-center justify-end gap-1.5">
+                                                    <Link href={route('user.events.show', event.slug)}
+                                                        className="inline-flex items-center gap-1 rounded-md bg-primary px-3.5 py-2 text-[13px] font-medium text-white transition hover:bg-primary-600 shadow-sm">
+                                                        Open <ArrowRight size={13} />
                                                     </Link>
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => handleCancelClick(event)}
-                                                        disabled={event.journey_status === 'ended'}
-                                                        className="text-sm font-medium text-rose-700 transition hover:text-rose-800 disabled:cursor-not-allowed disabled:text-slate-400"
-                                                    >
-                                                        Cancel registration
-                                                    </button>
+                                                    {event.journey_status !== 'ended' && (
+                                                        <button type="button" onClick={() => handleCancelClick(event)}
+                                                            className="rounded-md p-1.5 text-slate-400 transition hover:bg-accent-50 hover:text-accent" title="Cancel">
+                                                            <X size={14} />
+                                                        </button>
+                                                    )}
                                                 </div>
                                             </td>
                                         </tr>
@@ -205,122 +191,34 @@ export default function MyEvents({ events }: MyEventsProps) {
                                 </tbody>
                             </table>
                         </div>
-                    </section>
-                ) : (
-                    <section className="workspace-card border-dashed p-10 text-center">
-                        <div className="mx-auto max-w-xl space-y-4">
-                            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full border border-slate-200 bg-slate-50 text-slate-700">
-                                <i className="fas fa-calendar-plus text-xl"></i>
-                            </div>
-                            <h2 className="text-2xl font-semibold text-slate-900">No event registrations yet</h2>
-                            <p className="text-sm leading-7 text-slate-600">
-                                Once you register for an event, this page becomes your event register for confirmations, reminders, and attendee resources.
-                            </p>
-                            <Link
-                                href={route('events.index')}
-                                className="inline-flex items-center rounded-xl border border-slate-900 bg-slate-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-800"
-                            >
-                                Browse events
-                            </Link>
-                        </div>
-                    </section>
+                    </>
                 )}
             </div>
 
             {showCancelModal && selectedEvent && (
-                <CancelEventModal
-                    event={selectedEvent}
-                    remainingChances={getRemainingChances(selectedEvent)}
-                    isProcessing={isProcessing}
-                    onClose={() => setShowCancelModal(false)}
-                    onConfirm={handleCancelEvent}
-                />
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/30 px-4 backdrop-blur-sm">
+                    <div className="w-full max-w-md overflow-hidden rounded-lg border border-slate-200 bg-white shadow-lg p-6">
+                        <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-lg bg-accent-50 text-accent mb-4">
+                            <X size={20} />
+                        </div>
+                        <h3 className="text-center text-base font-semibold text-slate-900">Cancel registration for {selectedEvent.title}?</h3>
+                        <p className="mt-2 text-center text-sm text-slate-500">Cancelling removes you from the attendee journey.</p>
+                        <p className="mt-2 text-center text-sm font-medium text-accent">
+                            {getRemainingChances(selectedEvent)} cancellation{getRemainingChances(selectedEvent) !== 1 ? 's' : ''} remaining.
+                        </p>
+                        <form onSubmit={handleCancelEvent} className="mt-5 flex justify-center gap-3">
+                            <button type="submit" disabled={isProcessing}
+                                className="rounded-md bg-accent px-5 py-2.5 text-sm font-medium text-white transition hover:bg-accent-600 disabled:opacity-50">
+                                {isProcessing ? 'Cancelling...' : 'Confirm cancel'}
+                            </button>
+                            <button type="button" onClick={() => setShowCancelModal(false)}
+                                className="rounded-md border border-slate-200 bg-white px-5 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50">
+                                Keep registration
+                            </button>
+                        </form>
+                    </div>
+                </div>
             )}
         </DashboardLayout>
-    );
-}
-
-function SummaryItem({
-    label,
-    value,
-    context,
-}: {
-    label: string;
-    value: string;
-    context: string;
-}) {
-    return (
-        <div className="px-5 py-4">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">{label}</p>
-            <p className="mt-3 text-2xl font-semibold tracking-tight text-slate-900">{value}</p>
-            <p className="mt-1 text-xs leading-5 text-slate-500">{context}</p>
-        </div>
-    );
-}
-
-function TableHead({
-    children,
-    align = 'left',
-}: {
-    children: React.ReactNode;
-    align?: 'left' | 'right';
-}) {
-    return (
-        <th className={`px-6 py-4 text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500 ${align === 'right' ? 'text-right' : 'text-left'}`}>
-            {children}
-        </th>
-    );
-}
-
-function CancelEventModal({
-    event,
-    remainingChances,
-    isProcessing,
-    onClose,
-    onConfirm,
-}: {
-    event: Event;
-    remainingChances: number;
-    isProcessing: boolean;
-    onClose: () => void;
-    onConfirm: (e: FormEvent) => void;
-}) {
-    return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 px-4">
-            <div className="relative w-full max-w-md rounded-lg bg-white p-6 shadow-xl">
-                <button
-                    type="button"
-                    onClick={onClose}
-                    className="absolute right-3 top-3 inline-flex h-8 w-8 items-center justify-center rounded-lg text-gray-400 hover:bg-gray-100 hover:text-gray-900"
-                >
-                    <i className="fas fa-times"></i>
-                </button>
-
-                <div className="space-y-4 text-center">
-                    <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-red-50 text-red-600">
-                        <i className="fas fa-exclamation-triangle"></i>
-                    </div>
-
-                    <div className="space-y-2">
-                        <h3 className="text-lg font-semibold text-primary">Cancel registration for {event.title}?</h3>
-                        <p className="text-sm leading-6 text-gray-600">
-                            Cancelling removes you from the attendee journey and may affect your remaining registration attempts.
-                        </p>
-                        <p className="text-sm font-medium text-red-600">
-                            {remainingChances} cancellation{remainingChances !== 1 ? 's' : ''} remaining.
-                        </p>
-                    </div>
-
-                    <form onSubmit={onConfirm} className="flex justify-center gap-3">
-                        <Button type="submit" variant="danger" loading={isProcessing}>
-                            Confirm cancel
-                        </Button>
-                        <Button type="button" variant="secondary" onClick={onClose}>
-                            Keep registration
-                        </Button>
-                    </form>
-                </div>
-            </div>
-        </div>
     );
 }
