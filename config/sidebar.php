@@ -146,6 +146,10 @@ return [
                     'route' => 'admin.roles.index',
                     'permission' => ['view-permission-list'],
                 ],
+                [
+                    'title' => 'Settings',
+                    'route' => 'admin.settings',
+                ],
             ],
         ],
 

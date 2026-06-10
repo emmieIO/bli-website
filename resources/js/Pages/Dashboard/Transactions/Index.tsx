@@ -165,14 +165,15 @@ export default function Index({ transactions }: Props) {
                                                 </Link>
                                             )}
                                             {transaction.status === 'successful' && (
-                                                <Link
+                                                <a
                                                     href={route('transactions.show-receipt', transaction.id)}
                                                     target="_blank"
+                                                    rel="noopener noreferrer"
                                                     className="inline-flex items-center gap-1.5 rounded-md border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 transition hover:bg-slate-50"
                                                 >
                                                     <FileText size={13} />
                                                     Receipt
-                                                </Link>
+                                                </a>
                                             )}
                                         </div>
                                     </div>

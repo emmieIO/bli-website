@@ -163,14 +163,15 @@ export default function Index({ transactions, filters }: Props) {
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                     <div className="flex items-center justify-end gap-2">
                     {transaction.status === 'successful' && (
-                      <Link
+                      <a
                         href={route('transactions.show-receipt', transaction.id)}
                         target="_blank"
+                        rel="noopener noreferrer"
                         className="text-blue-600 hover:text-blue-900 inline-flex items-center gap-1"
                       >
                         <FileText className="w-4 h-4" />
                         View Receipt
-                      </Link>
+                      </a>
                     )}
                     {transaction.status !== 'successful' && (
                       <Link

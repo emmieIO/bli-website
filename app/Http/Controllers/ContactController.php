@@ -22,7 +22,7 @@ class ContactController extends Controller
 
         try {
             // Send notification to admin
-            Notification::route('mail', env('CONTACT_EMAIL', 'info@beaconleadership.org'))
+            Notification::route('mail', \App\Models\Setting::get('contact_email', env('CONTACT_EMAIL', 'info@beaconleadership.org')))
                 ->notify(new ContactFormSubmitted(
                     $validated['name'],
                     $validated['email'],

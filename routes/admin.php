@@ -119,4 +119,8 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
         Route::get('/transactions-audit', [\App\Http\Controllers\Admin\TransactionAuditController::class, 'index'])->name('transactions-audit.index');
         Route::post('/transactions-audit/{transaction}/resolve', [\App\Http\Controllers\Admin\TransactionAuditController::class, 'resolve'])->name('transactions-audit.resolve');
     });
+
+    // Settings
+    Route::get('/settings', [\App\Http\Controllers\Admin\SettingsController::class, 'edit'])->name('settings');
+    Route::post('/settings', [\App\Http\Controllers\Admin\SettingsController::class, 'update'])->name('settings.update');
 });

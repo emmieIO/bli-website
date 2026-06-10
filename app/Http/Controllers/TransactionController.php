@@ -90,9 +90,9 @@ class TransactionController extends Controller
             ],
             'companyDetails' => [
                 'name' => config('app.name'),
-                'address' => env('CONTACT_ADDRESS', 'Lagos, Nigeria'),
-                'email' => env('CONTACT_EMAIL', 'info@beaconleadership.org'),
-                'phone' => env('CONTACT_PHONE', '+234-706-442-5639'),
+                'address' => \App\Models\Setting::get('contact_address', env('CONTACT_ADDRESS', 'Lagos, Nigeria')),
+                'email' => \App\Models\Setting::get('contact_email', env('CONTACT_EMAIL', 'info@beaconleadership.org')),
+                'phone' => \App\Models\Setting::get('contact_phone', env('CONTACT_PHONE', '+234-706-442-5639')),
             ]
         ]);
     }

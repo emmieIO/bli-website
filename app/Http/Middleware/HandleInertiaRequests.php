@@ -52,9 +52,9 @@ class HandleInertiaRequests extends Middleware
                 'type' => fn () => $request->session()->get('type'),
             ],
             'contact' => [
-                'email' => env('CONTACT_EMAIL', 'info@beaconleadership.org'),
-                'phone' => env('CONTACT_PHONE', '+234-706-442-5639'),
-                'address' => env('CONTACT_ADDRESS', '123 Beacon Avenue, Lagos, Nigeria'),
+                'email' => \App\Models\Setting::get('contact_email', env('CONTACT_EMAIL', 'info@beaconleadership.org')),
+                'phone' => \App\Models\Setting::get('contact_phone', env('CONTACT_PHONE', '+234-706-442-5639')),
+                'address' => \App\Models\Setting::get('contact_address', env('CONTACT_ADDRESS', '123 Beacon Avenue, Lagos, Nigeria')),
             ],
             'ziggy' => fn () => array_merge((new \Tighten\Ziggy\Ziggy)->toArray(), [
                 'location' => $request->url(),

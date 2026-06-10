@@ -114,10 +114,7 @@ class AuthenticatedController extends Controller
     public function logout(Request $request)
     {
         if($this->authService->logout($request)){
-            return redirect(route('homepage'))->with([
-                "type" => "success",
-                "message" => "Logged out successfully"
-            ]);
+            return \Inertia\Inertia::location(route('homepage'));
         }
         return redirect()->back()->with([
             "type" => "error",
