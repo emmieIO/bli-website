@@ -25,8 +25,7 @@ class EnsureSpeakerWorkspaceAccess
         }
 
         abort_unless($event instanceof Event, 404);
-        abort_unless($user->canAccessSpeakerArea(), 403, 'Only verified speaker accounts can access speaker workspaces.');
-        abort_unless($user->hasSpeakerEventContext($event), 403, 'You do not have speaker access for this event.');
+        abort_unless($user->hasSpeakerEventContext($event), 404);
 
         return $next($request);
     }

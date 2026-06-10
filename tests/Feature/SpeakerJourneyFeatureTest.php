@@ -7,6 +7,7 @@ use App\Enums\EventStatus;
 use App\Enums\Permissions\EventPermissionsEnum;
 use App\Enums\SessionFormat;
 use App\Enums\SpeakerWorkspaceStage;
+use App\Enums\UserRoles;
 use App\Models\Event;
 use App\Models\Speaker;
 use App\Models\SpeakerApplication;
@@ -18,6 +19,7 @@ use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\URL;
 use Inertia\Testing\AssertableInertia as Assert;
 use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Models\Role;
 use Spatie\Permission\PermissionRegistrar;
 use Tests\TestCase;
 
@@ -39,6 +41,7 @@ class SpeakerJourneyFeatureTest extends TestCase
         Permission::findOrCreate(EventPermissionsEnum::APPLY_TO_SPEAK->value);
         Permission::findOrCreate(EventPermissionsEnum::MANAGE_SPEAKERS->value);
         Permission::findOrCreate('approve-speaker-applications');
+        Role::findOrCreate(UserRoles::SPEAKER->value, 'web');
     }
 
     public function test_speaker_application_submission_creates_under_review_workspace(): void
@@ -251,6 +254,8 @@ class SpeakerJourneyFeatureTest extends TestCase
 
     private function makeSpeaker(User $user): Speaker
     {
+        $user->assignRole(UserRoles::SPEAKER->value);
+
         return Speaker::query()->create([
             'user_id' => $user->id,
             'created_by' => $user->id,

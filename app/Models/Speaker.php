@@ -15,15 +15,15 @@ class Speaker extends Model
     use HasFactory, Notifiable;
 
     protected $fillable = [
-        'name',
-        'email',
-        'phone',
+        'user_id',
+        'created_by',
+        'title',
+        'organization',
         'bio',
         'photo',
-        'organization',
-        'user_id',
+        'linkedin',
+        'website',
         'status',
-        'created_by',
     ];
 
     protected $casts = [
@@ -33,7 +33,7 @@ class Speaker extends Model
     protected $with=['user'];
 
     public function routeNotificationForMail(){
-        return $this->email;
+        return $this->user?->email;
     }
     public function events (){
         return $this->belongsToMany(Event::class, 'event_speaker');

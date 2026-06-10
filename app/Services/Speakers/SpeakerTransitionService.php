@@ -12,6 +12,7 @@ use App\Models\Speaker;
 use App\Models\SpeakerApplication;
 use App\Models\SpeakerInvite;
 use Illuminate\Support\Facades\DB;
+use Spatie\Permission\Models\Role;
 
 class SpeakerTransitionService
 {
@@ -51,10 +52,7 @@ class SpeakerTransitionService
                 'status' => SpeakerStatus::ACTIVE->value,
             ]);
 
-            $user = $application->speaker->user;
-            if ($user && ! $user->hasRole(UserRoles::SPEAKER->value)) {
-                $user->assignRole(UserRoles::SPEAKER->value);
-            }
+            $this->assignSpeakerRole($application->speaker);
 
             $application->event->speakers()->syncWithoutDetaching([
                 $application->speaker->id,
@@ -117,10 +115,23 @@ class SpeakerTransitionService
             ]);
 
             if ($response === SpeakerInviteStatus::ACCEPTED) {
+                $this->assignSpeakerRole($speaker);
                 $invite->event?->speakers()->syncWithoutDetaching([$speaker->id]);
             }
 
             return $invite->fresh();
         });
+    }
+
+    private function assignSpeakerRole(Speaker $speaker): void
+    {
+        $user = $speaker->user;
+
+        if (! $user) {
+            return;
+        }
+
+        Role::findOrCreate(UserRoles::SPEAKER->value, 'web');
+        $user->assignRole(UserRoles::SPEAKER->value);
     }
 }

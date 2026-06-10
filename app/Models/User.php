@@ -133,7 +133,7 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public function hasSpeakerIdentity(): bool
     {
-        return $this->speaker !== null;
+        return $this->speaker()->exists();
     }
 
     public function isSpeakerRole(): bool
@@ -148,7 +148,7 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public function hasSpeakerEventContext(Event $event): bool
     {
-        $speakerId = $this->speaker?->id;
+        $speakerId = $this->speaker()->value('id');
 
         $hasApplication = SpeakerApplication::query()
             ->where('event_id', $event->id)

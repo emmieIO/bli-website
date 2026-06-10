@@ -4,11 +4,13 @@ namespace Tests\Feature;
 
 use App\Enums\EventRegistrationStatus;
 use App\Enums\EventStatus;
+use App\Enums\UserRoles;
 use App\Models\Event;
 use App\Models\Speaker;
 use App\Models\SpeakerInvite;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
 class EventJourneyAccessTest extends TestCase
@@ -23,6 +25,8 @@ class EventJourneyAccessTest extends TestCase
             \Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class,
             \Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class,
         ]);
+
+        Role::findOrCreate(UserRoles::SPEAKER->value, 'web');
     }
 
     public function test_registered_attendee_can_open_event_workspace(): void
@@ -103,6 +107,7 @@ class EventJourneyAccessTest extends TestCase
             'status' => 'pending',
             'expires_at' => now()->addDay(),
         ]);
+        $user->assignRole(UserRoles::SPEAKER->value);
 
         $response = $this->actingAs($user)->get(route('speaker.events.show', $event->slug));
 

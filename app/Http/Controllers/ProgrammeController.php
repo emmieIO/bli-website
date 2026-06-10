@@ -25,10 +25,13 @@ class ProgrammeController extends Controller
     {
         $searchQuery = $request->input('q', null);
         $statusFilter = $request->input('status');
+        $segments = $this->publicSegments();
+        $segmentCounts = $this->publicSegmentCounts($searchQuery);
 
         $statusMap = [
             'live_now'             => 'live',
             'open_registration'    => 'registration_open',
+            'waitlist_open'        => 'registration_open',
             'registration_closed'  => 'registration_closed',
             'completed'            => 'completed',
             'announced'            => 'published',
@@ -55,49 +58,94 @@ class ProgrammeController extends Controller
         return \Inertia\Inertia::render("Events/Index", [
             'searchQuery' => $searchQuery,
             'events' => $events,
+            'segmentCounts' => $segmentCounts,
+            'sections' => collect($segments)
+                ->map(fn (array $segment, string $key) => [
+                    'key' => $key,
+                    'label' => $segment['label'],
+                    'count' => $segmentCounts[$key] ?? 0,
+                ])
+                ->values()
+                ->all(),
         ]);
     }
 
     private function resolvePublicSegment(Event $event, string|int $slotsRemaining): array
     {
         return match ($event->lifecycleStatus()) {
-            EventStatus::LIVE => [
-                'key' => 'live_now',
-                'label' => 'Live Now',
-                'note' => 'This event is currently in session.',
-            ],
+            EventStatus::LIVE => $this->publicSegments()['live_now'],
             EventStatus::REGISTRATION_OPEN => $slotsRemaining === 'Full'
-                ? [
-                    'key' => 'waitlist_open',
-                    'label' => 'Waitlist Open',
-                    'note' => 'Registration capacity is full. New attendees will join the waitlist.',
-                ]
-                : [
-                    'key' => 'open_registration',
-                    'label' => 'Open Registration',
-                    'note' => 'Registration is currently available.',
-                ],
-            EventStatus::PUBLISHED => [
-                'key' => 'announced',
-                'label' => 'Announced',
-                'note' => 'This event is public, but registration has not opened yet.',
-            ],
-            EventStatus::REGISTRATION_CLOSED => [
-                'key' => 'registration_closed',
-                'label' => 'Registration Closed',
-                'note' => 'Public details are still available, but new attendee registration is closed.',
-            ],
-            EventStatus::COMPLETED => [
-                'key' => 'completed',
-                'label' => 'Completed',
-                'note' => 'This event has ended and remains visible for reference.',
-            ],
+                ? $this->publicSegments()['waitlist_open']
+                : $this->publicSegments()['open_registration'],
+            EventStatus::PUBLISHED => $this->publicSegments()['announced'],
+            EventStatus::REGISTRATION_CLOSED => $this->publicSegments()['registration_closed'],
+            EventStatus::COMPLETED => $this->publicSegments()['completed'],
             default => [
                 'key' => 'announced',
                 'label' => 'Announced',
                 'note' => 'This event is public.',
             ],
         };
+    }
+
+    private function publicSegments(): array
+    {
+        return [
+            'live_now' => [
+                'key' => 'live_now',
+                'label' => 'Live Now',
+                'note' => 'This event is currently in session.',
+            ],
+            'open_registration' => [
+                'key' => 'open_registration',
+                'label' => 'Open Registration',
+                'note' => 'Registration is currently available.',
+            ],
+            'waitlist_open' => [
+                'key' => 'waitlist_open',
+                'label' => 'Waitlist Open',
+                'note' => 'Registration capacity is full. New attendees will join the waitlist.',
+            ],
+            'announced' => [
+                'key' => 'announced',
+                'label' => 'Announced',
+                'note' => 'This event is public, but registration has not opened yet.',
+            ],
+            'registration_closed' => [
+                'key' => 'registration_closed',
+                'label' => 'Registration Closed',
+                'note' => 'Public details are still available, but new attendee registration is closed.',
+            ],
+            'completed' => [
+                'key' => 'completed',
+                'label' => 'Completed',
+                'note' => 'This event has ended and remains visible for reference.',
+            ],
+        ];
+    }
+
+    private function publicSegmentCounts(?string $searchQuery): array
+    {
+        $counts = array_fill_keys(array_keys($this->publicSegments()), 0);
+
+        Event::publiclyVisible()
+            ->when($searchQuery, function ($query, $searchQuery) {
+                $like = '%'.$searchQuery.'%';
+
+                $query->where(function ($nestedQuery) use ($like) {
+                    $nestedQuery->where('title', 'like', $like)
+                        ->orWhere('mode', 'like', $like)
+                        ->orWhere('theme', 'like', $like)
+                        ->orWhere('physical_address', 'like', $like);
+                });
+            })
+            ->get()
+            ->each(function (Event $event) use (&$counts) {
+                $segment = $this->resolvePublicSegment($event, $this->participantStateService->slotsRemaining($event));
+                $counts[$segment['key']]++;
+            });
+
+        return $counts;
     }
 
     /**

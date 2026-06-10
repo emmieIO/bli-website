@@ -13,6 +13,7 @@ use App\Traits\HasFileUpload;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
+use Spatie\Permission\Models\Role;
 
 class SpeakerApplicationService
 {
@@ -47,20 +48,19 @@ class SpeakerApplicationService
                 $speaker = Speaker::updateOrCreate(
                     ['user_id' => $user->id],
                     [
-                        'name' => $user->name,
-                        'email' => $user->email,
-                        'phone' => $user->phone,
+                        'title' => $data['title'] ?? $existingSpeaker?->title,
                         'bio' => $data['bio'] ?? $existingSpeaker?->bio,
                         'organization' => $data['organization'] ?? $existingSpeaker?->organization,
+                        'linkedin' => $data['linkedin'] ?? $existingSpeaker?->linkedin,
+                        'website' => $data['website'] ?? $existingSpeaker?->website,
                         'photo' => $existingSpeaker?->photo,
                         'status' => $existingSpeaker?->status?->value ?? SpeakerStatus::PENDING->value,
                         'created_by' => $existingSpeaker?->created_by ?? $user->id,
                     ]
                 );
 
-                if (! $user->hasRole(UserRoles::SPEAKER->value)) {
-                    $user->assignRole(UserRoles::SPEAKER->value);
-                }
+                Role::findOrCreate(UserRoles::SPEAKER->value, 'web');
+                $user->assignRole(UserRoles::SPEAKER->value);
 
                 return $speaker;
             });
