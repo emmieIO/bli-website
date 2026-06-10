@@ -25,7 +25,7 @@ class PublicEventCtaResolver
             $event->lifecycleStatus() === EventStatus::ARCHIVED   => $this->status('archived', 'Event archived', 'This event has been archived and is no longer active.'),
             $this->isFinished($event)                            => $this->status('completed', 'Event completed', 'This event has already concluded.'),
             $user && $this->participantStateService->userHasAttendeeWorkspace($event, $user->id) => $this->action('view_attendee_workspace', 'Open attendee workspace', 'Your registration is already on file.', route('user.events.show', $event->slug)),
-            $this->speakerContext($event, $user) !== null        => $this->action('view_speaker_workspace', 'Open speaker workspace', 'Continue your speaker journey.', route('speaker.events.show', $event->slug)),
+            $user && $this->speakerContext($event, $user) !== null => $this->action('view_speaker_workspace', 'Open speaker workspace', 'Continue your speaker journey.', route('speaker.events.show', $event->slug)),
             $this->isLive($event)                                => $this->status('live', 'Event is live', 'Registration is not the primary action while the event is in progress.'),
             ! $event->isRegistrationOpen()                       => $this->resolveClosedRegistration($event, $user),
             $this->participantStateService->slotsRemaining($event) === 'Full' => $this->joinAction('join_waitlist', $event, $user, 'Join waitlist', 'This event is full, but you can claim the next available seat.'),

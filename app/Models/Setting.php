@@ -10,11 +10,18 @@ class Setting extends Model
 
     public static function get(string $key, ?string $default = null): ?string
     {
-        return static::where('key', $key)->value('value') ?? $default;
+        try {
+            return static::where('key', $key)->value('value') ?? $default;
+        } catch (\Exception) {
+            return $default;
+        }
     }
 
     public static function set(string $key, ?string $value): void
     {
-        static::updateOrCreate(['key' => $key], ['value' => $value]);
+        try {
+            static::updateOrCreate(['key' => $key], ['value' => $value]);
+        } catch (\Exception) {
+        }
     }
 }
