@@ -22,11 +22,13 @@ class NotificationController extends Controller
                 return [
                     'id' => $notification->id,
                     'type' => $notification->data['type'] ?? 'general',
-                    'message' => $notification->data['message'] ?? '',
+                    'message' => $this->normalizeMessage($notification->data['message'] ?? ''),
                     'action_url' => $notification->data['action_url'] ?? null,
                     'read_at' => $notification->read_at,
                     'created_at' => $notification->created_at->diffForHumans(),
-                    'data' => $notification->data,
+                    'data' => array_merge($notification->data, [
+                        'message' => $this->normalizeMessage($notification->data['message'] ?? ''),
+                    ]),
                 ];
             });
 
@@ -112,5 +114,27 @@ class NotificationController extends Controller
             'success' => true,
             'unread_count' => 0,
         ]);
+    }
+
+    private function normalizeMessage(string $message): string
+    {
+        return preg_replace_callback(
+            '/\bin\s+(\d+\.\d+)\s+(hours?|days?)\b/i',
+            function (array $matches) {
+                $value = (float) $matches[1];
+                $unit = strtolower($matches[2]);
+
+                if (str_starts_with($unit, 'hour')) {
+                    $hours = max(1, (int) round($value));
+
+                    return 'in '.$hours.' hour'.($hours === 1 ? '' : 's');
+                }
+
+                $days = max(1, (int) round($value));
+
+                return $days === 1 ? 'tomorrow' : 'in '.$days.' days';
+            },
+            $message
+        ) ?? $message;
     }
 }
