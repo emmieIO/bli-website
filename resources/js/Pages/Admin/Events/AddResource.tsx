@@ -64,7 +64,7 @@ export default function AddResource({ event }: AddEventResourceProps) {
         {/* Form Card */}
         <form
           onSubmit={handleSubmit}
-          className="bg-white border border-slate-200 rounded-lg border border-slate-200 p-8 space-y-8"
+          className="space-y-8 rounded-lg border border-slate-200 bg-white p-8"
         >
           {/* Basic Information */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

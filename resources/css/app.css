@@ -458,6 +458,22 @@ h6 {
     padding-block: 4rem;
 }
 
+.event-show-section {
+    padding-block: 1rem 6rem;
+}
+
+@media (min-width: 640px) {
+    .event-show-section {
+        padding-block: 2rem 6rem;
+    }
+}
+
+@media (min-width: 1024px) {
+    .event-show-section {
+        padding-block: 4rem;
+    }
+}
+
 .public-hero {
     padding-block: 4.5rem 3.5rem;
     border-bottom: 1px solid var(--border-subtle);

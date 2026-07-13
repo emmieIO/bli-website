@@ -223,32 +223,27 @@ export default function EventShow({ event, auth, primary_cta }: EventShowProps) 
         <GuestLayout>
             <Head title={event.title} />
 
-            <section className="border-b border-slate-200 bg-white py-5">
+            <section className="border-b border-slate-200 bg-white py-3 sm:py-5">
                 <div className="section-shell">
                     <nav>
-                        <ul className="flex items-center space-x-3 text-sm">
+                        <ul className="flex min-w-0 items-center gap-2 text-sm sm:gap-3">
                             <li className="inline">
-                                <Link href={route('homepage')} className="font-medium text-slate-500 transition-colors hover:text-slate-950">
-                                    <i className="fas fa-home text-xs"></i>
-                                    <span className="ml-2">Home</span>
+                                <Link href={route('events.index')} className="inline-flex items-center gap-2 font-medium text-slate-500 transition-colors hover:text-slate-950">
+                                    <i className="fas fa-arrow-left text-xs"></i> Events
                                 </Link>
                             </li>
                             <li className="inline text-xs text-slate-400"><i className="fas fa-chevron-right"></i></li>
-                            <li className="inline">
-                                <Link href={route('events.index')} className="font-medium text-slate-500 transition-colors hover:text-slate-950">Events</Link>
-                            </li>
-                            <li className="inline text-xs text-slate-400"><i className="fas fa-chevron-right"></i></li>
-                            <li className="inline truncate font-medium text-slate-900">{event.title}</li>
+                            <li className="min-w-0 truncate font-medium text-slate-900">{event.title}</li>
                         </ul>
                     </nav>
                 </div>
             </section>
 
-            <section className="public-section bg-slate-50">
+            <section className="public-section event-show-section bg-slate-50">
                 <div className="section-shell">
                     <div className="grid gap-6 lg:grid-cols-[minmax(0,1.65fr)_minmax(320px,0.95fr)] lg:gap-8">
                         <div className="space-y-6 lg:space-y-8">
-                            <section className="relative isolate overflow-hidden rounded-2xl border border-slate-200 bg-slate-900 text-white shadow-sm">
+                            <section className="relative isolate overflow-hidden rounded-md border border-slate-200 bg-slate-900 text-white shadow-sm sm:rounded-lg">
                                 <div className="absolute inset-0">
                                     <img
                                         src={event.program_cover ? `/storage/${event.program_cover}` : '/assets/img/banner.png'}
@@ -261,9 +256,9 @@ export default function EventShow({ event, auth, primary_cta }: EventShowProps) 
                                     <div className="absolute inset-0 bg-slate-900/68"></div>
                                 </div>
 
-                                <div className="relative flex min-h-[440px] items-end md:min-h-[520px]">
-                                    <div className="w-full px-6 pb-8 pt-12 lg:px-10 lg:pb-10 lg:pt-16">
-                                        <div className="max-w-4xl space-y-6">
+                                <div className="relative flex min-h-130 items-end sm:min-h-125 md:min-h-130">
+                                    <div className="w-full px-4 pb-5 pt-10 sm:px-6 sm:pb-8 lg:px-10 lg:pb-10 lg:pt-16">
+                                        <div className="max-w-4xl space-y-4 sm:space-y-6">
                                             <div className="flex flex-wrap items-center gap-3">
                                                 <span
                                                     className="inline-flex items-center rounded-md bg-white/10 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-white/92"
@@ -299,14 +294,14 @@ export default function EventShow({ event, auth, primary_cta }: EventShowProps) 
 
                                             <div className="space-y-4">
                                                 <h1
-                                                    className="max-w-4xl text-4xl font-semibold leading-[0.98] !text-white md:text-5xl lg:text-6xl"
+                                                    className="max-w-4xl wrap-break-word text-3xl font-semibold leading-tight text-white! sm:text-4xl md:text-5xl lg:text-6xl"
                                                     style={{ textShadow: '0 4px 18px rgba(0, 0, 0, 0.35)' }}
                                                 >
                                                     {event.title}
                                                 </h1>
                                                 {event.theme && (
                                                     <p
-                                                        className="max-w-3xl text-lg leading-8 text-white/78 md:text-xl"
+                                                        className="max-w-3xl text-base leading-6 text-white/78 sm:text-lg sm:leading-8 md:text-xl"
                                                         style={{ textShadow: '0 2px 10px rgba(0, 0, 0, 0.28)' }}
                                                     >
                                                         {event.theme}
@@ -315,34 +310,34 @@ export default function EventShow({ event, auth, primary_cta }: EventShowProps) 
                                             </div>
 
                                             <div
-                                                className="max-w-3xl text-base leading-8 text-white/88 md:text-lg"
+                                                className="hidden max-w-3xl text-base leading-8 text-white/88 sm:block md:text-lg"
                                                 style={{ textShadow: '0 2px 10px rgba(0, 0, 0, 0.28)' }}
                                             >
                                                 <p>{primary_cta.description}</p>
                                             </div>
 
-                                            <div className="grid max-w-4xl gap-x-8 gap-y-6 border-t border-white/14 pt-6 text-sm text-white/78 sm:grid-cols-2 xl:grid-cols-4">
+                                            <div className="grid max-w-4xl grid-cols-2 gap-x-4 gap-y-4 border-t border-white/14 pt-4 text-sm text-white/78 sm:gap-x-8 sm:gap-y-6 sm:pt-6 xl:grid-cols-4">
                                                 <div>
                                                     <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/54">Starts</p>
                                                     <p
-                                                        className="mt-2 text-base font-semibold text-white/96"
+                                                        className="mt-1 text-sm font-semibold leading-5 text-white/96 sm:mt-2 sm:text-base"
                                                         style={{ textShadow: '0 2px 8px rgba(0, 0, 0, 0.22)' }}
                                                     >
                                                         {formatDate(event.start_date)}
                                                     </p>
-                                                    <p className="mt-1 text-white/72">{formatTime(event.start_date)}</p>
+                                                    <p className="mt-1 text-xs text-white/72 sm:text-sm">{formatTime(event.start_date)}</p>
                                                 </div>
                                                 <div>
                                                     <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/54">Ends</p>
                                                     <p
-                                                        className="mt-2 text-base font-semibold text-white/96"
+                                                        className="mt-1 text-sm font-semibold leading-5 text-white/96 sm:mt-2 sm:text-base"
                                                         style={{ textShadow: '0 2px 8px rgba(0, 0, 0, 0.22)' }}
                                                     >
                                                         {formatDate(event.end_date)}
                                                     </p>
-                                                    <p className="mt-1 text-white/72">{formatTime(event.end_date)}</p>
+                                                    <p className="mt-1 text-xs text-white/72 sm:text-sm">{formatTime(event.end_date)}</p>
                                                 </div>
-                                                <div>
+                                                <div className="hidden sm:block">
                                                     <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/54">Entry</p>
                                                     <p
                                                         className="mt-2 text-base font-semibold text-white/96"
@@ -351,7 +346,7 @@ export default function EventShow({ event, auth, primary_cta }: EventShowProps) 
                                                         {event.entry_fee > 0 ? `₦${event.entry_fee.toLocaleString()}` : 'Free'}
                                                     </p>
                                                 </div>
-                                                <div>
+                                                <div className="hidden sm:block">
                                                     <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/54">Seats</p>
                                                     <p
                                                         className="mt-2 text-base font-semibold text-white/96"
@@ -372,10 +367,10 @@ export default function EventShow({ event, auth, primary_cta }: EventShowProps) 
                                             </div>
 
                                             {isUpcoming && countdown && (
-                                                <div className="border-l-2 border-emerald-400 pl-4">
+                                                <div className="border-l-2 border-accent pl-3 sm:pl-4">
                                                     <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-emerald-300">Countdown</p>
                                                     <p
-                                                        className="mt-2 text-lg font-semibold text-white/96"
+                                                        className="mt-1 text-base font-semibold text-white/96 sm:mt-2 sm:text-lg"
                                                         style={{ textShadow: '0 2px 8px rgba(0, 0, 0, 0.22)' }}
                                                     >
                                                         {countdown}
@@ -388,7 +383,7 @@ export default function EventShow({ event, auth, primary_cta }: EventShowProps) 
                                 </div>
                             </section>
 
-                            <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm lg:p-7">
+                            <div className="rounded-md border border-slate-200 bg-white p-4 shadow-sm sm:p-5 lg:p-7">
                                 <div className="mb-5 flex items-center gap-3">
                                     <div className="flex h-10 w-10 items-center justify-center rounded-md bg-slate-900 text-white">
                                         <i className="fas fa-align-left text-sm"></i>
@@ -417,7 +412,7 @@ export default function EventShow({ event, auth, primary_cta }: EventShowProps) 
                             </div>
 
                             {programProfile && (
-                                <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm lg:p-7">
+                                <div className="rounded-md border border-slate-200 bg-white p-4 shadow-sm sm:p-5 lg:p-7">
                                     <div className="mb-5 flex items-center gap-3">
                                         <div className="flex h-10 w-10 items-center justify-center rounded-md bg-emerald-50 text-emerald-700">
                                             <i className="fas fa-route text-sm"></i>
@@ -465,7 +460,7 @@ export default function EventShow({ event, auth, primary_cta }: EventShowProps) 
                             )}
 
                             {event.speakers && event.speakers.length > 0 && (
-                                <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm lg:p-7">
+                                <div className="rounded-md border border-slate-200 bg-white p-4 shadow-sm sm:p-5 lg:p-7">
                                     <div className="mb-5 flex items-center gap-3">
                                         <div className="flex h-10 w-10 items-center justify-center rounded-md bg-slate-900 text-white">
                                             <i className="fas fa-microphone text-sm"></i>
@@ -478,7 +473,7 @@ export default function EventShow({ event, auth, primary_cta }: EventShowProps) 
                                             <Link
                                                 key={speaker.id}
                                                 href={route('speakers.profile', speaker.id)}
-                                                className="block rounded-xl border border-slate-200 bg-slate-50 p-5 transition hover:border-slate-300 hover:bg-white hover:shadow-sm"
+                                                className="block rounded-md border border-slate-200 bg-slate-50 p-4 transition hover:border-slate-300 hover:bg-white hover:shadow-sm sm:p-5"
                                             >
                                                 <div className="flex items-start gap-4">
                                                     <img
@@ -488,7 +483,7 @@ export default function EventShow({ event, auth, primary_cta }: EventShowProps) 
                                                                 : `https://ui-avatars.com/api/?name=${encodeURIComponent(speaker.user.name)}&background=002147&color=fff&size=128&font-size=0.35&bold=true`
                                                         }
                                                         alt={speaker.user.name}
-                                                        className="h-16 w-16 rounded-xl object-cover"
+                                                        className="h-14 w-14 shrink-0 rounded-md object-cover sm:h-16 sm:w-16"
                                                     />
                                                     <div className="min-w-0 flex-1">
                                                         <p className="text-base font-semibold text-slate-950 md:text-lg">{speaker.user.name}</p>
@@ -507,7 +502,7 @@ export default function EventShow({ event, auth, primary_cta }: EventShowProps) 
                             )}
 
                             {auth?.user && isRegistered && event.resources && event.resources.filter((r) => r.is_downloadable).length > 0 && (
-                                <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm lg:p-7">
+                                <div className="rounded-md border border-slate-200 bg-white p-4 shadow-sm sm:p-5 lg:p-7">
                                     <div className="mb-5 flex items-center gap-3">
                                         <div className="flex h-10 w-10 items-center justify-center rounded-md bg-emerald-50 text-emerald-700">
                                             <i className="fas fa-download text-sm"></i>
@@ -564,7 +559,7 @@ export default function EventShow({ event, auth, primary_cta }: EventShowProps) 
                         </div>
 
                         <aside className="space-y-6 lg:sticky lg:top-24 lg:self-start">
-                            <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm lg:p-6">
+                            <div className="rounded-md border border-slate-200 bg-white p-4 shadow-sm sm:p-5 lg:p-6">
                                 <div className="border-b border-slate-200 pb-5">
                                     <p className="text-[11px] font-semibold uppercase text-slate-500">Next action</p>
                                     <h3 className="mt-2 text-xl font-semibold text-slate-950 md:text-2xl">{primary_cta.label}</h3>
@@ -669,7 +664,7 @@ export default function EventShow({ event, auth, primary_cta }: EventShowProps) 
 
                             </div>
 
-                            <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm lg:p-6">
+                            <div className="rounded-md border border-slate-200 bg-white p-4 shadow-sm sm:p-5 lg:p-6">
                                 <p className="text-[11px] font-semibold uppercase text-slate-500">Event Logistics</p>
                                 <div className="mt-5 space-y-5">
                                     <div className="flex items-start gap-3">
@@ -750,12 +745,31 @@ export default function EventShow({ event, auth, primary_cta }: EventShowProps) 
                 </div>
             </section>
 
+            <div className="fixed inset-x-0 bottom-0 z-40 border-t border-slate-200 bg-white/95 px-4 py-3 shadow-[0_-8px_24px_rgba(15,23,42,0.10)] backdrop-blur lg:hidden">
+                {primary_cta.kind === 'status' || !showPrimaryCta ? (
+                    <div className="flex min-h-12 w-full items-center justify-center rounded-md bg-slate-700 px-4 text-center text-sm font-semibold text-white">
+                        {revokeCount === 4 && (isFreeRegistrationFlow || isWaitlistFlow) ? 'Registration limit reached' : primary_cta.label}
+                    </div>
+                ) : (
+                    <button
+                        type="button"
+                        onClick={handlePrimaryCta}
+                        className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-md bg-primary px-4 text-sm font-semibold text-white"
+                    >
+                        {isPaidCheckoutFlow && <i className="fas fa-ticket-alt"></i>}
+                        {isWaitlistFlow && <i className="fas fa-clock"></i>}
+                        {isFreeRegistrationFlow && <i className="fas fa-check"></i>}
+                        <span>{primary_cta.label}</span>
+                    </button>
+                )}
+            </div>
+
             {/* Registration Modal */}
             {showModal && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-md">
-                    <div className="relative p-4 w-full max-w-lg max-h-full">
-                        <div className="relative overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl">
-                            <div className="border-b border-slate-200 bg-slate-950 p-6 text-center">
+                <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/60 backdrop-blur-md sm:items-center">
+                    <div className="relative max-h-[92vh] w-full max-w-lg p-2 sm:p-4">
+                        <div className="relative max-h-[90vh] overflow-y-auto rounded-md border border-slate-200 bg-white shadow-2xl sm:rounded-lg">
+                            <div className="border-b border-slate-200 bg-slate-950 p-5 text-center sm:p-6">
                                 {/* Close Button */}
                                 <button
                                     type="button"
@@ -766,8 +780,8 @@ export default function EventShow({ event, auth, primary_cta }: EventShowProps) 
                                 </button>
 
                                 {/* Modal Icon */}
-                                <div className="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-xl bg-white/10">
-                                    <i className={`fas ${isWaitlistFlow ? 'fa-clock' : 'fa-calendar-check'} text-3xl text-white`}></i>
+                                <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-md bg-white/10 sm:mb-4 sm:h-20 sm:w-20">
+                                    <i className={`fas ${isWaitlistFlow ? 'fa-clock' : 'fa-calendar-check'} text-2xl text-white sm:text-3xl`}></i>
                                 </div>
 
                                 {/* Modal Title */}
@@ -778,7 +792,7 @@ export default function EventShow({ event, auth, primary_cta }: EventShowProps) 
                             </div>
 
                             {/* Modal Content */}
-                            <div className="p-8 text-center">
+                            <div className="p-5 text-center sm:p-8">
                                 <div className="mb-6">
                                     <h4 className="mb-2 text-lg font-semibold text-slate-950">
                                         {isWaitlistFlow ? "You're about to join the waitlist for:" : "You're about to confirm your registration for:"}
