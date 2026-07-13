@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Enums\Permissions\EventPermissionsEnum;
+use App\Enums\UserRoles;
 use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
@@ -21,7 +22,6 @@ class RoleAndPermissionsSeeder extends Seeder
             EventPermissionsEnum::DELETE_ANY->value,
             EventPermissionsEnum::PUBLISH->value,
             EventPermissionsEnum::MANAGE_ATTENDEES->value,
-            EventPermissionsEnum::MANAGE_WAITLIST->value,
             EventPermissionsEnum::MANAGE_SPEAKERS->value,
             EventPermissionsEnum::MANAGE_RESOURCES->value,
             EventPermissionsEnum::VIEW_PAYMENTS->value,
@@ -34,12 +34,11 @@ class RoleAndPermissionsSeeder extends Seeder
             EventPermissionsEnum::VIEW->value,
             EventPermissionsEnum::REGISTER->value,
             EventPermissionsEnum::VIEW_OWN_REGISTRATION->value,
-            EventPermissionsEnum::JOIN_WAITLIST->value,
             EventPermissionsEnum::APPLY_TO_SPEAK->value,
         ];
 
         $rolesPermissions = [
-            'admin' => [
+            UserRoles::ADMIN->value => [
                 'analytics-view-system',
                 ...$eventAdminPermissions,
                 EventPermissionsEnum::APPLY_TO_SPEAK->value,
@@ -72,26 +71,38 @@ class RoleAndPermissionsSeeder extends Seeder
                 'manage-tickets',
                 'view-transaction-audit',
             ],
-            'student' => [
+            UserRoles::STUDENT->value => [
                 'track-applications',
                 'view-own-transaction-history',
                 'view-own-invitations',
                 'mentorship-view-own',
                 ...$eventUserPermissions,
             ],
-            'instructor' => [
+            UserRoles::INSTRUCTOR->value => [
                 'track-applications',
                 'view-own-transaction-history',
                 'view-own-invitations',
-                'mentorship-view-instructor',
                 ...$eventUserPermissions,
             ],
-            'speaker' => [
+            UserRoles::SPEAKER->value => [
                 'track-applications',
                 'view-own-invitations',
                 ...$eventUserPermissions,
             ],
+            UserRoles::MENTOR->value => [
+                'track-applications',
+                'view-own-transaction-history',
+                'view-own-invitations',
+                'mentorship-manage-assigned',
+                ...$eventUserPermissions,
+            ],
         ];
+
+        $rolesPermissions[UserRoles::SUPER_ADMIN->value] = collect($rolesPermissions)
+            ->flatten()
+            ->unique()
+            ->values()
+            ->all();
 
         // Create permissions
         $allPermissions = collect($rolesPermissions)->flatten()->unique();

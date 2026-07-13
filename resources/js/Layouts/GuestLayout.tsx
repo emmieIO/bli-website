@@ -38,6 +38,7 @@ export default function GuestLayout({ children }: PropsWithChildren) {
                     <div className="hidden items-center gap-6 lg:flex">
                         <Link href={route('homepage')} className={navLinkClass}>Home</Link>
                         <Link href={route('events.index')} className={navLinkClass}>Events</Link>
+                        <Link href={route('mentorship.index')} className={navLinkClass}>Mentorship</Link>
                         <Link href={route('blog.index')} className={navLinkClass}>Insights</Link>
                         <Link href={route('contact-us')} className={navLinkClass}>Contact</Link>
                         <li className="relative list-none" ref={joinUsDropdownRef}>
@@ -95,6 +96,7 @@ export default function GuestLayout({ children }: PropsWithChildren) {
                         <div className="section-shell space-y-1.5 py-4">
                             <Link href={route('homepage')} className={mobileNavLinkClass}>Home</Link>
                             <Link href={route('events.index')} className={mobileNavLinkClass}>Events</Link>
+                            <Link href={route('mentorship.index')} className={mobileNavLinkClass}>Mentorship</Link>
                             <Link href={route('blog.index')} className={mobileNavLinkClass}>Insights</Link>
                             <Link href={route('contact-us')} className={mobileNavLinkClass}>Contact</Link>
                             <Link href={route('instructors.become-an-instructor')} className={mobileNavLinkClass}>Become an Instructor</Link>
@@ -131,6 +133,7 @@ export default function GuestLayout({ children }: PropsWithChildren) {
                             <h4 className="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-3">Programs</h4>
                             <div className="space-y-2">
                                 <Link href={route('events.index')} className="block text-sm text-slate-600 transition hover:text-primary">Events</Link>
+                                <Link href={route('mentorship.index')} className="block text-sm text-slate-600 transition hover:text-primary">Mentorship</Link>
                                 <Link href={route('blog.index')} className="block text-sm text-slate-600 transition hover:text-primary">Insights</Link>
                             </div>
                         </div>

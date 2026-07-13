@@ -47,7 +47,7 @@ class PublicEventCtaResolverTest extends TestCase
         $this->assertSame('view_speaker_workspace', $cta['key']);
     }
 
-    public function test_full_event_prefers_waitlist(): void
+    public function test_full_event_stops_registration(): void
     {
         $user = User::factory()->create();
         $event = $this->makeEvent([
@@ -56,8 +56,8 @@ class PublicEventCtaResolverTest extends TestCase
 
         $cta = app(PublicEventCtaResolver::class)->resolve($event, $user);
 
-        $this->assertSame('join_waitlist', $cta['key']);
-        $this->assertSame('post', $cta['method']);
+        $this->assertSame('event_full', $cta['key']);
+        $this->assertSame('status', $cta['kind']);
     }
 
     public function test_authenticated_user_gets_free_registration_cta(): void

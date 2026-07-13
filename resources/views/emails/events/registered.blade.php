@@ -62,12 +62,10 @@
                                     Event Registration
                                 </div>
                                 <h1 class="email-header-title" style="margin:14px 0 0 0;font-size:32px;line-height:1.08;font-weight:700;">
-                                    {{ $isWaitlistPromotion ? 'Your seat is confirmed.' : 'You are officially registered.' }}
+                                    You are officially registered.
                                 </h1>
                                 <p class="email-header-text" style="margin:14px 0 0 0;font-size:16px;line-height:1.7;">
-                                    {{ $isWaitlistPromotion
-                                        ? "A place opened up and your registration for {$event->title} has been moved from the waitlist into confirmed attendance."
-                                        : "Your registration for {$event->title} has been confirmed. Everything you need is now in your event workspace." }}
+                                    Your registration for {{ $event->title }} has been confirmed. Everything you need is now in your event workspace.
                                 </p>
                             </div>
                         </td>

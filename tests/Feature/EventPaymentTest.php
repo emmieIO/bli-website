@@ -89,33 +89,6 @@ class EventPaymentTest extends TestCase
         $response->assertSessionHas('message', 'Your registration is already confirmed.');
     }
 
-    public function test_checkout_page_redirects_waitlisted_attendee_to_workspace()
-    {
-        $user = User::factory()->create();
-        $creator = User::factory()->create();
-        $event = Event::factory()->create([
-            'entry_fee' => 5000,
-            'status' => 'registration_open',
-            'theme' => 'Test Theme',
-            'creator_id' => $creator->id,
-        ]);
-
-        $event->attendees()->attach($user->id, [
-            'status' => EventRegistrationStatus::WAITLISTED->value,
-            'revoke_count' => 0,
-        ]);
-
-        $this->mock(PaystackService::class, function ($mock) {
-            $mock->shouldReceive('getPublicKey')->andReturn('pk_test_xxx');
-        });
-
-        $response = $this->actingAs($user)
-            ->get(route('events.checkout', $event->slug));
-
-        $response->assertRedirect(route('user.events.show', $event->slug));
-        $response->assertSessionHas('message', 'You are already on the waitlist for this event.');
-    }
-
     public function test_checkout_page_redirects_when_paid_event_is_full()
     {
         $user = User::factory()->create();
@@ -136,7 +109,7 @@ class EventPaymentTest extends TestCase
             ->get(route('events.checkout', $event->slug));
 
         $response->assertRedirect(route('events.show', $event->slug));
-        $response->assertSessionHas('message', 'This event is currently full. Join the waitlist instead of proceeding to checkout.');
+        $response->assertSessionHas('message', 'This event is currently full. Registration will reopen if a seat becomes available.');
     }
 
     public function test_payment_initialization()
@@ -277,7 +250,7 @@ class EventPaymentTest extends TestCase
         ]);
     }
 
-    public function test_successful_paid_event_verification_waitlists_user_if_capacity_fills_before_callback()
+    public function test_successful_paid_event_verification_does_not_overbook_if_capacity_fills_before_callback()
     {
         $user = User::factory()->create();
         $otherAttendee = User::factory()->create();
@@ -326,59 +299,18 @@ class EventPaymentTest extends TestCase
         $response = $this->actingAs($user)
             ->get(route('payment.callback', ['reference' => $txRef]));
 
-        $response->assertRedirect(route('user.events.show', $event->slug));
-        $response->assertSessionHas('message', 'Payment successful! You have been added to the event waitlist.');
+        $response->assertRedirect(route('events.show', $event->slug));
+        $response->assertSessionHas('message', 'Payment was received, but the event is now full. Please contact support with your payment reference.');
 
         $this->assertDatabaseHas('transactions', [
             'id' => $transaction->id,
             'status' => 'successful'
         ]);
 
-        $this->assertDatabaseHas('event_attendees', [
+        $this->assertDatabaseMissing('event_attendees', [
             'event_id' => $event->id,
             'user_id' => $user->id,
-            'status' => EventRegistrationStatus::WAITLISTED->value,
         ]);
-    }
-
-    public function test_verify_payment_for_successful_event_transaction_respects_waitlist_status()
-    {
-        $user = User::factory()->create();
-        $creator = User::factory()->create();
-        $event = Event::factory()->create([
-            'entry_fee' => 5000,
-            'attendee_slots' => 1,
-            'status' => 'registration_open',
-            'theme' => 'Test Theme',
-            'creator_id' => $creator->id,
-        ]);
-
-        $transaction = Transaction::create([
-            'user_id' => $user->id,
-            'payable_id' => $event->id,
-            'payable_type' => Event::class,
-            'transaction_id' => 'BLI_EVENT_VERIFY_WAITLIST_' . time(),
-            'payment_ref' => 'REF_WAITLIST_' . time(),
-            'amount' => 5000,
-            'currency' => 'NGN',
-            'status' => 'successful',
-            'metadata' => ['type' => 'event', 'event_id' => $event->id]
-        ]);
-
-        $event->attendees()->attach($user->id, [
-            'status' => EventRegistrationStatus::WAITLISTED->value,
-            'revoke_count' => 0,
-        ]);
-
-        $this->mock(PaystackService::class, function ($mock) {
-            $mock->shouldReceive('getPublicKey')->andReturn('pk_test_xxx');
-        });
-
-        $response = $this->actingAs($user)
-            ->get(route('payment.verify', $transaction->payment_ref));
-
-        $response->assertRedirect(route('user.events.show', $event->slug));
-        $response->assertSessionHas('message', 'Your payment was successful and you are currently on the event waitlist.');
     }
 
 }

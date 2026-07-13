@@ -3,6 +3,7 @@
 @import "./dashboard.css";
 @import "./home-nav.css";
 @import "./auth-enhancements.css";
+@import "./rich-content.css";
 @import "../../node_modules/flyonui/variants.css";
 
 @plugin "flowbite/plugin";

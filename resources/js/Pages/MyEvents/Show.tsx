@@ -41,7 +41,7 @@ interface Event {
     contact_email?: string | null;
     status: string;
     journey_status: 'upcoming' | 'ongoing' | 'ended';
-    registration_status: 'registered' | 'waitlisted' | 'attended' | 'no_show';
+    registration_status: 'registered' | 'attended' | 'no_show';
     meeting_link?: string | null;
     access_notes?: string | null;
     latest_transaction?: Transaction | null;
@@ -78,15 +78,11 @@ export default function ShowMyEvent({ event }: Props) {
         return `${event.latest_transaction.status} • ${event.latest_transaction.currency} ${Number(event.latest_transaction.amount).toLocaleString()}`;
     }, [event.latest_transaction]);
 
-    const registrationCopy = event.registration_status === 'waitlisted'
-        ? 'You are currently on the waitlist. We will notify you if a seat opens up.'
-        : 'Your attendee registration is confirmed. Use this workspace for access details, resources, and updates.';
+    const registrationCopy = 'Your attendee registration is confirmed. Use this workspace for access details, resources, and updates.';
 
     const registrationLabel = event.registration_status === 'registered' ? 'confirmed' : event.registration_status.replace('_', ' ');
 
-    const statusTone = event.registration_status === 'waitlisted'
-        ? 'border-amber-200 bg-amber-50 text-amber-700'
-        : 'border-lime-200 bg-lime-50 text-lime-700';
+    const statusTone = 'border-lime-200 bg-lime-50 text-lime-700';
 
     const journeyTone = event.journey_status === 'ongoing'
         ? 'border-primary-200 bg-primary-50 text-primary'
@@ -114,7 +110,7 @@ export default function ShowMyEvent({ event }: Props) {
         });
     };
 
-    const canCancelRegistration = event.registration_status === 'registered' || event.registration_status === 'waitlisted';
+    const canCancelRegistration = event.registration_status === 'registered';
     const availableResources = event.resources.filter((resource) => resource.is_downloadable);
     const programProfile = event.program_profile;
     const prayerTargetLabel = programProfile?.weekly_prayer_target_minutes
@@ -164,7 +160,7 @@ export default function ShowMyEvent({ event }: Props) {
                             <div className="w-full max-w-sm rounded-lg border border-slate-200 bg-white/90 p-5 backdrop-blur-sm">
                                 <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-400">Attendee Actions</p>
                                 <div className="mt-4 space-y-2.5">
-                                    {event.meeting_link && event.journey_status !== 'ended' && event.registration_status !== 'waitlisted' && (
+                                    {event.meeting_link && event.journey_status !== 'ended' && (
                                         <a href={event.meeting_link} target="_blank" rel="noreferrer"
                                             className="flex items-center justify-between rounded-md bg-primary px-4 py-2.5 text-sm font-medium text-white transition hover:bg-primary-600 shadow-sm">
                                             <span>Join event</span>
@@ -221,7 +217,7 @@ export default function ShowMyEvent({ event }: Props) {
                                 <WorkspaceRow label="End" value={formatDate(event.end_date)} />
                                 <WorkspaceRow label="Venue" value={event.physical_address || event.location || 'Shared closer to the event'} />
                                 <WorkspaceRow label="Contact" value={event.contact_email || 'Support team'} />
-                                <WorkspaceRow label="Access notes" value={event.access_notes || (event.registration_status === 'waitlisted' ? 'Wait for confirmation before planning travel or session access.' : 'Any final joining instructions will appear here before the event starts.')} />
+                                <WorkspaceRow label="Access notes" value={event.access_notes || 'Any final joining instructions will appear here before the event starts.'} />
                             </div>
                         </WorkspaceSection>
 
@@ -243,9 +239,7 @@ export default function ShowMyEvent({ event }: Props) {
 
                         <WorkspaceSection title="Attendee Resources" eyebrow="Materials">
                             <div className="space-y-2.5">
-                                {event.registration_status === 'waitlisted' ? (
-                                    <p className="text-sm leading-relaxed text-slate-500">Attendee resources are unavailable while your registration is waitlisted.</p>
-                                ) : availableResources.length > 0 ? (
+                                {availableResources.length > 0 ? (
                                     availableResources.map((resource) => (
                                         <div key={resource.id}>
                                             {resource.type === 'file' && resource.file_path && (
@@ -301,7 +295,7 @@ export default function ShowMyEvent({ event }: Props) {
                         </WorkspaceSection>
 
                         <WorkspaceSection title="Event Description" eyebrow="Brief">
-                            <div className="prose prose-slate max-w-none text-sm leading-7 prose-headings:text-slate-900 prose-p:text-slate-600" dangerouslySetInnerHTML={{ __html: event.description || '<p>No additional description available.</p>' }} />
+                            <div className="rich-content" dangerouslySetInnerHTML={{ __html: event.description || '<p>No additional description available.</p>' }} />
                         </WorkspaceSection>
                     </aside>
                 </section>

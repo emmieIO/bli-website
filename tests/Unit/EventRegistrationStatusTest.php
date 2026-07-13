@@ -6,7 +6,6 @@ test('workspace accessible registration states are explicit', function () {
     expect(EventRegistrationStatus::workspaceAccessibleValues())
         ->toBe([
             EventRegistrationStatus::REGISTERED->value,
-            EventRegistrationStatus::WAITLISTED->value,
             EventRegistrationStatus::ATTENDED->value,
             EventRegistrationStatus::NO_SHOW->value,
         ]);
@@ -22,10 +21,7 @@ test('seat occupancy registration states are explicit', function () {
 });
 
 test('event registration transitions are constrained', function () {
-    expect(EventRegistrationStatus::REGISTERED->canTransitionTo(EventRegistrationStatus::WAITLISTED))->toBeFalse();
     expect(EventRegistrationStatus::REGISTERED->canTransitionTo(EventRegistrationStatus::CANCELLED))->toBeTrue();
-    expect(EventRegistrationStatus::WAITLISTED->canTransitionTo(EventRegistrationStatus::REGISTERED))->toBeTrue();
-    expect(EventRegistrationStatus::WAITLISTED->canTransitionTo(EventRegistrationStatus::ATTENDED))->toBeFalse();
     expect(EventRegistrationStatus::CANCELLED->canTransitionTo(EventRegistrationStatus::REGISTERED))->toBeTrue();
     expect(EventRegistrationStatus::ATTENDED->canTransitionTo(EventRegistrationStatus::REGISTERED))->toBeFalse();
 });

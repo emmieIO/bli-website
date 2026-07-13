@@ -110,28 +110,12 @@ class BcciDiscipleshipTrackSeeder extends Seeder
         );
         $confirmedParticipant->assignRole('student');
 
-        $waitlistedParticipant = User::firstOrCreate(
-            ['email' => 'disciple.waitlist@bcci.test'],
-            [
-                'name' => 'Waitlisted Disciple',
-                'password' => 'password',
-                'phone' => '08000000002',
-            ]
-        );
-        $waitlistedParticipant->assignRole('student');
-
         $event->attendees()->syncWithoutDetaching([
             $confirmedParticipant->id => [
                 'status' => EventRegistrationStatus::REGISTERED->value,
                 'revoke_count' => 0,
                 'created_at' => now()->subDay(),
                 'updated_at' => now()->subDay(),
-            ],
-            $waitlistedParticipant->id => [
-                'status' => EventRegistrationStatus::WAITLISTED->value,
-                'revoke_count' => 0,
-                'created_at' => now()->subHours(12),
-                'updated_at' => now()->subHours(12),
             ],
         ]);
     }

@@ -11,12 +11,13 @@ interface Instructor {
 
 interface Props {
   instructors: Instructor[];
+  selectedInstructorId?: number | null;
 }
 
-export default function Create({ instructors }: Props) {
+export default function Create({ instructors, selectedInstructorId }: Props) {
   const { sideLinks } = usePage().props as any;
   const { data, setData, post, processing, errors } = useForm({
-    instructor_id: '',
+    instructor_id: selectedInstructorId?.toString() ?? '',
     message: '',
     goals: '',
     duration_type: 'monthly',

@@ -31,9 +31,9 @@ class PublicEventIndexSegmentationTest extends TestCase
             'attendee_slots' => 10,
         ]);
 
-        $waitlist = Event::factory()->create([
+        $full = Event::factory()->create([
             'creator_id' => $creator->id,
-            'theme' => 'Waitlist Event',
+            'theme' => 'Full Event',
             'status' => EventStatus::REGISTRATION_OPEN->value,
             'attendee_slots' => 0,
         ]);
@@ -65,13 +65,13 @@ class PublicEventIndexSegmentationTest extends TestCase
             ->component('Events/Index')
             ->where('segmentCounts.live_now', 1)
             ->where('segmentCounts.open_registration', 1)
-            ->where('segmentCounts.waitlist_open', 1)
+            ->where('segmentCounts.event_full', 1)
             ->where('segmentCounts.announced', 1)
             ->where('segmentCounts.registration_closed', 1)
             ->where('segmentCounts.completed', 1)
             ->where('sections.0.key', 'live_now')
             ->where('sections.1.key', 'open_registration')
-            ->where('sections.2.key', 'waitlist_open')
+            ->where('sections.2.key', 'event_full')
             ->where('sections.3.key', 'announced')
             ->where('sections.4.key', 'registration_closed')
             ->where('sections.5.key', 'completed'));

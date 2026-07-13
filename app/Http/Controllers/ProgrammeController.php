@@ -31,7 +31,7 @@ class ProgrammeController extends Controller
         $statusMap = [
             'live_now'             => 'live',
             'open_registration'    => 'registration_open',
-            'waitlist_open'        => 'registration_open',
+            'event_full'           => 'registration_open',
             'registration_closed'  => 'registration_closed',
             'completed'            => 'completed',
             'announced'            => 'published',
@@ -75,7 +75,7 @@ class ProgrammeController extends Controller
         return match ($event->lifecycleStatus()) {
             EventStatus::LIVE => $this->publicSegments()['live_now'],
             EventStatus::REGISTRATION_OPEN => $slotsRemaining === 'Full'
-                ? $this->publicSegments()['waitlist_open']
+                ? $this->publicSegments()['event_full']
                 : $this->publicSegments()['open_registration'],
             EventStatus::PUBLISHED => $this->publicSegments()['announced'],
             EventStatus::REGISTRATION_CLOSED => $this->publicSegments()['registration_closed'],
@@ -101,10 +101,10 @@ class ProgrammeController extends Controller
                 'label' => 'Open Registration',
                 'note' => 'Registration is currently available.',
             ],
-            'waitlist_open' => [
-                'key' => 'waitlist_open',
-                'label' => 'Waitlist Open',
-                'note' => 'Registration capacity is full. New attendees will join the waitlist.',
+            'event_full' => [
+                'key' => 'event_full',
+                'label' => 'Event Full',
+                'note' => 'All available seats have been reserved.',
             ],
             'announced' => [
                 'key' => 'announced',

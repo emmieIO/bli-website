@@ -31,61 +31,6 @@ class AdminEventPermissionTest extends TestCase
         $this->registerEventPermissions();
     }
 
-    public function test_user_with_manage_waitlist_permission_can_promote_waitlisted_attendee(): void
-    {
-        $manager = User::factory()->create();
-        $attendee = User::factory()->create();
-        $event = $this->makeEvent([
-            'attendee_slots' => 2,
-        ]);
-
-        $this->grantPermissions($manager, [
-            EventPermissionsEnum::MANAGE_WAITLIST->value,
-        ]);
-
-        $event->attendees()->attach($attendee->id, [
-            'status' => EventRegistrationStatus::WAITLISTED->value,
-            'revoke_count' => 0,
-        ]);
-
-        $response = $this->actingAs($manager)->post(
-            route('admin.events.attendees.promote-waitlist', [$event->slug, $attendee->id])
-        );
-
-        $response->assertRedirect();
-        $response->assertSessionHas('message', 'Waitlisted attendee promoted successfully.');
-
-        $this->assertDatabaseHas('event_attendees', [
-            'event_id' => $event->id,
-            'user_id' => $attendee->id,
-            'status' => EventRegistrationStatus::REGISTERED->value,
-        ]);
-    }
-
-    public function test_user_without_manage_waitlist_permission_cannot_promote_waitlisted_attendee(): void
-    {
-        $user = User::factory()->create();
-        $attendee = User::factory()->create();
-        $event = $this->makeEvent();
-
-        $event->attendees()->attach($attendee->id, [
-            'status' => EventRegistrationStatus::WAITLISTED->value,
-            'revoke_count' => 0,
-        ]);
-
-        $response = $this->actingAs($user)->post(
-            route('admin.events.attendees.promote-waitlist', [$event->slug, $attendee->id])
-        );
-
-        $response->assertForbidden();
-
-        $this->assertDatabaseHas('event_attendees', [
-            'event_id' => $event->id,
-            'user_id' => $attendee->id,
-            'status' => EventRegistrationStatus::WAITLISTED->value,
-        ]);
-    }
-
     public function test_user_without_manage_speakers_permission_cannot_access_assign_speakers_page(): void
     {
         $user = User::factory()->create();

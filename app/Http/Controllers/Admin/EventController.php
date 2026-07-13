@@ -8,10 +8,8 @@ use App\Http\Requests\SpeakerInviteRequest;
 use App\Http\Requests\UpdateEventRequest;
 use App\Enums\Permissions\EventPermissionsEnum;
 use App\Models\Event;
-use App\Models\User;
 use App\Services\Event\EventCrudService;
 use App\Services\Event\EventQueryService;
-use App\Services\Event\EventRegistrationService;
 use App\Services\Event\EventSpeakerInvitationService;
 use App\Services\Event\SpeakerService;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
@@ -26,7 +24,6 @@ class EventController extends Controller
         protected EventQueryService $eventQueryService,
         protected EventCrudService $eventCrudService,
         protected EventSpeakerInvitationService $eventSpeakerInvitationService,
-        protected EventRegistrationService $eventRegistrationService,
         protected SpeakerService $speakerService
     ) {
 
@@ -69,7 +66,6 @@ class EventController extends Controller
             'canDelete' => auth()->user()?->can('delete', $event) ?? false,
             'canManageSpeakers' => auth()->user()?->can('manageSpeakers', $event) ?? false,
             'canManageAttendees' => auth()->user()?->can('manageAttendees', $event) ?? false,
-            'canManageWaitlist' => auth()->user()?->can('manageWaitlist', $event) ?? false,
             'canManageResources' => auth()->user()?->can('manageResources', $event) ?? false,
             'canViewPayments' => auth()->user()?->can('viewPayments', $event) ?? false,
         ];
@@ -228,39 +224,5 @@ class EventController extends Controller
             'message'=> 'Failed to invite speaker. Please try again.'
         ]);
     }
-
-    public function promoteWaitlistedAttendee(Event $event, User $user)
-    {
-        $this->authorize('manageWaitlist', $event);
-
-        $result = $this->eventRegistrationService->promoteWaitlistedAttendee($event, $user->id);
-
-        if ($result === true) {
-            return redirect()->back()->with([
-                'type' => 'success',
-                'message' => 'Waitlisted attendee promoted successfully.',
-            ]);
-        }
-
-        if ($result === 'no_capacity') {
-            return redirect()->back()->with([
-                'type' => 'error',
-                'message' => 'No seat is currently available for promotion.',
-            ]);
-        }
-
-        if ($result === 'invalid_status') {
-            return redirect()->back()->with([
-                'type' => 'error',
-                'message' => 'Only waitlisted attendees can be promoted.',
-            ]);
-        }
-
-        return redirect()->back()->with([
-            'type' => 'error',
-            'message' => 'Failed to promote attendee. Please try again.',
-        ]);
-    }
-
 
 }

@@ -15,13 +15,19 @@ use App\Traits\GeneratesApplicationId;
 use App\Traits\HasFileUpload;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\{Auth, Hash, Log, Password, URL, DB};
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Str;
 
 class InstructorApplicationService
 {
-    use HasFileUpload, GeneratesApplicationId;
+    use GeneratesApplicationId, HasFileUpload;
+
     /**
      * Create a new class instance.
      */
@@ -42,12 +48,11 @@ class InstructorApplicationService
             ]);
             $profile = InstructorProfile::where('user_id', $user->id)->first();
 
-
             if ($profile && in_array($profile->status, ['submitted', 'approved'])) {
                 return null;
             }
 
-            if (!$profile) {
+            if (! $profile) {
                 $profile = InstructorProfile::create([
                     // 'application_id' => $this->formatApplicationId($profile->id),
                     'user_id' => $user->id,
@@ -57,6 +62,7 @@ class InstructorApplicationService
                 $profile->save();
             }
             $user->notify(new SendInstructorApplicationLink($user));
+
             return $user;
         });
     }
@@ -81,10 +87,11 @@ class InstructorApplicationService
             return true;
 
         } catch (\Throwable $e) {
-            Log::error('Error saving personal info: ' . $e->getMessage(), [
+            Log::error('Error saving personal info: '.$e->getMessage(), [
                 'user_id' => $user->id ?? null,
                 'data' => $personalInfo,
             ]);
+
             return false;
         }
     }
@@ -99,17 +106,19 @@ class InstructorApplicationService
                     'linkedin' => $experienceData['linkedin'] ?? null,
                 ]);
                 $user->instructorProfile()->update([
-                    "teaching_history" => $experienceData["experience"],
-                    "area_of_expertise" => $experienceData['expertise'],
-                    "experience_years" => $experienceData["experience_years"],
+                    'teaching_history' => $experienceData['experience'],
+                    'area_of_expertise' => $experienceData['expertise'],
+                    'experience_years' => $experienceData['experience_years'],
                 ]);
             });
+
             return true;
         } catch (\Throwable $th) {
-            Log::error('Error saving experience: ' . $th->getMessage(), [
+            Log::error('Error saving experience: '.$th->getMessage(), [
                 'user_id' => $user->id ?? null,
                 'data' => $experienceData,
             ]);
+
             return false;
         }
 
@@ -133,25 +142,27 @@ class InstructorApplicationService
 
                 $docsToUpdate['intro_video_url'] = $request->video_url;
 
-                if (!empty($docsToUpdate)) {
+                if (! empty($docsToUpdate)) {
                     $profile->update($docsToUpdate);
 
-                    if (!empty($docsToUpdate['resume_path']) && $oldResumePath) {
+                    if (! empty($docsToUpdate['resume_path']) && $oldResumePath) {
                         $this->deleteFile($oldResumePath);
                     }
                 }
 
             });
+
             return true;
         } catch (\Throwable $e) {
-            if (!empty($request->file('resume'))) {
+            if (! empty($request->file('resume'))) {
                 $this->deleteFile($request->file('resume')->path());
             }
-            Log::error('Error saving instructor documents: ' . $e->getMessage(), [
+            Log::error('Error saving instructor documents: '.$e->getMessage(), [
                 'user_id' => $user->id ?? null,
                 'data' => $request->only(['video_url']),
                 'has_resume' => $request->hasFile('resume'),
             ]);
+
             return false;
         }
     }
@@ -160,29 +171,37 @@ class InstructorApplicationService
     {
         $profile = $user->instructorProfile;
 
-        if (!$profile)
+        if (! $profile) {
             return ['profile'];
+        }
 
         $missing = [];
 
-        if ($user->name === 'Pending Instructor' || !filled($user->name)) {
+        if ($user->name === 'Pending Instructor' || ! filled($user->name)) {
             $missing[] = 'name';
         }
 
-        if (!filled($profile->user->headline))
+        if (! filled($profile->user->headline)) {
             $missing[] = 'headline';
-        if (!filled($profile->bio))
+        }
+        if (! filled($profile->bio)) {
             $missing[] = 'bio';
-        if (!filled($profile->teaching_history))
+        }
+        if (! filled($profile->teaching_history)) {
             $missing[] = 'teaching_history';
-        if (!filled($profile->experience_years))
+        }
+        if (! filled($profile->experience_years)) {
             $missing[] = 'experience_years';
-        if (!filled($profile->area_of_expertise))
+        }
+        if (! filled($profile->area_of_expertise)) {
             $missing[] = 'area_of_expertise';
-        if (!filled($profile->resume_path))
+        }
+        if (! filled($profile->resume_path)) {
             $missing[] = 'resume_path';
-        if (!filled($profile->intro_video_url))
+        }
+        if (! filled($profile->intro_video_url)) {
             $missing[] = 'intro_video_url';
+        }
 
         return $missing;
     }
@@ -199,16 +218,18 @@ class InstructorApplicationService
                 $profile = $user->instructorProfile;
                 if ($this->isApplicationComplete($user)) {
                     $profile->update([
-                        "status" => "submitted"
+                        'status' => 'submitted',
                     ]);
                 }
             });
-            $user->notify(new InstructorApplicationSubmitted());
+            $user->notify(new InstructorApplicationSubmitted);
+
             return true;
         } catch (\Exception $e) {
-            Log::error('Error submitting instructor application: ' . $e->getMessage(), [
+            Log::error('Error submitting instructor application: '.$e->getMessage(), [
                 'user_id' => $user->id ?? null,
             ]);
+
             return false;
         }
     }
@@ -220,7 +241,7 @@ class InstructorApplicationService
         }
         // guest application user
         $user = $application->user;
-        if (!$this->isApplicationComplete($user)) {
+        if (! $this->isApplicationComplete($user)) {
             return false;
         }
         try {
@@ -229,24 +250,20 @@ class InstructorApplicationService
                     $user->assignRole(UserRoles::INSTRUCTOR->value);
                 }
 
-                if ($user->hasRole(UserRoles::STUDENT->value)) {
-                    $user->removeRole(UserRoles::STUDENT->value);
-                }
-
                 $user->email_verified_at = Carbon::now();
                 $user->save();
                 // update application status to approved
                 $application->update([
                     'status' => ApplicationStatus::APPROVED->value,
                     'is_approved' => true,
-                    "approved_at" => now()
+                    'approved_at' => now(),
                 ]);
             });
             // Generate a secure shorlived password reset link
             $resetUrl = URL::temporarySignedRoute(
                 'password.reset',
                 now()->addDays(3),
-                ["token" => Password::createToken($user), 'email' => $user->email]
+                ['token' => Password::createToken($user), 'email' => $user->email]
             );
             // log Activity
             ApplicationLog::create([
@@ -258,18 +275,21 @@ class InstructorApplicationService
             ]);
             // send approval notification with password reset link
             $user->notify(new InstructorApplicationApproved($resetUrl));
+
             return true;
         } catch (\Exception $e) {
-            Log::error('Error approving instructor application: ' . $e->getMessage(), [
+            Log::error('Error approving instructor application: '.$e->getMessage(), [
                 'user_id' => $user->id ?? null,
                 'application_id' => $application->id ?? null,
             ]);
+
             return false;
         }
     }
 
-    public function rejectApplication(array $rejectionData, InstructorProfile $application){
-        if($application->status == ApplicationStatus::REJECTED->value){
+    public function rejectApplication(array $rejectionData, InstructorProfile $application)
+    {
+        if ($application->status == ApplicationStatus::REJECTED->value) {
             return true;
         }
         try {
@@ -307,10 +327,11 @@ class InstructorApplicationService
 
             return true;
         } catch (\Throwable $th) {
-            Log::error('Error rejecting instructor application: ' . $th->getMessage(), [
+            Log::error('Error rejecting instructor application: '.$th->getMessage(), [
                 'application_id' => $application->id ?? null,
                 'data' => $rejectionData,
             ]);
+
             return false;
         }
     }

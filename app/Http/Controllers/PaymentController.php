@@ -40,7 +40,7 @@ class PaymentController extends Controller
 
         if (! $checkoutStatus['can_checkout']) {
             $redirectRoute = match ($checkoutStatus['reason']) {
-                'already_confirmed', 'already_waitlisted' => route('user.events.show', $event->slug),
+                'already_confirmed' => route('user.events.show', $event->slug),
                 default => route('events.show', $event->slug),
             };
 
@@ -131,15 +131,16 @@ class PaymentController extends Controller
             $result = $this->paymentService->verifyAndProcessPayment($txRef);
 
             if ($result['type'] === 'event') {
-                $message = ($result['registration_status'] ?? null) === 'waitlisted'
-                    ? 'Payment successful! You have been added to the event waitlist.'
-                    : 'Payment successful! Your event registration is now confirmed.';
+                $registrationConfirmed = ($result['registration_status'] ?? null) === 'registered';
+                $message = $registrationConfirmed
+                    ? 'Payment successful! Your event registration is now confirmed.'
+                    : 'Payment was received, but the event is now full. Please contact support with your payment reference.';
 
                 return redirect()
-                    ->route('user.events.show', $result['event']->slug)
+                    ->route($registrationConfirmed ? 'user.events.show' : 'events.show', $result['event']->slug)
                     ->with([
                         'message' => $message,
-                        'type' => 'success'
+                        'type' => $registrationConfirmed ? 'success' : 'error'
                     ]);
             }
 
@@ -210,11 +211,11 @@ class PaymentController extends Controller
                     $registrationStatus = $transaction->payable
                         ? $this->participantStateService->registrationStatusForUser($transaction->payable, auth()->id())
                         : null;
-                    $message = $registrationStatus === 'waitlisted'
-                        ? 'Your payment was successful and you are currently on the event waitlist.'
-                        : 'Your registration for this event is already confirmed.';
+                    $message = $registrationStatus === 'registered'
+                        ? 'Your registration for this event is already confirmed.'
+                        : 'Payment was received, but no event seat is confirmed. Please contact support with your payment reference.';
 
-                    return redirect()->route('user.events.show', $transaction->payable->slug)->with([
+                    return redirect()->route($registrationStatus === 'registered' ? 'user.events.show' : 'events.show', $transaction->payable->slug)->with([
                         'message' => $message,
                         'type' => 'info'
                     ]);
@@ -229,15 +230,16 @@ class PaymentController extends Controller
             $result = $this->paymentService->verifyAndProcessPayment($reference);
 
             if ($result['type'] === 'event') {
-                $message = ($result['registration_status'] ?? null) === 'waitlisted'
-                    ? 'Payment successful! You have been added to the event waitlist.'
-                    : 'Payment successful! Your event registration is now confirmed.';
+                $registrationConfirmed = ($result['registration_status'] ?? null) === 'registered';
+                $message = $registrationConfirmed
+                    ? 'Payment successful! Your event registration is now confirmed.'
+                    : 'Payment was received, but the event is now full. Please contact support with your payment reference.';
 
                 return redirect()
-                    ->route('user.events.show', $result['event']->slug)
+                    ->route($registrationConfirmed ? 'user.events.show' : 'events.show', $result['event']->slug)
                     ->with([
                         'message' => $message,
-                        'type' => 'success'
+                        'type' => $registrationConfirmed ? 'success' : 'error'
                     ]);
             }
 

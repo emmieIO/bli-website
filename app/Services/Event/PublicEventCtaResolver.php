@@ -26,9 +26,9 @@ class PublicEventCtaResolver
             $this->isFinished($event) => $this->status('completed', 'Event completed', 'This event has already concluded.'),
             $user && $this->participantStateService->userHasAttendeeWorkspace($event, $user->id) => $this->action('view_attendee_workspace', 'Open attendee workspace', 'Your registration is already on file.', route('user.events.show', $event->slug)),
             $user && $this->speakerContext($event, $user) !== null => $this->action('view_speaker_workspace', 'Open speaker workspace', 'Continue your speaker journey.', route('speaker.events.show', $event->slug)),
-            $this->isLive($event) => $this->status('live', 'Event is live', 'Registration is not the primary action while the event is in progress.'),
+            $this->isLive($event) => $this->status('live', 'Event is live', 'This event is currently in progress. New registrations are closed.'),
             ! $event->isRegistrationOpen() => $this->resolveClosedRegistration($event, $user),
-            $this->participantStateService->slotsRemaining($event) === 'Full' => $this->joinAction('join_waitlist', $event, $user, 'Join waitlist', 'This event is full, but you can claim the next available seat.'),
+            $this->participantStateService->slotsRemaining($event) === 'Full' => $this->status('event_full', 'Event full', 'All available seats have been reserved.'),
             (float) $event->entry_fee > 0 => $this->resolvePaidEvent($event, $user),
             default => $this->joinAction('register_now', $event, $user, 'Register now', 'Reserve your seat and move into the attendee journey.'),
         };
@@ -54,18 +54,14 @@ class PublicEventCtaResolver
     {
         if (! $user) {
             if (! $event->require_sign_up && (float) $event->entry_fee <= 0) {
-                $guestLabel = $key === 'join_waitlist' ? 'Join waitlist with email' : 'Register with email';
-
-                return $this->action($key, $guestLabel, 'No account needed. Use your email to receive event reminders.', route('events.join', $event->slug), [
+                return $this->action($key, 'Register with email', 'No account needed. Use your email to receive event reminders.', route('events.join', $event->slug), [
                     'method' => 'post',
                     'requires_confirmation' => true,
                     'requires_email' => true,
                 ]);
             }
 
-            $guestLabel = $key === 'join_waitlist' ? 'Log in to join waitlist' : 'Log in to register';
-
-            return $this->action($key, $guestLabel, $description, route('login'), ['requires_auth' => true]);
+            return $this->action($key, 'Log in to register', $description, route('login'), ['requires_auth' => true]);
         }
 
         return $this->action($key, $label, $description, route('events.join', $event->slug), [

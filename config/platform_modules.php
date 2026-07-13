@@ -27,7 +27,7 @@ return [
             'stage' => 'Acquire',
             'audience' => 'Students, guests, speakers, admins',
             'purpose' => 'Public programs, event registration, attendee workspace, speakers, resources, and reminders.',
-            'actions' => ['Browse events', 'Register or join waitlist', 'Manage attendees and resources'],
+            'actions' => ['Browse events', 'Register for available events', 'Manage attendees and resources'],
             'lms_bridge' => 'Events can later graduate into cohorts that grant LMS enrollment.',
             'children' => [
                 [
@@ -66,10 +66,10 @@ return [
             'icon' => 'user-group',
             'route' => 'student.mentorship.index',
             'admin_route' => 'admin.mentorship.index',
-            'permission' => ['mentorship-view-own', 'mentorship-view-instructor', 'mentorship-manage-any'],
+            'permission' => ['mentorship-view-own', 'mentorship-manage-assigned', 'mentorship-manage-any'],
             'status' => 'active',
             'stage' => 'Deepen',
-            'audience' => 'Students, instructors, admins',
+            'audience' => 'Students, mentors, admins',
             'purpose' => 'Structured mentorship requests, sessions, milestones, and resources.',
             'actions' => ['Request mentorship', 'Review requests', 'Track milestones'],
             'lms_bridge' => 'Mentorship can consume LMS progress signals later without becoming the course engine.',
@@ -82,7 +82,7 @@ return [
                 [
                     'title' => 'Mentorship Requests',
                     'route' => 'instructor.mentorship.index',
-                    'permission' => 'mentorship-view-instructor',
+                    'permission' => 'mentorship-manage-assigned',
                 ],
                 [
                     'title' => 'Mentorship Manager',

@@ -124,6 +124,7 @@ class UserManagementController extends Controller
             'admins' => User::role('admin')->count(),
             'instructors' => User::role('instructor')->count(),
             'speakers' => User::role('speaker')->count(),
+            'mentors' => User::role('mentor')->count(),
             'students' => User::role('student')->count(),
             'users_without_roles' => User::doesntHave('roles')->count(),
         ];
@@ -170,11 +171,9 @@ class UserManagementController extends Controller
                 'track-applications',
                 'view-own-transaction-history',
                 'view-own-invitations',
-                'mentorship-view-instructor',
                 'event-view',
                 'event-register',
                 'event-view-own-registration',
-                'event-join-waitlist',
                 'event-apply-to-speak',
             ],
             'student' => [
@@ -185,7 +184,6 @@ class UserManagementController extends Controller
                 'event-view',
                 'event-register',
                 'event-view-own-registration',
-                'event-join-waitlist',
                 'event-apply-to-speak',
             ],
             'speaker' => [
@@ -194,7 +192,16 @@ class UserManagementController extends Controller
                 'event-view',
                 'event-register',
                 'event-view-own-registration',
-                'event-join-waitlist',
+                'event-apply-to-speak',
+            ],
+            'mentor' => [
+                'track-applications',
+                'view-own-transaction-history',
+                'view-own-invitations',
+                'mentorship-manage-assigned',
+                'event-view',
+                'event-register',
+                'event-view-own-registration',
                 'event-apply-to-speak',
             ],
         ];

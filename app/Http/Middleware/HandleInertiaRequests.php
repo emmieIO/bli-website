@@ -60,7 +60,6 @@ class HandleInertiaRequests extends Middleware
                 'location' => $request->url(),
             ]),
             'sideLinks' => fn () => app(PlatformModuleRegistry::class)->sideLinks($request->user()),
-            'platformModules' => fn () => app(PlatformModuleRegistry::class)->visibleModules($request->user()),
         ]);
     }
 }

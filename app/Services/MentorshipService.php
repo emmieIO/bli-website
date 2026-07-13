@@ -3,8 +3,10 @@
 namespace App\Services;
 
 use App\Contracts\Repositories\MentorshipRepositoryInterface;
+use App\Enums\UserRoles;
 use App\Models\MentorshipRequest;
 use App\Models\User;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Notification;
@@ -30,8 +32,8 @@ class MentorshipService
         }
 
         // Validate that the instructor has the instructor role
-        if (!$instructor->canAccessInstructorArea()) {
-            throw new \Exception('The selected user is not an instructor.');
+        if (! $instructor->canAccessMentorArea()) {
+            throw new \Exception('The selected user is not an approved mentor.');
         }
 
         DB::beginTransaction();
@@ -76,7 +78,7 @@ class MentorshipService
     public function instructorApprove(MentorshipRequest $request, User $instructor, ?string $response = null): MentorshipRequest
     {
         // Validate that request is in pending status
-        if (!$request->isPending()) {
+        if (! $request->isPending()) {
             throw new \Exception('This request is not pending instructor approval.');
         }
 
@@ -121,12 +123,12 @@ class MentorshipService
     public function adminApprove(MentorshipRequest $request, User $admin, ?string $response = null): MentorshipRequest
     {
         // Validate that request is instructor approved
-        if (!$request->isInstructorApproved()) {
+        if (! $request->isInstructorApproved()) {
             throw new \Exception('This request has not been approved by the instructor yet.');
         }
 
         // Validate that the approver has admin role
-        if (!$admin->hasRole('admin')) {
+        if (! $admin->hasRole('admin')) {
             throw new \Exception('Only administrators can give final approval.');
         }
 
@@ -173,7 +175,7 @@ class MentorshipService
             $canReject = true; // Admin can reject at any stage
         }
 
-        if (!$canReject) {
+        if (! $canReject) {
             throw new \Exception('You do not have permission to reject this request.');
         }
 
@@ -257,12 +259,12 @@ class MentorshipService
             || $request->instructor_id === $user->id
             || $user->hasRole('admin');
 
-        if (!$canEnd) {
+        if (! $canEnd) {
             throw new \Exception('You do not have permission to end this mentorship.');
         }
 
         // Validate that mentorship is active
-        if (!$request->isActive()) {
+        if (! $request->isActive()) {
             throw new \Exception('This mentorship is not currently active.');
         }
 
@@ -296,9 +298,10 @@ class MentorshipService
     /**
      * Get available instructors for mentorship
      */
-    public function getAvailableInstructors(): \Illuminate\Database\Eloquent\Collection
+    public function getAvailableInstructors(): Collection
     {
-        return User::role('instructor')
+        return User::role(UserRoles::MENTOR->value)
+            ->whereHas('instructorProfile', fn ($query) => $query->where('is_approved', true))
             ->orderBy('name')
             ->get();
     }

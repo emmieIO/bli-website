@@ -34,6 +34,7 @@ interface Stats {
   admins: number;
   instructors: number;
   students: number;
+  mentors: number;
   users_without_roles: number;
 }
 
@@ -110,6 +111,8 @@ export default function UserManagement({ users, roles }: UserManagementProps) {
     const colors: Record<string, string> = {
       admin: 'bg-red-100 text-red-800',
       instructor: 'bg-green-100 text-green-800',
+      mentor: 'bg-amber-100 text-amber-800',
+      speaker: 'bg-violet-100 text-violet-800',
       student: 'bg-blue-100 text-blue-800',
     };
     return colors[roleName] || 'bg-slate-100 text-slate-700';
@@ -151,10 +154,11 @@ export default function UserManagement({ users, roles }: UserManagementProps) {
         </section>
 
         {showStats && stats && (
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-5">
+          <div className="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-6">
             <StatsCard icon="users" label="Total Users" value={stats.total_users} color="blue" />
             <StatsCard icon="shield-alt" label="Admins" value={stats.admins} color="red" />
             <StatsCard icon="graduation-cap" label="Instructors" value={stats.instructors} color="green" />
+            <StatsCard icon="user-friends" label="Mentors" value={stats.mentors} color="yellow" />
             <StatsCard icon="book-open" label="Students" value={stats.students} color="purple" />
             <StatsCard icon="user-slash" label="No Role" value={stats.users_without_roles} color="yellow" />
           </div>

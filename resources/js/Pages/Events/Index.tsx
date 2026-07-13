@@ -15,7 +15,7 @@ interface Event {
     physical_address?: string;
     entry_fee: number;
     slots_remaining?: number | null;
-    public_segment: 'live_now' | 'open_registration' | 'waitlist_open' | 'announced' | 'registration_closed' | 'completed';
+    public_segment: 'live_now' | 'open_registration' | 'event_full' | 'announced' | 'registration_closed' | 'completed';
     public_status_label: string;
     availability_note: string;
 }
@@ -33,7 +33,7 @@ interface EventsIndexProps {
 const segmentBadgeStyles: Record<Event['public_segment'], string> = {
     live_now: 'bg-accent text-white',
     open_registration: 'bg-lime-500 text-primary',
-    waitlist_open: 'bg-primary text-white',
+    event_full: 'bg-slate-600 text-white',
     announced: 'bg-slate-700 text-white',
     registration_closed: 'bg-zinc-600 text-white',
     completed: 'bg-slate-500 text-white',
@@ -82,7 +82,7 @@ export default function EventsIndex({ events, searchQuery: initialSearchQuery = 
                             Explore Events
                         </h1>
                         <p className="mt-3 max-w-xl text-sm leading-7 text-slate-500 md:text-base">
-                            Browse public events by actual availability — live now, open registration, waitlist, and more.
+                            Browse public events by availability, from open registration to completed programs.
                         </p>
                     </div>
 
@@ -112,7 +112,7 @@ export default function EventsIndex({ events, searchQuery: initialSearchQuery = 
                                 <option value="">All statuses</option>
                                 <option value="live_now">Live Now</option>
                                 <option value="open_registration">Open Registration</option>
-                                <option value="waitlist_open">Waitlist Open</option>
+                                <option value="event_full">Event Full</option>
                                 <option value="announced">Announced</option>
                                 <option value="registration_closed">Registration Closed</option>
                                 <option value="completed">Completed</option>
@@ -136,10 +136,10 @@ export default function EventsIndex({ events, searchQuery: initialSearchQuery = 
                                     className="group flex flex-col overflow-hidden rounded-lg border border-slate-200 bg-white transition hover:-translate-y-1 hover:border-slate-300 hover:shadow-sm">
                                     <div className="relative h-48 overflow-hidden bg-slate-100">
                                         <img
-                                                        src={event.program_cover ? `/storage/${event.program_cover}` : '/assets/img/banner.png'}
+                                                        src={event.program_cover ? `/storage/${event.program_cover}` : '/assets/img/leadership-workshop.png'}
                                                         alt={event.title}
                                                         className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
-                                                        onError={(e) => { (e.target as HTMLImageElement).src = '/assets/img/banner.png'; }}
+                                                        onError={(e) => { (e.target as HTMLImageElement).src = '/assets/img/leadership-workshop.png'; }}
                                                     />
                                                     <div className="absolute left-3 top-3">
                                                         <span className={`inline-flex rounded-md px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider ${segmentBadgeStyles[event.public_segment]}`}>

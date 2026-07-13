@@ -119,7 +119,6 @@ interface ViewEventProps {
     canDelete: boolean;
     canManageSpeakers: boolean;
     canManageAttendees: boolean;
-    canManageWaitlist: boolean;
     canManageResources: boolean;
     canViewPayments: boolean;
   };
@@ -158,9 +157,7 @@ export default function ViewEvent({ event, capabilities }: ViewEventProps) {
   const registrationStats = useMemo(() => {
     const registered = event.attendees.filter((attendee) => attendee.pivot.status === 'registered').length;
     const cancelled = event.attendees.filter((attendee) => attendee.pivot.status === 'cancelled').length;
-    const waitlisted = event.attendees.filter((attendee) => attendee.pivot.status === 'waitlisted').length;
-
-    return { registered, cancelled, waitlisted };
+    return { registered, cancelled };
   }, [event.attendees]);
   const registrationLabel = (status: string) => status === 'registered' ? 'confirmed' : status.replace('_', ' ');
 
@@ -265,7 +262,7 @@ export default function ViewEvent({ event, capabilities }: ViewEventProps) {
         <div className="grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-4">
           <MetricCard label="Confirmed" value={registrationStats.registered} hint={`${registrationStats.cancelled} cancelled`} />
           <MetricCard label="Speakers" value={event.speakers.length} hint={`${event.speaker_applications.length} applications`} />
-          <MetricCard label={capabilities.canViewPayments ? 'Paid Orders' : 'Waitlist'} value={capabilities.canViewPayments ? successfulPayments.length : registrationStats.waitlisted} hint={capabilities.canViewPayments ? (event.entry_fee === '0.00' || Number(event.entry_fee) === 0 ? 'Free event' : `₦${revenue.toLocaleString()}`) : 'Attendees awaiting promotion'} />
+          <MetricCard label={capabilities.canViewPayments ? 'Paid Orders' : 'Registrations'} value={capabilities.canViewPayments ? successfulPayments.length : registrationStats.registered} hint={capabilities.canViewPayments ? (event.entry_fee === '0.00' || Number(event.entry_fee) === 0 ? 'Free event' : `₦${revenue.toLocaleString()}`) : 'Confirmed attendees'} />
           <MetricCard label="Capacity" value={event.attendee_slots ?? 0} hint={event.attendee_slots ? 'Configured seats' : 'Unlimited'} />
         </div>
 
@@ -297,7 +294,7 @@ export default function ViewEvent({ event, capabilities }: ViewEventProps) {
                     </div>
                   )}
                   <div
-                    className="prose max-w-none text-slate-700 prose-headings:text-primary prose-headings:prose-p:"
+                    className="rich-content"
                     dangerouslySetInnerHTML={{ __html: event.description }}
                   />
                 </WorkspacePanel>
@@ -401,23 +398,11 @@ export default function ViewEvent({ event, capabilities }: ViewEventProps) {
                           <p className="break-all text-xs text-slate-500">{attendee.email}</p>
                         </div>
                         <div className="flex items-center justify-between gap-3 sm:justify-end">
-                          {attendee.pivot.status === 'waitlisted' && capabilities.canManageWaitlist && (
-                            <button
-                              type="button"
-                              onClick={() => router.post(route('admin.events.attendees.promote-waitlist', [event.slug, attendee.id]))}
-                              className="inline-flex items-center gap-2 rounded-md border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs font-semibold text-emerald-700 transition hover:bg-emerald-100"
-                            >
-                              <i className="fas fa-arrow-up w-3 h-3"></i>
-                              Promote
-                            </button>
-                          )}
                           <div className="text-right">
                           <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold capitalize ${
                             attendee.pivot.status === 'registered'
                               ? 'bg-green-100 text-green-700'
-                              : attendee.pivot.status === 'waitlisted'
-                                ? 'bg-amber-100 text-amber-700'
-                                : 'bg-rose-100 text-rose-700'
+                              : 'bg-rose-100 text-rose-700'
                           }`}>
                             {registrationLabel(attendee.pivot.status)}
                           </span>

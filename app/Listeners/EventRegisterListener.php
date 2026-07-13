@@ -23,7 +23,7 @@ class EventRegisterListener
     {
         Notification::send(
             $event->user,
-            new EventRegisteredNotification($event->event, $event->registrationContext)
+            new EventRegisteredNotification($event->event)
         );
 
         logger()->info('EventRegisterEvent received', ['event' => $event]);

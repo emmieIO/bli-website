@@ -2,9 +2,7 @@
 
 Hello {{ $recipientName }},
 
-{{ $isWaitlistPromotion
-    ? "A place opened up and your registration for {$event->title} has been moved from the waitlist into confirmed attendance."
-    : "Your registration for {$event->title} has been confirmed. Everything you need is now in your event workspace." }}
+Your registration for {{ $event->title }} has been confirmed. Everything you need is now in your event workspace.
 
 EVENT DETAILS
 - Event: {{ $event->title }}

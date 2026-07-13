@@ -12,7 +12,7 @@ interface Event {
     location?: string | null;
     mode?: string | null;
     journey_status: 'upcoming' | 'ongoing' | 'ended';
-    registration_status: 'registered' | 'waitlisted' | 'attended' | 'no_show';
+    registration_status: 'registered' | 'attended' | 'no_show';
     latest_transaction?: { status: string; amount: string; } | null;
     pivot?: { revoke_count?: number; };
 }
@@ -21,14 +21,12 @@ interface MyEventsProps { events: Event[]; }
 
 const registrationTone: Record<string, string> = {
     registered: 'bg-lime-50 text-lime-700',
-    waitlisted: 'bg-amber-50 text-amber-700',
     attended: 'bg-slate-100 text-slate-600',
     no_show: 'bg-red-50 text-red-600',
 };
 
 const registrationLabel: Record<string, string> = {
     registered: 'Confirmed',
-    waitlisted: 'Waitlisted',
     attended: 'Attended',
     no_show: 'No show',
 };
@@ -81,7 +79,7 @@ export default function MyEvents({ events }: MyEventsProps) {
             <div className="space-y-5">
                 <div>
                     <h1 className="text-xl font-semibold tracking-tight text-slate-900">My Events</h1>
-                    <p className="mt-1 text-sm text-slate-500">Your registered events, waitlist positions, and workspaces.</p>
+                    <p className="mt-1 text-sm text-slate-500">Your confirmed events and attendee workspaces.</p>
                 </div>
 
                 <div className="grid gap-3 sm:grid-cols-2 lg:flex lg:items-center">
@@ -98,7 +96,6 @@ export default function MyEvents({ events }: MyEventsProps) {
                             className="h-9 w-full appearance-none rounded-md border border-slate-200 bg-white pl-3 pr-8 text-sm text-slate-700 outline-none transition focus:border-primary-300 focus:ring-2 focus:ring-primary-500/10">
                             <option value="">All statuses</option>
                             <option value="registered">Confirmed</option>
-                            <option value="waitlisted">Waitlisted</option>
                             <option value="attended">Attended</option>
                             <option value="no_show">No show</option>
                         </select>

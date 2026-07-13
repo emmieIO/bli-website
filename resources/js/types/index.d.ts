@@ -90,7 +90,6 @@ export interface PageProps {
         [key: string]: any;
     };
     sideLinks: SideLink[];
-    platformModules: PlatformModule[];
 }
 
 export type FlashMessage = {

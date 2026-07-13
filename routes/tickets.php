@@ -18,7 +18,7 @@ Route::middleware(['auth', 'verified'])->prefix('user')->name('user.')->group(fu
 });
 
 // Admin routes
-Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
+Route::middleware(['auth', 'role:admin|super-admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/support', [AdminTicketController::class, 'index'])->name('tickets.index');
     Route::get('/support/{ticket}', [AdminTicketController::class, 'show'])->name('tickets.show');
     Route::post('/support/{ticket}/reply', [AdminTicketController::class, 'reply'])->name('tickets.reply');

@@ -3,6 +3,7 @@
 use App\Http\Middleware\AdminGuestMiddleware;
 use App\Http\Middleware\CheckMentorshipExpirations;
 use App\Http\Middleware\EnsureInstructorAccess;
+use App\Http\Middleware\EnsureMentorAccess;
 use App\Http\Middleware\EnsureValidQueueToken;
 use App\Http\Middleware\EnsureSpeakerWorkspaceAccess;
 use Illuminate\Foundation\Application;
@@ -26,6 +27,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'admin.guest' => AdminGuestMiddleware::class,
             'instructor.access' => EnsureInstructorAccess::class,
+            'mentor.access' => EnsureMentorAccess::class,
             'queue.token' => EnsureValidQueueToken::class,
             'speaker.workspace' => EnsureSpeakerWorkspaceAccess::class,
             'role' => \Spatie\Permission\Middleware\RoleMiddleware::class,

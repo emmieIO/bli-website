@@ -35,7 +35,6 @@ class EventReminderCommandTest extends TestCase
 
         $creator = User::factory()->create();
         $confirmedUser = User::factory()->create();
-        $waitlistedUser = User::factory()->create();
         $cancelledUser = User::factory()->create();
 
         $event = Event::factory()->create([
@@ -51,11 +50,6 @@ class EventReminderCommandTest extends TestCase
             'revoke_count' => 0,
         ]);
 
-        $event->attendees()->attach($waitlistedUser->id, [
-            'status' => EventRegistrationStatus::WAITLISTED->value,
-            'revoke_count' => 0,
-        ]);
-
         $event->attendees()->attach($cancelledUser->id, [
             'status' => EventRegistrationStatus::CANCELLED->value,
             'revoke_count' => 1,
@@ -64,7 +58,6 @@ class EventReminderCommandTest extends TestCase
         $this->artisan('app:send-event-reminders')->assertExitCode(0);
 
         Notification::assertSentToTimes($confirmedUser, UpcomingEventReminder::class, 1);
-        Notification::assertNotSentTo($waitlistedUser, UpcomingEventReminder::class);
         Notification::assertNotSentTo($cancelledUser, UpcomingEventReminder::class);
     }
 
@@ -121,16 +114,9 @@ class EventReminderCommandTest extends TestCase
             'status' => EventRegistrationStatus::REGISTERED->value,
         ]);
 
-        $waitlistedGuest = EventGuestAttendee::query()->create([
-            'event_id' => $event->id,
-            'email' => 'waitlist@example.com',
-            'status' => EventRegistrationStatus::WAITLISTED->value,
-        ]);
-
         $this->artisan('app:send-event-reminders')->assertExitCode(0);
 
         Notification::assertSentToTimes($confirmedGuest, UpcomingEventReminder::class, 1);
-        Notification::assertNotSentTo($waitlistedGuest, UpcomingEventReminder::class);
     }
 
     public function test_reminder_notification_uses_human_readable_time_until_event(): void

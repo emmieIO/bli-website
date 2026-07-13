@@ -5,7 +5,6 @@ namespace App\Enums;
 enum EventRegistrationStatus: string
 {
     case REGISTERED = 'registered';
-    case WAITLISTED = 'waitlisted';
     case CANCELLED = 'cancelled';
     case ATTENDED = 'attended';
     case NO_SHOW = 'no_show';
@@ -34,7 +33,6 @@ enum EventRegistrationStatus: string
     {
         return [
             self::REGISTERED->value,
-            self::WAITLISTED->value,
             self::ATTENDED->value,
             self::NO_SHOW->value,
         ];
@@ -69,7 +67,6 @@ enum EventRegistrationStatus: string
     {
         return in_array($this, [
             self::REGISTERED,
-            self::WAITLISTED,
             self::ATTENDED,
             self::NO_SHOW,
         ], true);
@@ -84,7 +81,6 @@ enum EventRegistrationStatus: string
     {
         return in_array($this, [
             self::REGISTERED,
-            self::WAITLISTED,
         ], true);
     }
 
@@ -96,13 +92,8 @@ enum EventRegistrationStatus: string
                 self::ATTENDED,
                 self::NO_SHOW,
             ], true),
-            self::WAITLISTED => in_array($target, [
-                self::REGISTERED,
-                self::CANCELLED,
-            ], true),
             self::CANCELLED => in_array($target, [
                 self::REGISTERED,
-                self::WAITLISTED,
             ], true),
             self::ATTENDED, self::NO_SHOW => false,
         };
@@ -112,7 +103,6 @@ enum EventRegistrationStatus: string
     {
         return match ($this) {
             self::REGISTERED => 'confirmed',
-            self::WAITLISTED => 'waitlisted',
             self::CANCELLED => 'cancelled',
             self::ATTENDED => 'attended',
             self::NO_SHOW => 'no show',

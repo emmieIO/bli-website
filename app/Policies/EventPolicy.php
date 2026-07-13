@@ -118,15 +118,6 @@ class EventPolicy
     }
 
     /**
-     * Determine whether the user can manage the waitlist for an event.
-     */
-    public function manageWaitlist(User $user, Event $event): bool
-    {
-        return $user->hasPermissionTo(EventPermissionsEnum::MANAGE_WAITLIST->value)
-            || $user->hasPermissionTo(EventPermissionsEnum::MANAGE_ATTENDEES->value);
-    }
-
-    /**
      * Determine whether the user can manage event speakers.
      */
     public function manageSpeakers(User $user, Event $event): bool

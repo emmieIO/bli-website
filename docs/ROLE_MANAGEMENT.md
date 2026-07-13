@@ -13,8 +13,8 @@ This application implements a comprehensive role-based access control (RBAC) sys
 - Access to the unified dashboard and system settings
 
 ### 2. Instructor  
-- **Teaching, speaking, and mentorship workspaces** within their domain
-- Can manage assigned event/speaking contexts and mentorship requests
+- **Teaching and speaking workspaces** within their approved domain
+- Mentor access is assigned separately and does not follow automatically from instructor approval
 - Will teach cohorts once the LMS module is introduced
 - Limited administrative capabilities focused on formation delivery
 - Cannot access system-wide administrative functions
@@ -43,7 +43,7 @@ This application implements a comprehensive role-based access control (RBAC) sys
 
 ### Mentorship
 - Student: `mentorship-view-own`
-- Instructor: `mentorship-view-instructor`
+- Mentor: `mentorship-manage-assigned`
 - Admin: `mentorship-manage-any`
 
 ### User & System Management (22 permissions)

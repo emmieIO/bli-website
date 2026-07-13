@@ -6,6 +6,7 @@ use App\Http\Controllers\Events\OpenEventLinkController;
 use App\Http\Controllers\SpeakerUserController;
 use App\Http\Controllers\Instructors\InstructorsController;
 use App\Http\Controllers\ContactController;
+use App\Http\Controllers\PublicMentorshipController;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -16,6 +17,7 @@ Route::get('/privacy', fn() => Inertia::render('Legal/Privacy'))->name('privacy-
 Route::get('/agreement-terms', fn() => Inertia::render('Legal/Terms'))->name('terms-of-service');
 Route::get('/contact', fn() => Inertia::render('Contact'))->name('contact-us');
 Route::post('/contact', [ContactController::class, 'submit'])->name('contact.submit');
+Route::get('/mentorship', [PublicMentorshipController::class, 'index'])->name('mentorship.index');
 
 // Public events browsing
 Route::get('/events', [ProgrammeController::class, 'index'])->name('events.index');

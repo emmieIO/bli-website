@@ -19,7 +19,7 @@ Route::middleware(['auth', 'role:student'])->prefix('student/mentorship')->name(
 });
 
 // Instructor Mentorship Routes
-Route::middleware(['auth', 'instructor.access'])->prefix('instructor/mentorship')->name('instructor.mentorship.')->group(function () {
+Route::middleware(['auth', 'mentor.access'])->prefix('instructor/mentorship')->name('instructor.mentorship.')->group(function () {
     Route::get('/', [InstructorMentorshipController::class, 'index'])->name('index');
     Route::get('/{id}', [InstructorMentorshipController::class, 'show'])->name('show');
     Route::post('/{id}/approve', [InstructorMentorshipController::class, 'approve'])->name('approve');
@@ -28,7 +28,7 @@ Route::middleware(['auth', 'instructor.access'])->prefix('instructor/mentorship'
 });
 
 // Admin Mentorship Routes
-Route::middleware(['auth', 'role:admin'])->prefix('admin/mentorship')->name('admin.mentorship.')->group(function () {
+Route::middleware(['auth', 'role:admin|super-admin'])->prefix('admin/mentorship')->name('admin.mentorship.')->group(function () {
     Route::get('/', [AdminMentorshipController::class, 'index'])->name('index');
     Route::get('/{id}', [AdminMentorshipController::class, 'show'])->name('show');
     Route::post('/{id}/approve', [AdminMentorshipController::class, 'approve'])->name('approve');

@@ -46,21 +46,6 @@ class EventJourneyAccessTest extends TestCase
         $response->assertOk();
     }
 
-    public function test_waitlisted_attendee_can_open_event_workspace(): void
-    {
-        $user = User::factory()->create();
-        $event = $this->makeEvent();
-
-        $event->attendees()->attach($user->id, [
-            'status' => EventRegistrationStatus::WAITLISTED->value,
-            'revoke_count' => 0,
-        ]);
-
-        $response = $this->actingAs($user)->get(route('user.events.show', $event->slug));
-
-        $response->assertOk();
-    }
-
     public function test_cancelled_attendee_cannot_open_event_workspace(): void
     {
         $user = User::factory()->create();
@@ -161,7 +146,7 @@ class EventJourneyAccessTest extends TestCase
         ]);
     }
 
-    public function test_full_free_event_join_waitlists_attendee_and_redirects_to_workspace(): void
+    public function test_full_free_event_rejects_new_registration(): void
     {
         $user = User::factory()->create();
         $otherAttendee = User::factory()->create();
@@ -180,14 +165,12 @@ class EventJourneyAccessTest extends TestCase
             ->post(route('events.join', $event->slug));
 
         $response
-            ->assertRedirect(route('user.events.show', $event->slug))
-            ->assertSessionHas('message', 'This event is full right now. You have been added to the waitlist.');
+            ->assertRedirect(route('events.show', $event->slug))
+            ->assertSessionHas('message', 'This event is full. Registration will reopen if a seat becomes available.');
 
-        $this->assertDatabaseHas('event_attendees', [
+        $this->assertDatabaseMissing('event_attendees', [
             'event_id' => $event->id,
             'user_id' => $user->id,
-            'status' => EventRegistrationStatus::WAITLISTED->value,
-            'revoke_count' => 0,
         ]);
     }
 
@@ -242,7 +225,7 @@ class EventJourneyAccessTest extends TestCase
         ]);
     }
 
-    public function test_guest_join_waitlists_when_free_event_is_full(): void
+    public function test_full_free_event_rejects_guest_registration(): void
     {
         $registeredUser = User::factory()->create();
         $event = $this->makeEvent([
@@ -259,17 +242,16 @@ class EventJourneyAccessTest extends TestCase
         $response = $this
             ->from(route('events.show', $event->slug))
             ->post(route('events.join', $event->slug), [
-                'email' => 'waitlist@example.com',
+                'email' => 'guest@example.com',
             ]);
 
         $response
             ->assertRedirect(route('events.show', $event->slug))
-            ->assertSessionHas('message', 'This event is full right now. Your email has been added to the waitlist.');
+            ->assertSessionHas('message', 'This event is full. Registration will reopen if a seat becomes available.');
 
-        $this->assertDatabaseHas('event_guest_attendees', [
+        $this->assertDatabaseMissing('event_guest_attendees', [
             'event_id' => $event->id,
-            'email' => 'waitlist@example.com',
-            'status' => EventRegistrationStatus::WAITLISTED->value,
+            'email' => 'guest@example.com',
         ]);
     }
 
@@ -327,7 +309,7 @@ class EventJourneyAccessTest extends TestCase
         ]);
     }
 
-    public function test_cancelled_attendee_below_revoke_limit_can_rejoin_and_be_waitlisted_when_event_is_full(): void
+    public function test_cancelled_attendee_cannot_rejoin_when_event_is_full(): void
     {
         $user = User::factory()->create();
         $otherAttendee = User::factory()->create();
@@ -350,13 +332,13 @@ class EventJourneyAccessTest extends TestCase
             ->post(route('events.join', $event->slug));
 
         $response
-            ->assertRedirect(route('user.events.show', $event->slug))
-            ->assertSessionHas('message', 'This event is full right now. You have been added to the waitlist.');
+            ->assertRedirect(route('events.show', $event->slug))
+            ->assertSessionHas('message', 'This event is full. Registration will reopen if a seat becomes available.');
 
         $this->assertDatabaseHas('event_attendees', [
             'event_id' => $event->id,
             'user_id' => $user->id,
-            'status' => EventRegistrationStatus::WAITLISTED->value,
+            'status' => EventRegistrationStatus::CANCELLED->value,
             'revoke_count' => 1,
         ]);
     }
@@ -380,11 +362,9 @@ class EventJourneyAccessTest extends TestCase
             ->assertSessionHas('message', 'Failed to revoke your RSVP. Please try again.');
     }
 
-    public function test_registered_attendee_cancellation_auto_promotes_oldest_waitlisted_attendee(): void
+    public function test_registered_attendee_cancellation_reopens_the_seat(): void
     {
         $registeredUser = User::factory()->create();
-        $firstWaitlistedUser = User::factory()->create();
-        $secondWaitlistedUser = User::factory()->create();
         $event = $this->makeEvent([
             'attendee_slots' => 1,
         ]);
@@ -394,20 +374,6 @@ class EventJourneyAccessTest extends TestCase
             'revoke_count' => 0,
             'created_at' => now()->subHours(3),
             'updated_at' => now()->subHours(3),
-        ]);
-
-        $event->attendees()->attach($firstWaitlistedUser->id, [
-            'status' => EventRegistrationStatus::WAITLISTED->value,
-            'revoke_count' => 0,
-            'created_at' => now()->subHours(2),
-            'updated_at' => now()->subHours(2),
-        ]);
-
-        $event->attendees()->attach($secondWaitlistedUser->id, [
-            'status' => EventRegistrationStatus::WAITLISTED->value,
-            'revoke_count' => 0,
-            'created_at' => now()->subHour(),
-            'updated_at' => now()->subHour(),
         ]);
 
         $response = $this->actingAs($registeredUser)
@@ -424,60 +390,7 @@ class EventJourneyAccessTest extends TestCase
             'status' => EventRegistrationStatus::CANCELLED->value,
         ]);
 
-        $this->assertDatabaseHas('event_attendees', [
-            'event_id' => $event->id,
-            'user_id' => $firstWaitlistedUser->id,
-            'status' => EventRegistrationStatus::REGISTERED->value,
-        ]);
-
-        $this->assertDatabaseHas('event_attendees', [
-            'event_id' => $event->id,
-            'user_id' => $secondWaitlistedUser->id,
-            'status' => EventRegistrationStatus::WAITLISTED->value,
-        ]);
-    }
-
-    public function test_waitlisted_attendee_cancellation_does_not_promote_anyone(): void
-    {
-        $waitlistedUser = User::factory()->create();
-        $otherWaitlistedUser = User::factory()->create();
-        $event = $this->makeEvent([
-            'attendee_slots' => 1,
-        ]);
-
-        $event->attendees()->attach($waitlistedUser->id, [
-            'status' => EventRegistrationStatus::WAITLISTED->value,
-            'revoke_count' => 0,
-            'created_at' => now()->subHours(2),
-            'updated_at' => now()->subHours(2),
-        ]);
-
-        $event->attendees()->attach($otherWaitlistedUser->id, [
-            'status' => EventRegistrationStatus::WAITLISTED->value,
-            'revoke_count' => 0,
-            'created_at' => now()->subHour(),
-            'updated_at' => now()->subHour(),
-        ]);
-
-        $response = $this->actingAs($waitlistedUser)
-            ->from(route('user.events.show', $event->slug))
-            ->delete(route('user.revoke.event', $event->slug));
-
-        $response
-            ->assertRedirect(route('user.events.show', $event->slug))
-            ->assertSessionHas('message', 'Your RSVP has been successfully revoked.');
-
-        $this->assertDatabaseHas('event_attendees', [
-            'event_id' => $event->id,
-            'user_id' => $waitlistedUser->id,
-            'status' => EventRegistrationStatus::CANCELLED->value,
-        ]);
-
-        $this->assertDatabaseHas('event_attendees', [
-            'event_id' => $event->id,
-            'user_id' => $otherWaitlistedUser->id,
-            'status' => EventRegistrationStatus::WAITLISTED->value,
-        ]);
+        $this->assertSame(1, app(\App\Services\Event\EventParticipantStateService::class)->slotsRemaining($event));
     }
 
     public function test_public_event_page_exposes_discipleship_program_profile(): void

@@ -99,7 +99,7 @@ export default function RichTextEditor({
         content: value,
         editorProps: {
             attributes: {
-                class: 'editor-content',
+                class: 'editor-content rich-content',
             },
         },
         onUpdate: ({ editor: currentEditor }) => {
@@ -439,7 +439,7 @@ export default function RichTextEditor({
                                     </div>
                                 ) : (
                                     <div
-                                        className="editor-preview-content ProseMirror"
+                                        className="editor-preview-content rich-content"
                                         dangerouslySetInnerHTML={{ __html: value }}
                                     />
                                 )}

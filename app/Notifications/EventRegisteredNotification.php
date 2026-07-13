@@ -15,8 +15,7 @@ class EventRegisteredNotification extends Notification implements ShouldQueue
     use Queueable;
 
     public function __construct(
-        public Event $event,
-        public string $registrationContext = 'confirmed'
+        public Event $event
     )
     {
     }
@@ -49,21 +48,12 @@ class EventRegisteredNotification extends Notification implements ShouldQueue
             default => $this->event->location ?? 'Location TBA'
         };
 
-        $isWaitlistPromotion = $this->registrationContext === 'promoted_from_waitlist';
-        $subject = $isWaitlistPromotion
-            ? '🎉 Seat Confirmed from Waitlist - ' . $this->event->title
-            : '🎉 Registration Confirmed - ' . $this->event->title;
-        $nextSteps = $isWaitlistPromotion
-            ? [
-                'Your seat has been confirmed from the waitlist',
-                'A calendar invite is attached to this email',
-                'Review your attendee workspace for access and event details',
-            ]
-            : [
-                'Your spot is secured',
-                'A calendar invite is attached to this email',
-                'You will receive a reminder before the event',
-            ];
+        $subject = 'Registration Confirmed - ' . $this->event->title;
+        $nextSteps = [
+            'Your spot is secured',
+            'A calendar invite is attached to this email',
+            'You will receive a reminder before the event',
+        ];
 
         $mail = (new MailMessage)
             ->subject($subject)
@@ -74,7 +64,6 @@ class EventRegisteredNotification extends Notification implements ShouldQueue
                 'recipientName' => ucfirst($notifiable->name),
                 'event' => $this->event,
                 'subjectLine' => $subject,
-                'isWaitlistPromotion' => $isWaitlistPromotion,
                 'dateRange' => $dateRange,
                 'timeRange' => $timeRange,
                 'locationDisplay' => $locationDisplay,
@@ -136,13 +125,9 @@ class EventRegisteredNotification extends Notification implements ShouldQueue
             'date_range' => $dateRange,
             'time_range' => $timeRange,
             'mode' => $this->event->mode ?? 'Hybrid',
-            'message' => $this->registrationContext === 'promoted_from_waitlist'
-                ? "A seat opened up and your registration for '{$this->event->title}' is now confirmed!"
-                : "Your registration for '{$this->event->title}' has been confirmed!",
+            'message' => "Your registration for '{$this->event->title}' has been confirmed!",
             'action_url' => route('events.open', $this->event),
-            'type' => $this->registrationContext === 'promoted_from_waitlist'
-                ? 'event_waitlist_promoted'
-                : 'event_registration',
+            'type' => 'event_registration',
         ];
     }
 }

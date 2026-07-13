@@ -1,5 +1,6 @@
 import { FormEventHandler, useState } from 'react';
 import { Head, Link, useForm } from '@inertiajs/react';
+import { Eye, EyeOff } from 'lucide-react';
 import AuthLayout from '@/Layouts/AuthLayout';
 
 export default function Register() {
@@ -51,8 +52,14 @@ export default function Register() {
                     <div className="relative">
                         <input type={showPassword ? 'text' : 'password'} id="password" value={data.password} onChange={(e) => setData('password', e.target.value)} required placeholder="At least 8 characters"
                             className="w-full rounded-md border border-slate-300 px-3.5 py-2.5 pr-10 text-sm text-slate-900 placeholder:text-slate-400 outline-none transition focus:border-primary-300 focus:ring-2 focus:ring-primary-500/10" />
-                        <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400 hover:text-slate-600">
-                            <i className={`fas ${showPassword ? 'fa-eye-slash' : 'fa-eye'} text-sm`} />
+                        <button
+                            type="button"
+                            onClick={() => setShowPassword(!showPassword)}
+                            aria-label={showPassword ? 'Hide password' : 'Show password'}
+                            title={showPassword ? 'Hide password' : 'Show password'}
+                            className="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400 hover:text-slate-600"
+                        >
+                            {showPassword ? <EyeOff size={17} /> : <Eye size={17} />}
                         </button>
                     </div>
                     {errors.password && <p className="mt-1.5 text-[13px] text-accent">{errors.password}</p>}

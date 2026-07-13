@@ -23,7 +23,7 @@ class EventTransitionAuditTest extends TestCase
 
         $this->actingAs($user);
 
-        $result = app(EventRegistrationService::class)->registerOrWaitlist($event, $user->id);
+        $result = app(EventRegistrationService::class)->registerIfAvailable($event, $user->id);
 
         $this->assertSame(EventRegistrationStatus::REGISTERED, $result);
 
@@ -60,35 +60,6 @@ class EventTransitionAuditTest extends TestCase
             'action' => 'registration_cancelled',
             'from_status' => EventRegistrationStatus::REGISTERED->value,
             'to_status' => EventRegistrationStatus::CANCELLED->value,
-        ]);
-    }
-
-    public function test_waitlist_promotion_writes_transition_audit(): void
-    {
-        $admin = User::factory()->create();
-        $attendee = User::factory()->create();
-        $event = $this->makeEvent([
-            'attendee_slots' => 2,
-        ]);
-
-        $event->attendees()->attach($attendee->id, [
-            'status' => EventRegistrationStatus::WAITLISTED->value,
-            'revoke_count' => 0,
-        ]);
-
-        $this->actingAs($admin);
-
-        $result = app(EventRegistrationService::class)->promoteWaitlistedAttendee($event, $attendee->id);
-
-        $this->assertTrue($result);
-
-        $this->assertDatabaseHas('event_transition_audits', [
-            'event_id' => $event->id,
-            'user_id' => $attendee->id,
-            'actor_user_id' => $admin->id,
-            'action' => 'waitlist_promoted',
-            'from_status' => EventRegistrationStatus::WAITLISTED->value,
-            'to_status' => EventRegistrationStatus::REGISTERED->value,
         ]);
     }
 

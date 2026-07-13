@@ -45,7 +45,7 @@ interface Event {
     speakers?: Speaker[];
     resources?: Resource[];
     is_registered?: boolean;
-    registration_status?: 'registered' | 'waitlisted' | 'cancelled' | null;
+    registration_status?: 'registered' | 'cancelled' | null;
     revoke_count?: number;
     attendee_workspace_url?: string | null;
     program_profile?: {
@@ -172,22 +172,18 @@ export default function EventShow({ event, auth, primary_cta }: EventShowProps) 
 
     const slotsRemaining = event.slots_remaining;
     const isRegistered = event.is_registered ?? false;
-    const isWaitlisted = event.registration_status === 'waitlisted';
     const revokeCount = event.revoke_count ?? 0;
     const programProfile = event.program_profile;
     const modeLabel = event.mode ? event.mode.charAt(0).toUpperCase() + event.mode.slice(1) : 'Hybrid';
     const isFreeRegistrationFlow = primary_cta.key === 'register_now';
-    const isWaitlistFlow = primary_cta.key === 'join_waitlist';
     const isPaidCheckoutFlow = primary_cta.key === 'buy_ticket';
     const requiresGuestEmail = Boolean(primary_cta.requires_email && !auth?.user);
-    const showPrimaryCta = primary_cta.kind === 'action' && !(revokeCount === 4 && (primary_cta.key === 'register_now' || primary_cta.key === 'join_waitlist'));
+    const showPrimaryCta = primary_cta.kind === 'action' && !(revokeCount === 4 && primary_cta.key === 'register_now');
     const ctaTone = primary_cta.key === 'view_attendee_workspace'
         ? 'border-emerald-200 bg-emerald-50'
         : primary_cta.key === 'view_speaker_workspace'
             ? 'border-slate-200 bg-slate-100'
-            : primary_cta.key === 'join_waitlist'
-                ? 'border-amber-200 bg-amber-50'
-                : 'border-slate-200 bg-slate-50';
+            : 'border-slate-200 bg-slate-50';
     const programTypeLabel = programProfile?.program_type === 'discipleship_track' ? 'Discipleship Track' : 'General Event';
     const prayerTargetLabel = programProfile?.weekly_prayer_target_minutes
         ? `${Math.floor(programProfile.weekly_prayer_target_minutes / 60)}h ${programProfile.weekly_prayer_target_minutes % 60}m weekly prayer target`
@@ -200,7 +196,7 @@ export default function EventShow({ event, auth, primary_cta }: EventShowProps) 
         : null;
 
     const handlePrimaryCta = () => {
-        if (revokeCount === 4 && (primary_cta.key === 'register_now' || primary_cta.key === 'join_waitlist')) {
+        if (revokeCount === 4 && primary_cta.key === 'register_now') {
             return;
         }
 
@@ -246,11 +242,11 @@ export default function EventShow({ event, auth, primary_cta }: EventShowProps) 
                             <section className="relative isolate overflow-hidden rounded-md border border-slate-200 bg-slate-900 text-white shadow-sm sm:rounded-lg">
                                 <div className="absolute inset-0">
                                     <img
-                                        src={event.program_cover ? `/storage/${event.program_cover}` : '/assets/img/banner.png'}
+                                        src={event.program_cover ? `/storage/${event.program_cover}` : '/assets/img/leadership-workshop.png'}
                                         alt={event.title}
                                         className="h-full w-full object-cover"
                                         onError={(e) => {
-                                            (e.target as HTMLImageElement).src = '/assets/img/banner.png';
+                                            (e.target as HTMLImageElement).src = '/assets/img/leadership-workshop.png';
                                         }}
                                     />
                                     <div className="absolute inset-0 bg-slate-900/68"></div>
@@ -391,22 +387,7 @@ export default function EventShow({ event, auth, primary_cta }: EventShowProps) 
                                     <h2 className="text-xl font-semibold text-slate-950 md:text-2xl">Overview</h2>
                                 </div>
                                 <div
-                                    className="prose max-w-none text-slate-700
-                                        prose-headings:font-sans prose-headings:text-slate-950 prose-headings:font-semibold
-                                        prose-h1:text-3xl prose-h2:text-2xl prose-h3:text-xl prose-h4:text-lg
-                                        prose-p:leading-relaxed prose-p:mb-4 prose-p:text-slate-700
-                                        prose-a:text-emerald-700 prose-a:font-semibold prose-a:no-underline hover:prose-a:underline
-                                        prose-strong:text-slate-950 prose-strong:font-semibold
-                                        prose-ul:list-disc prose-ul:ml-6 prose-ul:mb-4
-                                        prose-ol:list-decimal prose-ol:ml-6 prose-ol:mb-4
-                                        prose-li:mb-2 prose-li:text-slate-700 prose-li:marker:text-emerald-700
-                                        prose-blockquote:border-l-4 prose-blockquote:border-emerald-600 prose-blockquote:pl-4 prose-blockquote:italic prose-blockquote:text-slate-600 prose-blockquote:bg-slate-50 prose-blockquote:py-2
-                                        prose-code:bg-slate-100 prose-code:px-2 prose-code:py-1 prose-code:rounded prose-code:text-sm prose-code:text-slate-900
-                                        prose-pre:bg-slate-900 prose-pre:text-slate-100 prose-pre:p-4 prose-pre:rounded-lg prose-pre:overflow-x-auto
-                                        prose-img:rounded-xl prose-img:shadow-md
-                                        prose-table:border-collapse prose-table:w-full
-                                        prose-th:bg-slate-900 prose-th:text-white prose-th:p-3 prose-th:text-left prose-th:font-semibold
-                                        prose-td:border prose-td:border-slate-300 prose-td:p-3"
+                                    className="rich-content"
                                     dangerouslySetInnerHTML={{ __html: event.description }}
                                 />
                             </div>
@@ -578,7 +559,6 @@ export default function EventShow({ event, auth, primary_cta }: EventShowProps) 
                                                 {primary_cta.key === 'view_attendee_workspace' && <i className="fas fa-calendar-check"></i>}
                                                 {primary_cta.key === 'view_speaker_workspace' && <i className="fas fa-microphone"></i>}
                                                 {isPaidCheckoutFlow && <i className="fas fa-ticket-alt"></i>}
-                                                {isWaitlistFlow && <i className="fas fa-clock"></i>}
                                                 {primary_cta.key === 'apply_to_speak' && <i className="fas fa-bullhorn"></i>}
                                                 {(isFreeRegistrationFlow || primary_cta.kind === 'status') && <i className="fas fa-arrow-right"></i>}
                                             </div>
@@ -621,9 +601,9 @@ export default function EventShow({ event, auth, primary_cta }: EventShowProps) 
                                         </div>
                                     )}
 
-                                    {slotsRemaining === 0 && !isWaitlisted && (
+                                    {slotsRemaining === 0 && (
                                         <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-medium text-amber-700">
-                                            This event is full. New registrations will join the waitlist.
+                                            This event is full. Registration will reopen if a seat becomes available.
                                         </div>
                                     )}
 
@@ -635,20 +615,19 @@ export default function EventShow({ event, auth, primary_cta }: EventShowProps) 
 
                                     {primary_cta.kind === 'status' || !showPrimaryCta ? (
                                         <div className="flex w-full items-center justify-center rounded-xl bg-slate-700 px-5 py-4 text-center text-base font-semibold text-white">
-                                            {revokeCount === 4 && (isFreeRegistrationFlow || isWaitlistFlow)
+                                            {revokeCount === 4 && isFreeRegistrationFlow
                                                 ? 'Registration limit reached'
                                                 : primary_cta.label}
                                         </div>
                                     ) : (
                                         <button
                                             onClick={handlePrimaryCta}
-                                            disabled={revokeCount === 4 && (isFreeRegistrationFlow || isWaitlistFlow)}
+                                            disabled={revokeCount === 4 && isFreeRegistrationFlow}
                                             className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-slate-950 px-5 py-4 text-base font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50"
                                         >
                                             {primary_cta.key === 'view_attendee_workspace' && <i className="fas fa-calendar-check"></i>}
                                             {primary_cta.key === 'view_speaker_workspace' && <i className="fas fa-microphone"></i>}
                                             {isPaidCheckoutFlow && <i className="fas fa-ticket-alt"></i>}
-                                            {isWaitlistFlow && <i className="fas fa-clock"></i>}
                                             {primary_cta.key === 'apply_to_speak' && <i className="fas fa-microphone"></i>}
                                             {(isFreeRegistrationFlow || primary_cta.key === 'live') && <i className="fas fa-check"></i>}
                                             <span>{primary_cta.label}</span>
@@ -748,7 +727,7 @@ export default function EventShow({ event, auth, primary_cta }: EventShowProps) 
             <div className="fixed inset-x-0 bottom-0 z-40 border-t border-slate-200 bg-white/95 px-4 py-3 shadow-[0_-8px_24px_rgba(15,23,42,0.10)] backdrop-blur lg:hidden">
                 {primary_cta.kind === 'status' || !showPrimaryCta ? (
                     <div className="flex min-h-12 w-full items-center justify-center rounded-md bg-slate-700 px-4 text-center text-sm font-semibold text-white">
-                        {revokeCount === 4 && (isFreeRegistrationFlow || isWaitlistFlow) ? 'Registration limit reached' : primary_cta.label}
+                        {revokeCount === 4 && isFreeRegistrationFlow ? 'Registration limit reached' : primary_cta.label}
                     </div>
                 ) : (
                     <button
@@ -757,7 +736,6 @@ export default function EventShow({ event, auth, primary_cta }: EventShowProps) 
                         className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-md bg-primary px-4 text-sm font-semibold text-white"
                     >
                         {isPaidCheckoutFlow && <i className="fas fa-ticket-alt"></i>}
-                        {isWaitlistFlow && <i className="fas fa-clock"></i>}
                         {isFreeRegistrationFlow && <i className="fas fa-check"></i>}
                         <span>{primary_cta.label}</span>
                     </button>
@@ -781,13 +759,13 @@ export default function EventShow({ event, auth, primary_cta }: EventShowProps) 
 
                                 {/* Modal Icon */}
                                 <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-md bg-white/10 sm:mb-4 sm:h-20 sm:w-20">
-                                    <i className={`fas ${isWaitlistFlow ? 'fa-clock' : 'fa-calendar-check'} text-2xl text-white sm:text-3xl`}></i>
+                                    <i className="fas fa-calendar-check text-2xl text-white sm:text-3xl"></i>
                                 </div>
 
                                 {/* Modal Title */}
-                                <h3 className="mb-2 text-xl font-bold text-white">{isWaitlistFlow ? 'Join Event Waitlist' : requiresGuestEmail ? 'Register With Email' : 'Confirm Free Registration'}</h3>
+                                <h3 className="mb-2 text-xl font-bold text-white">{requiresGuestEmail ? 'Register With Email' : 'Confirm Free Registration'}</h3>
                                 <p className="text-sm text-white/90">
-                                    {isWaitlistFlow ? 'Stay in line for the next available seat' : requiresGuestEmail ? 'No account needed. We will use your email for reminders.' : 'Reserve your seat and move directly into the attendee journey'}
+                                    {requiresGuestEmail ? 'No account needed. We will use your email for reminders.' : 'Reserve your seat and move directly into the attendee journey'}
                                 </p>
                             </div>
 
@@ -795,18 +773,16 @@ export default function EventShow({ event, auth, primary_cta }: EventShowProps) 
                             <div className="p-5 text-center sm:p-8">
                                 <div className="mb-6">
                                     <h4 className="mb-2 text-lg font-semibold text-slate-950">
-                                        {isWaitlistFlow ? "You're about to join the waitlist for:" : "You're about to confirm your registration for:"}
+                                        You're about to confirm your registration for:
                                     </h4>
                                     <div className="mb-4 rounded-xl border border-emerald-200 bg-emerald-50 p-4">
                                         <span className="block text-lg font-semibold text-slate-950">{event.title}</span>
                                         <span className="text-sm text-emerald-700">{event.theme}</span>
                                     </div>
                                     <p className="text-slate-600">
-                                        {isWaitlistFlow
-                                            ? 'We will notify you as soon as a confirmed seat becomes available.'
-                                            : requiresGuestEmail
-                                                ? 'This is a free event. Add your email and we will include you in event reminders.'
-                                                : 'This is a free event. Once confirmed, your attendee workspace becomes the home for access instructions, resources, and updates.'}
+                                        {requiresGuestEmail
+                                            ? 'This is a free event. Add your email and we will include you in event reminders.'
+                                            : 'This is a free event. Once confirmed, your attendee workspace becomes the home for access instructions, resources, and updates.'}
                                     </p>
                                 </div>
 
@@ -862,12 +838,12 @@ export default function EventShow({ event, auth, primary_cta }: EventShowProps) 
                                                         ></circle>
                                                         <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
                                                     </svg>
-                                                    {isWaitlistFlow ? 'Joining waitlist...' : requiresGuestEmail ? 'Adding email...' : 'Confirming registration...'}
+                                                    {requiresGuestEmail ? 'Adding email...' : 'Confirming registration...'}
                                                 </>
                                             ) : (
                                                 <>
-                                                    <i className={`fas ${isWaitlistFlow ? 'fa-clock' : 'fa-check'}`}></i>
-                                                    {isWaitlistFlow ? 'Yes, Join Waitlist' : requiresGuestEmail ? 'Register Email' : 'Yes, Confirm Registration'}
+                                                    <i className="fas fa-check"></i>
+                                                    {requiresGuestEmail ? 'Register Email' : 'Yes, Confirm Registration'}
                                                 </>
                                             )}
                                         </button>

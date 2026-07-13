@@ -44,13 +44,6 @@ class JoinEventAction
             ]);
         }
 
-        if ($existing && $existing->pivot->status === EventRegistrationStatus::WAITLISTED->value) {
-            return redirect($workspaceRoute)->with([
-                'type' => 'info',
-                'message' => 'You are already on the waitlist for this event.',
-            ]);
-        }
-
         if (! $event->isRegistrationOpen()) {
             return back()->with([
                 'type' => 'error',
@@ -86,20 +79,16 @@ class JoinEventAction
         // Check if event is paid
         if ($event->entry_fee > 0) {
             if ($this->participantStateService->slotsRemaining($event) === 'Full') {
-                $result = $this->eventRegistrationService->registerOrWaitlist($event, $userId);
-
-                if ($result === EventRegistrationStatus::WAITLISTED) {
-                    return redirect($workspaceRoute)->with([
-                        'type' => 'success',
-                        'message' => 'This event is currently full. You have been added to the waitlist.',
-                    ]);
-                }
+                return back()->with([
+                    'type' => 'info',
+                    'message' => 'This event is full. Registration will reopen if a seat becomes available.',
+                ]);
             }
 
             return redirect()->route('events.checkout', $event->slug);
         }
 
-        $result = $this->eventRegistrationService->registerOrWaitlist($event, $userId);
+        $result = $this->eventRegistrationService->registerIfAvailable($event, $userId);
 
         if ($result === EventRegistrationStatus::REGISTERED) {
             return redirect($workspaceRoute)->with([
@@ -108,16 +97,9 @@ class JoinEventAction
             ]);
         }
 
-        if ($result === EventRegistrationStatus::WAITLISTED) {
-            return redirect($workspaceRoute)->with([
-                'type' => 'success',
-                'message' => 'This event is full right now. You have been added to the waitlist.',
-            ]);
-        }
-
         return back()->with([
-            'type' => 'error',
-            'message' => 'Registration failed. Please try again later or contact support.',
+            'type' => 'info',
+            'message' => 'This event is full. Registration will reopen if a seat becomes available.',
         ]);
 
     }
@@ -168,14 +150,7 @@ class JoinEventAction
             ]);
         }
 
-        if ($existing && $existing->status === EventRegistrationStatus::WAITLISTED) {
-            return back()->with([
-                'type' => 'info',
-                'message' => 'This email is already on the waitlist for this event.',
-            ]);
-        }
-
-        $result = $this->eventRegistrationService->registerGuestOrWaitlist(
+        $result = $this->eventRegistrationService->registerGuestIfAvailable(
             $event,
             $validated['email'],
             $validated['name'] ?? null
@@ -188,16 +163,9 @@ class JoinEventAction
             ]);
         }
 
-        if ($result === EventRegistrationStatus::WAITLISTED) {
-            return back()->with([
-                'type' => 'success',
-                'message' => 'This event is full right now. Your email has been added to the waitlist.',
-            ]);
-        }
-
         return back()->with([
-            'type' => 'error',
-            'message' => 'Registration failed. Please try again later or contact support.',
+            'type' => 'info',
+            'message' => 'This event is full. Registration will reopen if a seat becomes available.',
         ]);
     }
 }

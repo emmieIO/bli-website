@@ -3,7 +3,6 @@
 namespace App\Services\Instructors;
 
 use App\Enums\ApplicationStatus;
-use App\Enums\RoleEnum;
 use App\Enums\UserRoles;
 use App\Models\ApplicationLog;
 use App\Models\InstructorProfile;
@@ -16,6 +15,7 @@ use Illuminate\Support\Facades\Storage;
 class InstructorService
 {
     use HasFileUpload;
+
     /**
      * Create a new class instance.
      */
@@ -48,11 +48,13 @@ class InstructorService
                 'exception' => $th,
                 'log_id' => $log->id ?? null,
             ]);
+
             return false;
         }
     }
 
     public function createInstructor() {}
+
     public function updateInstructor(array $data, InstructorProfile $instructorProfile, ?UploadedFile $file = null)
     {
         try {
@@ -61,23 +63,19 @@ class InstructorService
                 $newPath = $oldPath;
                 $user = $instructorProfile->user;
 
-                $data['is_approved'] = $data["application_status"] === ApplicationStatus::APPROVED->value;
+                $data['is_approved'] = $data['application_status'] === ApplicationStatus::APPROVED->value;
 
-                if ($data["application_status"] === ApplicationStatus::APPROVED->value) {
-                    if (! $user->hasRole(RoleEnum::Instructor->value)) {
-                        $user->assignRole(RoleEnum::Instructor->value);
-                    }
-
-                    if ($user->hasRole(RoleEnum::Student->value)) {
-                        $user->removeRole(RoleEnum::Student->value);
+                if ($data['application_status'] === ApplicationStatus::APPROVED->value) {
+                    if (! $user->hasRole(UserRoles::INSTRUCTOR->value)) {
+                        $user->assignRole(UserRoles::INSTRUCTOR->value);
                     }
                 } else {
-                    if ($user->hasRole(RoleEnum::Instructor->value)) {
-                        $user->removeRole(RoleEnum::Instructor->value);
+                    if ($user->hasRole(UserRoles::INSTRUCTOR->value)) {
+                        $user->removeRole(UserRoles::INSTRUCTOR->value);
                     }
 
                     if (! $user->hasAnyRole([UserRoles::STUDENT->value, UserRoles::ADMIN->value, UserRoles::SUPER_ADMIN->value])) {
-                        $user->assignRole(RoleEnum::Student->value);
+                        $user->assignRole(UserRoles::STUDENT->value);
                     }
                 }
 
@@ -107,7 +105,7 @@ class InstructorService
                     'resume_path' => $newPath,
                     'status' => $data['application_status'],
                     'is_approved' => $data['is_approved'],
-                    'approved_at' => $data['approved_at']
+                    'approved_at' => $data['approved_at'],
                 ]);
 
                 if ($file && $oldPath) {
@@ -118,51 +116,59 @@ class InstructorService
                     });
                 }
             });
+
             return true;
         } catch (\Throwable $th) {
             Log::error('Instructor update failed', [
                 'error' => $th->getMessage(),
-                'trace' => $th->getTraceAsString()
+                'trace' => $th->getTraceAsString(),
             ]);
+
             return false;
         }
     }
-    public function deleteInstructor(InstructorProfile $instructorProfile) {
+
+    public function deleteInstructor(InstructorProfile $instructorProfile)
+    {
         $resumePath = $instructorProfile->resume_path;
         $user = $instructorProfile->user;
         try {
-        DB::transaction(function () use ($instructorProfile, $user) {
-            if ($user->hasRole(RoleEnum::Instructor->value)) {
-                $user->removeRole(RoleEnum::Instructor->value);
-            }
+            DB::transaction(function () use ($instructorProfile, $user) {
+                if ($user->hasRole(UserRoles::INSTRUCTOR->value)) {
+                    $user->removeRole(UserRoles::INSTRUCTOR->value);
+                }
 
-            if (! $user->hasAnyRole([UserRoles::STUDENT->value, UserRoles::ADMIN->value, UserRoles::SUPER_ADMIN->value])) {
-                $user->assignRole(RoleEnum::Student->value);
-            }
+                if (! $user->hasAnyRole([UserRoles::STUDENT->value, UserRoles::ADMIN->value, UserRoles::SUPER_ADMIN->value])) {
+                    $user->assignRole(UserRoles::STUDENT->value);
+                }
 
-            $instructorProfile->delete();
-        });
+                $instructorProfile->delete();
+            });
 
-        // File deletion outside transaction
-        // if ($resumePath && Storage::disk('public')->exists($resumePath)) {
-        //     Storage::disk('public')->delete($resumePath);
-        // }
+            // File deletion outside transaction
+            // if ($resumePath && Storage::disk('public')->exists($resumePath)) {
+            //     Storage::disk('public')->delete($resumePath);
+            // }
 
             return true;
         } catch (\Throwable $th) {
             Log::error('Instructor deletion failed', [
-                'error'=> $th->getMessage(),
-                'trace'=> $th->getTraceAsString()
+                'error' => $th->getMessage(),
+                'trace' => $th->getTraceAsString(),
             ]);
+
             return false;
         }
     }
 
-    public function restoreInstructor(InstructorProfile $instructorProfile) {
-        if($instructorProfile->deleted_at) {
+    public function restoreInstructor(InstructorProfile $instructorProfile)
+    {
+        if ($instructorProfile->deleted_at) {
             $instructorProfile->restore();
+
             return true;
         }
+
         return false;
     }
 }

@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\UserRoles;
+use Database\Factories\UserFactory;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -13,8 +14,8 @@ use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
-    /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable, HasRoles, SoftDeletes;
+    /** @use HasFactory<UserFactory> */
+    use HasFactory, HasRoles, Notifiable, SoftDeletes;
 
     /**
      * The attributes that are mass assignable.
@@ -42,7 +43,6 @@ class User extends Authenticatable implements MustVerifyEmail
         'remember_token',
     ];
 
-
     /**
      * Get the attributes that should be cast.
      *
@@ -66,10 +66,10 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public function events()
     {
-        return $this->belongsToMany(Event::class, "event_attendees", 'user_id', "event_id")
+        return $this->belongsToMany(Event::class, 'event_attendees', 'user_id', 'event_id')
             ->withPivot([
                 'status',
-                'revoke_count'
+                'revoke_count',
             ])
             ->withTimestamps();
     }
@@ -129,6 +129,18 @@ class User extends Authenticatable implements MustVerifyEmail
     public function canAccessInstructorArea(): bool
     {
         return $this->isApprovedInstructor();
+    }
+
+    public function isMentorRole(): bool
+    {
+        return $this->hasRole(UserRoles::MENTOR->value);
+    }
+
+    public function canAccessMentorArea(): bool
+    {
+        return $this->isMentorRole()
+            && $this->hasInstructorProfile()
+            && (bool) optional($this->instructorProfile)->is_approved;
     }
 
     public function hasSpeakerIdentity(): bool

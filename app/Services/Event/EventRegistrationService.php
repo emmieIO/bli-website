@@ -32,7 +32,7 @@ class EventRegistrationService
         return $this->setRegistrationStatus($event, $userId, EventRegistrationStatus::REGISTERED) === EventRegistrationStatus::REGISTERED;
     }
 
-    public function registerOrWaitlist(Event $event, ?int $userId = null): EventRegistrationStatus|false
+    public function registerIfAvailable(Event $event, ?int $userId = null): EventRegistrationStatus|false
     {
         $userId = $userId ?? Auth::id();
 
@@ -40,14 +40,14 @@ class EventRegistrationService
             return false;
         }
 
-        $targetStatus = $this->participantStateService->slotsRemaining($event) === 'Full'
-            ? EventRegistrationStatus::WAITLISTED
-            : EventRegistrationStatus::REGISTERED;
+        if ($this->participantStateService->slotsRemaining($event) === 'Full') {
+            return false;
+        }
 
-        return $this->setRegistrationStatus($event, $userId, $targetStatus);
+        return $this->setRegistrationStatus($event, $userId, EventRegistrationStatus::REGISTERED);
     }
 
-    public function registerGuestOrWaitlist(Event $event, string $email, ?string $name = null): EventRegistrationStatus|false
+    public function registerGuestIfAvailable(Event $event, string $email, ?string $name = null): EventRegistrationStatus|false
     {
         $email = mb_strtolower(trim($email));
 
@@ -55,9 +55,11 @@ class EventRegistrationService
             return false;
         }
 
-        $targetStatus = $this->participantStateService->slotsRemaining($event) === 'Full'
-            ? EventRegistrationStatus::WAITLISTED
-            : EventRegistrationStatus::REGISTERED;
+        if ($this->participantStateService->slotsRemaining($event) === 'Full') {
+            return false;
+        }
+
+        $targetStatus = EventRegistrationStatus::REGISTERED;
 
         $existing = $event->guestAttendees()
             ->where('email', $email)
@@ -148,8 +150,6 @@ class EventRegistrationService
                     return false;
                 }
 
-                $releasedSeat = $currentStatus->occupiesSeat();
-
                 $event->attendees()->updateExistingPivot($userId, [
                     'status' => EventRegistrationStatus::CANCELLED->value,
                     'revoke_count' => DB::raw('revoke_count + 1'),
@@ -168,10 +168,6 @@ class EventRegistrationService
                     ],
                 );
 
-                if ($releasedSeat) {
-                    $this->promoteOldestWaitlistedAttendee($event, $userId);
-                }
-
                 return true;
             });
         } catch (Throwable $exception) {
@@ -183,94 +179,6 @@ class EventRegistrationService
 
             return false;
         }
-    }
-
-    public function promoteWaitlistedAttendee(Event $event, int $userId): bool|string
-    {
-        try {
-            return DB::transaction(function () use ($event, $userId) {
-                $event = Event::query()->findOrFail($event->id);
-                $registration = $event->attendees()->where('user_id', $userId)->first();
-
-                if (! $registration) {
-                    return 'not_found';
-                }
-
-                $currentStatus = EventRegistrationStatus::fromValue($registration->pivot->status);
-
-                if ($currentStatus !== EventRegistrationStatus::WAITLISTED) {
-                    return 'invalid_status';
-                }
-
-                if ($this->participantStateService->slotsRemaining($event) === 'Full') {
-                    return 'no_capacity';
-                }
-
-                return $this->promoteSpecificWaitlistedAttendee(
-                    event: $event,
-                    userId: $userId,
-                    actorUserId: Auth::id(),
-                    context: [
-                        'trigger' => 'manual_promotion',
-                    ],
-                ) ? true : false;
-            });
-        } catch (Throwable $exception) {
-            Log::error('Failed to promote waitlisted attendee.', [
-                'event_id' => $event->id,
-                'user_id' => $userId,
-                'exception' => $exception->getMessage(),
-            ]);
-
-            return false;
-        }
-    }
-
-    protected function promoteOldestWaitlistedAttendee(Event $event, ?int $actorUserId = null): bool
-    {
-        $nextWaitlistedAttendee = $event->attendees()
-            ->wherePivot('status', EventRegistrationStatus::WAITLISTED->value)
-            ->orderByPivot('created_at', 'asc')
-            ->first();
-
-        if (! $nextWaitlistedAttendee) {
-            return false;
-        }
-
-        return $this->promoteSpecificWaitlistedAttendee(
-            event: $event,
-            userId: $nextWaitlistedAttendee->id,
-            actorUserId: $actorUserId,
-            context: [
-                'trigger' => 'seat_released',
-            ],
-        );
-    }
-
-    protected function promoteSpecificWaitlistedAttendee(Event $event, int $userId, ?int $actorUserId = null, array $context = []): bool
-    {
-        $event->attendees()->updateExistingPivot($userId, [
-            'status' => EventRegistrationStatus::REGISTERED->value,
-            'updated_at' => now(),
-        ]);
-
-        $this->recordRegistrationAudit(
-            event: $event,
-            userId: $userId,
-            action: 'waitlist_promoted',
-            fromStatus: EventRegistrationStatus::WAITLISTED,
-            toStatus: EventRegistrationStatus::REGISTERED,
-            actorUserId: $actorUserId,
-            context: $context,
-        );
-
-        $user = User::query()->find($userId, ['*']);
-
-        if ($user) {
-            event(new EventRegisterEvent($event, $user, 'promoted_from_waitlist'));
-        }
-
-        return true;
     }
 
     protected function setRegistrationStatus(Event $event, int $userId, EventRegistrationStatus $targetStatus): EventRegistrationStatus|false
@@ -313,7 +221,7 @@ class EventRegistrationService
             $this->recordRegistrationAudit(
                 event: $event,
                 userId: $userId,
-                action: $targetStatus === EventRegistrationStatus::WAITLISTED ? 'registration_waitlisted' : 'registration_confirmed',
+                action: 'registration_confirmed',
                 fromStatus: $currentStatus,
                 toStatus: $targetStatus,
                 actorUserId: Auth::id(),
@@ -340,7 +248,7 @@ class EventRegistrationService
         $this->recordRegistrationAudit(
             event: $event,
             userId: $userId,
-            action: $targetStatus === EventRegistrationStatus::WAITLISTED ? 'registration_waitlisted' : 'registration_confirmed',
+            action: 'registration_confirmed',
             fromStatus: null,
             toStatus: $targetStatus,
             actorUserId: Auth::id(),

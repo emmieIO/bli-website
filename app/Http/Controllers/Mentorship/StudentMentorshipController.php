@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Mentorship;
 
 use App\Contracts\Repositories\MentorshipRepositoryInterface;
 use App\Http\Controllers\Controller;
+use App\Models\User;
 use App\Services\MentorshipExpirationService;
 use App\Services\MentorshipService;
 use Illuminate\Http\Request;
@@ -40,9 +41,15 @@ class StudentMentorshipController extends Controller
     public function create()
     {
         $instructors = $this->mentorshipService->getAvailableInstructors();
+        $selectedInstructorId = request()->integer('instructor');
+
+        if (! $instructors->contains('id', $selectedInstructorId)) {
+            $selectedInstructorId = null;
+        }
 
         return Inertia::render('Mentorship/Student/Create', [
             'instructors' => $instructors,
+            'selectedInstructorId' => $selectedInstructorId,
         ]);
     }
 
@@ -60,7 +67,7 @@ class StudentMentorshipController extends Controller
         ]);
 
         try {
-            $instructor = \App\Models\User::findOrFail($validated['instructor_id']);
+            $instructor = User::findOrFail($validated['instructor_id']);
             $mentorshipRequest = $this->mentorshipService->requestMentorship(
                 auth()->user(),
                 $instructor,
@@ -70,12 +77,12 @@ class StudentMentorshipController extends Controller
             return redirect()->route('student.mentorship.show', $mentorshipRequest->id)
                 ->with([
                     'message' => 'Mentorship request submitted successfully! The instructor will review your request.',
-                    'type' => 'success'
+                    'type' => 'success',
                 ]);
         } catch (\Exception $e) {
             return back()->with([
                 'message' => $e->getMessage(),
-                'type' => 'error'
+                'type' => 'error',
             ])->withInput();
         }
     }
@@ -87,7 +94,7 @@ class StudentMentorshipController extends Controller
     {
         $mentorshipRequest = $this->mentorshipRepository->getById($id);
 
-        if (!$mentorshipRequest || $mentorshipRequest->student_id !== auth()->id()) {
+        if (! $mentorshipRequest || $mentorshipRequest->student_id !== auth()->id()) {
             abort(404, 'Mentorship request not found');
         }
 
@@ -167,7 +174,7 @@ class StudentMentorshipController extends Controller
     {
         $mentorshipRequest = $this->mentorshipRepository->getById($id);
 
-        if (!$mentorshipRequest || $mentorshipRequest->student_id !== auth()->id()) {
+        if (! $mentorshipRequest || $mentorshipRequest->student_id !== auth()->id()) {
             abort(404, 'Mentorship request not found');
         }
 
@@ -176,12 +183,12 @@ class StudentMentorshipController extends Controller
 
             return back()->with([
                 'message' => 'Mentorship request cancelled successfully.',
-                'type' => 'success'
+                'type' => 'success',
             ]);
         } catch (\Exception $e) {
             return back()->with([
                 'message' => $e->getMessage(),
-                'type' => 'error'
+                'type' => 'error',
             ]);
         }
     }
@@ -193,7 +200,7 @@ class StudentMentorshipController extends Controller
     {
         $mentorshipRequest = $this->mentorshipRepository->getById($id);
 
-        if (!$mentorshipRequest || $mentorshipRequest->student_id !== auth()->id()) {
+        if (! $mentorshipRequest || $mentorshipRequest->student_id !== auth()->id()) {
             abort(404, 'Mentorship request not found');
         }
 
@@ -202,12 +209,12 @@ class StudentMentorshipController extends Controller
 
             return back()->with([
                 'message' => 'Mentorship ended successfully.',
-                'type' => 'success'
+                'type' => 'success',
             ]);
         } catch (\Exception $e) {
             return back()->with([
                 'message' => $e->getMessage(),
-                'type' => 'error'
+                'type' => 'error',
             ]);
         }
     }

@@ -1,7 +1,7 @@
 import { PropsWithChildren } from 'react';
 import { Head, Link } from '@inertiajs/react';
 import { ToastContainer, useToastNotifications } from '@/Components/Toast';
-import { ArrowLeft, GraduationCap } from 'lucide-react';
+import { ArrowLeft, CheckCircle2 } from 'lucide-react';
 
 interface AuthLayoutProps extends PropsWithChildren {
     title?: string;
@@ -18,11 +18,15 @@ export default function AuthLayout({ title, description, wide, children }: AuthL
             <ToastContainer />
 
             <div className="grid min-h-screen lg:grid-cols-2">
-                {/* Left: Brand Panel */}
+                {/* One shared photographic shell keeps every auth screen connected to the public BLI experience. */}
                 <div className="relative hidden flex-col justify-between overflow-hidden bg-primary p-10 lg:flex lg:p-14">
-                    <div className="absolute -right-32 -top-32 h-96 w-96 rounded-full bg-accent/10 blur-3xl" />
-                    <div className="absolute -bottom-20 -left-20 h-72 w-72 rounded-full bg-accent/8 blur-3xl" />
-                    <div className="absolute left-1/3 top-1/2 h-64 w-64 -translate-y-1/2 rounded-full bg-white/5 blur-3xl" />
+                    <img
+                        src="/assets/img/leadership-workshop.png"
+                        alt="Leaders participating in a focused BLI-style workshop"
+                        className="absolute inset-0 h-full w-full object-cover object-[58%_center] saturate-[0.9]"
+                    />
+                    <div className="absolute inset-0 bg-primary/65" />
+                    <div className="absolute inset-0 bg-slate-950/10" />
 
                     <div className="relative z-10">
                         <Link href={route('homepage')} className="flex items-center gap-3">
@@ -36,27 +40,21 @@ export default function AuthLayout({ title, description, wide, children }: AuthL
                     </div>
 
                     <div className="relative z-10">
-                        <div className="inline-flex items-center gap-2 rounded-full border border-accent/20 bg-accent/10 px-4 py-1.5 text-[11px] font-semibold uppercase tracking-wider text-accent-200 backdrop-blur-sm">
-                            <GraduationCap size={14} />
+                        <div className="inline-flex items-center gap-2 border-l-2 border-accent-300 pl-3 text-[11px] font-semibold uppercase text-accent-200">
+                            <CheckCircle2 size={14} />
                             Leadership Formation
                         </div>
                         <h2 className="mt-6 text-3xl font-bold leading-tight text-white lg:text-4xl">
-                            Shape the next generation of leaders.
+                            Leadership grows through focused practice.
                         </h2>
                         <p className="mt-4 max-w-sm text-sm leading-relaxed text-primary-200">
-                            Access live events and a community focused on developing leaders
-                            with spiritual depth and practical clarity.
+                            Return to your events, mentorship goals, resources, and the next action in your development journey.
                         </p>
 
-                        <div className="mt-10 grid grid-cols-3 gap-6 border-t border-white/10 pt-8">
-                            {[
-                                { value: '500+', label: 'Leaders enrolled' },
-                                { value: '20+', label: 'Active events' },
-                                { value: '15+', label: 'Expert instructors' },
-                            ].map((stat) => (
-                                <div key={stat.label}>
-                                    <p className="text-2xl font-bold tracking-tight text-white">{stat.value}</p>
-                                    <p className="mt-1 text-xs font-medium uppercase tracking-wider text-primary-200">{stat.label}</p>
+                        <div className="mt-10 grid grid-cols-2 gap-px overflow-hidden border-y border-white/20 bg-white/20">
+                            {['Character and clarity', 'Competence and capacity'].map((focus) => (
+                                <div key={focus} className="bg-primary/70 px-4 py-4 text-xs font-semibold uppercase text-white backdrop-blur-sm">
+                                    {focus}
                                 </div>
                             ))}
                         </div>
@@ -71,6 +69,16 @@ export default function AuthLayout({ title, description, wide, children }: AuthL
 
                 {/* Right: Form Panel */}
                 <div className="flex flex-col bg-white">
+                    {/* Mobile still gets a human visual cue without pushing the form below the fold. */}
+                    <div className="relative h-36 overflow-hidden bg-primary lg:hidden">
+                        <img src="/assets/img/leadership-workshop.png" alt="Leaders learning together" className="h-full w-full object-cover object-center" />
+                        <div className="absolute inset-0 bg-primary/55" />
+                        <Link href={route('homepage')} className="absolute inset-x-5 bottom-4 flex items-center gap-2.5 text-white">
+                            <img src="/assets/img/bli-mark.png" alt="" className="h-9 w-9 rounded-sm bg-white object-contain" />
+                            <span className="text-sm font-semibold">Beacon Leadership Institute</span>
+                        </Link>
+                    </div>
+
                     <div className="flex items-center justify-between px-6 py-4 lg:px-10">
                         <Link
                             href={route('homepage')}

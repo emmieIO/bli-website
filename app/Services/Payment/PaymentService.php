@@ -59,7 +59,12 @@ class PaymentService
             return $subjectType;
         }
 
-        if ($transaction->payable_type === Event::class || ($transaction->metadata['type'] ?? null) === 'event') {
+        if (
+            $transaction->payable instanceof Event
+            || $transaction->payable_type === Event::class
+            || ($transaction->metadata['type'] ?? null) === 'event'
+            || isset($transaction->metadata['event_id'])
+        ) {
             return 'event';
         }
 
@@ -166,14 +171,6 @@ class PaymentService
             ];
         }
 
-        if ($registrationStatus === \App\Enums\EventRegistrationStatus::WAITLISTED) {
-            return [
-                'can_checkout' => false,
-                'reason' => 'already_waitlisted',
-                'message' => 'You are already on the waitlist for this event.',
-            ];
-        }
-
         if ($this->eventParticipantStateService->hasReachedMaxRevokes($event, $user->id)) {
             return [
                 'can_checkout' => false,
@@ -186,7 +183,7 @@ class PaymentService
             return [
                 'can_checkout' => false,
                 'reason' => 'event_full',
-                'message' => 'This event is currently full. Join the waitlist instead of proceeding to checkout.',
+                'message' => 'This event is currently full. Registration will reopen if a seat becomes available.',
             ];
         }
 
@@ -308,7 +305,7 @@ class PaymentService
                 }
 
                 if ($event) {
-                    $registrationStatus = $this->eventRegistrationService->registerOrWaitlist($event, $transaction->user_id);
+                    $registrationStatus = $this->eventRegistrationService->registerIfAvailable($event, $transaction->user_id);
                 } else {
                     $registrationStatus = false;
                 }
@@ -320,7 +317,9 @@ class PaymentService
                     'type' => 'event',
                     'event' => $event,
                     'transaction' => $transaction,
-                    'registration_status' => $registrationStatus?->value,
+                    'registration_status' => $registrationStatus instanceof \App\Enums\EventRegistrationStatus
+                        ? $registrationStatus->value
+                        : null,
                 ];
             }
 
@@ -385,7 +384,7 @@ class PaymentService
                 }
 
                 if ($event) {
-                    $this->eventRegistrationService->registerOrWaitlist($event, $transaction->user_id);
+                    $this->eventRegistrationService->registerIfAvailable($event, $transaction->user_id);
                 }
             }
 

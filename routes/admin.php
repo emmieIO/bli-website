@@ -45,11 +45,6 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
         Route::delete('/events/{event}/destroy-resource/{resource}', [EventResourceController::class, 'destroy'])->name('events.resources.destroy');
     });
 
-    Route::middleware(['permission:event-manage-waitlist|event-manage-attendees'])->group(function () {
-        Route::post('/events/{event}/attendees/{user}/promote-waitlist', [EventController::class, 'promoteWaitlistedAttendee'])
-            ->name('events.attendees.promote-waitlist');
-    });
-
     // Speakers Management (NOT resource - has custom methods like pendingSpeaker, activateSpeaker)
     Route::get('/speakers', [SpeakersController::class, 'index'])->name('speakers.index');
     Route::get('/speakers/pending', [SpeakersController::class, 'pendingSpeaker'])->name('speakers.pending');
@@ -86,7 +81,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
     });
 
     // User & Role Management (Admin only)
-    Route::middleware(['role:admin'])->group(function () {
+    Route::middleware(['role:admin|super-admin'])->group(function () {
         // User Management
         Route::get('/users', [\App\Http\Controllers\Admin\UserManagementController::class, 'index'])->name('users.index');
         Route::post('/users/{user}/assign-role', [\App\Http\Controllers\Admin\UserManagementController::class, 'assignRole'])->name('users.assign-role');

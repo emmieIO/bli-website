@@ -29,29 +29,8 @@ class EventRegistrationNotificationTest extends TestCase
         Notification::assertSentTo($user, EventRegisteredNotification::class, function (EventRegisteredNotification $notification) use ($user) {
             $payload = $notification->toArray($user);
 
-            return $notification->registrationContext === 'confirmed'
-                && $payload['type'] === 'event_registration'
+            return $payload['type'] === 'event_registration'
                 && str_contains($payload['message'], 'has been confirmed');
-        });
-    }
-
-    public function test_waitlist_promotion_sends_promotion_confirmation_notification(): void
-    {
-        Notification::fake();
-
-        $user = User::factory()->create();
-        $event = $this->makeEvent();
-
-        app(EventRegisterListener::class)->handle(
-            new EventRegisterEvent($event, $user, 'promoted_from_waitlist')
-        );
-
-        Notification::assertSentTo($user, EventRegisteredNotification::class, function (EventRegisteredNotification $notification) use ($user) {
-            $payload = $notification->toArray($user);
-
-            return $notification->registrationContext === 'promoted_from_waitlist'
-                && $payload['type'] === 'event_waitlist_promoted'
-                && str_contains($payload['message'], 'seat opened up');
         });
     }
 
