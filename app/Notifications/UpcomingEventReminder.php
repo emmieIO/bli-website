@@ -3,6 +3,8 @@
 namespace App\Notifications;
 
 use App\Models\Event;
+use App\Models\EventGuestAttendee;
+use Carbon\Carbon;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -27,6 +29,10 @@ class UpcomingEventReminder extends Notification implements ShouldQueue
      */
     public function via(object $notifiable): array
     {
+        if ($notifiable instanceof EventGuestAttendee) {
+            return ['mail'];
+        }
+
         return ['database', 'mail'];
     }
 
@@ -35,35 +41,36 @@ class UpcomingEventReminder extends Notification implements ShouldQueue
      */
     public function toMail(object $notifiable): MailMessage
     {
-        $startDate = \Carbon\Carbon::parse($this->event->start_date);
-        $endDate = \Carbon\Carbon::parse($this->event->end_date);
+        $startDate = Carbon::parse($this->event->start_date);
+        $endDate = Carbon::parse($this->event->end_date);
         $timeUntil = $this->timeUntilStart($startDate);
 
         // Format dates
         $dateRange = $startDate->isSameDay($endDate)
             ? $startDate->format('l, F j, Y')
-            : $startDate->format('F j') . ' - ' . $endDate->format('F j, Y');
+            : $startDate->format('F j').' - '.$endDate->format('F j, Y');
 
-        $timeRange = $startDate->format('g:i A') . ' - ' . $endDate->format('g:i A');
+        $timeRange = $startDate->format('g:i A').' - '.$endDate->format('g:i A');
+        $recipientName = $notifiable->name ?: 'there';
 
         $mail = (new MailMessage)
             ->subject("⏰ Reminder: {$this->event->title} is {$timeUntil}!")
-            ->greeting("Hello {$notifiable->name}!")
+            ->greeting("Hello {$recipientName}!")
             ->line("**Your confirmed event is starting {$timeUntil}!**")
             ->line("Don't forget about **{$this->event->title}** - we're excited to see you there!")
             ->line('---')
             ->line('### Event Details')
-            ->line('**Event:** ' . $this->event->title);
+            ->line('**Event:** '.$this->event->title);
 
         // Add theme if available
         if ($this->event->theme) {
-            $mail->line('**Theme:** ' . $this->event->theme);
+            $mail->line('**Theme:** '.$this->event->theme);
         }
 
-        $mail->line('**Date:** ' . $dateRange)
-            ->line('**Time:** ' . $timeRange)
-            ->line('**Mode:** ' . ucfirst($this->event->mode ?? 'Hybrid'))
-            ->line('**Location:** ' . $this->formatLocation());
+        $mail->line('**Date:** '.$dateRange)
+            ->line('**Time:** '.$timeRange)
+            ->line('**Mode:** '.ucfirst($this->event->mode ?? 'Hybrid'))
+            ->line('**Location:** '.$this->formatLocation());
 
         $mail->line('---')
             ->action('Join Event Now', route('events.show', $this->event->slug));
@@ -86,8 +93,8 @@ class UpcomingEventReminder extends Notification implements ShouldQueue
         $mail->line('---')
             ->line('**Can\'t make it?** Please cancel your registration so others can attend.')
             ->line('We look forward to seeing you soon!')
-            ->salutation("Best regards,
-The " . config('app.name') . " Team");
+            ->salutation('Best regards,
+The '.config('app.name').' Team');
 
         // Set reply-to to event contact email if available
         if ($this->event->contact_email) {
@@ -104,7 +111,7 @@ The " . config('app.name') . " Team");
      */
     public function toArray(object $notifiable): array
     {
-        $startDate = \Carbon\Carbon::parse($this->event->start_date);
+        $startDate = Carbon::parse($this->event->start_date);
         $timeUntil = $this->timeUntilStart($startDate);
 
         return [
@@ -126,14 +133,14 @@ The " . config('app.name') . " Team");
         return match ($this->event->mode) {
             'online' => 'Online Event (Access link on event page)',
             'offline' => $this->event->physical_address ?? 'Venue TBA',
-            'hybrid' => 'Hybrid Event - Online & ' . ($this->event->physical_address ?? 'Physical venue TBA'),
+            'hybrid' => 'Hybrid Event - Online & '.($this->event->physical_address ?? 'Physical venue TBA'),
             default => $this->event->location ?? 'Location TBA',
         };
     }
 
-    private function timeUntilStart(\Carbon\Carbon $startDate): string
+    private function timeUntilStart(Carbon $startDate): string
     {
-        $now = \Carbon\Carbon::now();
+        $now = Carbon::now();
         $minutesUntil = max(0, (int) ceil($now->diffInMinutes($startDate)));
 
         if ($minutesUntil < 120) {

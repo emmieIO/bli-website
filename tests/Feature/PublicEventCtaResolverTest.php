@@ -90,6 +90,24 @@ class PublicEventCtaResolverTest extends TestCase
         $this->assertTrue($cta['requires_auth']);
     }
 
+    public function test_guest_can_register_with_email_when_signup_is_not_required_for_free_event(): void
+    {
+        $event = $this->makeEvent([
+            'entry_fee' => 0,
+            'attendee_slots' => 10,
+            'require_sign_up' => false,
+        ]);
+
+        $cta = app(PublicEventCtaResolver::class)->resolve($event, null);
+
+        $this->assertSame('register_now', $cta['key']);
+        $this->assertSame('Register with email', $cta['label']);
+        $this->assertSame('post', $cta['method']);
+        $this->assertTrue($cta['requires_confirmation']);
+        $this->assertTrue($cta['requires_email']);
+        $this->assertFalse($cta['requires_auth']);
+    }
+
     public function test_paid_event_prefers_buy_ticket(): void
     {
         $user = User::factory()->create();

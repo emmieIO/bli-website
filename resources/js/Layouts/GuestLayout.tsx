@@ -1,4 +1,4 @@
-import React, { PropsWithChildren, useEffect, useRef, useState } from 'react';
+import { PropsWithChildren, useEffect, useRef, useState } from 'react';
 import { Link, usePage } from '@inertiajs/react';
 import { ToastContainer, useToastNotifications } from '@/Components/Toast';
 import { PageProps } from '@/types';
@@ -31,7 +31,7 @@ export default function GuestLayout({ children }: PropsWithChildren) {
             <nav className="sticky top-0 z-50 border-b border-slate-200/80 bg-white/90 backdrop-blur-xl">
                 <div className="section-shell flex items-center justify-between py-3.5">
                     <Link href={route('homepage')} className="flex items-center gap-2.5">
-                        <img src="/assets/img/logo.jpg" alt="BLI Logo" className="h-12 w-12 rounded-lg object-cover shadow-sm" />
+                        <img src="/assets/img/bli-mark.png" alt="Beacon Leadership Institute" className="h-12 w-12 rounded-md object-contain" />
                         <span className="text-sm font-semibold tracking-tight text-primary">Beacon Leadership Institute</span>
                     </Link>
 
@@ -122,7 +122,7 @@ export default function GuestLayout({ children }: PropsWithChildren) {
                     <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
                         <div>
                             <div className="flex items-center gap-2.5 mb-3">
-                                <img src="/assets/img/logo.jpg" alt="BLI" className="h-10 w-10 rounded-md object-cover" />
+                                <img src="/assets/img/bli-mark.png" alt="Beacon Leadership Institute" className="h-10 w-10 rounded-md object-contain" />
                                 <span className="text-sm font-semibold text-primary">Beacon Leadership Institute</span>
                             </div>
                             <p className="text-sm leading-relaxed text-slate-500">Forming leaders with spiritual depth and practical clarity across ministry, business, education, and public service.</p>

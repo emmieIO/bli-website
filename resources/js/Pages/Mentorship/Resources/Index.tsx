@@ -2,38 +2,9 @@ import { Head, Link, useForm } from '@inertiajs/react';
 import DashboardLayout from '@/Layouts/DashboardLayout';
 import { usePage } from '@inertiajs/react';
 import { FormEventHandler, useState } from 'react';
+import type { MentorshipResourcesProps } from '@/types/mentorship';
 
-interface MentorshipRequest {
-  id: number;
-  student: {
-    name: string;
-    email: string;
-  };
-  instructor: {
-    name: string;
-    email: string;
-  };
-}
-
-interface Resource {
-  id: number;
-  file_name: string;
-  file_type: string | null;
-  file_size: number | null;
-  description: string | null;
-  category: string;
-  created_at: string;
-  uploader: {
-    name: string;
-  };
-}
-
-interface Props {
-  mentorshipRequest: MentorshipRequest;
-  resources: Resource[];
-}
-
-export default function Index({ mentorshipRequest, resources }: Props) {
+export default function Index({ mentorshipRequest, resources }: MentorshipResourcesProps) {
   const { sideLinks } = usePage().props as any;
   const [showUploadModal, setShowUploadModal] = useState(false);
 

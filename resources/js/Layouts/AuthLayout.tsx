@@ -27,9 +27,9 @@ export default function AuthLayout({ title, description, wide, children }: AuthL
                     <div className="relative z-10">
                         <Link href={route('homepage')} className="flex items-center gap-3">
                             <img
-                                src="/assets/img/logo.jpg"
+                                src="/assets/img/bli-mark.png"
                                 alt="BLI"
-                                className="h-12 w-12 rounded-xl object-cover ring-1 ring-white/15"
+                                className="h-12 w-12 rounded-md bg-white object-contain ring-1 ring-white/15"
                             />
                             <span className="text-sm font-semibold tracking-tight text-white">Beacon Leadership Institute</span>
                         </Link>

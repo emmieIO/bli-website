@@ -8,7 +8,7 @@ interface Event {
     slug: string;
     title: string;
     theme: string;
-    program_cover: string;
+    program_cover: string | null;
     start_date: string;
     end_date: string;
     mode?: 'online' | 'offline' | 'hybrid';
@@ -40,7 +40,7 @@ const segmentBadgeStyles: Record<Event['public_segment'], string> = {
 };
 
 export default function EventsIndex({ events, searchQuery: initialSearchQuery = '' }: EventsIndexProps) {
-    const [searchQuery, setSearchQuery] = useState(initialSearchQuery);
+    const [searchQuery, setSearchQuery] = useState(initialSearchQuery ?? '');
     const [filterStatus, setFilterStatus] = useState('');
     const [isSearching, setIsSearching] = useState(false);
 
@@ -136,10 +136,10 @@ export default function EventsIndex({ events, searchQuery: initialSearchQuery = 
                                     className="group flex flex-col overflow-hidden rounded-lg border border-slate-200 bg-white transition hover:-translate-y-1 hover:border-slate-300 hover:shadow-sm">
                                     <div className="relative h-48 overflow-hidden bg-slate-100">
                                         <img
-                                                        src={`/storage/${event.program_cover}`}
+                                                        src={event.program_cover ? `/storage/${event.program_cover}` : '/assets/img/banner.png'}
                                                         alt={event.title}
                                                         className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
-                                                        onError={(e) => { (e.target as HTMLImageElement).src = 'https://placehold.co/600x400?text=Cover'; }}
+                                                        onError={(e) => { (e.target as HTMLImageElement).src = '/assets/img/banner.png'; }}
                                                     />
                                                     <div className="absolute left-3 top-3">
                                                         <span className={`inline-flex rounded-md px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider ${segmentBadgeStyles[event.public_segment]}`}>

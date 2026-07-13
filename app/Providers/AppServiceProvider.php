@@ -3,15 +3,17 @@
 namespace App\Providers;
 
 use App\Contracts\ProgramRepositoryInterface;
+use App\Contracts\Repositories\MentorshipRepositoryInterface;
 use App\Contracts\Services\PaymentGatewayInterface;
+use App\Repositories\MentorshipRepository;
 use App\Repositories\ProgramRepository;
 use App\Services\Payment\PaystackService;
-use Illuminate\Support\Composer;
+use App\Support\PlatformModuleRegistry;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
-use Inertia\Inertia;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -22,8 +24,8 @@ class AppServiceProvider extends ServiceProvider
     {
         $this->app->bind(ProgramRepositoryInterface::class, ProgramRepository::class);
         $this->app->bind(
-            \App\Contracts\Repositories\MentorshipRepositoryInterface::class,
-            \App\Repositories\MentorshipRepository::class
+            MentorshipRepositoryInterface::class,
+            MentorshipRepository::class
         );
         $this->app->bind(PaymentGatewayInterface::class, PaystackService::class);
     }
@@ -34,16 +36,12 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         View::composer('components.sidebar', function ($view) {
-            $sideLinks = config('sidebar.links');
-            $view->with('sideLinks', $sideLinks);
+            $view->with('sideLinks', app(PlatformModuleRegistry::class)->sideLinks(Auth::user()));
         });
+
         Schema::defaultStringLength(191);
         if (config('app.env') === 'production') {
             URL::forceScheme('https');
         }
-
-        Inertia::share([
-            'sideLinks' => fn () => config('sidebar.links'),
-        ]);
     }
 }

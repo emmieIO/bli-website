@@ -1,81 +1,43 @@
-import { useState, FormEvent, ChangeEvent } from 'react';
-import { Head, Link, router, usePage } from '@inertiajs/react';
+import type { ChangeEvent, FormEvent } from 'react';
+import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import DashboardLayout from '@/Layouts/DashboardLayout';
 import Input from '@/Components/Input';
 import Textarea from '@/Components/Textarea';
+import type { AddEventResourceProps, EventResourceFormData } from '@/types/events';
 
-interface Event {
-  id: number;
-  title: string;
-  slug: string;
-}
-
-interface FormData {
-  title: string;
-  type: 'file' | 'link' | '';
-  external_link: string;
-  description: string;
-  is_downloadable: boolean;
-}
-
-interface AddResourceProps {
-  event: Event;
-}
-
-export default function AddResource({ event }: AddResourceProps) {
-  const { sideLinks, errors } = usePage().props as any;
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [formData, setFormData] = useState<FormData>({
+export default function AddResource({ event }: AddEventResourceProps) {
+  const { sideLinks } = usePage().props as any;
+  const { data, setData, post, processing, errors } = useForm<EventResourceFormData>({
     title: '',
     type: '',
     external_link: '',
     description: '',
     is_downloadable: false,
+    file_path: null,
   });
-  const [file, setFile] = useState<File | null>(null);
 
   const handleInputChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
 
     if (type === 'checkbox') {
       const checked = (e.target as HTMLInputElement).checked;
-      setFormData(prev => ({ ...prev, [name]: checked }));
+      setData(name as keyof EventResourceFormData, checked as never);
     } else {
-      setFormData(prev => ({ ...prev, [name]: value }));
+      setData(name as keyof EventResourceFormData, value as never);
     }
   };
 
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
-      setFile(e.target.files[0]);
+      setData('file_path', e.target.files[0]);
     }
   };
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
-    setIsSubmitting(true);
-
-    const data = new FormData();
-
-    // Append all form fields
-    Object.entries(formData).forEach(([key, value]) => {
-      if (typeof value === 'boolean') {
-        if (value) data.append(key, '1');
-      } else if (value !== '') {
-        data.append(key, value);
-      }
-    });
-
-    // Append file if selected
-    if (file) {
-      data.append('file_path', file);
-    }
-
-    router.post(route('admin.events.resources.store', event.slug), data, {
+    post(route('admin.events.resources.store', event.slug), {
       preserveScroll: true,
-      onFinish: () => {
-        setIsSubmitting(false);
-      },
+      forceFormData: true,
     });
   };
 
@@ -109,7 +71,7 @@ export default function AddResource({ event }: AddResourceProps) {
             <Input
               label="Title"
               name="title"
-              value={formData.title}
+              value={data.title}
               onChange={handleInputChange}
               error={errors?.title}
               icon="file-alt"
@@ -128,7 +90,7 @@ export default function AddResource({ event }: AddResourceProps) {
                 <select
                   id="type"
                   name="type"
-                  value={formData.type}
+                  value={data.type}
                   onChange={handleInputChange}
                   required
                   className={`block w-full pl-10 pr-10 py-3 border rounded-lg shadow-sm focus:ring-2 focus:outline-none text-sm bg-slate-50 focus:bg-white transition-all ${
@@ -148,9 +110,9 @@ export default function AddResource({ event }: AddResourceProps) {
           </div>
 
           {/* Conditional Input Based on Type */}
-          {formData.type && (
-            <div className="border-2 border-dashed rounded-lg p-6 transition-all duration-300" style={{ borderColor: formData.type === 'file' ? '#002147' : '#00a651' }}>
-              {formData.type === 'link' ? (
+          {data.type && (
+            <div className="border-2 border-dashed rounded-lg p-6 transition-all duration-300" style={{ borderColor: data.type === 'file' ? '#002147' : '#00a651' }}>
+              {data.type === 'link' ? (
                 <div className="space-y-3">
                   <div className="flex items-center gap-2 mb-4">
                     <div className="w-10 h-10 rounded-lg flex items-center justify-center" style={{ backgroundColor: '#e6f7ed' }}>
@@ -165,7 +127,7 @@ export default function AddResource({ event }: AddResourceProps) {
                     label="Resource URL"
                     name="external_link"
                     type="url"
-                    value={formData.external_link}
+                    value={data.external_link}
                     onChange={handleInputChange}
                     error={errors?.external_link}
                     icon="link"
@@ -202,7 +164,7 @@ export default function AddResource({ event }: AddResourceProps) {
                         name="file_path"
                         type="file"
                         onChange={handleFileChange}
-                        required={formData.type === 'file'}
+                        required={data.type === 'file'}
                         accept=".jpeg,.jpg,.png,.gif,.svg,.pdf,.mp4,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.zip"
                         className={`block w-full text-sm text-slate-900 bg-white rounded-lg border-2 border-dashed focus:ring-2 focus:outline-none p-4
                           file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold
@@ -211,11 +173,11 @@ export default function AddResource({ event }: AddResourceProps) {
                           }`}
                         style={{ '--tw-ring-color': '#002147' } as any}
                       />
-                      {file && (
+                      {data.file_path && (
                         <div className="mt-3 flex items-center gap-2 text-sm text-slate-700 bg-slate-50 p-3 rounded-lg">
                           <i className="fas fa-file text-primary"></i>
-                          <span className="font-medium">{file.name}</span>
-                          <span className="text-slate-500">({(file.size / 1024).toFixed(2)} KB)</span>
+                          <span className="font-medium">{data.file_path.name}</span>
+                          <span className="text-slate-500">({(data.file_path.size / 1024).toFixed(2)} KB)</span>
                         </div>
                       )}
                     </div>
@@ -238,7 +200,7 @@ export default function AddResource({ event }: AddResourceProps) {
           )}
 
           {/* Show message when no type selected */}
-          {!formData.type && (
+          {!data.type && (
             <div className="bg-slate-50 border-2 border-dashed border-slate-300 rounded-lg p-8 text-center">
               <i className="fas fa-hand-pointer text-4xl text-gray-400 mb-3"></i>
               <p className="text-slate-500">
@@ -251,7 +213,7 @@ export default function AddResource({ event }: AddResourceProps) {
           <Textarea
             label="Description"
             name="description"
-            value={formData.description}
+            value={data.description}
             onChange={handleInputChange}
             error={errors?.description}
             placeholder="Brief description about this resource..."
@@ -259,14 +221,14 @@ export default function AddResource({ event }: AddResourceProps) {
           />
 
           {/* Downloadable Option */}
-          <div className="bg-linear-to-r from-blue-50 to-green-50 rounded-lg p-6 border-2 transition-all duration-300" style={{ borderColor: formData.is_downloadable ? '#00a651' : '#e5e7eb' }}>
+          <div className="bg-linear-to-r from-blue-50 to-green-50 rounded-lg p-6 border-2 transition-all duration-300" style={{ borderColor: data.is_downloadable ? '#00a651' : '#e5e7eb' }}>
             <div className="flex items-start gap-4">
               <div className="flex items-center h-5">
                 <input
                   id="is_downloadable"
                   name="is_downloadable"
                   type="checkbox"
-                  checked={formData.is_downloadable}
+                  checked={data.is_downloadable}
                   onChange={handleInputChange}
                   className="h-5 w-5 rounded-lg border-2 border-slate-300 transition-all duration-200 cursor-pointer focus:ring-2 focus:ring-offset-2"
                   style={{
@@ -277,11 +239,11 @@ export default function AddResource({ event }: AddResourceProps) {
               </div>
               <div className="flex-1">
                 <label htmlFor="is_downloadable" className="block text-sm font-semibold text-slate-900 mb-1 cursor-pointer">
-                  <i className="fas fa-download mr-2" style={{ color: formData.is_downloadable ? '#00a651' : '#6b7280' }}></i>
+                  <i className="fas fa-download mr-2" style={{ color: data.is_downloadable ? '#00a651' : '#6b7280' }}></i>
                   Make Resource Downloadable for Attendees
                 </label>
                 <p className="text-xs text-slate-500 leading-relaxed">
-                  {formData.is_downloadable ? (
+                  {data.is_downloadable ? (
                     <span className="text-green-700 font-medium">
                       ✓ This resource will be available for download on the public event page
                     </span>
@@ -299,11 +261,11 @@ export default function AddResource({ event }: AddResourceProps) {
           <div className="pt-6 border-t border-slate-200 mt-6 flex justify-end">
             <button
               type="submit"
-              disabled={isSubmitting}
+              disabled={processing}
               className="inline-flex items-center gap-3 px-6 py-3 bg-primary text-white text-sm font-semibold rounded-lg hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 transition-all duration-200 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
             >
               <i className="fas fa-save w-5 h-5"></i>
-              {isSubmitting ? 'Saving...' : 'Save Resource'}
+              {processing ? 'Saving...' : 'Save Resource'}
             </button>
           </div>
         </form>

@@ -1,7 +1,6 @@
 import { useState, FormEvent, ChangeEvent } from 'react';
-import { Head, Link, router, usePage } from '@inertiajs/react';
+import { Head, router, usePage } from '@inertiajs/react';
 import DashboardLayout from '@/Layouts/DashboardLayout';
-import Textarea from '@/Components/Textarea';
 
 interface User {
   id: number;

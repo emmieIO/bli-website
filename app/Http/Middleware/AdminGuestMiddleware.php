@@ -12,7 +12,7 @@ class AdminGuestMiddleware
     /**
      * Handle an incoming request.
      *
-     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
+     * @param  Closure(Request): (Response)  $next
      */
     public function handle(Request $request, Closure $next)
     {
@@ -23,13 +23,8 @@ class AdminGuestMiddleware
             $current = $request->fullUrl();
 
             // Avoid redirect loop
-            if ($previous && $previous !== $current && !str_contains($previous, '/login')) {
+            if ($previous && $previous !== $current && ! str_contains($previous, '/login')) {
                 return redirect()->to($previous);
-            }
-
-            // Redirect by role
-            if ($user->hasRole(['admin', 'super-admin'])) {
-                return redirect()->route('admin.dashboard');
             }
 
             return redirect()->route('user_dashboard');

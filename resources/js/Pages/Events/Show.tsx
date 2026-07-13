@@ -32,13 +32,14 @@ interface Event {
     title: string;
     theme: string;
     description: string;
-    program_cover: string;
+    program_cover: string | null;
     start_date: string;
     end_date: string;
     mode?: 'online' | 'offline' | 'hybrid';
     physical_address?: string;
     location?: string;
     entry_fee: number;
+    require_sign_up: boolean;
     slots_remaining?: number | null;
     is_allowing_application: boolean;
     speakers?: Speaker[];
@@ -81,6 +82,7 @@ interface EventShowProps {
         method: 'get' | 'post';
         requires_auth: boolean;
         requires_confirmation: boolean;
+        requires_email?: boolean;
     };
 }
 
@@ -88,6 +90,8 @@ export default function EventShow({ event, auth, primary_cta }: EventShowProps) 
     const [showModal, setShowModal] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [countdown, setCountdown] = useState('');
+    const [guestEmail, setGuestEmail] = useState('');
+    const [guestName, setGuestName] = useState('');
 
     const now = new Date();
     const startDate = new Date(event.start_date);
@@ -150,10 +154,18 @@ export default function EventShow({ event, auth, primary_cta }: EventShowProps) 
         e.preventDefault();
         setIsSubmitting(true);
 
-        router.post(route('events.join', event.slug), {}, {
+        router.post(route('events.join', event.slug), primary_cta.requires_email && !auth?.user ? {
+            email: guestEmail,
+            name: guestName || undefined,
+        } : {}, {
+            preserveScroll: true,
+            onSuccess: () => {
+                setGuestEmail('');
+                setGuestName('');
+                setShowModal(false);
+            },
             onFinish: () => {
                 setIsSubmitting(false);
-                setShowModal(false);
             },
         });
     };
@@ -167,6 +179,7 @@ export default function EventShow({ event, auth, primary_cta }: EventShowProps) 
     const isFreeRegistrationFlow = primary_cta.key === 'register_now';
     const isWaitlistFlow = primary_cta.key === 'join_waitlist';
     const isPaidCheckoutFlow = primary_cta.key === 'buy_ticket';
+    const requiresGuestEmail = Boolean(primary_cta.requires_email && !auth?.user);
     const showPrimaryCta = primary_cta.kind === 'action' && !(revokeCount === 4 && (primary_cta.key === 'register_now' || primary_cta.key === 'join_waitlist'));
     const ctaTone = primary_cta.key === 'view_attendee_workspace'
         ? 'border-emerald-200 bg-emerald-50'
@@ -238,11 +251,11 @@ export default function EventShow({ event, auth, primary_cta }: EventShowProps) 
                             <section className="relative isolate overflow-hidden rounded-2xl border border-slate-200 bg-slate-900 text-white shadow-sm">
                                 <div className="absolute inset-0">
                                     <img
-                                        src={`/storage/${event.program_cover}`}
+                                        src={event.program_cover ? `/storage/${event.program_cover}` : '/assets/img/banner.png'}
                                         alt={event.title}
                                         className="h-full w-full object-cover"
                                         onError={(e) => {
-                                            (e.target as HTMLImageElement).src = 'https://placehold.co/1200x900?text=Cover+Image+Missing';
+                                            (e.target as HTMLImageElement).src = '/assets/img/banner.png';
                                         }}
                                     />
                                     <div className="absolute inset-0 bg-slate-900/68"></div>
@@ -758,9 +771,9 @@ export default function EventShow({ event, auth, primary_cta }: EventShowProps) 
                                 </div>
 
                                 {/* Modal Title */}
-                                <h3 className="mb-2 text-xl font-bold text-white">{isWaitlistFlow ? 'Join Event Waitlist' : 'Confirm Free Registration'}</h3>
+                                <h3 className="mb-2 text-xl font-bold text-white">{isWaitlistFlow ? 'Join Event Waitlist' : requiresGuestEmail ? 'Register With Email' : 'Confirm Free Registration'}</h3>
                                 <p className="text-sm text-white/90">
-                                    {isWaitlistFlow ? 'Stay in line for the next available seat' : 'Reserve your seat and move directly into the attendee journey'}
+                                    {isWaitlistFlow ? 'Stay in line for the next available seat' : requiresGuestEmail ? 'No account needed. We will use your email for reminders.' : 'Reserve your seat and move directly into the attendee journey'}
                                 </p>
                             </div>
 
@@ -777,11 +790,45 @@ export default function EventShow({ event, auth, primary_cta }: EventShowProps) 
                                     <p className="text-slate-600">
                                         {isWaitlistFlow
                                             ? 'We will notify you as soon as a confirmed seat becomes available.'
-                                            : 'This is a free event. Once confirmed, your attendee workspace becomes the home for access instructions, resources, and updates.'}
+                                            : requiresGuestEmail
+                                                ? 'This is a free event. Add your email and we will include you in event reminders.'
+                                                : 'This is a free event. Once confirmed, your attendee workspace becomes the home for access instructions, resources, and updates.'}
                                     </p>
                                 </div>
 
                                 <form onSubmit={handleRegistration}>
+                                    {requiresGuestEmail && (
+                                        <div className="mb-6 space-y-4 text-left">
+                                            <div>
+                                                <label htmlFor="guest_name" className="mb-1 block text-sm font-medium text-slate-700">
+                                                    Name <span className="text-slate-400">(optional)</span>
+                                                </label>
+                                                <input
+                                                    id="guest_name"
+                                                    type="text"
+                                                    value={guestName}
+                                                    onChange={(e) => setGuestName(e.target.value)}
+                                                    className="h-11 w-full rounded-lg border border-slate-300 px-3 text-sm text-slate-900 outline-none transition focus:border-primary-300 focus:ring-2 focus:ring-primary-500/10"
+                                                    placeholder="Your name"
+                                                />
+                                            </div>
+                                            <div>
+                                                <label htmlFor="guest_email" className="mb-1 block text-sm font-medium text-slate-700">
+                                                    Email address <span className="text-red-500">*</span>
+                                                </label>
+                                                <input
+                                                    id="guest_email"
+                                                    type="email"
+                                                    required
+                                                    value={guestEmail}
+                                                    onChange={(e) => setGuestEmail(e.target.value)}
+                                                    className="h-11 w-full rounded-lg border border-slate-300 px-3 text-sm text-slate-900 outline-none transition focus:border-primary-300 focus:ring-2 focus:ring-primary-500/10"
+                                                    placeholder="you@example.com"
+                                                />
+                                                <p className="mt-1 text-xs text-slate-500">We will use this only for this event registration and reminders.</p>
+                                            </div>
+                                        </div>
+                                    )}
                                     <div className="flex flex-col justify-center gap-4 sm:flex-row">
                                         <button
                                             type="submit"
@@ -801,12 +848,12 @@ export default function EventShow({ event, auth, primary_cta }: EventShowProps) 
                                                         ></circle>
                                                         <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
                                                     </svg>
-                                                    {isWaitlistFlow ? 'Joining waitlist...' : 'Confirming registration...'}
+                                                    {isWaitlistFlow ? 'Joining waitlist...' : requiresGuestEmail ? 'Adding email...' : 'Confirming registration...'}
                                                 </>
                                             ) : (
                                                 <>
                                                     <i className={`fas ${isWaitlistFlow ? 'fa-clock' : 'fa-check'}`}></i>
-                                                    {isWaitlistFlow ? 'Yes, Join Waitlist' : 'Yes, Confirm Registration'}
+                                                    {isWaitlistFlow ? 'Yes, Join Waitlist' : requiresGuestEmail ? 'Register Email' : 'Yes, Confirm Registration'}
                                                 </>
                                             )}
                                         </button>

@@ -5,6 +5,7 @@ namespace App\Services\Event;
 use App\Enums\EventRegistrationStatus;
 use App\Events\EventRegisterEvent;
 use App\Models\Event;
+use App\Models\EventGuestAttendee;
 use App\Models\EventTransitionAudit;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
@@ -44,6 +45,51 @@ class EventRegistrationService
             : EventRegistrationStatus::REGISTERED;
 
         return $this->setRegistrationStatus($event, $userId, $targetStatus);
+    }
+
+    public function registerGuestOrWaitlist(Event $event, string $email, ?string $name = null): EventRegistrationStatus|false
+    {
+        $email = mb_strtolower(trim($email));
+
+        if ($email === '' || ! filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            return false;
+        }
+
+        $targetStatus = $this->participantStateService->slotsRemaining($event) === 'Full'
+            ? EventRegistrationStatus::WAITLISTED
+            : EventRegistrationStatus::REGISTERED;
+
+        $existing = $event->guestAttendees()
+            ->where('email', $email)
+            ->first();
+
+        if ($existing && $existing->status === $targetStatus) {
+            return $targetStatus;
+        }
+
+        if ($existing) {
+            $currentStatus = $existing->status;
+
+            if (! $currentStatus?->canTransitionTo($targetStatus)) {
+                return false;
+            }
+
+            $existing->update([
+                'name' => $name ?: $existing->name,
+                'status' => $targetStatus->value,
+            ]);
+
+            return $targetStatus;
+        }
+
+        EventGuestAttendee::query()->create([
+            'event_id' => $event->id,
+            'email' => $email,
+            'name' => $name,
+            'status' => $targetStatus->value,
+        ]);
+
+        return $targetStatus;
     }
 
     public function getEventsImAttending()

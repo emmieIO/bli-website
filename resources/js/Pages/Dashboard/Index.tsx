@@ -1,11 +1,14 @@
 import { Head, Link, usePage } from '@inertiajs/react';
 import DashboardLayout from '@/Layouts/DashboardLayout';
+import type { PlatformModule } from '@/types';
 import {
     ArrowRight,
+    BookOpen,
     CalendarDays,
     CheckCircle2,
     Clock3,
     CreditCard,
+    Layers3,
     MessageSquareText,
     Send,
     Sparkles,
@@ -42,13 +45,16 @@ interface DashboardProps {
     };
     adminStats?: AdminStats | null;
     instructorStats?: InstructorStats | null;
+    platformModules?: PlatformModule[];
 }
 
-export default function Dashboard({ stats, adminStats, instructorStats }: DashboardProps) {
+export default function Dashboard({ stats, adminStats, instructorStats, platformModules = [] }: DashboardProps) {
     const { auth, sideLinks } = usePage().props as any;
     const user = auth?.user;
     const isAdmin = user?.roles?.some((role: string) => ['admin', 'super-admin'].includes(role));
     const isInstructor = user?.roles?.includes('instructor');
+    const activeModules = platformModules.filter((module) => module.status !== 'planned');
+    const lmsModule = platformModules.find((module) => module.key === 'lms');
 
     return (
         <DashboardLayout sideLinks={sideLinks}>
@@ -98,6 +104,8 @@ export default function Dashboard({ stats, adminStats, instructorStats }: Dashbo
                 ) : (
                     <StudentDashboard stats={stats} />
                 )}
+
+                <PlatformFlow modules={activeModules} lmsModule={lmsModule} />
             </div>
         </DashboardLayout>
     );
@@ -223,6 +231,106 @@ function StudentDashboard({ stats }: DashboardProps) {
                 </div>
             </section>
         </>
+    );
+}
+
+function PlatformFlow({ modules, lmsModule }: { modules: PlatformModule[]; lmsModule?: PlatformModule }) {
+    const orderedStages = ['Acquire', 'Engage', 'Learn', 'Deepen', 'Transact', 'Support', 'Govern', 'Operate'];
+    const visibleModules = [...modules].sort((a, b) => orderedStages.indexOf(a.stage) - orderedStages.indexOf(b.stage));
+
+    return (
+        <section className="space-y-4">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+                <div>
+                    <div className="inline-flex items-center gap-1.5 rounded-md bg-primary-50 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wider text-primary">
+                        <Layers3 size={12} />
+                        Platform flow
+                    </div>
+                    <h2 className="mt-3 text-lg font-semibold tracking-tight text-slate-900">A predictable path through the application</h2>
+                    <p className="mt-1 max-w-2xl text-sm leading-relaxed text-slate-500">
+                        Every feature should sit inside this operating model: acquire people through events, engage them through workspaces, deepen formation through mentorship, transact cleanly, support issues, and govern access from one place.
+                    </p>
+                </div>
+            </div>
+
+            <div className="grid gap-4 lg:grid-cols-[1fr_360px]">
+                <div className="grid gap-3 sm:grid-cols-2">
+                    {visibleModules.map((module) => (
+                        <ModuleCard key={module.key} module={module} />
+                    ))}
+                </div>
+
+                {lmsModule && (
+                    <article className="rounded-lg border border-l-[3px] border-l-lime-500 border-slate-200 bg-white p-5">
+                        <div className="flex items-start gap-3">
+                            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-lime-50 text-lime-600">
+                                <BookOpen size={18} />
+                            </span>
+                            <div>
+                                <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-lime-600">Planned module</p>
+                                <h3 className="mt-1 text-base font-semibold tracking-tight text-slate-900">{lmsModule.title}</h3>
+                                <p className="mt-2 text-[13px] leading-relaxed text-slate-500">{lmsModule.purpose}</p>
+                            </div>
+                        </div>
+
+                        {lmsModule.lms_bridge && (
+                            <p className="mt-4 rounded-lg bg-slate-50 p-3 text-[13px] leading-relaxed text-slate-600">{lmsModule.lms_bridge}</p>
+                        )}
+
+                        <div className="mt-4 space-y-3">
+                            <RoadmapList title="First permissions" items={lmsModule.planned_permissions || []} />
+                            <RoadmapList title="Route contracts" items={lmsModule.planned_routes || []} />
+                        </div>
+                    </article>
+                )}
+            </div>
+        </section>
+    );
+}
+
+function ModuleCard({ module }: { module: PlatformModule }) {
+    return (
+        <article className="rounded-lg border border-slate-200 bg-white p-4 transition hover:border-slate-300 hover:shadow-sm">
+            <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                    <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-400">{module.stage}</p>
+                    <h3 className="mt-1 text-sm font-semibold tracking-tight text-slate-900">{module.title}</h3>
+                </div>
+                <span className="rounded-md bg-lime-50 px-2 py-1 text-[11px] font-semibold text-lime-700">{module.status}</span>
+            </div>
+            <p className="mt-2 text-[13px] leading-relaxed text-slate-500">{module.purpose}</p>
+            <p className="mt-3 text-[11px] font-medium uppercase tracking-wider text-slate-400">{module.audience}</p>
+            <div className="mt-3 flex flex-wrap gap-1.5">
+                {module.actions.slice(0, 3).map((action) => (
+                    <span key={action} className="rounded-md bg-slate-100 px-2 py-1 text-[11px] font-medium text-slate-600">
+                        {action}
+                    </span>
+                ))}
+            </div>
+            {module.entry_url && (
+                <Link href={module.entry_url} className="mt-3 inline-flex items-center gap-1.5 text-[13px] font-medium text-primary">
+                    Open module
+                    <ArrowRight size={14} />
+                </Link>
+            )}
+        </article>
+    );
+}
+
+function RoadmapList({ title, items }: { title: string; items: string[] }) {
+    if (items.length === 0) return null;
+
+    return (
+        <div>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-400">{title}</p>
+            <div className="mt-2 flex flex-wrap gap-1.5">
+                {items.map((item) => (
+                    <span key={item} className="rounded-md bg-slate-100 px-2 py-1 font-mono text-[11px] text-slate-600">
+                        {item}
+                    </span>
+                ))}
+            </div>
+        </div>
     );
 }
 

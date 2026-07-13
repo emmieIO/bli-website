@@ -123,9 +123,25 @@ class SpeakersController extends Controller
     {
         $this->authorize('manageSpeakers', $event);
 
-        $speakers = $this->speakerService->fetchSpeakers();
-        $assignedSpeakerIds = $event->speakers()->pluck('speakers.id')->toArray();
-        return \Inertia\Inertia::render('Admin/Speakers/AssignSpeaker', compact('event', 'speakers', 'assignedSpeakerIds'));
+        $event->load([
+            'speakers.user',
+            'speakerInvites' => fn ($query) => $query->latest(),
+            'speakerInvites.speaker.user',
+            'speakerApplications' => fn ($query) => $query->latest(),
+            'speakerApplications.user',
+            'speakerApplications.speaker.user',
+        ]);
+
+        // Confirmed speakers are excluded because inviting them again is never a useful action.
+        $confirmedIds = $event->speakers->pluck('id');
+        $speakers = Speaker::query()
+            ->where('status', 'active')
+            ->whereNotIn('id', $confirmedIds)
+            ->with('user')
+            ->orderByDesc('created_at')
+            ->get();
+
+        return \Inertia\Inertia::render('Admin/Speakers/AssignSpeaker', compact('event', 'speakers'));
     }
 
 }

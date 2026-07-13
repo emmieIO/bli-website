@@ -24,7 +24,7 @@ interface Event {
     slug: string;
     title: string;
     theme?: string;
-    program_cover: string;
+    program_cover: string | null;
     start_date: string;
     end_date: string;
     mode?: 'online' | 'offline' | 'hybrid';
@@ -238,10 +238,10 @@ export default function Index({ events, stats }: IndexProps) {
                                 <article key={event.id} className="group flex flex-col overflow-hidden rounded-lg border border-white/10 bg-white/[0.04] transition hover:bg-white/[0.08] hover:-translate-y-1 hover:shadow-xl">
                                     <div className="relative h-48 overflow-hidden">
                                         <img
-                                            src={`/storage/${event.program_cover}`}
+                                            src={event.program_cover ? `/storage/${event.program_cover}` : '/assets/img/banner.png'}
                                             alt={event.title}
                                             className="h-full w-full object-cover transition duration-700 group-hover:scale-105"
-                                            onError={(e) => { (e.target as HTMLImageElement).src = 'https://placehold.co/800x500?text=Event'; }}
+                                            onError={(e) => { (e.target as HTMLImageElement).src = '/assets/img/banner.png'; }}
                                         />
                                         <div className="absolute inset-0 bg-gradient-to-t from-primary/70 to-transparent" />
                                         <div className="absolute left-3 top-3 inline-flex items-center gap-1.5 rounded-md bg-accent/30 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.16em] text-white backdrop-blur-sm">

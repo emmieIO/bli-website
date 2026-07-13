@@ -27,7 +27,7 @@ interface CheckoutProps {
     paystackPublicKey: string;
 }
 
-export default function Checkout({ event, paystackPublicKey }: CheckoutProps) {
+export default function Checkout({ event }: CheckoutProps) {
     const { auth } = usePage().props as { auth?: { user?: AuthUser } };
     const user = auth?.user;
 

@@ -1,60 +1,9 @@
 import { Head, Link } from '@inertiajs/react';
 import DashboardLayout from '@/Layouts/DashboardLayout';
 import { usePage } from '@inertiajs/react';
+import type { InstructorMentorshipIndexProps } from '@/types/mentorship';
 
-interface MentorshipRequest {
-  id: number;
-  student_id: number;
-  instructor_id: number;
-  message: string;
-  goals: string | null;
-  duration_type: string;
-  duration_value: number;
-  status: string;
-  instructor_response: string | null;
-  admin_response: string | null;
-  rejection_reason: string | null;
-  created_at: string;
-  student: {
-    id: number;
-    name: string;
-    email: string;
-  };
-  status_label: string;
-  status_color: string;
-  formatted_duration: string;
-}
-
-interface Statistics {
-  total: number;
-  pending: number;
-  instructor_approved: number;
-  admin_approved: number;
-  active: number;
-  rejected: number;
-}
-
-interface ExpiringWarning {
-  id: number;
-  student: string;
-  instructor: string;
-  days_remaining: number;
-  expiration_date: string;
-  expiration_status: {
-    status: string;
-    message: string;
-    color: string;
-  };
-}
-
-interface Props {
-  requests: MentorshipRequest[];
-  pending: MentorshipRequest[];
-  statistics: Statistics;
-  expiringWarnings: ExpiringWarning[];
-}
-
-export default function Index({ requests, pending, statistics, expiringWarnings }: Props) {
+export default function Index({ requests, statistics, expiringWarnings }: InstructorMentorshipIndexProps) {
   const { sideLinks } = usePage().props as any;
 
   const getStatusBadgeClass = (color: string) => {

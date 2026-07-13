@@ -3,8 +3,8 @@
 namespace Database\Seeders;
 
 use App\Enums\Permissions\EventPermissionsEnum;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 
 class RoleAndPermissionsSeeder extends Seeder
@@ -76,12 +76,14 @@ class RoleAndPermissionsSeeder extends Seeder
                 'track-applications',
                 'view-own-transaction-history',
                 'view-own-invitations',
+                'mentorship-view-own',
                 ...$eventUserPermissions,
             ],
             'instructor' => [
                 'track-applications',
                 'view-own-transaction-history',
                 'view-own-invitations',
+                'mentorship-view-instructor',
                 ...$eventUserPermissions,
             ],
             'speaker' => [
@@ -91,22 +93,18 @@ class RoleAndPermissionsSeeder extends Seeder
             ],
         ];
 
-
-
         // Create permissions
         $allPermissions = collect($rolesPermissions)->flatten()->unique();
         foreach ($allPermissions as $permission) {
-            \Spatie\Permission\Models\Permission::firstOrCreate([
+            Permission::firstOrCreate([
                 'name' => $permission,
-                'guard_name' => 'web'
+                'guard_name' => 'web',
             ]);
         }
 
-
-
         foreach ($rolesPermissions as $role => $permissions) {
             $roleModel = Role::firstOrCreate([
-                "name" => $role
+                'name' => $role,
             ]);
             $roleModel->syncPermissions($permissions);
         }

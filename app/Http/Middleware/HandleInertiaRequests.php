@@ -2,8 +2,11 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\Setting;
+use App\Support\PlatformModuleRegistry;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
+use Tighten\Ziggy\Ziggy;
 
 class HandleInertiaRequests extends Middleware
 {
@@ -11,6 +14,7 @@ class HandleInertiaRequests extends Middleware
      * The root template that's loaded on the first page visit.
      *
      * @see https://inertiajs.com/server-side-setup#root-template
+     *
      * @var string
      */
     protected $rootView = 'app';
@@ -19,8 +23,6 @@ class HandleInertiaRequests extends Middleware
      * Determines the current asset version.
      *
      * @see https://inertiajs.com/asset-versioning
-     * @param  \Illuminate\Http\Request  $request
-     * @return string|null
      */
     public function version(Request $request): ?string
     {
@@ -31,8 +33,6 @@ class HandleInertiaRequests extends Middleware
      * Defines the props that are shared by default.
      *
      * @see https://inertiajs.com/shared-data
-     * @param  \Illuminate\Http\Request  $request
-     * @return array
      */
     public function share(Request $request): array
     {
@@ -52,14 +52,15 @@ class HandleInertiaRequests extends Middleware
                 'type' => fn () => $request->session()->get('type'),
             ],
             'contact' => [
-                'email' => \App\Models\Setting::get('contact_email', env('CONTACT_EMAIL', 'info@beaconleadership.org')),
-                'phone' => \App\Models\Setting::get('contact_phone', env('CONTACT_PHONE', '+234-706-442-5639')),
-                'address' => \App\Models\Setting::get('contact_address', env('CONTACT_ADDRESS', '123 Beacon Avenue, Lagos, Nigeria')),
+                'email' => Setting::get('contact_email', env('CONTACT_EMAIL', 'info@beaconleadership.org')),
+                'phone' => Setting::get('contact_phone', env('CONTACT_PHONE', '+234-706-442-5639')),
+                'address' => Setting::get('contact_address', env('CONTACT_ADDRESS', '123 Beacon Avenue, Lagos, Nigeria')),
             ],
-            'ziggy' => fn () => array_merge((new \Tighten\Ziggy\Ziggy)->toArray(), [
+            'ziggy' => fn () => array_merge((new Ziggy)->toArray(), [
                 'location' => $request->url(),
             ]),
-            'sideLinks' => config('sidebar.links'),
+            'sideLinks' => fn () => app(PlatformModuleRegistry::class)->sideLinks($request->user()),
+            'platformModules' => fn () => app(PlatformModuleRegistry::class)->visibleModules($request->user()),
         ]);
     }
 }

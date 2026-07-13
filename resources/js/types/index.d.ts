@@ -34,13 +34,49 @@ export interface Event {
     is_published: boolean;
     is_allowing_application: boolean;
     is_featured: boolean;
+    require_sign_up: boolean;
     entry_fee: string;
     metadata?: Record<string, any> | null;
     created_at: string;
     updated_at: string;
 }
 
+export interface SideLink {
+    section?: string;
+    title: string;
+    icon: string;
+    route?: string;
+    permission?: string | string[];
+    exclude_permission?: string | string[];
+    variant?: string;
+    children?: Array<{
+        title: string;
+        route: string;
+        permission?: string | string[];
+    }>;
+}
+
+export interface PlatformModule {
+    key: string;
+    title: string;
+    section: string;
+    icon: string;
+    status: 'active' | 'planned' | string;
+    stage: string;
+    audience: string;
+    purpose: string;
+    actions: string[];
+    entry_route?: string | null;
+    entry_url?: string | null;
+    lms_bridge?: string | null;
+    planned_permissions?: string[];
+    planned_routes?: string[];
+    can_access: boolean;
+}
+
 export interface PageProps {
+    // Inertia pages may add controller-specific props beyond this shared core.
+    [key: string]: unknown;
     auth: {
         user: User | null;
     };
@@ -53,6 +89,8 @@ export interface PageProps {
         query: Record<string, any>;
         [key: string]: any;
     };
+    sideLinks: SideLink[];
+    platformModules: PlatformModule[];
 }
 
 export type FlashMessage = {

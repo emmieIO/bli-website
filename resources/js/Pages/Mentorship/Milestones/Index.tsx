@@ -1,39 +1,10 @@
-import { Head, Link, useForm, router } from '@inertiajs/react';
+import { Head, useForm, router } from '@inertiajs/react';
 import DashboardLayout from '@/Layouts/DashboardLayout';
 import { usePage } from '@inertiajs/react';
 import { FormEventHandler, useState } from 'react';
+import type { MentorshipMilestonesProps } from '@/types/mentorship';
 
-interface MentorshipRequest {
-  id: number;
-  student: {
-    name: string;
-    email: string;
-  };
-  instructor: {
-    name: string;
-    email: string;
-  };
-}
-
-interface Milestone {
-  id: number;
-  title: string;
-  description: string | null;
-  due_date: string | null;
-  order: number;
-  completed_at: string | null;
-  completed_by: {
-    name: string;
-  } | null;
-  created_at: string;
-}
-
-interface Props {
-  mentorshipRequest: MentorshipRequest;
-  milestones: Milestone[];
-}
-
-export default function Index({ mentorshipRequest, milestones }: Props) {
+export default function Index({ mentorshipRequest, milestones }: MentorshipMilestonesProps) {
   const { sideLinks } = usePage().props as any;
   const [showCreateModal, setShowCreateModal] = useState(false);
 

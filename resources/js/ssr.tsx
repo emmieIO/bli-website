@@ -17,11 +17,11 @@ createServer((page) =>
                 import.meta.glob('./Pages/**/*.tsx')
             ),
         setup: ({ App, props }) => {
-            global.route = (name, params, absolute) =>
+            (globalThis as any).route = (name: string, params?: any, absolute?: boolean) =>
                 route(name, params, absolute, {
                     ...page.props.ziggy,
                     location: new URL(page.props.ziggy.location),
-                });
+                } as any);
 
             return <App {...props} />;
         },

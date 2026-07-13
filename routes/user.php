@@ -13,6 +13,8 @@ use App\Http\Controllers\UserDashBoard\ShowMyEventController;
 use App\Http\Controllers\UserDashBoard\ShowMyEventsController;
 use Illuminate\Support\Facades\Route;
 
+Route::post('/events/{slug}/join', JoinEventAction::class)->name('events.join');
+
 Route::middleware(['auth', 'verified'])->group(function () {
     // Main dashboard
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('user_dashboard');
@@ -34,7 +36,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // User's events management
     Route::get('/user/events', ShowMyEventsController::class)->name('user.events');
     Route::get('/user/events/{slug}', ShowMyEventController::class)->name('user.events.show');
-    Route::post('/events/{slug}/join', JoinEventAction::class)->name('events.join');
     Route::delete('/events/user/{slug}/revoke-rsvp', RevokeRsvpAction::class)->name('user.revoke.event');
 
     // Event utilities

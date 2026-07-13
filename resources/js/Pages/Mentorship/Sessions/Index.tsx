@@ -1,36 +1,9 @@
 import { Head, Link } from '@inertiajs/react';
 import DashboardLayout from '@/Layouts/DashboardLayout';
 import { usePage } from '@inertiajs/react';
+import type { MentorshipSessionsProps } from '@/types/mentorship';
 
-interface MentorshipRequest {
-  id: number;
-  student: {
-    name: string;
-    email: string;
-  };
-  instructor: {
-    name: string;
-    email: string;
-  };
-}
-
-interface Session {
-  id: number;
-  session_date: string;
-  duration: number;
-  notes: string | null;
-  topics_covered: string | null;
-  recording_link: string | null;
-  completed_at: string | null;
-  created_at: string;
-}
-
-interface Props {
-  mentorshipRequest: MentorshipRequest;
-  sessions: Session[];
-}
-
-export default function Index({ mentorshipRequest, sessions }: Props) {
+export default function Index({ mentorshipRequest, sessions }: MentorshipSessionsProps) {
   const { sideLinks } = usePage().props as any;
 
   return (

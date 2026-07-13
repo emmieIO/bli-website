@@ -21,6 +21,8 @@ class EventSpeakerInvitationService
     public function inviteSpeakerToEvent(Event $event, array $data): bool|string
     {
         $speaker = $this->speakerService->findOneSpeaker($data['speaker_id']);
+        $data['event_id'] = $event->id;
+        $data['email'] = $speaker->user?->email;
 
         if ($this->speakerService->speakerAlreadyInvited($event, $speaker)) {
             return 'already_invited';
@@ -37,7 +39,8 @@ class EventSpeakerInvitationService
         }
 
         try {
-            $data['expires_at'] = Carbon::now()->addDay();
+            $data['sent_at'] = Carbon::now();
+            $data['expires_at'] = Carbon::now()->addDays(7);
 
             DB::transaction(function () use ($data) {
                 $invitation = SpeakerInvite::create($data);

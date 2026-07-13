@@ -24,6 +24,7 @@ interface InstructorProfile {
   teaching_history: string;
   intro_video_url: string;
   status: string;
+  resume_path?: string | null;
 }
 
 interface FormData {

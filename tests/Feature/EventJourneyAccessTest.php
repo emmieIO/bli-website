@@ -9,6 +9,8 @@ use App\Models\Event;
 use App\Models\Speaker;
 use App\Models\SpeakerInvite;
 use App\Models\User;
+use Illuminate\Foundation\Http\Middleware\ValidateCsrfToken;
+use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Spatie\Permission\Models\Role;
 use Tests\TestCase;
@@ -22,8 +24,8 @@ class EventJourneyAccessTest extends TestCase
         parent::setUp();
 
         $this->withoutMiddleware([
-            \Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class,
-            \Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class,
+            VerifyCsrfToken::class,
+            ValidateCsrfToken::class,
         ]);
 
         Role::findOrCreate(UserRoles::SPEAKER->value, 'web');
@@ -186,6 +188,88 @@ class EventJourneyAccessTest extends TestCase
             'user_id' => $user->id,
             'status' => EventRegistrationStatus::WAITLISTED->value,
             'revoke_count' => 0,
+        ]);
+    }
+
+    public function test_guest_can_join_free_event_with_email_when_signup_is_not_required(): void
+    {
+        $event = $this->makeEvent([
+            'entry_fee' => 0,
+            'attendee_slots' => 5,
+            'require_sign_up' => false,
+        ]);
+
+        $response = $this
+            ->from(route('events.show', $event->slug))
+            ->post(route('events.join', $event->slug), [
+                'email' => 'Guest@Example.com',
+                'name' => 'Guest Attendee',
+            ]);
+
+        $response
+            ->assertRedirect(route('events.show', $event->slug))
+            ->assertSessionHas('message', 'Your email has been added to the attendee list. We will send event reminders to that address.');
+
+        $this->assertDatabaseHas('event_guest_attendees', [
+            'event_id' => $event->id,
+            'email' => 'guest@example.com',
+            'name' => 'Guest Attendee',
+            'status' => EventRegistrationStatus::REGISTERED->value,
+        ]);
+    }
+
+    public function test_guest_join_requires_login_when_event_requires_signup(): void
+    {
+        $event = $this->makeEvent([
+            'entry_fee' => 0,
+            'attendee_slots' => 5,
+            'require_sign_up' => true,
+        ]);
+
+        $response = $this
+            ->from(route('events.show', $event->slug))
+            ->post(route('events.join', $event->slug), [
+                'email' => 'guest@example.com',
+            ]);
+
+        $response
+            ->assertRedirect(route('login'))
+            ->assertSessionHas('message', 'Please sign in to register for this event.');
+
+        $this->assertDatabaseMissing('event_guest_attendees', [
+            'event_id' => $event->id,
+            'email' => 'guest@example.com',
+        ]);
+    }
+
+    public function test_guest_join_waitlists_when_free_event_is_full(): void
+    {
+        $registeredUser = User::factory()->create();
+        $event = $this->makeEvent([
+            'entry_fee' => 0,
+            'attendee_slots' => 1,
+            'require_sign_up' => false,
+        ]);
+
+        $event->attendees()->attach($registeredUser->id, [
+            'status' => EventRegistrationStatus::REGISTERED->value,
+            'revoke_count' => 0,
+        ]);
+
+        $response = $this
+            ->from(route('events.show', $event->slug))
+            ->post(route('events.join', $event->slug), [
+                'email' => 'waitlist@example.com',
+            ]);
+
+        $response
+            ->assertRedirect(route('events.show', $event->slug))
+            ->assertSessionHas('message', 'This event is full right now. Your email has been added to the waitlist.');
+
+        $this->assertDatabaseHas('event_guest_attendees', [
+            'event_id' => $event->id,
+            'email' => 'waitlist@example.com',
+            'status' => EventRegistrationStatus::WAITLISTED->value,
         ]);
     }
 

@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Enums\EventRegistrationStatus;
 use App\Enums\EventStatus;
 use App\Models\Event;
+use App\Models\EventGuestAttendee;
 use App\Models\User;
 use App\Notifications\UpcomingEventReminder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -94,6 +95,42 @@ class EventReminderCommandTest extends TestCase
         $this->artisan('app:send-event-reminders')->assertExitCode(0);
 
         Notification::assertSentToTimes($confirmedUser, UpcomingEventReminder::class, 1);
+    }
+
+    public function test_reminder_command_notifies_confirmed_guest_attendees(): void
+    {
+        Notification::fake();
+        Cache::flush();
+
+        Carbon::setTestNow('2026-05-01 10:00:00');
+
+        $creator = User::factory()->create();
+        $event = Event::factory()->create([
+            'creator_id' => $creator->id,
+            'theme' => 'Beacon Summit',
+            'status' => EventStatus::REGISTRATION_OPEN->value,
+            'require_sign_up' => false,
+            'start_date' => Carbon::now()->addHours(24),
+            'end_date' => Carbon::now()->addHours(26),
+        ]);
+
+        $confirmedGuest = EventGuestAttendee::query()->create([
+            'event_id' => $event->id,
+            'email' => 'guest@example.com',
+            'name' => 'Guest Attendee',
+            'status' => EventRegistrationStatus::REGISTERED->value,
+        ]);
+
+        $waitlistedGuest = EventGuestAttendee::query()->create([
+            'event_id' => $event->id,
+            'email' => 'waitlist@example.com',
+            'status' => EventRegistrationStatus::WAITLISTED->value,
+        ]);
+
+        $this->artisan('app:send-event-reminders')->assertExitCode(0);
+
+        Notification::assertSentToTimes($confirmedGuest, UpcomingEventReminder::class, 1);
+        Notification::assertNotSentTo($waitlistedGuest, UpcomingEventReminder::class);
     }
 
     public function test_reminder_notification_uses_human_readable_time_until_event(): void

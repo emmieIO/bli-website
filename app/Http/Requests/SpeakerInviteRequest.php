@@ -26,7 +26,6 @@ class SpeakerInviteRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'event_id' => ['required', 'exists:events,id'],
             'speaker_id' => ['required', 'exists:speakers,id'],
             'email' => ['nullable', 'email'],
             'suggested_topic' => ['required', 'string', 'max:255'],
@@ -40,8 +39,6 @@ class SpeakerInviteRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'event_id.required' => 'Event ID is required. Please refresh and try again.',
-            'event_id.exists' => 'Selected event not found.',
             'speaker_id.exists' => 'Speaker does not exist.',
             'email.email' => 'Enter a valid email address.',
             'suggested_topic.required' => 'Please suggest a topic.',

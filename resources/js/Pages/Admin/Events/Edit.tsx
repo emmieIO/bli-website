@@ -1,210 +1,22 @@
-import { useState, FormEvent, ChangeEvent } from 'react';
-import { Head, Link, router, usePage } from '@inertiajs/react';
+import { useState } from 'react';
+import type { FormEvent } from 'react';
+import { Head, Link, usePage } from '@inertiajs/react';
 import DashboardLayout from '@/Layouts/DashboardLayout';
 import Input from '@/Components/Input';
 import Modal from '@/Components/Modal';
 import Textarea from '@/Components/Textarea';
 import RichTextEditor from '@/Components/RichTextEditor';
+import { useEventForm } from '@/Components/Events/useEventForm';
+import type { EditEventProps } from '@/types/events';
 
-interface Event {
-  id: number;
-  slug: string;
-  title: string;
-  status: 'draft' | 'review' | 'published' | 'registration_open' | 'registration_closed' | 'live' | 'completed' | 'cancelled' | 'archived';
-  mode: 'online' | 'offline' | 'hybrid';
-  attendee_slots: number;
-  theme?: string;
-  start_date: string;
-  end_date: string;
-  location?: string;
-  physical_address?: string;
-  contact_email?: string;
-  entry_fee: number;
-  description?: string;
-  program_cover?: string;
-  is_active: boolean;
-  is_published: boolean;
-  is_allowing_application: boolean;
-  is_featured: boolean;
-  creator_id: number;
-  metadata?: {
-    program_type?: 'general_event' | 'discipleship_track';
-    program_code?: string | null;
-    registration_mode?: 'open' | 'selective';
-    requires_screening?: boolean;
-    screening_note?: string | null;
-    cohort_duration_weeks?: number | null;
-    group_model?: string | null;
-    central_teaching_schedule?: string | null;
-    group_meeting_schedule?: string | null;
-    weekly_prayer_target_minutes?: number | null;
-    weekly_evangelism_target_min?: number | null;
-    weekly_evangelism_target_max?: number | null;
-    weekly_discipleship_target_min?: number | null;
-    weekly_discipleship_target_max?: number | null;
-    meeting_link?: string | null;
-    access_notes?: string | null;
-  } | null;
-}
-
-interface Props {
-  event: Event;
-}
-
-interface FormData {
-  title: string;
-  status: 'draft' | 'review' | 'published' | 'registration_open' | 'registration_closed' | 'live' | 'completed' | 'cancelled' | 'archived';
-  mode: 'online' | 'offline' | 'hybrid';
-  attendee_slots: string;
-  theme: string;
-  start_date: string;
-  end_date: string;
-  location: string;
-  physical_address: string;
-  contact_email: string;
-  entry_fee: string;
-  description: string;
-  is_active: boolean;
-  is_published: boolean;
-  is_allowing_application: boolean;
-  is_featured: boolean;
-}
-
-interface ProgramMetadataFormData {
-  program_type: 'general_event' | 'discipleship_track';
-  program_code: string;
-  registration_mode: 'open' | 'selective';
-  requires_screening: boolean;
-  screening_note: string;
-  cohort_duration_weeks: string;
-  group_model: string;
-  central_teaching_schedule: string;
-  group_meeting_schedule: string;
-  weekly_prayer_target_minutes: string;
-  weekly_evangelism_target_min: string;
-  weekly_evangelism_target_max: string;
-  weekly_discipleship_target_min: string;
-  weekly_discipleship_target_max: string;
-  meeting_link: string;
-  access_notes: string;
-}
-
-export default function EditEvent({ event }: Props) {
-  const { sideLinks, errors } = usePage().props as any;
-  const formErrors = (errors || {}) as Record<string, string>;
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [formData, setFormData] = useState<FormData>({
-    title: event.title || '',
-    status: event.status || 'draft',
-    mode: event.mode || 'online',
-    attendee_slots: event.attendee_slots?.toString() || '',
-    theme: event.theme || '',
-    start_date: event.start_date ? new Date(event.start_date).toISOString().slice(0, 16) : '',
-    end_date: event.end_date ? new Date(event.end_date).toISOString().slice(0, 16) : '',
-    location: event.location || '',
-    physical_address: event.physical_address || '',
-    contact_email: event.contact_email || '',
-    entry_fee: event.entry_fee?.toString() || '0',
-    description: event.description || '',
-    is_active: event.is_active || false,
-    is_published: event.is_published || false,
-    is_allowing_application: event.is_allowing_application || false,
-    is_featured: event.is_featured || false,
-  });
-  const [programMetadata, setProgramMetadata] = useState<ProgramMetadataFormData>({
-    program_type: event.metadata?.program_type || 'general_event',
-    program_code: event.metadata?.program_code || '',
-    registration_mode: event.metadata?.registration_mode || 'open',
-    requires_screening: event.metadata?.requires_screening || false,
-    screening_note: event.metadata?.screening_note || '',
-    cohort_duration_weeks: event.metadata?.cohort_duration_weeks?.toString() || '',
-    group_model: event.metadata?.group_model || '',
-    central_teaching_schedule: event.metadata?.central_teaching_schedule || '',
-    group_meeting_schedule: event.metadata?.group_meeting_schedule || '',
-    weekly_prayer_target_minutes: event.metadata?.weekly_prayer_target_minutes?.toString() || '',
-    weekly_evangelism_target_min: event.metadata?.weekly_evangelism_target_min?.toString() || '',
-    weekly_evangelism_target_max: event.metadata?.weekly_evangelism_target_max?.toString() || '',
-    weekly_discipleship_target_min: event.metadata?.weekly_discipleship_target_min?.toString() || '',
-    weekly_discipleship_target_max: event.metadata?.weekly_discipleship_target_max?.toString() || '',
-    meeting_link: event.metadata?.meeting_link || '',
-    access_notes: event.metadata?.access_notes || '',
-  });
-  const [programCover, setProgramCover] = useState<File | null>(null);
+export default function EditEvent({ event }: EditEventProps) {
+  const { sideLinks } = usePage().props as any;
+  const { form, handleInputChange, handleMetadataChange, handleFileChange, update } = useEventForm(event);
+  const { data: formData, processing: isSubmitting, errors: formErrors } = form;
+  const programMetadata = formData.metadata;
   const [showCoverPreview, setShowCoverPreview] = useState(false);
 
-  const handleInputChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const { name, value, type } = e.target;
-
-    if (type === 'checkbox') {
-      const checked = (e.target as HTMLInputElement).checked;
-      setFormData(prev => ({ ...prev, [name]: checked }));
-    } else {
-      setFormData(prev => ({ ...prev, [name]: value }));
-    }
-  };
-
-  const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      setProgramCover(e.target.files[0]);
-    }
-  };
-
-  const handleMetadataChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const { name, value, type } = e.target;
-
-    if (type === 'checkbox') {
-      const checked = (e.target as HTMLInputElement).checked;
-      setProgramMetadata((prev) => ({ ...prev, [name]: checked }));
-      return;
-    }
-
-    setProgramMetadata((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const handleSubmit = (e: FormEvent) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-
-    const data = new FormData();
-
-    // Append all form fields
-    Object.entries(formData).forEach(([key, value]) => {
-      if (typeof value === 'boolean') {
-        if (value) data.append(key, '1');
-      } else {
-        data.append(key, value);
-      }
-    });
-
-    // Add creator_id (preserve original creator)
-    data.append('creator_id', event.creator_id.toString());
-
-    // Append file if selected
-    if (programCover) {
-      data.append('program_cover', programCover);
-    }
-
-    Object.entries(programMetadata).forEach(([key, value]) => {
-      if (typeof value === 'boolean') {
-        data.append(`metadata[${key}]`, value ? '1' : '0');
-        return;
-      }
-
-      if (value !== '') {
-        data.append(`metadata[${key}]`, value);
-      }
-    });
-
-    // Add _method for PUT request
-    data.append('_method', 'PUT');
-
-    router.post(route('admin.events.update', event.slug), data, {
-      preserveScroll: true,
-      onFinish: () => {
-        setIsSubmitting(false);
-      },
-    });
-  };
+  const handleSubmit = (submitEvent: FormEvent) => update(submitEvent, event.slug);
 
   const shouldShowLocation = formData.mode === 'online' || formData.mode === 'hybrid';
   const shouldShowPhysicalAddress = formData.mode === 'offline' || formData.mode === 'hybrid';
@@ -670,7 +482,7 @@ export default function EditEvent({ event }: Props) {
               <RichTextEditor
                 label="Description"
                 value={formData.description}
-                onChange={(value) => setFormData(prev => ({ ...prev, description: value }))}
+                onChange={(value) => form.setData('description', value)}
                 error={formErrors.description}
                 placeholder="Describe your event, audience, highlights, and what attendees can expect..."
                 required
@@ -681,6 +493,17 @@ export default function EditEvent({ event }: Props) {
             <div>
               <h3 className="text-lg font-semibold text-slate-900 mb-4 pb-2 border-b border-slate-200">Visibility & Intake</h3>
               <div className="flex flex-wrap items-center gap-6 p-4 bg-slate-50 rounded-lg">
+                <label className="inline-flex items-center">
+                  <input
+                    type="checkbox"
+                    name="require_sign_up"
+                    checked={formData.require_sign_up}
+                    onChange={handleInputChange}
+                    className="rounded border-slate-300 text-primary focus:ring-primary"
+                  />
+                  <span className="ml-2 text-sm font-medium text-slate-700">Require account sign-up</span>
+                </label>
+
                 <label className="inline-flex items-center">
                   <input
                     type="checkbox"
@@ -703,8 +526,9 @@ export default function EditEvent({ event }: Props) {
                   <span className="ml-2 text-sm font-medium text-slate-700">Is featured</span>
                 </label>
               </div>
-              {(formErrors.is_allowing_application || formErrors.is_featured || formErrors.is_active || formErrors.is_published) && (
+              {(formErrors.require_sign_up || formErrors.is_allowing_application || formErrors.is_featured || formErrors.is_active || formErrors.is_published) && (
                 <div className="mt-2 space-y-1">
+                  {formErrors.require_sign_up && <p className="text-sm text-red-500">{formErrors.require_sign_up}</p>}
                   {formErrors.is_allowing_application && <p className="text-sm text-red-500">{formErrors.is_allowing_application}</p>}
                   {formErrors.is_featured && <p className="text-sm text-red-500">{formErrors.is_featured}</p>}
                   {formErrors.is_active && <p className="text-sm text-red-500">{formErrors.is_active}</p>}
@@ -712,7 +536,7 @@ export default function EditEvent({ event }: Props) {
                 </div>
               )}
               <p className="mt-2 text-xs text-slate-500">
-                Status controls the public stage of the event. Use the switches here for speaker intake and featured placement.
+                Turn off account sign-up only for free events where email-only attendance and reminders are enough.
               </p>
             </div>
 

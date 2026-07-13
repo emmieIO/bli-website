@@ -25,41 +25,41 @@
     --font-montserrat: "Figtree", ui-sans-serif, system-ui, sans-serif;
 
     /* Color Palette */
-    --color-primary: #002147;
+    --color-primary: #0b2d6b;
     --color-primary-50: #eef3f7;
     --color-primary-100: #d9e2ec;
     --color-primary-200: #bcccdc;
     --color-primary-300: #9fb3c8;
     --color-primary-400: #4a6a8a;
-    --color-primary-500: #002147;
-    --color-primary-600: #001a39;
-    --color-primary-700: #00142c;
-    --color-primary-800: #000d1e;
-    --color-primary-900: #000711;
+    --color-primary-500: #0b2d6b;
+    --color-primary-600: #08265c;
+    --color-primary-700: #071f4c;
+    --color-primary-800: #06183b;
+    --color-primary-900: #04112a;
 
-    --color-accent: #b91c1c;
-    --color-accent-50: #fef2f2;
-    --color-accent-100: #fee2e2;
-    --color-accent-200: #fecaca;
-    --color-accent-300: #fca5a5;
-    --color-accent-400: #ef5a5a;
-    --color-accent-500: #b91c1c;
-    --color-accent-600: #9e1616;
-    --color-accent-700: #7f1010;
-    --color-accent-800: #5c0e0e;
-    --color-accent-900: #3b0808;
+    --color-accent: #c89b3c;
+    --color-accent-50: #fbf8ef;
+    --color-accent-100: #f5ecd5;
+    --color-accent-200: #ead7aa;
+    --color-accent-300: #dec17c;
+    --color-accent-400: #d3ad57;
+    --color-accent-500: #c89b3c;
+    --color-accent-600: #aa7f2f;
+    --color-accent-700: #876326;
+    --color-accent-800: #64491f;
+    --color-accent-900: #423117;
 
-    --color-secondary: #b91c1c;
-    --color-secondary-50: #fef2f2;
-    --color-secondary-100: #fee2e2;
-    --color-secondary-200: #fecaca;
-    --color-secondary-300: #fca5a5;
-    --color-secondary-400: #ef5a5a;
-    --color-secondary-500: #b91c1c;
-    --color-secondary-600: #9e1616;
-    --color-secondary-700: #7f1010;
-    --color-secondary-800: #5c0e0e;
-    --color-secondary-900: #3b0808;
+    --color-secondary: #a9b0bb;
+    --color-secondary-50: #f7f8f9;
+    --color-secondary-100: #eceef1;
+    --color-secondary-200: #d9dde2;
+    --color-secondary-300: #c2c7cf;
+    --color-secondary-400: #a9b0bb;
+    --color-secondary-500: #8d96a3;
+    --color-secondary-600: #717b89;
+    --color-secondary-700: #59616d;
+    --color-secondary-800: #414750;
+    --color-secondary-900: #2e2e2e;
 
     --color-white: #ffffff;
     --color-black: #000000;
@@ -67,10 +67,10 @@
     --surface-panel: #ffffff;
     --surface-muted: #e5eaef;
     --surface-strong: #111827;
-    --text-primary: #1e293b;
+    --text-primary: #2e2e2e;
     --text-secondary: #475569;
     --text-inverse: #f9fafb;
-    --border-subtle: #d7dee7;
+    --border-subtle: #a9b0bb;
 
     /* Gray Scale */
     --color-gray-50: #f9fafb;

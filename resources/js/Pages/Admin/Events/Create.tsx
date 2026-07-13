@@ -1,161 +1,15 @@
-import { useState, FormEvent, ChangeEvent } from 'react';
-import { Head, Link, router, usePage } from '@inertiajs/react';
+import { Head, Link, usePage } from '@inertiajs/react';
 import DashboardLayout from '@/Layouts/DashboardLayout';
 import Input from '@/Components/Input';
 import Textarea from '@/Components/Textarea';
 import RichTextEditor from '@/Components/RichTextEditor';
-
-interface FormData {
-  title: string;
-  status: 'draft' | 'review' | 'published' | 'registration_open' | 'registration_closed' | 'live' | 'completed' | 'cancelled' | 'archived' | '';
-  mode: 'online' | 'offline' | 'hybrid' | '';
-  attendee_slots: string;
-  theme: string;
-  start_date: string;
-  end_date: string;
-  location: string;
-  physical_address: string;
-  contact_email: string;
-  entry_fee: string;
-  description: string;
-  is_active: boolean;
-  is_published: boolean;
-  is_allowing_application: boolean;
-  is_featured: boolean;
-}
-
-interface ProgramMetadataFormData {
-  program_type: 'general_event' | 'discipleship_track';
-  program_code: string;
-  registration_mode: 'open' | 'selective';
-  requires_screening: boolean;
-  screening_note: string;
-  cohort_duration_weeks: string;
-  group_model: string;
-  central_teaching_schedule: string;
-  group_meeting_schedule: string;
-  weekly_prayer_target_minutes: string;
-  weekly_evangelism_target_min: string;
-  weekly_evangelism_target_max: string;
-  weekly_discipleship_target_min: string;
-  weekly_discipleship_target_max: string;
-  meeting_link: string;
-  access_notes: string;
-}
+import { useEventForm } from '@/Components/Events/useEventForm';
 
 export default function CreateEvent() {
-  const { auth, sideLinks, errors } = usePage().props as any;
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [formData, setFormData] = useState<FormData>({
-    title: '',
-    status: 'draft',
-    mode: '',
-    attendee_slots: '',
-    theme: '',
-    start_date: '',
-    end_date: '',
-    location: '',
-    physical_address: '',
-    contact_email: '',
-    entry_fee: '0',
-    description: '',
-    is_active: false,
-    is_published: false,
-    is_allowing_application: false,
-    is_featured: false,
-  });
-  const [programMetadata, setProgramMetadata] = useState<ProgramMetadataFormData>({
-    program_type: 'general_event',
-    program_code: '',
-    registration_mode: 'open',
-    requires_screening: false,
-    screening_note: '',
-    cohort_duration_weeks: '',
-    group_model: '',
-    central_teaching_schedule: '',
-    group_meeting_schedule: '',
-    weekly_prayer_target_minutes: '',
-    weekly_evangelism_target_min: '',
-    weekly_evangelism_target_max: '',
-    weekly_discipleship_target_min: '',
-    weekly_discipleship_target_max: '',
-    meeting_link: '',
-    access_notes: '',
-  });
-  const [programCover, setProgramCover] = useState<File | null>(null);
-
-  const handleInputChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const { name, value, type } = e.target;
-
-    if (type === 'checkbox') {
-      const checked = (e.target as HTMLInputElement).checked;
-      setFormData(prev => ({ ...prev, [name]: checked }));
-    } else {
-      setFormData(prev => ({ ...prev, [name]: value }));
-    }
-  };
-
-  const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      setProgramCover(e.target.files[0]);
-    }
-  };
-
-  const handleMetadataChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const { name, value, type } = e.target;
-
-    if (type === 'checkbox') {
-      const checked = (e.target as HTMLInputElement).checked;
-      setProgramMetadata((prev) => ({ ...prev, [name]: checked }));
-      return;
-    }
-
-    setProgramMetadata((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const handleSubmit = (e: FormEvent) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-
-    const data = new FormData();
-
-    // Append all form fields
-    Object.entries(formData).forEach(([key, value]) => {
-      if (typeof value === 'boolean') {
-        if (value) data.append(key, '1');
-      } else {
-        data.append(key, value);
-      }
-    });
-
-    // Add creator_id (current authenticated user)
-    if (auth?.user?.id) {
-      data.append('creator_id', auth.user.id.toString());
-    }
-
-    // Append file if selected
-    if (programCover) {
-      data.append('program_cover', programCover);
-    }
-
-    Object.entries(programMetadata).forEach(([key, value]) => {
-      if (typeof value === 'boolean') {
-        data.append(`metadata[${key}]`, value ? '1' : '0');
-        return;
-      }
-
-      if (value !== '') {
-        data.append(`metadata[${key}]`, value);
-      }
-    });
-
-    router.post(route('admin.events.store'), data, {
-      preserveScroll: true,
-      onFinish: () => {
-        setIsSubmitting(false);
-      },
-    });
-  };
+  const { auth, sideLinks } = usePage().props as any;
+  const { form, handleInputChange, handleMetadataChange, handleFileChange, create: handleSubmit } = useEventForm(undefined, auth?.user?.id ?? null);
+  const { data: formData, processing: isSubmitting, errors } = form;
+  const programMetadata = formData.metadata;
 
   const shouldShowLocation = formData.mode === 'online' || formData.mode === 'hybrid';
   const shouldShowPhysicalAddress = formData.mode === 'offline' || formData.mode === 'hybrid';
@@ -597,7 +451,7 @@ export default function CreateEvent() {
               <RichTextEditor
                 label="Description"
                 value={formData.description}
-                onChange={(value) => setFormData(prev => ({ ...prev, description: value }))}
+                onChange={(value) => form.setData('description', value)}
                 error={errors?.description}
                 placeholder="Describe your event, audience, highlights, and what attendees can expect..."
                 required
@@ -608,6 +462,17 @@ export default function CreateEvent() {
             <div>
               <h3 className="text-lg font-semibold text-slate-900 mb-4 pb-2 border-b border-slate-200">Visibility & Intake</h3>
               <div className="flex flex-wrap items-center gap-6 p-4 bg-slate-50 rounded-lg">
+                <label className="inline-flex items-center">
+                  <input
+                    type="checkbox"
+                    name="require_sign_up"
+                    checked={formData.require_sign_up}
+                    onChange={handleInputChange}
+                    className="rounded border-slate-300 text-primary focus:ring-primary"
+                  />
+                  <span className="ml-2 text-sm font-medium text-slate-700">Require account sign-up</span>
+                </label>
+
                 <label className="inline-flex items-center">
                   <input
                     type="checkbox"
@@ -631,7 +496,7 @@ export default function CreateEvent() {
                 </label>
               </div>
               <p className="mt-2 text-xs text-slate-500">
-                Status controls the public stage of the event. Use the switches here for speaker intake and homepage highlighting.
+                Turn off account sign-up only for free events where email-only attendance and reminders are enough.
               </p>
             </div>
 

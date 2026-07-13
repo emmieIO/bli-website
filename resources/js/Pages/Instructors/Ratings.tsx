@@ -1,4 +1,4 @@
-import { Head, Link } from '@inertiajs/react';
+import { Head } from '@inertiajs/react';
 import GuestLayout from '@/Layouts/GuestLayout';
 import { Star } from 'lucide-react';
 import Pagination from '@/Components/Pagination';

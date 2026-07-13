@@ -10,8 +10,7 @@ interface ProfileEditProps {
 }
 
 export default function Edit({ mustVerifyEmail, status }: ProfileEditProps) {
-    const { auth, sideLinks } = usePage().props as any;
-    const user = auth?.user;
+    const { sideLinks } = usePage().props as any;
 
     return (
         <DashboardLayout sideLinks={sideLinks}>
@@ -115,7 +114,7 @@ function UpdateProfilePhotoForm() {
     const [photoPreview, setPhotoPreview] = useState<string | null>(null);
     const photoInputRef = useRef<HTMLInputElement>(null);
 
-    const { data, setData, post, errors, processing, recentlySuccessful } = useForm({
+    const { setData, post, errors, processing, recentlySuccessful } = useForm({
         photo: null as File | null,
     });
 

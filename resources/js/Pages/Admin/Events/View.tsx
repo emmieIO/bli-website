@@ -588,7 +588,7 @@ export default function ViewEvent({ event, capabilities }: ViewEventProps) {
               <div className="space-y-3">
                 {capabilities.canUpdate && <QuickLink href={route('admin.events.edit', event.slug)} icon="fa-pen" label="Update schedule and status" />}
                 {capabilities.canManageResources && <QuickLink href={route('admin.events.resources.create', event.slug)} icon="fa-folder-plus" label="Upload attendee resources" />}
-                {capabilities.canManageSpeakers && <QuickLink href={route('admin.events.assign-speakers', event.slug)} icon="fa-user-plus" label="Manage speaker assignments" />}
+                {capabilities.canManageSpeakers && <QuickLink href={route('admin.events.assign-speakers', event.slug)} icon="fa-microphone" label="Open speaker pipeline" />}
                 {capabilities.canViewPayments && <QuickLink href={route('admin.transactions-audit.index')} icon="fa-receipt" label="Open transaction audit" />}
               </div>
             </WorkspacePanel>

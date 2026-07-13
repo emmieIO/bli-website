@@ -109,7 +109,7 @@ export default function SpeakerWorkspace({ event, application, invite, stage, wo
             <div className="space-y-4">
               <div className="flex flex-wrap items-center gap-2">
                 <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold capitalize ${stageTone[stage]}`}>
-                  {stage.replaceAll('_', ' ')}
+                  {stage.replace(/_/g, ' ')}
                 </span>
                 <span className="inline-flex rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold capitalize text-slate-600">
                   speaker workspace
@@ -163,7 +163,7 @@ export default function SpeakerWorkspace({ event, application, invite, stage, wo
                         {completed ? <i className="fas fa-check"></i> : stageOrder.indexOf(step) + 1}
                       </div>
                       <div>
-                        <p className="text-sm font-semibold capitalize text-primary">{step.replaceAll('_', ' ')}</p>
+                        <p className="text-sm font-semibold capitalize text-primary">{step.replace(/_/g, ' ')}</p>
                         <p className="mt-1 text-sm text-slate-500">
                           {step === 'invited' && 'Invitation issued by the organizer.'}
                           {step === 'applied' && 'Speaker is preparing or has started the proposal stage.'}
@@ -181,7 +181,7 @@ export default function SpeakerWorkspace({ event, application, invite, stage, wo
                       <i className="fas fa-times"></i>
                     </div>
                     <div>
-                      <p className="text-sm font-semibold capitalize text-primary">{stage.replaceAll('_', ' ')}</p>
+                      <p className="text-sm font-semibold capitalize text-primary">{stage.replace(/_/g, ' ')}</p>
                       <p className="mt-1 text-sm text-slate-500">
                         {stage === 'rejected'
                           ? 'The proposal was reviewed and not selected for this event.'

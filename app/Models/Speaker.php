@@ -40,11 +40,16 @@ class Speaker extends Model
     }
 
     public function creator(){
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'created_by');
     }
 
     public function speakerApplications(){
-        return $this->belongsTo(Event::class);
+        return $this->hasMany(SpeakerApplication::class);
+    }
+
+    public function invitations()
+    {
+        return $this->hasMany(SpeakerInvite::class);
     }
 
     public function user(){

@@ -8,36 +8,43 @@ This application implements a comprehensive role-based access control (RBAC) sys
 
 ### 1. Admin
 - **Full system access** including user management, role assignment, and system configuration
-- Can manage all courses, events, speakers, and instructors
-- Access to administrative dashboard and system settings
+- Can manage events, speakers, instructors, mentorship, support, content, and settings
+- Will manage LMS courses and cohorts once the LMS module is introduced
+- Access to the unified dashboard and system settings
 
 ### 2. Instructor  
-- **Course and event management** within their domain
-- Can create, edit courses and events they're assigned to
-- Limited administrative capabilities focused on educational content
+- **Teaching, speaking, and mentorship workspaces** within their domain
+- Can manage assigned event/speaking contexts and mentorship requests
+- Will teach cohorts once the LMS module is introduced
+- Limited administrative capabilities focused on formation delivery
 - Cannot access system-wide administrative functions
 
 ### 3. Student
-- **Basic user permissions** for course enrollment and participation
-- Can view and enroll in courses
-- Can attend events and access learning materials
+- **Basic user permissions** for event registration, mentorship, support, and profile management
+- Can attend events and access assigned workspaces/resources
+- Will view catalogs and enroll in LMS courses once the LMS module is introduced
 - Cannot create or modify educational content
 
 ## Permission Categories
 
-### Course Management (12 permissions)
-- `create-course`, `view-course`, `edit-course`, `delete-course`
-- `publish-course`, `unpublish-course`
-- `create-course-category`, `edit-course-category`, `delete-course-category`
-- `create-lesson`, `edit-lesson`, `delete-lesson`
+### Planned LMS Management
+- `lms-view-catalog`, `lms-enroll-self`
+- `lms-manage-courses`, `lms-teach-cohorts`
+- These permissions are reserved for the LMS module and should be added with the LMS migrations/seeders.
 
-### Event Management (8 permissions)
-- `manage events`, `create-event`, `edit-event`, `delete-event`
-- `publish-event`, `unpublish-event`, `assign-speaker`, `manage-event-attendees`
+### Event Management
+- User flow: `event-view`, `event-register`, `event-view-own-registration`, `event-join-waitlist`, `event-apply-to-speak`
+- Admin flow: `event-view-any`, `event-create`, `event-update-any`, `event-delete-any`, `event-publish`, `event-cancel`, `event-archive`
+- Operations: `event-manage-attendees`, `event-manage-waitlist`, `event-manage-speakers`, `event-manage-resources`, `event-view-payments`, `event-send-updates`
 
 ### Speaker Management (6 permissions)
 - `create-speaker`, `view-speaker`, `edit-speaker`, `delete-speaker`
 - `assign-speaker`, `approve-speaker-applications`
+
+### Mentorship
+- Student: `mentorship-view-own`
+- Instructor: `mentorship-view-instructor`
+- Admin: `mentorship-manage-any`
 
 ### User & System Management (22 permissions)
 - User management: `create-user`, `edit-user`, `delete-user`, `view-user-list`
@@ -89,23 +96,23 @@ $user->assignRole('instructor');
 ### Checking Permissions
 ```php
 // In Blade templates
-@can('create-course')
-    <button>Create Course</button>
+@can('event-create')
+    <button>Create Event</button>
 @endcan
 
 // In controllers
-if (auth()->user()->can('manage events')) {
+if (auth()->user()->can('event-view-any')) {
     // Allow action
 }
 ```
 
 ### Policy Integration
 ```php
-// In CoursePolicy
+// In EventPolicy
 public function create(User $user)
 {
     return $user->hasRole('admin') || 
-           ($user->hasRole('instructor') && $user->can('create-course'));
+           $user->can('event-create');
 }
 ```
 

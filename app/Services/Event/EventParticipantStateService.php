@@ -21,8 +21,11 @@ class EventParticipantStateService
         $occupiedSeats = $event->attendees()
             ->wherePivotIn('status', EventRegistrationStatus::seatOccupyingValues())
             ->count();
+        $guestOccupiedSeats = $event->guestAttendees()
+            ->whereIn('status', EventRegistrationStatus::seatOccupyingValues())
+            ->count();
 
-        $remainingSeats = $event->attendee_slots - $occupiedSeats;
+        $remainingSeats = $event->attendee_slots - $occupiedSeats - $guestOccupiedSeats;
 
         return $remainingSeats <= 0 ? 'Full' : $remainingSeats;
     }

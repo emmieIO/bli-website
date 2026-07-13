@@ -217,6 +217,12 @@ class EventController extends Controller
                 'message'=> 'Speaker has already been invited to this event.'
                 ]);
         }
+        if ($invitation === 'speaker_approved') {
+            return redirect()->back()->with([
+                'type' => 'success',
+                'message' => 'The speaker had already applied, so their application was approved.',
+            ]);
+        }
         return redirect()->back()->with([
             'type'=> 'error',
             'message'=> 'Failed to invite speaker. Please try again.'

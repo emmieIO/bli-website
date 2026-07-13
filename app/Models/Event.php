@@ -7,6 +7,7 @@ use BinaryCabin\LaravelUUID\Traits\HasUUID;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Storage;
@@ -45,6 +46,7 @@ class Event extends Model
         'is_published',
         'is_allowing_application',
         'is_featured',
+        'require_sign_up',
         'entry_fee',
         'metadata',
     ];
@@ -58,6 +60,7 @@ class Event extends Model
         'is_published' => 'boolean',
         'is_allowing_application' => 'boolean',
         'is_featured' => 'boolean',
+        'require_sign_up' => 'boolean',
     ];
 
     protected static function booted()
@@ -87,6 +90,11 @@ class Event extends Model
         return $this->belongsToMany(User::class, 'event_attendees', 'event_id', 'user_id')
             ->withPivot(['status', 'revoke_count'])
             ->withTimestamps();
+    }
+
+    public function guestAttendees(): HasMany
+    {
+        return $this->hasMany(EventGuestAttendee::class);
     }
 
     public function scopeFindBySlug(Builder $query, string $slug): Builder
@@ -154,6 +162,11 @@ class Event extends Model
         return $this->hasMany(SpeakerApplication::class, 'event_id');
     }
 
+    public function speakerInvites()
+    {
+        return $this->hasMany(SpeakerInvite::class, 'event_id');
+    }
+
     public function transactions(): MorphMany
     {
         return $this->morphMany(Transaction::class, 'payable');
@@ -166,7 +179,7 @@ class Event extends Model
 
     public function isRegistrationOpen(): bool
     {
-        return $this->lifecycleStatus()->allowsRegistration() && (!$this->end_date || now()->lt($this->end_date));
+        return $this->lifecycleStatus()->allowsRegistration() && (! $this->end_date || now()->lt($this->end_date));
     }
 
     public function lifecycleStatus(): EventStatus
@@ -184,5 +197,4 @@ class Event extends Model
             (bool) $this->is_active
         );
     }
-
 }

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
+use Inertia\Inertia;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 
@@ -26,7 +27,7 @@ class UserManagementController extends Controller
         $users = User::with('roles')->paginate(15);
         $roles = Role::all();
 
-        return \Inertia\Inertia::render('Admin/Users/Index', compact('users', 'roles'));
+        return Inertia::render('Admin/Users/Index', compact('users', 'roles'));
     }
 
     /**
@@ -92,7 +93,7 @@ class UserManagementController extends Controller
             return explode('-', $permission->name)[0];
         });
 
-        return \Inertia\Inertia::render('Admin/Roles/Index', compact('roles', 'permissions'));
+        return Inertia::render('Admin/Roles/Index', compact('roles', 'permissions'));
     }
 
     /**
@@ -169,6 +170,7 @@ class UserManagementController extends Controller
                 'track-applications',
                 'view-own-transaction-history',
                 'view-own-invitations',
+                'mentorship-view-instructor',
                 'event-view',
                 'event-register',
                 'event-view-own-registration',
@@ -179,6 +181,7 @@ class UserManagementController extends Controller
                 'track-applications',
                 'view-own-transaction-history',
                 'view-own-invitations',
+                'mentorship-view-own',
                 'event-view',
                 'event-register',
                 'event-view-own-registration',
@@ -223,7 +226,7 @@ class UserManagementController extends Controller
             ];
         });
 
-        $fileName = 'roles-permissions-' . now()->format('Y-m-d-His') . '.json';
+        $fileName = 'roles-permissions-'.now()->format('Y-m-d-His').'.json';
 
         return response()->json($config, 200, [
             'Content-Type' => 'application/json',

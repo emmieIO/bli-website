@@ -45,11 +45,6 @@ class SpeakerApplication extends Model
         return $this->belongsTo(Speaker::class);
     }
 
-    public function speakerApplications()
-    {
-        return $this->hasMany(SpeakerApplication::class);
-    }
-
     public function isApproved()
     {
         return $this->status == ApplicationStatus::APPROVED->value;

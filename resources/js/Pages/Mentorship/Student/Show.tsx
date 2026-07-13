@@ -2,81 +2,11 @@ import { Head, Link, useForm, router } from '@inertiajs/react';
 import DashboardLayout from '@/Layouts/DashboardLayout';
 import { usePage } from '@inertiajs/react';
 import { FormEventHandler, useState } from 'react';
+import type { MentorshipTab, MentorshipWorkspaceProps } from '@/types/mentorship';
 
-interface MentorshipRequest {
-  id: number;
-  student: {
-    name: string;
-    email: string;
-  };
-  instructor: {
-    name: string;
-    email: string;
-  };
-  message: string;
-  goals: string | null;
-  status: string;
-  duration_type: string;
-  duration_value: number;
-  instructor_response: string | null;
-  instructor_approved_at: string | null;
-  admin_response: string | null;
-  admin_approved_at: string | null;
-  meeting_link: string | null;
-  meeting_schedule: any | null;
-  next_session_at: string | null;
-  created_at: string;
-}
-
-interface Session {
-  id: number;
-  session_date: string;
-  duration: number;
-  notes: string | null;
-  topics_covered: string | null;
-  recording_link: string | null;
-  completed_at: string | null;
-  created_at: string;
-}
-
-interface Resource {
-  id: number;
-  file_name: string;
-  file_type: string | null;
-  file_size: number | null;
-  description: string | null;
-  category: string;
-  created_at: string;
-  uploader: {
-    name: string;
-  };
-}
-
-interface Milestone {
-  id: number;
-  title: string;
-  description: string | null;
-  due_date: string | null;
-  order: number;
-  completed_at: string | null;
-  completed_by: {
-    name: string;
-  } | null;
-  created_at: string;
-}
-
-interface Props {
-  mentorshipRequest: MentorshipRequest;
-  sessions: Session[];
-  resources: Resource[];
-  milestones: Milestone[];
-}
-
-type TabType = 'overview' | 'sessions' | 'resources' | 'milestones';
-
-export default function Show({ mentorshipRequest, sessions, resources, milestones }: Props) {
+export default function Show({ mentorshipRequest, sessions, resources, milestones }: MentorshipWorkspaceProps) {
   const { sideLinks } = usePage().props as any;
-  const [activeTab, setActiveTab] = useState<TabType>('overview');
+  const [activeTab, setActiveTab] = useState<MentorshipTab>('overview');
   const [showSessionModal, setShowSessionModal] = useState(false);
   const [showResourceModal, setShowResourceModal] = useState(false);
   const [showMilestoneModal, setShowMilestoneModal] = useState(false);

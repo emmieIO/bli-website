@@ -27,7 +27,6 @@ class SendEventReminders extends Command
      */
     protected $description = 'Send reminders to users about upcoming events';
 
-
     /**
      * Execute the console command.
      */
@@ -39,8 +38,10 @@ class SendEventReminders extends Command
         // Send reminders for events starting in approximately 24 hours (23h 55m to 24h 5m window)
         // This 10-minute window accommodates two 5-minute cron runs
         $events24h = Event::with(['attendees' => function ($query) {
-                $query->whereIn('status', EventRegistrationStatus::reminderEligibleValues());
-            }])
+            $query->whereIn('status', EventRegistrationStatus::reminderEligibleValues());
+        }, 'guestAttendees' => function ($query) {
+            $query->whereIn('status', EventRegistrationStatus::reminderEligibleValues());
+        }])
             ->where('start_date', '>', $now->copy()->addHours(23)->addMinutes(55))
             ->where('start_date', '<=', $now->copy()->addHours(24)->addMinutes(5))
             ->get();
@@ -53,10 +54,13 @@ class SendEventReminders extends Command
                 continue;
             }
 
-            if ($event->attendees->isNotEmpty()) {
+            $recipientCount = $event->attendees->count() + $event->guestAttendees->count();
+
+            if ($recipientCount > 0) {
                 // Queue notification for all registered attendees
                 Notification::send($event->attendees, new UpcomingEventReminder($event));
-                $reminderCount += $event->attendees->count();
+                Notification::send($event->guestAttendees, new UpcomingEventReminder($event));
+                $reminderCount += $recipientCount;
 
                 // Cache for 23 hours to prevent duplicate reminders
                 Cache::put($cacheKey, true, now()->addHours(23));
@@ -65,6 +69,7 @@ class SendEventReminders extends Command
                     'event_id' => $event->id,
                     'event_title' => $event->title,
                     'attendee_count' => $event->attendees->count(),
+                    'guest_attendee_count' => $event->guestAttendees->count(),
                 ]);
             }
         }
@@ -72,8 +77,10 @@ class SendEventReminders extends Command
         // Send reminders for events starting in approximately 2 hours (1h 55m to 2h 5m window)
         // This 10-minute window accommodates two 5-minute cron runs
         $events2h = Event::with(['attendees' => function ($query) {
-                $query->whereIn('status', EventRegistrationStatus::reminderEligibleValues());
-            }])
+            $query->whereIn('status', EventRegistrationStatus::reminderEligibleValues());
+        }, 'guestAttendees' => function ($query) {
+            $query->whereIn('status', EventRegistrationStatus::reminderEligibleValues());
+        }])
             ->where('start_date', '>', $now->copy()->addHours(1)->addMinutes(55))
             ->where('start_date', '<=', $now->copy()->addHours(2)->addMinutes(5))
             ->get();
@@ -86,10 +93,13 @@ class SendEventReminders extends Command
                 continue;
             }
 
-            if ($event->attendees->isNotEmpty()) {
+            $recipientCount = $event->attendees->count() + $event->guestAttendees->count();
+
+            if ($recipientCount > 0) {
                 // Queue notification for all registered attendees
                 Notification::send($event->attendees, new UpcomingEventReminder($event));
-                $reminderCount += $event->attendees->count();
+                Notification::send($event->guestAttendees, new UpcomingEventReminder($event));
+                $reminderCount += $recipientCount;
 
                 // Cache for 2 hours to prevent duplicate reminders
                 Cache::put($cacheKey, true, now()->addHours(2));
@@ -98,6 +108,7 @@ class SendEventReminders extends Command
                     'event_id' => $event->id,
                     'event_title' => $event->title,
                     'attendee_count' => $event->attendees->count(),
+                    'guest_attendee_count' => $event->guestAttendees->count(),
                 ]);
             }
         }

@@ -2,16 +2,18 @@
 
 namespace App\Http\Requests;
 
+use App\Enums\EventModeEnum;
 use App\Enums\EventStatus;
 use App\Enums\Permissions\EventPermissionsEnum;
+use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Carbon;
 
 class UpdateEventRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
      */
-
     public function authorize(): bool
     {
         return auth()->user()->hasAnyPermission([
@@ -24,42 +26,42 @@ class UpdateEventRequest extends FormRequest
     /**
      * Get the validation rules that apply to the request.
      *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
+     * @return array<string, ValidationRule|array<mixed>|string>
      */
-
     public function rules(): array
     {
         return [
-            'title' => 'sometimes|required|string|max:255|unique:events,title,' . ($this->event->id ?? 'NULL'),
+            'title' => 'sometimes|required|string|max:255|unique:events,title,'.($this->event->id ?? 'NULL'),
             'theme' => 'sometimes|string|max:100',
             'description' => 'sometimes|required|string',
             'location' => 'nullable|string|required_if:mode,online,hybrid',
             'attendee_slots' => 'nullable|integer|min:1',
             'program_cover' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:5120',
-            'mode' => 'sometimes|required|string|in:' . implode(',', array_column(\App\Enums\EventModeEnum::cases(), 'value')),
+            'mode' => 'sometimes|required|string|in:'.implode(',', array_column(EventModeEnum::cases(), 'value')),
             'start_date' => [
                 'sometimes',
                 'required',
                 'date',
                 function ($attribute, $value, $fail) {
-                    if ($this->event && \Illuminate\Support\Carbon::parse($this->event->start_date)->isSameDay(\Illuminate\Support\Carbon::parse($value))) {
+                    if ($this->event && Carbon::parse($this->event->start_date)->isSameDay(Carbon::parse($value))) {
                         return;
                     }
-                    if (\Illuminate\Support\Carbon::parse($value)->startOfDay()->lt(\Illuminate\Support\Carbon::today())) {
-                         $fail('The start date must be today or later.');
+                    if (Carbon::parse($value)->startOfDay()->lt(Carbon::today())) {
+                        $fail('The start date must be today or later.');
                     }
-                }
+                },
             ],
             'end_date' => 'sometimes|required|date|after_or_equal:start_date',
             'physical_address' => 'nullable|string|max:255|required_if:mode,offline,hybrid',
             'creator_id' => 'sometimes|required|exists:users,id',
-            'status' => 'nullable|string|in:' . implode(',', EventStatus::values()),
+            'status' => 'nullable|string|in:'.implode(',', EventStatus::values()),
             'is_active' => 'sometimes|boolean',
             'metadata' => 'nullable|array',
             'contact_email' => 'nullable|email|max:255',
             'is_published' => 'nullable|boolean',
             'is_allowing_application' => 'sometimes|boolean',
             'is_featured' => 'nullable|boolean',
+            'require_sign_up' => 'sometimes|boolean',
             'entry_fee' => 'nullable|numeric|min:0|max:999999.99',
             'metadata.program_type' => 'nullable|string|in:general_event,discipleship_track',
             'metadata.program_code' => 'nullable|string|max:30',
@@ -116,6 +118,7 @@ class UpdateEventRequest extends FormRequest
             'is_published.boolean' => 'The published status must be true or false.',
             'is_allowing_application.boolean' => 'The application status must be true or false.',
             'is_featured.boolean' => 'The featured status must be true or false.',
+            'require_sign_up.boolean' => 'The sign-up requirement must be true or false.',
             'entry_fee.numeric' => 'The entry fee must be a number.',
             'entry_fee.min' => 'The entry fee must be at least 0.',
             'entry_fee.max' => 'The entry fee may not be greater than 999999.99.',
@@ -138,7 +141,7 @@ class UpdateEventRequest extends FormRequest
         $isPublished = $this->boolean('is_published');
         $isActive = $this->boolean('is_active');
 
-        if (!$status) {
+        if (! $status) {
             if ($publishedProvided || $activeProvided) {
                 $status = EventStatus::fromLegacyFlags($isPublished, $isActive)->value;
             }
@@ -149,7 +152,10 @@ class UpdateEventRequest extends FormRequest
             'is_active' => $isActive,
             'is_published' => $isPublished,
             'is_allowing_application' => $this->boolean('is_allowing_application'),
-            'is_featured' => $this->boolean('is_featured')
+            'is_featured' => $this->boolean('is_featured'),
+            'require_sign_up' => $this->exists('require_sign_up')
+                ? $this->boolean('require_sign_up')
+                : (bool) $this->event?->require_sign_up,
         ]);
     }
 }

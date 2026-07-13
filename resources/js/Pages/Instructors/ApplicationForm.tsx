@@ -1,7 +1,7 @@
 import { Head, useForm } from '@inertiajs/react';
 import GuestLayout from '@/Layouts/GuestLayout';
 import { useState, FormEvent } from 'react';
-import { GraduationCap, FileText, Upload, CheckCircle2 } from 'lucide-react';
+import { GraduationCap, Upload, CheckCircle2 } from 'lucide-react';
 
 interface User {
     id: number;

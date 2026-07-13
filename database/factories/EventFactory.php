@@ -2,11 +2,12 @@
 
 namespace Database\Factories;
 
+use App\Models\Event;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Str;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Event>
+ * @extends Factory<Event>
  */
 class EventFactory extends Factory
 {
@@ -18,7 +19,7 @@ class EventFactory extends Factory
     public function definition(): array
     {
         return [
-            'uuid'=> Str::uuid(),
+            'uuid' => Str::uuid(),
             'title' => $theme = $this->faker->sentence(10),
             'slug' => Str::slug($theme),
             'description' => $this->faker->paragraph,
@@ -26,7 +27,8 @@ class EventFactory extends Factory
             'mode' => $this->faker->randomElement(['online', 'offline', 'hybrid']),
             'start_date' => $this->faker->dateTimeBetween('now', '+1 week'),
             'end_date' => $this->faker->optional()->dateTimeBetween('+1 week', '+1 month'),
-            "location" => $this->faker->url(),
+            'location' => $this->faker->url(),
+            'require_sign_up' => true,
             'metadata' => [
                 'organizer' => $this->faker->company,
                 'sponsor' => $this->faker->company,
