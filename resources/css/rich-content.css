@@ -17,7 +17,7 @@
 .rich-content h2,
 .rich-content h3 {
     color: #0b2d6b;
-    font-family: "Figtree", ui-sans-serif, system-ui, sans-serif;
+    font-family: var(--font-display);
     letter-spacing: 0;
 }
 
