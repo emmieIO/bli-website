@@ -303,6 +303,7 @@ class AdminEventPermissionTest extends TestCase
             ->assertOk()
             ->assertInertia(fn ($page) => $page
                 ->component('Admin/Events/View')
+                ->where('publicEventUrl', route('events.open', $event))
                 ->has('event.attendees', 1)
                 ->has('event.guest_attendees', 1)
                 ->where('event.guest_attendees.0.name', 'Guest Participant')

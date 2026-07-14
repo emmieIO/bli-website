@@ -2,8 +2,6 @@
 
 namespace App\Traits;
 
-
-use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
@@ -11,14 +9,11 @@ use Illuminate\Support\Str;
 
 trait HasFileUpload
 {
-     /* Upload a file and store it in the specified path on the public disk.
+    /**
+     * Upload a file and store it in the specified path on the public disk.
      *
-     * @param UploadedFile $file The file to upload
-     * @param string $path The storage path
-     * @param string $disk_type The disk type (default: 'public')
-     * @param array $allowedMimes Optional array of allowed MIME types
-     * @param int $maxSizeMB Maximum file size in MB (default: 10)
-     * @return string|false The file path or false on failure
+     * @param  array<string>  $allowedMimes
+     * @return string|false The stored file path, or false when the upload fails.
      */
     public function uploadFile(
         UploadedFile $file,
@@ -30,7 +25,7 @@ trait HasFileUpload
         $file_path = null;
 
         try {
-            if (!$file) {
+            if (! $file) {
                 return false;
             }
 
@@ -41,10 +36,10 @@ trait HasFileUpload
             }
 
             // Security: Validate MIME type if specified
-            if (!empty($allowedMimes)) {
+            if (! empty($allowedMimes)) {
                 $mimeType = $file->getMimeType();
-                if (!in_array($mimeType, $allowedMimes)) {
-                    throw new \Exception("File type not allowed. Allowed types: " . implode(', ', $allowedMimes));
+                if (! in_array($mimeType, $allowedMimes)) {
+                    throw new \Exception('File type not allowed. Allowed types: '.implode(', ', $allowedMimes));
                 }
             }
 
@@ -56,13 +51,17 @@ trait HasFileUpload
             }
 
             // Generate safe filename to prevent directory traversal attacks
-            $safeFilename = Str::random(40) . '.' . $extension;
+            $safeFilename = Str::random(40).'.'.$extension;
             $file_path = $file->storeAs($path, $safeFilename, $disk_type);
+
+            if ($file_path === false) {
+                throw new \RuntimeException("The {$disk_type} storage disk rejected the file write.");
+            }
 
             return $file_path;
         } catch (\Exception $e) {
             // Clean up if file was partially uploaded
-            if (!empty($file_path) && Storage::disk($disk_type)->exists($file_path)) {
+            if (! empty($file_path) && Storage::disk($disk_type)->exists($file_path)) {
                 Storage::disk($disk_type)->delete($file_path);
             }
 
@@ -79,14 +78,16 @@ trait HasFileUpload
 
     public function deleteFile(string $file_path, $disk_type = 'public')
     {
-        if (!empty($file_path) && Storage::disk($disk_type)->exists($file_path)) {
+        if (! empty($file_path) && Storage::disk($disk_type)->exists($file_path)) {
             Storage::disk($disk_type)->delete($file_path);
+
             return true;
         }
         Log::error('File deletion failed', [
             'file_path' => $file_path,
             'disk_type' => $disk_type,
         ]);
+
         return false;
     }
 }

@@ -1,6 +1,7 @@
 import { Head, Link, router, usePage } from '@inertiajs/react';
-import { BadgeCheck, CalendarDays, Eye, Mail, Phone, UserRound, X } from 'lucide-react';
+import { BadgeCheck, CalendarDays, Eye, Mail, Phone, QrCode, UserRound, X } from 'lucide-react';
 import DashboardLayout from '@/Layouts/DashboardLayout';
+import EventQrCodeModal from '@/Components/Events/EventQrCodeModal';
 import { useMemo, useState } from 'react';
 import type { ReactNode } from 'react';
 import type { AdminEventGuestAttendee, AdminEventRegistration } from '@/types/events';
@@ -120,6 +121,7 @@ interface Event {
 
 interface ViewEventProps {
   event: Event;
+  publicEventUrl: string;
   capabilities: {
     canUpdate: boolean;
     canDelete: boolean;
@@ -154,9 +156,10 @@ const statusLabels: Record<Event['status'], string> = {
   archived: 'Archived',
 };
 
-export default function ViewEvent({ event, capabilities }: ViewEventProps) {
+export default function ViewEvent({ event, capabilities, publicEventUrl }: ViewEventProps) {
   const { sideLinks } = usePage().props as any;
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showQrCode, setShowQrCode] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [selectedRegistration, setSelectedRegistration] = useState<AdminEventRegistration | null>(null);
   const [activeTab, setActiveTab] = useState<'overview' | 'speakers' | 'registrations' | 'resources' | 'payments'>('overview');
@@ -258,6 +261,14 @@ export default function ViewEvent({ event, capabilities }: ViewEventProps) {
           </div>
 
           <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:gap-3">
+            <button
+              type="button"
+              onClick={() => setShowQrCode(true)}
+              className="inline-flex min-w-0 items-center justify-center gap-2 rounded-md border border-slate-300 bg-white px-3 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 sm:px-4"
+            >
+              <QrCode size={17} />
+              QR code
+            </button>
             {capabilities.canUpdate && (
               <Link
                 href={route('admin.events.edit', event.slug)}
@@ -666,6 +677,15 @@ export default function ViewEvent({ event, capabilities }: ViewEventProps) {
           registration={selectedRegistration}
           eventTitle={event.title}
           onClose={() => setSelectedRegistration(null)}
+        />
+      )}
+
+      {showQrCode && (
+        <EventQrCodeModal
+          eventTitle={event.title}
+          eventSlug={event.slug}
+          publicUrl={publicEventUrl}
+          onClose={() => setShowQrCode(false)}
         />
       )}
     </DashboardLayout>

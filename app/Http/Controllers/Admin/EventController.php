@@ -107,8 +107,9 @@ class EventController extends Controller
         ];
 
         $speakers = $this->speakerService->fetchSpeakers();
+        $publicEventUrl = route('events.open', $event);
 
-        return Inertia::render('Admin/Events/View', compact('event', 'speakers', 'capabilities'));
+        return Inertia::render('Admin/Events/View', compact('event', 'speakers', 'capabilities', 'publicEventUrl'));
     }
 
     public function store(CreateEventRequest $request)
@@ -156,7 +157,9 @@ class EventController extends Controller
 
         return redirect()->back()->withInput()->with([
             'type' => 'error',
-            'message' => 'Failed to update event. Please try again.',
+            'message' => $program_cover
+                ? 'The event was not updated because the cover image could not be stored. Please try again or contact support.'
+                : 'Failed to update event. Please try again.',
         ]);
     }
 
