@@ -67,20 +67,24 @@ export function useEventForm(event?: EditableEvent, creatorId: number | null = n
         const { name, value, type } = event.target;
         const nextValue = type === 'checkbox' ? (event.target as HTMLInputElement).checked : value;
         form.setData(name as keyof EventFormData, nextValue as never);
+        form.clearErrors(name as keyof EventFormData);
     };
 
     const handleMetadataChange = (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         const { name, value, type } = event.target;
         const nextValue = type === 'checkbox' ? (event.target as HTMLInputElement).checked : value;
         form.setData('metadata', { ...form.data.metadata, [name]: nextValue });
+        form.clearErrors(`metadata.${name}` as keyof EventFormData);
     };
 
     const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
         form.setData('program_cover', event.target.files?.[0] ?? null);
+        form.clearErrors('program_cover');
     };
 
     const create = (event: FormEvent) => {
         event.preventDefault();
+        form.transform(normalizeEventPayload);
         form.post(route('admin.events.store'), { preserveScroll: true, forceFormData: true });
     };
 
@@ -88,11 +92,43 @@ export function useEventForm(event?: EditableEvent, creatorId: number | null = n
         event.preventDefault();
         // Multipart PUT is not parsed consistently by PHP, so Inertia sends a
         // multipart POST with method spoofing when a replacement cover exists.
-        form.transform((data) => ({ ...data, _method: 'put' }));
+        form.transform((data) => ({ ...normalizeEventPayload(data), _method: 'put' }));
         form.post(route('admin.events.update', slug), { preserveScroll: true, forceFormData: true });
     };
 
     return { form, handleInputChange, handleMetadataChange, handleFileChange, create, update };
+}
+
+function normalizeEventPayload(data: EventFormData): EventFormData {
+    const isDiscipleshipTrack = data.metadata.program_type === 'discipleship_track';
+    const keepsScreeningNote = data.metadata.requires_screening || data.metadata.registration_mode === 'selective';
+
+    return {
+        ...data,
+        title: data.title.trim(),
+        theme: data.theme.trim(),
+        location: data.mode === 'offline' ? '' : data.location.trim(),
+        physical_address: data.mode === 'online' ? '' : data.physical_address.trim(),
+        contact_email: data.contact_email.trim(),
+        attendee_slots: data.attendee_slots.trim(),
+        entry_fee: data.entry_fee.trim() || '0',
+        metadata: {
+            ...data.metadata,
+            program_code: data.metadata.program_code.trim(),
+            screening_note: keepsScreeningNote ? data.metadata.screening_note.trim() : '',
+            cohort_duration_weeks: isDiscipleshipTrack ? data.metadata.cohort_duration_weeks.trim() : '',
+            group_model: isDiscipleshipTrack ? data.metadata.group_model.trim() : '',
+            central_teaching_schedule: isDiscipleshipTrack ? data.metadata.central_teaching_schedule.trim() : '',
+            group_meeting_schedule: isDiscipleshipTrack ? data.metadata.group_meeting_schedule.trim() : '',
+            weekly_prayer_target_minutes: isDiscipleshipTrack ? data.metadata.weekly_prayer_target_minutes.trim() : '',
+            weekly_evangelism_target_min: isDiscipleshipTrack ? data.metadata.weekly_evangelism_target_min.trim() : '',
+            weekly_evangelism_target_max: isDiscipleshipTrack ? data.metadata.weekly_evangelism_target_max.trim() : '',
+            weekly_discipleship_target_min: isDiscipleshipTrack ? data.metadata.weekly_discipleship_target_min.trim() : '',
+            weekly_discipleship_target_max: isDiscipleshipTrack ? data.metadata.weekly_discipleship_target_max.trim() : '',
+            meeting_link: data.metadata.meeting_link.trim(),
+            access_notes: data.metadata.access_notes.trim(),
+        },
+    };
 }
 
 function toDateTimeInput(value?: string | null): string {

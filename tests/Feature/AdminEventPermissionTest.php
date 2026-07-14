@@ -2,13 +2,14 @@
 
 namespace Tests\Feature;
 
-use App\Enums\EventRegistrationStatus;
 use App\Enums\EventStatus;
 use App\Enums\Permissions\EventPermissionsEnum;
 use App\Models\Event;
 use App\Models\Speaker;
 use App\Models\Transaction;
 use App\Models\User;
+use Illuminate\Foundation\Http\Middleware\ValidateCsrfToken;
+use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\PermissionRegistrar;
@@ -23,8 +24,8 @@ class AdminEventPermissionTest extends TestCase
         parent::setUp();
 
         $this->withoutMiddleware([
-            \Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class,
-            \Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class,
+            VerifyCsrfToken::class,
+            ValidateCsrfToken::class,
         ]);
 
         app(PermissionRegistrar::class)->forgetCachedPermissions();
@@ -45,6 +46,99 @@ class AdminEventPermissionTest extends TestCase
         );
 
         $response->assertForbidden();
+    }
+
+    public function test_create_event_returns_field_errors_for_invalid_input(): void
+    {
+        $user = User::factory()->create();
+        $this->grantPermissions($user, [EventPermissionsEnum::CREATE->value]);
+
+        $response = $this->actingAs($user)->post(route('admin.events.store'), [
+            'description' => '<p><br></p>',
+            'creator_id' => $user->id,
+        ]);
+
+        $response->assertSessionHasErrors([
+            'title',
+            'theme',
+            'description',
+            'mode',
+            'start_date',
+            'end_date',
+        ]);
+    }
+
+    public function test_create_event_normalizes_and_persists_a_valid_payload(): void
+    {
+        $user = User::factory()->create();
+        $otherUser = User::factory()->create();
+        $this->grantPermissions($user, [EventPermissionsEnum::CREATE->value]);
+
+        $response = $this->actingAs($user)->post(route('admin.events.store'), [
+            'title' => '  Formation Intensive  ',
+            'theme' => '  Character and Capacity  ',
+            'description' => '<p>Focused leadership formation.</p>',
+            'mode' => 'online',
+            'location' => 'https://meet.example.com/formation',
+            'physical_address' => 'This stale value must not be stored',
+            'attendee_slots' => '40',
+            'start_date' => now()->addDays(2)->format('Y-m-d H:i:s'),
+            'end_date' => now()->addDays(2)->addHours(2)->format('Y-m-d H:i:s'),
+            'creator_id' => $otherUser->id,
+            'status' => EventStatus::DRAFT->value,
+            'entry_fee' => '0',
+            'require_sign_up' => '0',
+            'metadata' => [
+                'program_type' => 'discipleship_track',
+                'program_code' => 'BDT',
+                'registration_mode' => 'selective',
+                'requires_screening' => '1',
+                'cohort_duration_weeks' => '12',
+                'weekly_prayer_target_minutes' => '420',
+                'weekly_evangelism_target_min' => '3',
+                'weekly_evangelism_target_max' => '5',
+                'weekly_discipleship_target_min' => '1',
+                'weekly_discipleship_target_max' => '3',
+            ],
+        ]);
+
+        $response
+            ->assertSessionHasNoErrors()
+            ->assertRedirect(route('admin.events.index'));
+
+        $event = Event::query()->where('title', 'Formation Intensive')->firstOrFail();
+
+        $this->assertSame($user->id, $event->creator_id);
+        $this->assertNull($event->physical_address);
+        $this->assertFalse($event->require_sign_up);
+        $this->assertTrue($event->metadata['requires_screening']);
+        $this->assertSame(12, $event->metadata['cohort_duration_weeks']);
+        $this->assertSame(420, $event->metadata['weekly_prayer_target_minutes']);
+        $this->assertSame(3, $event->metadata['weekly_evangelism_target_min']);
+    }
+
+    public function test_paid_event_payload_requires_account_sign_up(): void
+    {
+        $user = User::factory()->create();
+        $this->grantPermissions($user, [EventPermissionsEnum::CREATE->value]);
+
+        $response = $this->actingAs($user)->post(route('admin.events.store'), [
+            'title' => 'Paid Leadership Forum',
+            'theme' => 'Executive Leadership',
+            'description' => '<p>A paid leadership forum.</p>',
+            'mode' => 'online',
+            'location' => 'https://meet.example.com/forum',
+            'start_date' => now()->addDays(3)->format('Y-m-d H:i:s'),
+            'end_date' => now()->addDays(3)->addHours(2)->format('Y-m-d H:i:s'),
+            'creator_id' => $user->id,
+            'entry_fee' => '5000',
+            'require_sign_up' => '0',
+        ]);
+
+        $response->assertSessionHasErrors([
+            'entry_fee' => 'Paid events must require account sign-up so payment can be linked to an attendee.',
+        ]);
+        $this->assertDatabaseMissing('events', ['title' => 'Paid Leadership Forum']);
     }
 
     public function test_user_with_manage_speakers_permission_can_assign_speakers_to_event(): void

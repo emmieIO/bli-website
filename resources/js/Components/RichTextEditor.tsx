@@ -27,6 +27,7 @@ import {
 import './RichTextEditor.css';
 
 interface RichTextEditorProps {
+    name?: string;
     value: string;
     onChange: (value: string) => void;
     label?: string;
@@ -58,6 +59,7 @@ function ToolbarButton({ active = false, disabled = false, title, onClick, child
 }
 
 export default function RichTextEditor({
+    name,
     value,
     onChange,
     label,
@@ -112,6 +114,22 @@ export default function RichTextEditor({
             editor.commands.setContent(value);
         }
     }, [value, editor]);
+
+    useEffect(() => {
+        if (!editor || !name) {
+            return;
+        }
+
+        editor.view.dom.setAttribute('aria-labelledby', `${name}-label`);
+
+        if (error) {
+            editor.view.dom.setAttribute('aria-invalid', 'true');
+            editor.view.dom.setAttribute('aria-describedby', `${name}-error`);
+        } else {
+            editor.view.dom.removeAttribute('aria-invalid');
+            editor.view.dom.removeAttribute('aria-describedby');
+        }
+    }, [editor, error, name]);
 
     const openLinkPanel = () => {
         if (!editor) {
@@ -169,10 +187,10 @@ export default function RichTextEditor({
     }
 
     return (
-        <div className="relative">
+        <div className="relative" data-validation-field={name}>
             {label && (
                 <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
-                    <label className="block text-sm font-semibold text-slate-800">
+                    <label id={name ? `${name}-label` : undefined} className="block text-sm font-semibold text-slate-800">
                         {label}
                         {required && <span className="ml-1 text-red-500">*</span>}
                     </label>
@@ -449,7 +467,7 @@ export default function RichTextEditor({
                 </div>
             </div>
 
-            {error && <p className="mt-2 text-sm text-red-500">{error}</p>}
+            {error && <p id={name ? `${name}-error` : undefined} className="mt-2 text-sm text-red-600">{error}</p>}
         </div>
     );
 }

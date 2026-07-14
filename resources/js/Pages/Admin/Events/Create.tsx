@@ -1,4 +1,6 @@
+import { useEffect, useRef } from 'react';
 import { Head, Link, usePage } from '@inertiajs/react';
+import { AlertCircle } from 'lucide-react';
 import DashboardLayout from '@/Layouts/DashboardLayout';
 import Input from '@/Components/Input';
 import Textarea from '@/Components/Textarea';
@@ -10,6 +12,37 @@ export default function CreateEvent() {
   const { form, handleInputChange, handleMetadataChange, handleFileChange, create: handleSubmit } = useEventForm(undefined, auth?.user?.id ?? null);
   const { data: formData, processing: isSubmitting, errors } = form;
   const programMetadata = formData.metadata;
+  const formRef = useRef<HTMLFormElement>(null);
+  const errorSummaryRef = useRef<HTMLDivElement>(null);
+  const errorEntries = Object.entries(errors).filter((entry): entry is [string, string] => Boolean(entry[1]));
+
+  const focusValidationField = (errorKey: string, shouldScroll = true) => {
+    const formElement = formRef.current;
+
+    if (!formElement) return;
+
+    const fieldName = errorKey.startsWith('metadata.') ? errorKey.slice('metadata.'.length) : errorKey;
+    const field = formElement.querySelector<HTMLElement>(`[name="${fieldName}"]`);
+    const fieldGroup = formElement.querySelector<HTMLElement>(`[data-validation-field="${errorKey}"]`);
+    const focusTarget = field ?? fieldGroup?.querySelector<HTMLElement>('.ProseMirror, input, textarea, select') ?? fieldGroup;
+
+    if (shouldScroll) {
+      focusTarget?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
+    focusTarget?.focus({ preventScroll: true });
+  };
+
+  useEffect(() => {
+    const firstError = errorEntries[0]?.[0];
+
+    if (firstError) {
+      requestAnimationFrame(() => {
+        errorSummaryRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        focusValidationField(firstError, false);
+      });
+    }
+  }, [errors]);
 
   const shouldShowLocation = formData.mode === 'online' || formData.mode === 'hybrid';
   const shouldShowPhysicalAddress = formData.mode === 'offline' || formData.mode === 'hybrid';
@@ -40,7 +73,36 @@ export default function CreateEvent() {
 
         {/* Form Card */}
         <div className="bg-white border border-slate-200 rounded-lg shadow-sm p-6 md:p-8">
-          <form onSubmit={handleSubmit} className="space-y-8">
+          <form ref={formRef} onSubmit={handleSubmit} noValidate className="space-y-8">
+            {errorEntries.length > 0 && (
+              <div
+                ref={errorSummaryRef}
+                role="alert"
+                aria-live="polite"
+                className="scroll-mt-20 border-l-4 border-red-500 bg-red-50 px-4 py-3 text-red-900"
+              >
+                <div className="flex items-start gap-3">
+                  <AlertCircle className="mt-0.5 h-5 w-5 shrink-0" aria-hidden="true" />
+                  <div>
+                    <h2 className="text-sm font-semibold">Please correct the highlighted fields</h2>
+                    <ul className="mt-2 space-y-1 text-sm">
+                      {errorEntries.map(([field, message]) => (
+                        <li key={field}>
+                          <button
+                            type="button"
+                            onClick={() => focusValidationField(field)}
+                            className="text-left underline decoration-red-300 underline-offset-2 hover:decoration-red-700"
+                          >
+                            {message}
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* Section: Basic Event Info */}
             <div>
               <h3 className="text-lg font-semibold text-slate-900 mb-4 pb-2 border-b border-slate-200">
@@ -78,6 +140,8 @@ export default function CreateEvent() {
                       value={formData.status}
                       onChange={handleInputChange}
                       required
+                      aria-invalid={errors?.status ? true : undefined}
+                      aria-describedby={errors?.status ? 'status-error' : undefined}
                       className={`block w-full px-3 py-2 border rounded-lg shadow-sm focus:ring-primary-500 focus:border-primary-500 focus:outline-none text-sm ${errors?.status ? 'border-red-500' : 'border-slate-300'}`}
                     >
                       <option value="draft">Draft</option>
@@ -91,7 +155,7 @@ export default function CreateEvent() {
                       <option value="archived">Archived</option>
                     </select>
                     {errors?.status && (
-                      <p className="text-sm text-red-500 mt-1">{errors.status}</p>
+                      <p id="status-error" className="text-sm text-red-600 mt-1">{errors.status}</p>
                     )}
                   </div>
 
@@ -105,6 +169,8 @@ export default function CreateEvent() {
                       value={formData.mode}
                       onChange={handleInputChange}
                       required
+                      aria-invalid={errors?.mode ? true : undefined}
+                      aria-describedby={errors?.mode ? 'mode-error' : undefined}
                       className={`block w-full px-3 py-2 border rounded-lg shadow-sm focus:ring-primary-500 focus:border-primary-500 focus:outline-none text-sm ${errors?.mode ? 'border-red-500' : 'border-slate-300'}`}
                     >
                       <option value="">Select mode</option>
@@ -113,7 +179,7 @@ export default function CreateEvent() {
                       <option value="hybrid">Hybrid</option>
                     </select>
                     {errors?.mode && (
-                      <p className="text-sm text-red-500 mt-1">{errors.mode}</p>
+                      <p id="mode-error" className="text-sm text-red-600 mt-1">{errors.mode}</p>
                     )}
                   </div>
 
@@ -226,11 +292,16 @@ export default function CreateEvent() {
                       name="program_type"
                       value={programMetadata.program_type}
                       onChange={handleMetadataChange}
+                      aria-invalid={errors?.['metadata.program_type'] ? true : undefined}
+                      aria-describedby={errors?.['metadata.program_type'] ? 'program_type-error' : undefined}
                       className="block w-full px-3 py-2 border border-slate-300 rounded-lg shadow-sm focus:ring-primary-500 focus:border-primary-500 focus:outline-none text-sm"
                     >
                       <option value="general_event">General Event</option>
                       <option value="discipleship_track">Discipleship Track</option>
                     </select>
+                    {errors?.['metadata.program_type'] && (
+                      <p id="program_type-error" className="mt-1 text-sm text-red-600">{errors['metadata.program_type']}</p>
+                    )}
                   </div>
 
                   <Input
@@ -253,13 +324,15 @@ export default function CreateEvent() {
                       name="registration_mode"
                       value={programMetadata.registration_mode}
                       onChange={handleMetadataChange}
+                      aria-invalid={errors?.['metadata.registration_mode'] ? true : undefined}
+                      aria-describedby={errors?.['metadata.registration_mode'] ? 'registration_mode-error' : undefined}
                       className="block w-full px-3 py-2 border border-slate-300 rounded-lg shadow-sm focus:ring-primary-500 focus:border-primary-500 focus:outline-none text-sm"
                     >
                       <option value="open">Open Registration</option>
                       <option value="selective">Selective Admission</option>
                     </select>
                     {errors?.['metadata.registration_mode'] && (
-                      <p className="text-sm text-red-500 mt-1">{errors['metadata.registration_mode']}</p>
+                      <p id="registration_mode-error" className="text-sm text-red-600 mt-1">{errors['metadata.registration_mode']}</p>
                     )}
                   </div>
 
@@ -432,12 +505,14 @@ export default function CreateEvent() {
                   id="program_cover"
                   accept=".jpg,.jpeg,.png,.JPG,.PNG"
                   onChange={handleFileChange}
+                  aria-invalid={errors?.program_cover ? true : undefined}
+                  aria-describedby={errors?.program_cover ? 'program_cover-error' : undefined}
                   className={`block w-full text-sm text-slate-900 bg-slate-50 rounded-lg border focus:ring-2 focus:ring-primary focus:border-primary
                     file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium
                     file:bg-primary file:text-white hover:file:bg-[#003366] transition ${errors?.program_cover ? 'border-red-500' : 'border-slate-300'}`}
                 />
                 {errors?.program_cover && (
-                  <p className="text-sm text-red-500 mt-1">{errors.program_cover}</p>
+                  <p id="program_cover-error" className="text-sm text-red-600 mt-1">{errors.program_cover}</p>
                 )}
                 <p className="mt-2 text-xs text-slate-500">Recommended size: 1200x600px. Max file size: 5MB.</p>
               </div>
@@ -449,9 +524,13 @@ export default function CreateEvent() {
                 Event Description
               </h3>
               <RichTextEditor
+                name="description"
                 label="Description"
                 value={formData.description}
-                onChange={(value) => form.setData('description', value)}
+                onChange={(value) => {
+                  form.setData('description', value);
+                  form.clearErrors('description');
+                }}
                 error={errors?.description}
                 placeholder="Describe your event, audience, highlights, and what attendees can expect..."
                 required

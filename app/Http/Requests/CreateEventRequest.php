@@ -5,11 +5,14 @@ namespace App\Http\Requests;
 use App\Enums\EventModeEnum;
 use App\Enums\EventStatus;
 use App\Enums\Permissions\EventPermissionsEnum;
+use App\Http\Requests\Concerns\NormalizesEventPayload;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
 class CreateEventRequest extends FormRequest
 {
+    use NormalizesEventPayload;
+
     /**
      * Determine if the user is authorized to make this request.
      */
@@ -139,6 +142,7 @@ class CreateEventRequest extends FormRequest
         }
 
         $this->merge([
+            ...$this->normalizedEventFields(useAuthenticatedCreator: true),
             'status' => $status,
             'is_active' => $isActive,
             'is_published' => $isPublished,

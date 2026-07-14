@@ -8,10 +8,13 @@ interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
 
 const Input = forwardRef<HTMLInputElement, InputProps>(
     ({ label, icon, error, className = '', ...props }, ref) => {
+        const inputId = props.id ?? props.name;
+        const errorId = error && inputId ? `${inputId}-error` : undefined;
+
         return (
             <div className="relative">
                 {label && (
-                    <label className="block text-sm font-medium text-gray-700 mb-1 font-lato">
+                    <label htmlFor={inputId} className="block text-sm font-medium text-gray-700 mb-1 font-lato">
                         {label}
                         {props.required && <span className="text-red-500 ml-1">*</span>}
                     </label>
@@ -24,6 +27,9 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
                     )}
                     <input
                         ref={ref}
+                        id={inputId}
+                        aria-invalid={error ? true : undefined}
+                        aria-describedby={errorId ?? props['aria-describedby']}
                         className={`
                             block w-full rounded-lg border shadow-sm px-3 py-2
                             focus:border-primary-500 focus:ring-primary-500 focus:outline-none
@@ -37,7 +43,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
                     />
                 </div>
                 {error && (
-                    <p className="text-sm text-red-500 mt-1 font-lato">{error}</p>
+                    <p id={errorId} className="text-sm text-red-600 mt-1 font-lato">{error}</p>
                 )}
             </div>
         );
