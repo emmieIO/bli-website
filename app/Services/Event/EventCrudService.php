@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use RuntimeException;
 
 class EventCrudService
 {
@@ -23,9 +24,15 @@ class EventCrudService
             $filepath = null;
 
             $validated['slug'] = (string) Str::uuid();
+            unset($validated['program_cover']);
 
             if ($programCover) {
                 $filepath = $this->uploadFile($programCover, 'program_covers');
+
+                if (! $filepath) {
+                    throw new RuntimeException('The event cover could not be stored.');
+                }
+
                 $validated['program_cover'] = $filepath;
             }
 
@@ -55,16 +62,19 @@ class EventCrudService
 
         try {
             $filePath = $event->program_cover;
+            unset($validated['program_cover']);
 
             if ($programCover) {
                 $newFilePath = $this->uploadFile($programCover, 'program_covers');
 
-                if ($newFilePath) {
-                    $validated['program_cover'] = $newFilePath;
+                if (! $newFilePath) {
+                    throw new RuntimeException('The replacement event cover could not be stored.');
+                }
 
-                    if (! empty($filePath)) {
-                        $this->removeFile($filePath);
-                    }
+                $validated['program_cover'] = $newFilePath;
+
+                if (! empty($filePath)) {
+                    $this->removeFile($filePath);
                 }
             } else {
                 $validated['program_cover'] = $filePath;

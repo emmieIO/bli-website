@@ -12,6 +12,8 @@ use App\Models\User;
 use Illuminate\Foundation\Http\Middleware\ValidateCsrfToken;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\PermissionRegistrar;
 use Tests\TestCase;
@@ -116,6 +118,78 @@ class AdminEventPermissionTest extends TestCase
         $this->assertSame(12, $event->metadata['cohort_duration_weeks']);
         $this->assertSame(420, $event->metadata['weekly_prayer_target_minutes']);
         $this->assertSame(3, $event->metadata['weekly_evangelism_target_min']);
+    }
+
+    public function test_create_event_stores_its_cover_on_the_public_disk(): void
+    {
+        Storage::fake('public');
+
+        $user = User::factory()->create();
+        $this->grantPermissions($user, [EventPermissionsEnum::CREATE->value]);
+
+        $response = $this->actingAs($user)->post(route('admin.events.store'), [
+            'title' => 'Event With Cover',
+            'theme' => 'Visible Leadership',
+            'description' => '<p>An event with a permanent cover.</p>',
+            'mode' => 'online',
+            'location' => 'https://meet.example.com/cover',
+            'start_date' => now()->addDays(2)->format('Y-m-d H:i:s'),
+            'end_date' => now()->addDays(2)->addHours(2)->format('Y-m-d H:i:s'),
+            'creator_id' => $user->id,
+            'entry_fee' => '0',
+            'program_cover' => UploadedFile::fake()->image('event-cover.jpg', 1200, 600),
+        ]);
+
+        $response
+            ->assertSessionHasNoErrors()
+            ->assertRedirect(route('admin.events.index'));
+
+        $event = Event::query()->where('title', 'Event With Cover')->firstOrFail();
+
+        $this->assertStringStartsWith('program_covers/', $event->program_cover);
+        $this->assertStringNotContainsString('/tmp/', $event->program_cover);
+        Storage::disk('public')->assertExists($event->program_cover);
+    }
+
+    public function test_update_event_replaces_its_cover_with_a_permanent_file(): void
+    {
+        Storage::fake('public');
+
+        $user = User::factory()->create();
+        $event = $this->makeEvent([
+            'creator_id' => $user->id,
+            'mode' => 'online',
+            'location' => 'https://meet.example.com/replacement-cover',
+            'physical_address' => null,
+        ]);
+        $this->grantPermissions($user, [EventPermissionsEnum::UPDATE_ANY->value]);
+
+        $response = $this->actingAs($user)->post(route('admin.events.update', $event->slug), [
+            '_method' => 'put',
+            'title' => $event->title,
+            'theme' => $event->theme,
+            'description' => $event->description,
+            'mode' => $event->mode,
+            'location' => $event->location,
+            'physical_address' => $event->physical_address,
+            'attendee_slots' => $event->attendee_slots,
+            'start_date' => $event->start_date->format('Y-m-d H:i:s'),
+            'end_date' => $event->end_date->format('Y-m-d H:i:s'),
+            'creator_id' => $event->creator_id,
+            'status' => $event->status->value,
+            'entry_fee' => $event->entry_fee,
+            'program_cover' => UploadedFile::fake()->image('replacement-cover.png', 1200, 600),
+        ]);
+
+        $response
+            ->assertSessionHasNoErrors()
+            ->assertRedirect(route('admin.events.index'));
+
+        $event->refresh();
+
+        $this->assertStringStartsWith('program_covers/', $event->program_cover);
+        $this->assertStringNotContainsString('/tmp/', $event->program_cover);
+        Storage::disk('public')->assertExists($event->program_cover);
     }
 
     public function test_paid_event_payload_requires_account_sign_up(): void
