@@ -136,7 +136,7 @@ class JoinEventAction
 
         $validated = $request->validate([
             'email' => ['required', 'email', 'max:255'],
-            'name' => ['nullable', 'string', 'max:255'],
+            'name' => ['required', 'string', 'max:255'],
         ]);
 
         $existing = $event->guestAttendees()
@@ -153,13 +153,13 @@ class JoinEventAction
         $result = $this->eventRegistrationService->registerGuestIfAvailable(
             $event,
             $validated['email'],
-            $validated['name'] ?? null
+            $validated['name']
         );
 
         if ($result === EventRegistrationStatus::REGISTERED) {
             return back()->with([
                 'type' => 'success',
-                'message' => 'Your email has been added to the attendee list. We will send event reminders to that address.',
+                'message' => 'Your registration is confirmed. We will send event reminders to your email address.',
             ]);
         }
 

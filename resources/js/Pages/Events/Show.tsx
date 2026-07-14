@@ -1,4 +1,4 @@
-import { Head, Link, router } from '@inertiajs/react';
+import { Head, Link, router, useForm } from '@inertiajs/react';
 import GuestLayout from '@/Layouts/GuestLayout';
 import { useState, useEffect, FormEvent } from 'react';
 
@@ -88,10 +88,11 @@ interface EventShowProps {
 
 export default function EventShow({ event, auth, primary_cta }: EventShowProps) {
     const [showModal, setShowModal] = useState(false);
-    const [isSubmitting, setIsSubmitting] = useState(false);
     const [countdown, setCountdown] = useState('');
-    const [guestEmail, setGuestEmail] = useState('');
-    const [guestName, setGuestName] = useState('');
+    const guestRegistration = useForm({
+        name: '',
+        email: '',
+    });
 
     const now = new Date();
     const startDate = new Date(event.start_date);
@@ -152,20 +153,12 @@ export default function EventShow({ event, auth, primary_cta }: EventShowProps) 
 
     const handleRegistration = (e: FormEvent) => {
         e.preventDefault();
-        setIsSubmitting(true);
 
-        router.post(route('events.join', event.slug), primary_cta.requires_email && !auth?.user ? {
-            email: guestEmail,
-            name: guestName || undefined,
-        } : {}, {
+        guestRegistration.post(route('events.join', event.slug), {
             preserveScroll: true,
             onSuccess: () => {
-                setGuestEmail('');
-                setGuestName('');
+                guestRegistration.reset();
                 setShowModal(false);
-            },
-            onFinish: () => {
-                setIsSubmitting(false);
             },
         });
     };
@@ -763,9 +756,9 @@ export default function EventShow({ event, auth, primary_cta }: EventShowProps) 
                                 </div>
 
                                 {/* Modal Title */}
-                                <h3 className="mb-2 text-xl font-bold text-white">{requiresGuestEmail ? 'Register With Email' : 'Confirm Free Registration'}</h3>
+                                <h3 className="mb-2 text-xl font-bold text-white">{requiresGuestEmail ? 'Register as a guest' : 'Confirm Free Registration'}</h3>
                                 <p className="text-sm text-white/90">
-                                    {requiresGuestEmail ? 'No account needed. We will use your email for reminders.' : 'Reserve your seat and move directly into the attendee journey'}
+                                    {requiresGuestEmail ? 'No account needed. Enter your name and email to reserve your place.' : 'Reserve your seat and move directly into the attendee journey'}
                                 </p>
                             </div>
 
@@ -781,7 +774,7 @@ export default function EventShow({ event, auth, primary_cta }: EventShowProps) 
                                     </div>
                                     <p className="text-slate-600">
                                         {requiresGuestEmail
-                                            ? 'This is a free event. Add your email and we will include you in event reminders.'
+                                            ? 'This is a free event. We will use these details to confirm your registration and send reminders.'
                                             : 'This is a free event. Once confirmed, your attendee workspace becomes the home for access instructions, resources, and updates.'}
                                     </p>
                                 </div>
@@ -791,16 +784,26 @@ export default function EventShow({ event, auth, primary_cta }: EventShowProps) 
                                         <div className="mb-6 space-y-4 text-left">
                                             <div>
                                                 <label htmlFor="guest_name" className="mb-1 block text-sm font-medium text-slate-700">
-                                                    Name <span className="text-slate-400">(optional)</span>
+                                                    Full name <span className="text-red-500">*</span>
                                                 </label>
                                                 <input
                                                     id="guest_name"
                                                     type="text"
-                                                    value={guestName}
-                                                    onChange={(e) => setGuestName(e.target.value)}
+                                                    name="name"
+                                                    required
+                                                    autoComplete="name"
+                                                    value={guestRegistration.data.name}
+                                                    onChange={(e) => guestRegistration.setData('name', e.target.value)}
+                                                    aria-invalid={Boolean(guestRegistration.errors.name)}
+                                                    aria-describedby={guestRegistration.errors.name ? 'guest_name_error' : undefined}
                                                     className="h-11 w-full rounded-lg border border-slate-300 px-3 text-sm text-slate-900 outline-none transition focus:border-primary-300 focus:ring-2 focus:ring-primary-500/10"
-                                                    placeholder="Your name"
+                                                    placeholder="Your full name"
                                                 />
+                                                {guestRegistration.errors.name && (
+                                                    <p id="guest_name_error" className="mt-1 text-xs font-medium text-red-600">
+                                                        {guestRegistration.errors.name}
+                                                    </p>
+                                                )}
                                             </div>
                                             <div>
                                                 <label htmlFor="guest_email" className="mb-1 block text-sm font-medium text-slate-700">
@@ -809,23 +812,33 @@ export default function EventShow({ event, auth, primary_cta }: EventShowProps) 
                                                 <input
                                                     id="guest_email"
                                                     type="email"
+                                                    name="email"
                                                     required
-                                                    value={guestEmail}
-                                                    onChange={(e) => setGuestEmail(e.target.value)}
+                                                    autoComplete="email"
+                                                    value={guestRegistration.data.email}
+                                                    onChange={(e) => guestRegistration.setData('email', e.target.value)}
+                                                    aria-invalid={Boolean(guestRegistration.errors.email)}
+                                                    aria-describedby={guestRegistration.errors.email ? 'guest_email_error' : 'guest_email_help'}
                                                     className="h-11 w-full rounded-lg border border-slate-300 px-3 text-sm text-slate-900 outline-none transition focus:border-primary-300 focus:ring-2 focus:ring-primary-500/10"
                                                     placeholder="you@example.com"
                                                 />
-                                                <p className="mt-1 text-xs text-slate-500">We will use this only for this event registration and reminders.</p>
+                                                {guestRegistration.errors.email ? (
+                                                    <p id="guest_email_error" className="mt-1 text-xs font-medium text-red-600">
+                                                        {guestRegistration.errors.email}
+                                                    </p>
+                                                ) : (
+                                                    <p id="guest_email_help" className="mt-1 text-xs text-slate-500">We will use this only for this event registration and reminders.</p>
+                                                )}
                                             </div>
                                         </div>
                                     )}
                                     <div className="flex flex-col justify-center gap-4 sm:flex-row">
                                         <button
                                             type="submit"
-                                            disabled={isSubmitting}
+                                            disabled={guestRegistration.processing}
                                             className="inline-flex min-w-40 items-center justify-center gap-2 rounded-xl bg-slate-950 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
                                         >
-                                            {isSubmitting ? (
+                                            {guestRegistration.processing ? (
                                                 <>
                                                     <svg className="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
                                                         <circle
@@ -838,12 +851,12 @@ export default function EventShow({ event, auth, primary_cta }: EventShowProps) 
                                                         ></circle>
                                                         <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
                                                     </svg>
-                                                    {requiresGuestEmail ? 'Adding email...' : 'Confirming registration...'}
+                                                    Confirming registration...
                                                 </>
                                             ) : (
                                                 <>
                                                     <i className="fas fa-check"></i>
-                                                    {requiresGuestEmail ? 'Register Email' : 'Yes, Confirm Registration'}
+                                                    {requiresGuestEmail ? 'Complete registration' : 'Yes, Confirm Registration'}
                                                 </>
                                             )}
                                         </button>

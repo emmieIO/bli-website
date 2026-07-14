@@ -47,11 +47,12 @@ class EventRegistrationService
         return $this->setRegistrationStatus($event, $userId, EventRegistrationStatus::REGISTERED);
     }
 
-    public function registerGuestIfAvailable(Event $event, string $email, ?string $name = null): EventRegistrationStatus|false
+    public function registerGuestIfAvailable(Event $event, string $email, string $name): EventRegistrationStatus|false
     {
         $email = mb_strtolower(trim($email));
+        $name = trim($name);
 
-        if ($email === '' || ! filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        if ($name === '' || $email === '' || ! filter_var($email, FILTER_VALIDATE_EMAIL)) {
             return false;
         }
 
@@ -77,7 +78,7 @@ class EventRegistrationService
             }
 
             $existing->update([
-                'name' => $name ?: $existing->name,
+                'name' => $name,
                 'status' => $targetStatus->value,
             ]);
 

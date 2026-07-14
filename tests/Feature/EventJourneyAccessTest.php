@@ -191,13 +191,45 @@ class EventJourneyAccessTest extends TestCase
 
         $response
             ->assertRedirect(route('events.show', $event->slug))
-            ->assertSessionHas('message', 'Your email has been added to the attendee list. We will send event reminders to that address.');
+            ->assertSessionHas('message', 'Your registration is confirmed. We will send event reminders to your email address.');
 
         $this->assertDatabaseHas('event_guest_attendees', [
             'event_id' => $event->id,
             'email' => 'guest@example.com',
             'name' => 'Guest Attendee',
             'status' => EventRegistrationStatus::REGISTERED->value,
+        ]);
+    }
+
+    public function test_guest_registration_requires_name_and_email(): void
+    {
+        $event = $this->makeEvent([
+            'entry_fee' => 0,
+            'attendee_slots' => 5,
+            'require_sign_up' => false,
+        ]);
+
+        $response = $this
+            ->from(route('events.show', $event->slug))
+            ->post(route('events.join', $event->slug), [
+                'email' => 'guest@example.com',
+            ]);
+
+        $response
+            ->assertRedirect(route('events.show', $event->slug))
+            ->assertSessionHasErrors(['name']);
+
+        $this
+            ->from(route('events.show', $event->slug))
+            ->post(route('events.join', $event->slug), [
+                'name' => 'Guest Attendee',
+            ])
+            ->assertRedirect(route('events.show', $event->slug))
+            ->assertSessionHasErrors(['email']);
+
+        $this->assertDatabaseMissing('event_guest_attendees', [
+            'event_id' => $event->id,
+            'email' => 'guest@example.com',
         ]);
     }
 
@@ -213,6 +245,7 @@ class EventJourneyAccessTest extends TestCase
             ->from(route('events.show', $event->slug))
             ->post(route('events.join', $event->slug), [
                 'email' => 'guest@example.com',
+                'name' => 'Guest Attendee',
             ]);
 
         $response
@@ -243,6 +276,7 @@ class EventJourneyAccessTest extends TestCase
             ->from(route('events.show', $event->slug))
             ->post(route('events.join', $event->slug), [
                 'email' => 'guest@example.com',
+                'name' => 'Guest Attendee',
             ]);
 
         $response

@@ -54,7 +54,7 @@ class PublicEventCtaResolver
     {
         if (! $user) {
             if (! $event->require_sign_up && (float) $event->entry_fee <= 0) {
-                return $this->action($key, 'Register with email', 'No account needed. Use your email to receive event reminders.', route('events.join', $event->slug), [
+                return $this->action($key, 'Register as guest', 'No account needed. Use your name and email to register and receive event reminders.', route('events.join', $event->slug), [
                     'method' => 'post',
                     'requires_confirmation' => true,
                     'requires_email' => true,

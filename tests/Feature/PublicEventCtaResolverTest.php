@@ -101,7 +101,7 @@ class PublicEventCtaResolverTest extends TestCase
         $cta = app(PublicEventCtaResolver::class)->resolve($event, null);
 
         $this->assertSame('register_now', $cta['key']);
-        $this->assertSame('Register with email', $cta['label']);
+        $this->assertSame('Register as guest', $cta['label']);
         $this->assertSame('post', $cta['method']);
         $this->assertTrue($cta['requires_confirmation']);
         $this->assertTrue($cta['requires_email']);
