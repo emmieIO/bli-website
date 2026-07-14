@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Enums\EventStatus;
 use App\Enums\Permissions\EventPermissionsEnum;
 use App\Models\Event;
+use App\Models\EventGuestAttendee;
 use App\Models\Speaker;
 use App\Models\Transaction;
 use App\Models\User;
@@ -202,6 +203,45 @@ class AdminEventPermissionTest extends TestCase
             ->component('Admin/Events/View')
             ->where('capabilities.canViewPayments', false)
             ->has('event.transactions', 0));
+    }
+
+    public function test_event_workspace_and_index_include_email_guest_registrations(): void
+    {
+        $manager = User::factory()->create();
+        $accountAttendee = User::factory()->create();
+        $event = $this->makeEvent(['creator_id' => $manager->id]);
+
+        $event->attendees()->attach($accountAttendee->id, [
+            'status' => 'registered',
+            'revoke_count' => 0,
+        ]);
+        EventGuestAttendee::query()->create([
+            'event_id' => $event->id,
+            'name' => 'Guest Participant',
+            'email' => 'guest.participant@example.com',
+            'status' => 'registered',
+        ]);
+
+        $this->grantPermissions($manager, [EventPermissionsEnum::VIEW_ANY->value]);
+
+        $this->actingAs($manager)
+            ->get(route('admin.events.show', $event->slug))
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page
+                ->component('Admin/Events/View')
+                ->has('event.attendees', 1)
+                ->has('event.guest_attendees', 1)
+                ->where('event.guest_attendees.0.name', 'Guest Participant')
+                ->where('event.guest_attendees.0.email', 'guest.participant@example.com')
+                ->where('event.guest_attendees.0.status', 'registered'));
+
+        $this->actingAs($manager)
+            ->get(route('admin.events.index'))
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page
+                ->component('Admin/Events/Index')
+                ->where('events.data.0.attendees_count', 1)
+                ->where('events.data.0.guest_attendees_count', 1));
     }
 
     public function test_event_workspace_includes_payment_data_with_view_payments_permission(): void

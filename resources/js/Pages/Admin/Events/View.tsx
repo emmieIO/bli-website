@@ -1,7 +1,9 @@
 import { Head, Link, router, usePage } from '@inertiajs/react';
+import { BadgeCheck, CalendarDays, Eye, Mail, Phone, UserRound, X } from 'lucide-react';
 import DashboardLayout from '@/Layouts/DashboardLayout';
 import { useMemo, useState } from 'react';
 import type { ReactNode } from 'react';
+import type { AdminEventGuestAttendee, AdminEventRegistration } from '@/types/events';
 
 interface Speaker {
   id: number;
@@ -27,6 +29,9 @@ interface Attendee {
   id: number;
   name: string;
   email: string;
+  phone?: string | null;
+  headline?: string | null;
+  email_verified_at?: string | null;
   pivot: {
     status: string;
     created_at: string;
@@ -90,6 +95,7 @@ interface Event {
   speakers: Speaker[];
   resources: Resource[];
   attendees: Attendee[];
+  guest_attendees: AdminEventGuestAttendee[];
   speaker_applications: SpeakerApplication[];
   transactions: Transaction[];
   program_profile?: {
@@ -152,13 +158,37 @@ export default function ViewEvent({ event, capabilities }: ViewEventProps) {
   const { sideLinks } = usePage().props as any;
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [selectedRegistration, setSelectedRegistration] = useState<AdminEventRegistration | null>(null);
   const [activeTab, setActiveTab] = useState<'overview' | 'speakers' | 'registrations' | 'resources' | 'payments'>('overview');
 
+  const registrations = useMemo(() => [
+    ...event.attendees.map((attendee) => ({
+      key: `account-${attendee.id}`,
+      userId: attendee.id,
+      name: attendee.name,
+      email: attendee.email,
+      phone: attendee.phone,
+      headline: attendee.headline,
+      emailVerified: Boolean(attendee.email_verified_at),
+      status: attendee.pivot.status,
+      createdAt: attendee.pivot.created_at,
+      source: 'Account' as const,
+    })),
+    ...(event.guest_attendees ?? []).map((attendee) => ({
+      key: `guest-${attendee.id}`,
+      name: attendee.name || 'Email guest',
+      email: attendee.email,
+      status: attendee.status,
+      createdAt: attendee.created_at,
+      source: 'Email guest' as const,
+    })),
+  ].sort((first, second) => new Date(second.createdAt).getTime() - new Date(first.createdAt).getTime()), [event.attendees, event.guest_attendees]);
+
   const registrationStats = useMemo(() => {
-    const registered = event.attendees.filter((attendee) => attendee.pivot.status === 'registered').length;
-    const cancelled = event.attendees.filter((attendee) => attendee.pivot.status === 'cancelled').length;
+    const registered = registrations.filter((registration) => registration.status === 'registered').length;
+    const cancelled = registrations.filter((registration) => registration.status === 'cancelled').length;
     return { registered, cancelled };
-  }, [event.attendees]);
+  }, [registrations]);
   const registrationLabel = (status: string) => status === 'registered' ? 'confirmed' : status.replace('_', ' ');
 
   const successfulPayments = event.transactions.filter((transaction) => transaction.status === 'successful');
@@ -388,25 +418,38 @@ export default function ViewEvent({ event, capabilities }: ViewEventProps) {
             )}
 
             {activeTab === 'registrations' && (
-              <WorkspacePanel title={`Registrations (${event.attendees.length})`}>
+              <WorkspacePanel title={`Registrations (${registrations.length})`}>
                 <div className="space-y-3">
-                  {event.attendees.length > 0 ? (
-                    event.attendees.map((attendee) => (
-                      <div key={attendee.id} className="flex flex-col gap-3 rounded-md border border-slate-200 px-3 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-4">
+                  {registrations.length > 0 ? (
+                    registrations.map((registration) => (
+                      <div key={registration.key} className="flex flex-col gap-3 rounded-md border border-slate-200 px-3 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-4">
                         <div className="min-w-0">
-                          <p className="text-sm font-semibold text-primary">{attendee.name}</p>
-                          <p className="break-all text-xs text-slate-500">{attendee.email}</p>
+                          <div className="flex flex-wrap items-center gap-2">
+                            <p className="text-sm font-semibold text-primary">{registration.name}</p>
+                            <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-semibold text-slate-600">
+                              {registration.source}
+                            </span>
+                          </div>
+                          <p className="break-all text-xs text-slate-500">{registration.email}</p>
                         </div>
                         <div className="flex items-center justify-between gap-3 sm:justify-end">
+                          <button
+                            type="button"
+                            onClick={() => setSelectedRegistration(registration)}
+                            className="inline-flex items-center gap-1.5 rounded-md border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-700 transition hover:border-primary hover:text-primary"
+                          >
+                            <Eye size={14} />
+                            View details
+                          </button>
                           <div className="text-right">
                           <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold capitalize ${
-                            attendee.pivot.status === 'registered'
+                            registration.status === 'registered'
                               ? 'bg-green-100 text-green-700'
                               : 'bg-rose-100 text-rose-700'
                           }`}>
-                            {registrationLabel(attendee.pivot.status)}
+                            {registrationLabel(registration.status)}
                           </span>
-                          <p className="mt-1 text-xs text-slate-500">{formatShortDate(attendee.pivot.created_at)}</p>
+                          <p className="mt-1 text-xs text-slate-500">{formatShortDate(registration.createdAt)}</p>
                           </div>
                         </div>
                       </div>
@@ -617,7 +660,130 @@ export default function ViewEvent({ event, capabilities }: ViewEventProps) {
           </div>
         </div>
       )}
+
+      {selectedRegistration && (
+        <RegistrationDetailsModal
+          registration={selectedRegistration}
+          eventTitle={event.title}
+          onClose={() => setSelectedRegistration(null)}
+        />
+      )}
     </DashboardLayout>
+  );
+}
+
+function RegistrationDetailsModal({
+  registration,
+  eventTitle,
+  onClose,
+}: {
+  registration: AdminEventRegistration;
+  eventTitle: string;
+  onClose: () => void;
+}) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/50 px-4 py-6">
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="registration-details-title"
+        className="max-h-full w-full max-w-lg overflow-y-auto rounded-lg border border-slate-200 bg-white shadow-xl"
+      >
+        <div className="flex items-start justify-between gap-4 border-b border-slate-200 px-5 py-5 sm:px-6">
+          <div className="flex min-w-0 items-center gap-3">
+            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-md bg-primary text-sm font-bold text-white">
+              {initials(registration.name)}
+            </div>
+            <div className="min-w-0">
+              <p className="text-xs font-semibold uppercase text-slate-400">Registration details</p>
+              <h2 id="registration-details-title" className="mt-1 truncate text-lg font-semibold text-slate-900">
+                {registration.name}
+              </h2>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            title="Close details"
+            aria-label="Close registration details"
+            className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-md text-slate-500 transition hover:bg-slate-100 hover:text-slate-900"
+          >
+            <X size={18} />
+          </button>
+        </div>
+
+        <div className="space-y-5 px-5 py-5 sm:px-6">
+          <div className="flex flex-wrap gap-2">
+            <span className="rounded-full bg-primary-50 px-2.5 py-1 text-xs font-semibold text-primary">
+              {registration.source}
+            </span>
+            <span className={`rounded-full px-2.5 py-1 text-xs font-semibold capitalize ${
+              registration.status === 'registered'
+                ? 'bg-green-100 text-green-700'
+                : 'bg-rose-100 text-rose-700'
+            }`}>
+              {registration.status === 'registered' ? 'Confirmed' : registration.status.replaceAll('_', ' ')}
+            </span>
+            {registration.source === 'Account' && registration.emailVerified && (
+              <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700">
+                <BadgeCheck size={13} />
+                Verified email
+              </span>
+            )}
+          </div>
+
+          <div className="divide-y divide-slate-100 border-y border-slate-200">
+            <RegistrationDetail icon={<UserRound size={17} />} label="Name" value={registration.name} />
+            <RegistrationDetail icon={<Mail size={17} />} label="Email" value={registration.email} href={`mailto:${registration.email}`} />
+            <RegistrationDetail icon={<Phone size={17} />} label="Phone" value={registration.phone || 'Not provided'} />
+            <RegistrationDetail icon={<CalendarDays size={17} />} label="Registered" value={formatDate(registration.createdAt)} />
+          </div>
+
+          {registration.headline && (
+            <div className="rounded-md bg-slate-50 px-4 py-3">
+              <p className="text-xs font-semibold uppercase text-slate-400">Profile headline</p>
+              <p className="mt-1 text-sm leading-6 text-slate-700">{registration.headline}</p>
+            </div>
+          )}
+
+          <div className="rounded-md border border-slate-200 px-4 py-3">
+            <p className="text-xs font-semibold uppercase text-slate-400">Event</p>
+            <p className="mt-1 text-sm font-medium text-slate-800">{eventTitle}</p>
+            {registration.source === 'Email guest' && (
+              <p className="mt-2 text-sm leading-5 text-slate-500">
+                This attendee registered with an email address and does not have a linked platform account.
+              </p>
+            )}
+          </div>
+        </div>
+
+        <div className="flex justify-end border-t border-slate-200 px-5 py-4 sm:px-6">
+          <button
+            type="button"
+            onClick={onClose}
+            className="rounded-md bg-primary px-4 py-2 text-sm font-semibold text-white transition hover:bg-primary-600"
+          >
+            Done
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function RegistrationDetail({ icon, label, value, href }: { icon: ReactNode; label: string; value: string; href?: string }) {
+  return (
+    <div className="flex gap-3 py-3">
+      <span className="mt-0.5 shrink-0 text-slate-400">{icon}</span>
+      <div className="min-w-0">
+        <p className="text-xs font-semibold uppercase text-slate-400">{label}</p>
+        {href ? (
+          <a href={href} className="mt-1 block break-all text-sm font-medium text-primary hover:underline">{value}</a>
+        ) : (
+          <p className="mt-1 break-words text-sm font-medium text-slate-800">{value}</p>
+        )}
+      </div>
+    </div>
   );
 }
 
@@ -711,4 +877,14 @@ function formatShortDate(dateString: string) {
     month: 'short',
     day: 'numeric',
   });
+}
+
+function initials(name: string) {
+  return name
+    .split(' ')
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part.charAt(0))
+    .join('')
+    .toUpperCase();
 }

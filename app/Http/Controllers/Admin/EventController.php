@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Enums\Permissions\EventPermissionsEnum;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\CreateEventRequest;
 use App\Http\Requests\SpeakerInviteRequest;
 use App\Http\Requests\UpdateEventRequest;
-use App\Enums\Permissions\EventPermissionsEnum;
 use App\Models\Event;
 use App\Services\Event\EventCrudService;
 use App\Services\Event\EventQueryService;
@@ -15,6 +15,7 @@ use App\Services\Event\SpeakerService;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Inertia\Inertia;
 
 class EventController extends Controller
 {
@@ -25,9 +26,7 @@ class EventController extends Controller
         protected EventCrudService $eventCrudService,
         protected EventSpeakerInvitationService $eventSpeakerInvitationService,
         protected SpeakerService $speakerService
-    ) {
-
-    }
+    ) {}
 
     public function index()
     {
@@ -36,7 +35,7 @@ class EventController extends Controller
         $query = request()->query('status');
         $includePaymentMetrics = Auth::user()?->can(EventPermissionsEnum::VIEW_PAYMENTS->value) ?? false;
 
-        return \Inertia\Inertia::render('Admin/Events/Index', [
+        return Inertia::render('Admin/Events/Index', [
             'events' => $this->eventQueryService->getEventsCreatedByUser($query, $includePaymentMetrics),
             'capabilities' => [
                 'canCreate' => Auth::user()?->can(EventPermissionsEnum::CREATE->value) ?? false,
@@ -54,7 +53,7 @@ class EventController extends Controller
     {
         $this->authorize('create', Event::class);
 
-        return \Inertia\Inertia::render('Admin/Events/Create');
+        return Inertia::render('Admin/Events/Create');
     }
 
     public function show(Event $event)
@@ -74,6 +73,7 @@ class EventController extends Controller
             'speakers.user',
             'resources',
             'attendees',
+            'guestAttendees' => fn ($query) => $query->latest('created_at'),
             'speakerApplications.user',
             'speakerApplications.speaker.user',
         ]);
@@ -108,8 +108,9 @@ class EventController extends Controller
 
         $speakers = $this->speakerService->fetchSpeakers();
 
-        return \Inertia\Inertia::render('Admin/Events/View', compact('event', 'speakers', 'capabilities'));
+        return Inertia::render('Admin/Events/View', compact('event', 'speakers', 'capabilities'));
     }
+
     public function store(CreateEventRequest $request)
     {
         $this->authorize('create', Event::class);
@@ -120,12 +121,13 @@ class EventController extends Controller
         if ($event) {
             return to_route('admin.events.index')->with([
                 'type' => 'success',
-                'message' => 'Event created successfully.'
+                'message' => 'Event created successfully.',
             ]);
         }
+
         return redirect()->back()->withInput()->with([
             'type' => 'error',
-            'message' => 'Failed to create event. Please try again.'
+            'message' => 'Failed to create event. Please try again.',
         ]);
     }
 
@@ -134,7 +136,7 @@ class EventController extends Controller
         $event = Event::findBySlug($slug)->firstOrFail();
         $this->authorize('update', $event);
 
-        return \Inertia\Inertia::render('Admin/Events/Edit', compact('event'));
+        return Inertia::render('Admin/Events/Edit', compact('event'));
     }
 
     public function update(UpdateEventRequest $request, Event $event)
@@ -148,12 +150,13 @@ class EventController extends Controller
         if ($event) {
             return to_route('admin.events.index')->with([
                 'type' => 'success',
-                'message' => 'Event updated successfully.'
+                'message' => 'Event updated successfully.',
             ]);
         }
+
         return redirect()->back()->withInput()->with([
             'type' => 'error',
-            'message' => 'Failed to update event. Please try again.'
+            'message' => 'Failed to update event. Please try again.',
         ]);
     }
 
@@ -164,35 +167,37 @@ class EventController extends Controller
         if ($this->eventCrudService->deleteEvent($event)) {
             return redirect()->route('admin.events.index')->with([
                 'type' => 'success',
-                'message' => 'Event deleted successfully.'
+                'message' => 'Event deleted successfully.',
             ]);
         }
+
         return redirect()->back()->with([
             'type' => 'error',
-            'message' => 'Failed to delete event. Please try again.'
+            'message' => 'Failed to delete event. Please try again.',
         ]);
     }
 
     public function massDelete(Request $request)
     {
         abort_unless(
-            Auth::user()?->hasPermissionTo(\App\Enums\Permissions\EventPermissionsEnum::DELETE_ANY->value),
+            Auth::user()?->hasPermissionTo(EventPermissionsEnum::DELETE_ANY->value),
             403
         );
 
         $validated = $request->validate([
             'selected_events' => 'required|array',
-            'selected_events.*' => 'exists:events,id'
+            'selected_events.*' => 'exists:events,id',
         ]);
         if ($this->eventCrudService->deleteMany($validated['selected_events'])) {
             return redirect()->route('admin.events.index')->with([
                 'type' => 'success',
-                'message' => 'Selected events deleted successfully.'
+                'message' => 'Selected events deleted successfully.',
             ]);
         }
+
         return redirect()->back()->with([
             'type' => 'error',
-            'message' => 'Failed to delete selected events. Please try again.'
+            'message' => 'Failed to delete selected events. Please try again.',
         ]);
     }
 
@@ -204,14 +209,14 @@ class EventController extends Controller
         if ($invitation === true) {
             return redirect()->back()->with([
                 'type' => 'success',
-                'message' => 'Speaker invited successfully.'
+                'message' => 'Speaker invited successfully.',
             ]);
         }
         if ($invitation === 'already_invited') {
             return redirect()->back()->with([
-                'type'=> 'error',
-                'message'=> 'Speaker has already been invited to this event.'
-                ]);
+                'type' => 'error',
+                'message' => 'Speaker has already been invited to this event.',
+            ]);
         }
         if ($invitation === 'speaker_approved') {
             return redirect()->back()->with([
@@ -219,10 +224,10 @@ class EventController extends Controller
                 'message' => 'The speaker had already applied, so their application was approved.',
             ]);
         }
+
         return redirect()->back()->with([
-            'type'=> 'error',
-            'message'=> 'Failed to invite speaker. Please try again.'
+            'type' => 'error',
+            'message' => 'Failed to invite speaker. Please try again.',
         ]);
     }
-
 }

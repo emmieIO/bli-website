@@ -14,6 +14,7 @@ interface Event {
   is_featured: boolean;
   speakers_count?: number;
   attendees_count?: number;
+  guest_attendees_count?: number;
   speaker_applications_count?: number;
   successful_transactions_count?: number;
   program_cover?: string | null;
@@ -154,7 +155,10 @@ export default function EventsIndex({ events, capabilities }: EventsProps) {
                         <p className="text-xs text-slate-400">{event.speaker_applications_count || 0} applications</p>
                       </td>
                       <td className="whitespace-nowrap px-5 py-3.5 text-sm text-slate-700">
-                        <p>{event.attendees_count || 0} attendees</p>
+                        <p>{(event.attendees_count || 0) + (event.guest_attendees_count || 0)} registrations</p>
+                        {(event.guest_attendees_count || 0) > 0 && (
+                          <p className="text-xs text-slate-400">{event.guest_attendees_count} email guest{event.guest_attendees_count === 1 ? '' : 's'}</p>
+                        )}
                       </td>
                       {capabilities.canViewPayments && (
                         <td className="whitespace-nowrap px-5 py-3.5 text-sm text-slate-700">
