@@ -37,10 +37,17 @@ return Application::configure(basePath: dirname(__DIR__))
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->respond(function (\Symfony\Component\HttpFoundation\Response $response, \Throwable $_, Request $request) {
+            if ($response->getStatusCode() === 419) {
+                return back()->with([
+                    'type' => 'warning',
+                    'message' => 'Your secure session was refreshed. Please submit the form again.',
+                ]);
+            }
+
             // Only render custom Inertia error pages in production
             // In development, let Laravel's error handler (Ignition) show detailed errors
             if (!app()->environment('local', 'development') &&
-                in_array($response->getStatusCode(), [401, 403, 404, 419, 429, 500, 503])) {
+                in_array($response->getStatusCode(), [401, 403, 404, 429, 500, 503])) {
                 return inertia('Errors/Error', [
                     'status' => $response->getStatusCode(),
                 ])
