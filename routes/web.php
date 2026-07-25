@@ -3,6 +3,7 @@
 use App\Http\Controllers\BlogController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\Events\OpenEventLinkController;
+use App\Http\Controllers\Events\ResendGuestEventAccessCodeController;
 use App\Http\Controllers\Events\VerifyGuestEventAccessController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\InstructorRatingController;
@@ -28,6 +29,9 @@ Route::get('/events/{slug}/show', [ProgrammeController::class, 'show'])->name('e
 Route::post('/events/{slug}/guest-access', VerifyGuestEventAccessController::class)
     ->middleware('throttle:6,1')
     ->name('events.guest-access.verify');
+Route::post('/events/{slug}/guest-access/resend', ResendGuestEventAccessCodeController::class)
+    ->middleware('throttle:3,1')
+    ->name('events.guest-access.resend');
 Route::get('/events/{event}/open', OpenEventLinkController::class)->name('events.open');
 
 // Public blog

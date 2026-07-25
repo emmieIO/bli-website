@@ -1,5 +1,5 @@
 import { Head, Link, router, usePage } from '@inertiajs/react';
-import { BadgeCheck, BellRing, CalendarDays, Eye, Mail, Phone, QrCode, UserRound, X } from 'lucide-react';
+import { BadgeCheck, BellRing, CalendarDays, Eye, KeyRound, Mail, Phone, QrCode, UserRound, X } from 'lucide-react';
 import DashboardLayout from '@/Layouts/DashboardLayout';
 import EventQrCodeModal from '@/Components/Events/EventQrCodeModal';
 import EventSchedule from '@/Components/Events/EventSchedule';
@@ -803,6 +803,8 @@ export default function ViewEvent({ event, capabilities, publicEventUrl }: ViewE
         <RegistrationDetailsModal
           registration={selectedRegistration}
           eventTitle={event.title}
+          eventSlug={event.slug}
+          canManageAttendees={capabilities.canManageAttendees}
           onClose={() => setSelectedRegistration(null)}
         />
       )}
@@ -822,12 +824,37 @@ export default function ViewEvent({ event, capabilities, publicEventUrl }: ViewE
 function RegistrationDetailsModal({
   registration,
   eventTitle,
+  eventSlug,
+  canManageAttendees,
   onClose,
 }: {
   registration: AdminEventRegistration;
   eventTitle: string;
+  eventSlug: string;
+  canManageAttendees: boolean;
   onClose: () => void;
 }) {
+  const [isResendingCode, setIsResendingCode] = useState(false);
+  const canResendCode = canManageAttendees
+    && registration.source === 'Email guest'
+    && registration.status === 'registered'
+    && Boolean(registration.guestId);
+
+  const resendAccessCode = () => {
+    if (!registration.guestId) {
+      return;
+    }
+
+    setIsResendingCode(true);
+    router.post(route('admin.events.guests.resend-access-code', {
+      event: eventSlug,
+      guest: registration.guestId,
+    }), {}, {
+      preserveScroll: true,
+      onFinish: () => setIsResendingCode(false),
+    });
+  };
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/50 px-4 py-6">
       <div
@@ -904,7 +931,18 @@ function RegistrationDetailsModal({
           </div>
         </div>
 
-        <div className="flex justify-end border-t border-slate-200 px-5 py-4 sm:px-6">
+        <div className="flex flex-col-reverse gap-2 border-t border-slate-200 px-5 py-4 sm:flex-row sm:justify-end sm:px-6">
+          {canResendCode && (
+            <button
+              type="button"
+              onClick={resendAccessCode}
+              disabled={isResendingCode}
+              className="inline-flex items-center justify-center gap-2 rounded-md border border-amber-300 bg-amber-50 px-4 py-2 text-sm font-semibold text-amber-900 transition hover:bg-amber-100 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              <KeyRound size={16} />
+              {isResendingCode ? 'Queuing new code...' : 'Resend access code'}
+            </button>
+          )}
           <button
             type="button"
             onClick={onClose}

@@ -33,6 +33,7 @@ interface Event {
     slug: string;
     title: string;
     theme: string;
+    status: 'draft' | 'review' | 'published' | 'registration_open' | 'registration_closed' | 'live' | 'completed' | 'cancelled' | 'archived';
     description: string;
     program_cover: string | null;
     start_date: string;
@@ -92,6 +93,8 @@ interface EventShowProps {
 
 export default function EventShow({ event, auth, primary_cta, attendeeMeetingLink }: EventShowProps) {
     const [showModal, setShowModal] = useState(false);
+    const [showGuestAccessModal, setShowGuestAccessModal] = useState(false);
+    const [isResendingGuestCode, setIsResendingGuestCode] = useState(false);
     const [guestRegistrationStep, setGuestRegistrationStep] = useState<'details' | 'review'>('details');
     const [countdown, setCountdown] = useState('');
     const guestRegistration = useForm({
@@ -191,7 +194,29 @@ export default function EventShow({ event, auth, primary_cta, attendeeMeetingLin
         e.preventDefault();
         guestAccess.post(route('events.guest-access.verify', event.slug), {
             preserveScroll: true,
-            onSuccess: () => guestAccess.reset('guest_access_code'),
+            onSuccess: () => {
+                guestAccess.reset('guest_access_code');
+                setShowGuestAccessModal(false);
+            },
+        });
+    };
+
+    const handleGuestAccessResend = () => {
+        const email = guestAccess.data.guest_access_email.trim();
+
+        if (!email) {
+            guestAccess.setError('guest_access_email', 'Enter the email used for your registration.');
+            return;
+        }
+
+        setIsResendingGuestCode(true);
+        router.post(route('events.guest-access.resend', event.slug), {
+            guest_access_email: email,
+        }, {
+            preserveScroll: true,
+            preserveState: true,
+            onSuccess: () => guestAccess.clearErrors(),
+            onFinish: () => setIsResendingGuestCode(false),
         });
     };
 
@@ -204,7 +229,27 @@ export default function EventShow({ event, auth, primary_cta, attendeeMeetingLin
     const isPaidCheckoutFlow = primary_cta.key === 'buy_ticket';
     const requiresGuestEmail = Boolean(primary_cta.requires_email && !auth?.user);
     const showPrimaryCta = primary_cta.kind === 'action' && !(revokeCount === 4 && primary_cta.key === 'register_now');
-    const ctaTone = primary_cta.key === 'view_attendee_workspace'
+    const joinAccessIsOpen = event.status === 'live'
+        && (event.mode === 'online' || event.mode === 'hybrid')
+        && Boolean(programProfile?.has_meeting_link)
+        && !isPast;
+    const hasJoinAction = joinAccessIsOpen && Boolean(attendeeMeetingLink);
+    const requiresGuestAccess = joinAccessIsOpen && !hasJoinAction;
+    const displayedCtaLabel = hasJoinAction
+        ? isLive ? 'Join event now' : 'Open event room'
+        : requiresGuestAccess
+            ? 'Join event'
+            : primary_cta.label;
+    const displayedCtaDescription = hasJoinAction
+        ? isLive
+            ? 'Your access is confirmed. The event is live and ready to join.'
+            : 'Your access is confirmed. Open the event room whenever you are ready.'
+        : requiresGuestAccess
+            ? 'Registered attendees can enter their email and access code to join.'
+            : primary_cta.description;
+    const ctaTone = hasJoinAction || requiresGuestAccess
+        ? 'border-emerald-200 bg-emerald-50'
+        : primary_cta.key === 'view_attendee_workspace'
         ? 'border-emerald-200 bg-emerald-50'
         : primary_cta.key === 'view_speaker_workspace'
             ? 'border-slate-200 bg-slate-100'
@@ -335,8 +380,31 @@ export default function EventShow({ event, auth, primary_cta, attendeeMeetingLin
                                                 className="hidden max-w-3xl text-base leading-8 text-white/88 sm:block md:text-lg"
                                                 style={{ textShadow: '0 2px 10px rgba(0, 0, 0, 0.28)' }}
                                             >
-                                                <p>{primary_cta.description}</p>
+                                                <p>{displayedCtaDescription}</p>
                                             </div>
+
+                                            {hasJoinAction && attendeeMeetingLink && (
+                                                <a
+                                                    href={attendeeMeetingLink}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="inline-flex w-fit items-center justify-center gap-2 rounded-md bg-accent px-5 py-3 text-sm font-semibold text-slate-950 shadow-lg transition hover:bg-emerald-300 sm:text-base"
+                                                >
+                                                    <i className="fas fa-video"></i>
+                                                    {displayedCtaLabel}
+                                                    <i className="fas fa-arrow-up-right-from-square text-xs"></i>
+                                                </a>
+                                            )}
+                                            {requiresGuestAccess && (
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setShowGuestAccessModal(true)}
+                                                    className="inline-flex w-fit items-center justify-center gap-2 rounded-md bg-accent px-5 py-3 text-sm font-semibold text-slate-950 shadow-lg transition hover:bg-emerald-300 sm:text-base"
+                                                >
+                                                    <i className="fas fa-video"></i>
+                                                    Join event
+                                                </button>
+                                            )}
 
                                             <div className="grid max-w-4xl grid-cols-2 gap-x-4 gap-y-4 border-t border-white/14 pt-4 text-sm text-white/78 sm:gap-x-8 sm:gap-y-6 sm:pt-6 xl:grid-cols-4">
                                                 <div>
@@ -383,7 +451,7 @@ export default function EventShow({ event, auth, primary_cta, attendeeMeetingLin
                                                         className="mt-2 text-base font-semibold text-white/96"
                                                         style={{ textShadow: '0 2px 8px rgba(0, 0, 0, 0.22)' }}
                                                     >
-                                                        {primary_cta.label}
+                                                        {displayedCtaLabel}
                                                     </p>
                                                 </div>
                                             </div>
@@ -575,8 +643,8 @@ export default function EventShow({ event, auth, primary_cta, attendeeMeetingLin
                             <div className="rounded-md border border-slate-200 bg-white p-4 shadow-sm sm:p-5 lg:p-6">
                                 <div className="border-b border-slate-200 pb-5">
                                     <p className="text-[11px] font-semibold uppercase text-slate-500">Next action</p>
-                                    <h3 className="mt-2 text-xl font-semibold text-slate-950 md:text-2xl">{primary_cta.label}</h3>
-                                    <p className="mt-2 text-sm leading-6 text-slate-600">{primary_cta.description}</p>
+                                    <h3 className="mt-2 text-xl font-semibold text-slate-950 md:text-2xl">{displayedCtaLabel}</h3>
+                                    <p className="mt-2 text-sm leading-6 text-slate-600">{displayedCtaDescription}</p>
                                 </div>
 
                                 <div className="space-y-4 py-5">
@@ -584,15 +652,17 @@ export default function EventShow({ event, auth, primary_cta, attendeeMeetingLin
                                         <div className="flex items-start justify-between gap-4">
                                             <div>
                                                 <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">Path</p>
-                                                <p className="mt-2 text-lg font-semibold text-slate-950">{primary_cta.label}</p>
-                                                <p className="mt-2 text-sm leading-6 text-slate-600">{primary_cta.description}</p>
+                                                <p className="mt-2 text-lg font-semibold text-slate-950">{displayedCtaLabel}</p>
+                                                <p className="mt-2 text-sm leading-6 text-slate-600">{displayedCtaDescription}</p>
                                             </div>
                                             <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-white text-slate-900 shadow-sm">
-                                                {primary_cta.key === 'view_attendee_workspace' && <i className="fas fa-calendar-check"></i>}
-                                                {primary_cta.key === 'view_speaker_workspace' && <i className="fas fa-microphone"></i>}
-                                                {isPaidCheckoutFlow && <i className="fas fa-ticket-alt"></i>}
-                                                {primary_cta.key === 'apply_to_speak' && <i className="fas fa-bullhorn"></i>}
-                                                {(isFreeRegistrationFlow || primary_cta.kind === 'status') && <i className="fas fa-arrow-right"></i>}
+                                                {hasJoinAction && <i className="fas fa-video text-emerald-700"></i>}
+                                                {requiresGuestAccess && <i className="fas fa-key text-emerald-700"></i>}
+                                                {!hasJoinAction && !requiresGuestAccess && primary_cta.key === 'view_attendee_workspace' && <i className="fas fa-calendar-check"></i>}
+                                                {!hasJoinAction && !requiresGuestAccess && primary_cta.key === 'view_speaker_workspace' && <i className="fas fa-microphone"></i>}
+                                                {!hasJoinAction && !requiresGuestAccess && isPaidCheckoutFlow && <i className="fas fa-ticket-alt"></i>}
+                                                {!hasJoinAction && !requiresGuestAccess && primary_cta.key === 'apply_to_speak' && <i className="fas fa-bullhorn"></i>}
+                                                {!hasJoinAction && !requiresGuestAccess && (isFreeRegistrationFlow || primary_cta.kind === 'status') && <i className="fas fa-arrow-right"></i>}
                                             </div>
                                         </div>
                                     </div>
@@ -645,7 +715,27 @@ export default function EventShow({ event, auth, primary_cta, attendeeMeetingLin
                                         </div>
                                     )}
 
-                                    {primary_cta.kind === 'status' || !showPrimaryCta ? (
+                                    {hasJoinAction && attendeeMeetingLink ? (
+                                        <a
+                                            href={attendeeMeetingLink}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-600 px-5 py-4 text-base font-semibold text-white transition hover:bg-emerald-700"
+                                        >
+                                            <i className="fas fa-video"></i>
+                                            <span>{displayedCtaLabel}</span>
+                                            <i className="fas fa-arrow-up-right-from-square text-xs"></i>
+                                        </a>
+                                    ) : requiresGuestAccess ? (
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowGuestAccessModal(true)}
+                                            className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-600 px-5 py-4 text-base font-semibold text-white transition hover:bg-emerald-700"
+                                        >
+                                            <i className="fas fa-key"></i>
+                                            <span>Enter access code to join</span>
+                                        </button>
+                                    ) : primary_cta.kind === 'status' || !showPrimaryCta ? (
                                         <div className="flex w-full items-center justify-center rounded-xl bg-slate-700 px-5 py-4 text-center text-base font-semibold text-white">
                                             {revokeCount === 4 && isFreeRegistrationFlow
                                                 ? 'Registration limit reached'
@@ -723,53 +813,20 @@ export default function EventShow({ event, auth, primary_cta, attendeeMeetingLin
                                                             Join meeting
                                                         </a>
                                                     )
-                                                ) : !auth?.user && !event.require_sign_up ? (
-                                                    <form onSubmit={handleGuestAccess} className="mt-3 max-w-md space-y-3">
+                                                ) : !event.require_sign_up ? (
+                                                    <div className="mt-3 max-w-md space-y-3">
                                                         <p className="text-sm leading-6 text-slate-600">
-                                                            Registered as a guest? Enter the email and six-digit code sent to you to reveal joining details.
+                                                            Registered as a guest? Use your email and six-digit code to reveal joining details.
                                                         </p>
-                                                        <div>
-                                                            <input
-                                                                type="email"
-                                                                required
-                                                                autoComplete="email"
-                                                                value={guestAccess.data.guest_access_email}
-                                                                onChange={(e) => guestAccess.setData('guest_access_email', e.target.value)}
-                                                                placeholder="Registration email"
-                                                                aria-label="Registration email"
-                                                                className="h-10 w-full rounded-md border border-slate-300 px-3 text-sm outline-none focus:border-primary"
-                                                            />
-                                                            {guestAccess.errors.guest_access_email && (
-                                                                <p className="mt-1 text-xs font-medium text-red-600">{guestAccess.errors.guest_access_email}</p>
-                                                            )}
-                                                        </div>
-                                                        <div className="flex gap-2">
-                                                            <div className="min-w-0 flex-1">
-                                                                <input
-                                                                    type="text"
-                                                                    required
-                                                                    inputMode="numeric"
-                                                                    pattern="[0-9]{6}"
-                                                                    maxLength={6}
-                                                                    value={guestAccess.data.guest_access_code}
-                                                                    onChange={(e) => guestAccess.setData('guest_access_code', e.target.value.replace(/\D/g, '').slice(0, 6))}
-                                                                    placeholder="6-digit code"
-                                                                    aria-label="Guest access code"
-                                                                    className="h-10 w-full rounded-md border border-slate-300 px-3 text-sm tracking-widest outline-none focus:border-primary"
-                                                                />
-                                                            </div>
-                                                            <button
-                                                                type="submit"
-                                                                disabled={guestAccess.processing}
-                                                                className="h-10 shrink-0 rounded-md bg-primary px-4 text-sm font-semibold text-white disabled:opacity-60"
-                                                            >
-                                                                {guestAccess.processing ? 'Checking...' : 'Reveal details'}
-                                                            </button>
-                                                        </div>
-                                                        {guestAccess.errors.guest_access_code && (
-                                                            <p className="text-xs font-medium text-red-600">{guestAccess.errors.guest_access_code}</p>
-                                                        )}
-                                                    </form>
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => setShowGuestAccessModal(true)}
+                                                            className="inline-flex items-center gap-2 rounded-md border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm font-semibold text-emerald-800 hover:bg-emerald-100"
+                                                        >
+                                                            <i className="fas fa-key"></i>
+                                                            Enter access code
+                                                        </button>
+                                                    </div>
                                                 ) : (
                                                     <p className="mt-1 text-sm text-slate-600">
                                                         Available to confirmed attendees.
@@ -800,7 +857,27 @@ export default function EventShow({ event, auth, primary_cta, attendeeMeetingLin
             </section>
 
             <div className="fixed inset-x-0 bottom-0 z-40 border-t border-slate-200 bg-white/95 px-4 py-3 shadow-[0_-8px_24px_rgba(15,23,42,0.10)] backdrop-blur lg:hidden">
-                {primary_cta.kind === 'status' || !showPrimaryCta ? (
+                {hasJoinAction && attendeeMeetingLink ? (
+                    <a
+                        href={attendeeMeetingLink}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-md bg-emerald-600 px-4 text-sm font-semibold text-white"
+                    >
+                        <i className="fas fa-video"></i>
+                        <span>{displayedCtaLabel}</span>
+                        <i className="fas fa-arrow-up-right-from-square text-xs"></i>
+                    </a>
+                ) : requiresGuestAccess ? (
+                    <button
+                        type="button"
+                        onClick={() => setShowGuestAccessModal(true)}
+                        className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-md bg-emerald-600 px-4 text-sm font-semibold text-white"
+                    >
+                        <i className="fas fa-key"></i>
+                        <span>Enter access code to join</span>
+                    </button>
+                ) : primary_cta.kind === 'status' || !showPrimaryCta ? (
                     <div className="flex min-h-12 w-full items-center justify-center rounded-md bg-slate-700 px-4 text-center text-sm font-semibold text-white">
                         {revokeCount === 4 && isFreeRegistrationFlow ? 'Registration limit reached' : primary_cta.label}
                     </div>
@@ -816,6 +893,97 @@ export default function EventShow({ event, auth, primary_cta, attendeeMeetingLin
                     </button>
                 )}
             </div>
+
+            {showGuestAccessModal && (
+                <div className="fixed inset-0 z-50 flex items-end justify-center bg-slate-950/60 px-3 py-3 backdrop-blur-sm sm:items-center sm:px-4 sm:py-6">
+                    <div
+                        role="dialog"
+                        aria-modal="true"
+                        aria-labelledby="guest-access-title"
+                        className="max-h-[92vh] w-full max-w-md overflow-y-auto rounded-lg bg-white shadow-2xl"
+                    >
+                        <div className="flex items-start justify-between gap-4 border-b border-slate-200 px-5 py-5">
+                            <div>
+                                <p className="text-xs font-semibold uppercase text-emerald-700">Registered attendees</p>
+                                <h2 id="guest-access-title" className="mt-1 text-xl font-semibold text-slate-950">Join {event.title}</h2>
+                                <p className="mt-2 text-sm leading-6 text-slate-600">Enter the email used to register and your six-digit access code.</p>
+                            </div>
+                            <button
+                                type="button"
+                                onClick={() => setShowGuestAccessModal(false)}
+                                aria-label="Close guest access"
+                                title="Close"
+                                className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-md text-slate-500 hover:bg-slate-100 hover:text-slate-900"
+                            >
+                                <i className="fas fa-times"></i>
+                            </button>
+                        </div>
+
+                        <form onSubmit={handleGuestAccess} className="space-y-4 px-5 py-5">
+                            <div>
+                                <label htmlFor="modal_guest_access_email" className="text-sm font-semibold text-slate-800">Registration email</label>
+                                <input
+                                    id="modal_guest_access_email"
+                                    type="email"
+                                    required
+                                    autoComplete="email"
+                                    value={guestAccess.data.guest_access_email}
+                                    onChange={(e) => guestAccess.setData('guest_access_email', e.target.value)}
+                                    placeholder="you@example.com"
+                                    className="mt-1 h-11 w-full rounded-md border border-slate-300 px-3 text-sm outline-none focus:border-primary"
+                                />
+                                {guestAccess.errors.guest_access_email && (
+                                    <p className="mt-1 text-xs font-medium text-red-600">{guestAccess.errors.guest_access_email}</p>
+                                )}
+                            </div>
+
+                            <div>
+                                <label htmlFor="modal_guest_access_code" className="text-sm font-semibold text-slate-800">Access code</label>
+                                <input
+                                    id="modal_guest_access_code"
+                                    type="text"
+                                    required
+                                    inputMode="numeric"
+                                    pattern="[0-9]{6}"
+                                    maxLength={6}
+                                    value={guestAccess.data.guest_access_code}
+                                    onChange={(e) => guestAccess.setData('guest_access_code', e.target.value.replace(/\D/g, '').slice(0, 6))}
+                                    placeholder="6-digit code"
+                                    className="mt-1 h-11 w-full rounded-md border border-slate-300 px-3 text-sm tracking-widest outline-none focus:border-primary"
+                                />
+                                {guestAccess.errors.guest_access_code && (
+                                    <p className="mt-1 text-xs font-medium text-red-600">{guestAccess.errors.guest_access_code}</p>
+                                )}
+                            </div>
+
+                            <button
+                                type="submit"
+                                disabled={guestAccess.processing}
+                                className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-md bg-emerald-600 px-4 text-sm font-semibold text-white hover:bg-emerald-700 disabled:opacity-60"
+                            >
+                                <i className="fas fa-video"></i>
+                                {guestAccess.processing ? 'Checking access...' : 'Verify and join'}
+                            </button>
+                        </form>
+
+                        <div className="border-t border-slate-200 bg-slate-50 px-5 py-4">
+                            <p className="text-sm font-semibold text-slate-800">Forgot or lost your code?</p>
+                            <p className="mt-1 text-xs leading-5 text-slate-600">
+                                Enter your registration email above, then request a new code. This only works for confirmed attendees.
+                            </p>
+                            <button
+                                type="button"
+                                onClick={handleGuestAccessResend}
+                                disabled={isResendingGuestCode}
+                                className="mt-3 inline-flex items-center gap-2 text-sm font-semibold text-primary hover:underline disabled:opacity-60"
+                            >
+                                <i className="fas fa-paper-plane"></i>
+                                {isResendingGuestCode ? 'Sending new code...' : 'Send me a new code'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* Registration Modal */}
             {showModal && (

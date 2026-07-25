@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin\EventController;
 use App\Http\Controllers\Admin\EventResourceController;
 use App\Http\Controllers\Admin\InstructorApplicationController;
 use App\Http\Controllers\Admin\InstructorsManagementController;
+use App\Http\Controllers\Admin\ResendGuestEventAccessCodeController;
 use App\Http\Controllers\Admin\SendEventReminderController;
 use App\Http\Controllers\Admin\SpeakersController;
 use App\Http\Controllers\SpeakerApplicationController;
@@ -42,6 +43,10 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
     Route::post('/events/{event}/send-reminder', SendEventReminderController::class)
         ->middleware('permission:event-send-updates')
         ->name('events.send-reminder');
+
+    Route::post('/events/{event}/guests/{guest}/resend-access-code', ResendGuestEventAccessCodeController::class)
+        ->middleware('permission:event-manage-attendees')
+        ->name('events.guests.resend-access-code');
 
     // Event Resources (simple operations)
     Route::middleware(['permission:event-manage-resources'])->group(function () {

@@ -8,6 +8,7 @@ use App\Models\Event;
 use App\Models\EventGuestAttendee;
 use App\Models\EventTransitionAudit;
 use App\Models\User;
+use App\Notifications\EventGuestAccessCodeNotification;
 use App\Notifications\EventRegisteredNotification;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -103,14 +104,34 @@ class EventRegistrationService
 
     public function issueGuestAccessCode(Event $event, EventGuestAttendee $guest): void
     {
+        $accessCode = $this->replaceGuestAccessCode($guest);
+
+        $guest->notify(new EventRegisteredNotification($event, $accessCode));
+    }
+
+    public function resendGuestAccessCode(Event $event, EventGuestAttendee $guest): bool
+    {
+        if ($guest->event_id !== $event->id || $guest->status !== EventRegistrationStatus::REGISTERED) {
+            return false;
+        }
+
+        $accessCode = $this->replaceGuestAccessCode($guest);
+        $guest->notify(new EventGuestAccessCodeNotification($event, $accessCode));
+
+        return true;
+    }
+
+    private function replaceGuestAccessCode(EventGuestAttendee $guest): string
+    {
         $accessCode = (string) random_int(100000, 999999);
 
+        // A resend always invalidates the previous code so only the latest email can grant access.
         $guest->forceFill([
             'access_code_hash' => Hash::make($accessCode),
             'access_code_expires_at' => now()->addMinutes(15),
         ])->save();
 
-        $guest->notify(new EventRegisteredNotification($event, $accessCode));
+        return $accessCode;
     }
 
     public function getEventsImAttending()

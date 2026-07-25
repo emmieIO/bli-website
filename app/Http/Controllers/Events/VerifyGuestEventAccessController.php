@@ -31,7 +31,7 @@ class VerifyGuestEventAccessController extends Controller
             || $guest->access_code_expires_at->isPast()
             || ! Hash::check($validated['guest_access_code'], $guest->access_code_hash)) {
             throw ValidationException::withMessages([
-                'guest_access_code' => 'The access code is invalid or has expired. Register again to receive a new code.',
+                'guest_access_code' => 'The access code is invalid or has expired. Request a new code and try again.',
             ]);
         }
 
