@@ -6,6 +6,7 @@ import Input from '@/Components/Input';
 import Textarea from '@/Components/Textarea';
 import RichTextEditor from '@/Components/RichTextEditor';
 import { useEventForm } from '@/Components/Events/useEventForm';
+import EventDaysEditor from '@/Components/Events/EventDaysEditor';
 
 export default function CreateEvent() {
   const { auth, sideLinks } = usePage().props as any;
@@ -214,13 +215,12 @@ export default function CreateEvent() {
                 />
 
                 <Input
-                  label="End Date & Time"
+                  label="End Date & Time (Optional)"
                   name="end_date"
                   type="datetime-local"
                   value={formData.end_date}
                   onChange={handleInputChange}
                   error={errors?.end_date}
-                  required
                 />
 
                 {shouldShowLocation && (
@@ -246,6 +246,19 @@ export default function CreateEvent() {
                 )}
               </div>
             </div>
+
+            <EventDaysEditor
+              days={formData.days}
+              errors={errors as Record<string, string | undefined>}
+              defaults={{
+                theme: formData.theme,
+                mode: formData.mode || 'offline',
+                venue_name: '',
+                physical_address: formData.physical_address,
+                meeting_link: programMetadata.meeting_link || formData.location,
+              }}
+              onChange={(days) => form.setData('days', days)}
+            />
 
             {/* Section: Contact & Pricing */}
             <div>

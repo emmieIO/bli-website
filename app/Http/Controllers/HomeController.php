@@ -3,8 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Enums\UserRoles;
-use App\Models\User;
 use App\Models\Event;
+use App\Models\User;
 use App\Services\Event\EventQueryService;
 use Inertia\Inertia;
 use Spatie\Permission\Models\Role;
@@ -23,10 +23,13 @@ class HomeController extends Controller
         $stats = [
             'total_students' => $this->countUsersByRole(UserRoles::STUDENT),
             'total_instructors' => $this->countUsersByRole(UserRoles::INSTRUCTOR),
-            'active_events' => Event::where('end_date', '>=', now())->count(),
+            'active_events' => Event::where(fn ($query) => $query
+                ->whereNull('end_date')
+                ->orWhere('end_date', '>=', now()))
+                ->count(),
         ];
 
-        return Inertia::render("Index", compact("events", "stats"));
+        return Inertia::render('Index', compact('events', 'stats'));
     }
 
     private function countUsersByRole(UserRoles $role): int

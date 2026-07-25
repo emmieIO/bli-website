@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Models\Event;
+use App\Models\EventDay;
 use App\Services\Event\EventReminderService;
 use Illuminate\Console\Command;
 use Illuminate\Support\Carbon;
@@ -36,6 +37,7 @@ class SendEventReminders extends Command
         // Send reminders for events starting in approximately 24 hours (23h 55m to 24h 5m window)
         // This 10-minute window accommodates two 5-minute cron runs
         $events24h = Event::query()
+            ->whereDoesntHave('days')
             ->where('start_date', '>', $now->copy()->addHours(23)->addMinutes(55))
             ->where('start_date', '<=', $now->copy()->addHours(24)->addMinutes(5))
             ->get();
@@ -65,9 +67,18 @@ class SendEventReminders extends Command
             }
         }
 
+        $reminderCount += $this->sendDayReminders(
+            $reminderService,
+            $now->copy()->addHours(23)->addMinutes(55),
+            $now->copy()->addHours(24)->addMinutes(5),
+            '24h',
+            now()->addHours(23)
+        );
+
         // Send reminders for events starting in approximately 2 hours (1h 55m to 2h 5m window)
         // This 10-minute window accommodates two 5-minute cron runs
         $events2h = Event::query()
+            ->whereDoesntHave('days')
             ->where('start_date', '>', $now->copy()->addHours(1)->addMinutes(55))
             ->where('start_date', '<=', $now->copy()->addHours(2)->addMinutes(5))
             ->get();
@@ -97,9 +108,57 @@ class SendEventReminders extends Command
             }
         }
 
+        $reminderCount += $this->sendDayReminders(
+            $reminderService,
+            $now->copy()->addHours(1)->addMinutes(55),
+            $now->copy()->addHours(2)->addMinutes(5),
+            '2h',
+            now()->addHours(2)
+        );
+
         $this->info("Queued {$reminderCount} event reminder notifications.");
         Log::info("Event reminders queued: {$reminderCount} notifications");
 
         return Command::SUCCESS;
+    }
+
+    private function sendDayReminders(
+        EventReminderService $reminderService,
+        Carbon $windowStart,
+        Carbon $windowEnd,
+        string $window,
+        Carbon $cacheUntil
+    ): int {
+        $count = 0;
+        $days = EventDay::query()
+            ->with('event')
+            ->where('start_at', '>', $windowStart)
+            ->where('start_at', '<=', $windowEnd)
+            ->get();
+
+        foreach ($days as $day) {
+            $cacheKey = "event_day_reminder_{$window}_{$day->id}";
+
+            if (Cache::has($cacheKey) || ! $day->event) {
+                continue;
+            }
+
+            $result = $reminderService->sendToRegisteredAttendees($day->event, $day);
+
+            if ($result['total'] > 0) {
+                $count += $result['total'];
+                Cache::put($cacheKey, true, $cacheUntil);
+
+                Log::info("{$window} event-day reminders queued", [
+                    'event_id' => $day->event_id,
+                    'event_day_id' => $day->id,
+                    'event_title' => $day->event->title,
+                    'attendee_count' => $result['accounts'],
+                    'guest_attendee_count' => $result['guests'],
+                ]);
+            }
+        }
+
+        return $count;
     }
 }

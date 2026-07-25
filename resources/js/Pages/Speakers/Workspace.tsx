@@ -7,7 +7,7 @@ interface Event {
   title: string;
   description?: string | null;
   start_date: string;
-  end_date: string;
+  end_date?: string | null;
   mode?: string | null;
   physical_address?: string | null;
   location?: string | null;
@@ -197,7 +197,7 @@ export default function SpeakerWorkspace({ event, application, invite, stage, wo
               <h2 className="text-lg font-semibold text-primary">Event brief</h2>
               <div className="mt-5 grid gap-4 sm:grid-cols-2">
                 <DetailCard label="Start" value={formatDate(event.start_date)} />
-                <DetailCard label="End" value={formatDate(event.end_date)} />
+                <DetailCard label="End" value={event.end_date ? formatDate(event.end_date) : 'Not specified'} />
                 <DetailCard label="Format" value={event.mode ? event.mode.charAt(0).toUpperCase() + event.mode.slice(1) : 'Hybrid'} />
                 <DetailCard label="Contact" value={event.contact_email || 'Organizer'} />
               </div>

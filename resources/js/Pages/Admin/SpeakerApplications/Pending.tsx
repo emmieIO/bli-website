@@ -11,7 +11,7 @@ interface Event {
   id: number;
   title: string;
   start_date: string;
-  end_date: string;
+  end_date?: string | null;
 }
 
 interface Application {
@@ -197,7 +197,9 @@ export default function PendingApplications({ applications }: PendingApplication
                             {application.event.title}
                           </span>
                           <span className="text-xs text-slate-500">
-                            {application.event.start_date} – {application.event.end_date}
+                            {application.event.end_date
+                              ? `${formatDate(application.event.start_date)} - ${formatDate(application.event.end_date)}`
+                              : `Starts ${formatDate(application.event.start_date)}`}
                           </span>
                         </div>
                       </td>

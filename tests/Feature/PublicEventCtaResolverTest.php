@@ -121,6 +121,19 @@ class PublicEventCtaResolverTest extends TestCase
         $this->assertSame('buy_ticket', $cta['key']);
     }
 
+    public function test_started_event_without_an_end_is_treated_as_live(): void
+    {
+        $event = $this->makeEvent([
+            'start_date' => now()->subHour(),
+            'end_date' => null,
+        ]);
+
+        $cta = app(PublicEventCtaResolver::class)->resolve($event, null);
+
+        $this->assertSame('live', $cta['key']);
+        $this->assertSame('status', $cta['kind']);
+    }
+
     public function test_speaking_application_can_be_primary_when_registration_is_unavailable(): void
     {
         $event = $this->makeEvent([

@@ -2,9 +2,11 @@ import { Head, Link, router, usePage } from '@inertiajs/react';
 import { BadgeCheck, BellRing, CalendarDays, Eye, Mail, Phone, QrCode, UserRound, X } from 'lucide-react';
 import DashboardLayout from '@/Layouts/DashboardLayout';
 import EventQrCodeModal from '@/Components/Events/EventQrCodeModal';
+import EventSchedule from '@/Components/Events/EventSchedule';
 import { useMemo, useState } from 'react';
 import type { ReactNode } from 'react';
 import type { AdminEventGuestAttendee, AdminEventRegistration } from '@/types/events';
+import type { EventDayForm } from '@/types/events';
 
 interface Speaker {
   id: number;
@@ -87,7 +89,7 @@ interface Event {
   physical_address?: string | null;
   attendee_slots?: number | null;
   start_date: string;
-  end_date: string;
+  end_date?: string | null;
   contact_email?: string | null;
   program_cover?: string | null;
   entry_fee: string;
@@ -99,6 +101,7 @@ interface Event {
   guest_attendees: AdminEventGuestAttendee[];
   speaker_applications: SpeakerApplication[];
   transactions: Transaction[];
+  days: EventDayForm[];
   program_profile?: {
     program_type: 'general_event' | 'discipleship_track';
     program_code?: string | null;
@@ -164,10 +167,11 @@ export default function ViewEvent({ event, capabilities, publicEventUrl }: ViewE
   const [showReminderModal, setShowReminderModal] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isSendingReminder, setIsSendingReminder] = useState(false);
+  const [selectedReminderKeys, setSelectedReminderKeys] = useState<string[]>([]);
   const [selectedRegistration, setSelectedRegistration] = useState<AdminEventRegistration | null>(null);
   const [activeTab, setActiveTab] = useState<'overview' | 'speakers' | 'registrations' | 'resources' | 'payments'>('overview');
 
-  const registrations = useMemo(() => [
+  const registrations = useMemo<AdminEventRegistration[]>(() => [
     ...event.attendees.map((attendee) => ({
       key: `account-${attendee.id}`,
       userId: attendee.id,
@@ -182,6 +186,7 @@ export default function ViewEvent({ event, capabilities, publicEventUrl }: ViewE
     })),
     ...(event.guest_attendees ?? []).map((attendee) => ({
       key: `guest-${attendee.id}`,
+      guestId: attendee.id,
       name: attendee.name || 'Email guest',
       email: attendee.email,
       status: attendee.status,
@@ -195,6 +200,10 @@ export default function ViewEvent({ event, capabilities, publicEventUrl }: ViewE
     const cancelled = registrations.filter((registration) => registration.status === 'cancelled').length;
     return { registered, cancelled };
   }, [registrations]);
+  const confirmedRegistrations = useMemo(
+    () => registrations.filter((registration) => registration.status === 'registered'),
+    [registrations],
+  );
   const registrationLabel = (status: string) => status === 'registered' ? 'confirmed' : status.replace('_', ' ');
 
   const successfulPayments = event.transactions.filter((transaction) => transaction.status === 'successful');
@@ -230,12 +239,29 @@ export default function ViewEvent({ event, capabilities, publicEventUrl }: ViewE
   };
 
   const handleSendReminder = () => {
+    const selectedKeys = new Set(selectedReminderKeys);
+    const selectedRecipients = confirmedRegistrations.filter((registration) => selectedKeys.has(registration.key));
+
     setIsSendingReminder(true);
-    router.post(route('admin.events.send-reminder', event.slug), {}, {
+    router.post(route('admin.events.send-reminder', event.slug), {
+      account_ids: selectedRecipients.flatMap((registration) => registration.userId ? [registration.userId] : []),
+      guest_ids: selectedRecipients.flatMap((registration) => registration.guestId ? [registration.guestId] : []),
+    }, {
       preserveScroll: true,
       onSuccess: () => setShowReminderModal(false),
       onFinish: () => setIsSendingReminder(false),
     });
+  };
+
+  const openReminderModal = () => {
+    setSelectedReminderKeys(confirmedRegistrations.map((registration) => registration.key));
+    setShowReminderModal(true);
+  };
+
+  const toggleReminderRecipient = (key: string) => {
+    setSelectedReminderKeys((keys) => keys.includes(key)
+      ? keys.filter((selectedKey) => selectedKey !== key)
+      : [...keys, key]);
   };
 
   return (
@@ -284,7 +310,7 @@ export default function ViewEvent({ event, capabilities, publicEventUrl }: ViewE
             {capabilities.canSendUpdates && (
               <button
                 type="button"
-                onClick={() => setShowReminderModal(true)}
+                onClick={openReminderModal}
                 disabled={registrationStats.registered === 0}
                 title={registrationStats.registered === 0 ? 'No confirmed registrations to remind' : 'Send event reminder'}
                 className="inline-flex min-w-0 items-center justify-center gap-2 rounded-md border border-slate-300 bg-white px-3 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50 sm:px-4"
@@ -369,13 +395,19 @@ export default function ViewEvent({ event, capabilities, publicEventUrl }: ViewE
                     <MetaItem label="Mode" value={event.mode} />
                     <MetaItem label="Entry fee" value={Number(event.entry_fee) > 0 ? `₦${Number(event.entry_fee).toLocaleString()}` : 'Free'} />
                     <MetaItem label="Starts" value={formatDate(event.start_date)} />
-                    <MetaItem label="Ends" value={formatDate(event.end_date)} />
+                    <MetaItem label="Ends" value={event.end_date ? formatDate(event.end_date) : 'Not specified'} />
                     <MetaItem label="Meeting link" value={event.location || 'Not set'} />
                     <MetaItem label="Physical address" value={event.physical_address || 'Not set'} />
                     <MetaItem label="Contact email" value={event.contact_email || 'Not set'} />
                     <MetaItem label="Capacity" value={event.attendee_slots ? event.attendee_slots.toString() : 'Unlimited'} />
                   </dl>
                 </WorkspacePanel>
+
+                {event.days?.length > 0 && (
+                  <WorkspacePanel title="Detailed Schedule">
+                    <EventSchedule days={event.days} showJoinLinks />
+                  </WorkspacePanel>
+                )}
 
                 {programProfile && (
                   <WorkspacePanel title="Program Readiness Snapshot">
@@ -702,7 +734,7 @@ export default function ViewEvent({ event, capabilities, publicEventUrl }: ViewE
             role="dialog"
             aria-modal="true"
             aria-labelledby="send-reminder-title"
-            className="w-full max-w-md rounded-lg border border-slate-200 bg-white p-6 shadow-xl"
+            className="max-h-full w-full max-w-lg overflow-y-auto rounded-lg border border-slate-200 bg-white p-6 shadow-xl"
           >
             <div className="flex h-11 w-11 items-center justify-center rounded-md bg-primary/10 text-primary">
               <BellRing size={21} />
@@ -711,8 +743,40 @@ export default function ViewEvent({ event, capabilities, publicEventUrl }: ViewE
               Send event reminder
             </h2>
             <p className="mt-2 text-sm leading-6 text-slate-600">
-              Queue a reminder for <strong>{registrationStats.registered}</strong> confirmed {registrationStats.registered === 1 ? 'attendee' : 'attendees'} of <strong>{event.title}</strong>. Cancelled, attended, and no-show registrations will not receive it.
+              Choose which confirmed attendees should receive the reminder for <strong>{event.title}</strong>. Cancelled, attended, and no-show registrations are excluded.
             </p>
+            <div className="mt-5 overflow-hidden rounded-md border border-slate-200">
+              <div className="flex items-center justify-between gap-3 border-b border-slate-200 bg-slate-50 px-3 py-2.5">
+                <p className="text-xs font-semibold text-slate-600">
+                  {selectedReminderKeys.length} of {confirmedRegistrations.length} selected
+                </p>
+                <div className="flex items-center gap-3">
+                  <button type="button" onClick={() => setSelectedReminderKeys(confirmedRegistrations.map((registration) => registration.key))} className="text-xs font-semibold text-primary hover:underline">
+                    Select all
+                  </button>
+                  <button type="button" onClick={() => setSelectedReminderKeys([])} className="text-xs font-semibold text-slate-500 hover:text-slate-900">
+                    Clear
+                  </button>
+                </div>
+              </div>
+              <div className="max-h-64 divide-y divide-slate-100 overflow-y-auto">
+                {confirmedRegistrations.map((registration) => (
+                  <label key={registration.key} className="flex cursor-pointer items-start gap-3 px-3 py-3 hover:bg-slate-50">
+                    <input
+                      type="checkbox"
+                      checked={selectedReminderKeys.includes(registration.key)}
+                      onChange={() => toggleReminderRecipient(registration.key)}
+                      className="mt-0.5 h-4 w-4 rounded border-slate-300 text-primary focus:ring-primary"
+                    />
+                    <span className="min-w-0 flex-1">
+                      <span className="block truncate text-sm font-semibold text-slate-800">{registration.name}</span>
+                      <span className="block truncate text-xs text-slate-500">{registration.email}</span>
+                    </span>
+                    <span className="shrink-0 rounded bg-slate-100 px-1.5 py-0.5 text-[10px] font-semibold text-slate-500">{registration.source}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
             <div className="mt-6 flex justify-end gap-3">
               <button
                 type="button"
@@ -725,11 +789,11 @@ export default function ViewEvent({ event, capabilities, publicEventUrl }: ViewE
               <button
                 type="button"
                 onClick={handleSendReminder}
-                disabled={isSendingReminder || registrationStats.registered === 0}
+                disabled={isSendingReminder || selectedReminderKeys.length === 0}
                 className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-semibold text-white hover:bg-primary/90 disabled:opacity-60"
               >
                 <BellRing size={16} />
-                {isSendingReminder ? 'Queuing...' : 'Send reminder'}
+                {isSendingReminder ? 'Queuing...' : `Send to ${selectedReminderKeys.length}`}
               </button>
             </div>
           </div>

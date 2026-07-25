@@ -26,7 +26,7 @@ interface Event {
     theme?: string;
     program_cover: string | null;
     start_date: string;
-    end_date: string;
+    end_date?: string | null;
     mode?: 'online' | 'offline' | 'hybrid';
     physical_address?: string;
     location?: string;
@@ -305,7 +305,11 @@ export default function Index({ events, stats }: IndexProps) {
                                         <div className="mt-auto space-y-2 pt-4 text-sm text-primary-200">
                                             <div className="flex items-start gap-2">
                                                 <CalendarDays size={14} className="mt-0.5 shrink-0 text-accent-400/70" />
-                                                <span>{formatDate(event.start_date)} &mdash; {formatDate(event.end_date)}</span>
+                                                <span>
+                                                    {event.end_date
+                                                        ? `${formatDate(event.start_date)} - ${formatDate(event.end_date)}`
+                                                        : formatDate(event.start_date)}
+                                                </span>
                                             </div>
                                             <div className="flex items-start gap-2">
                                                 <MapPin size={14} className="mt-0.5 shrink-0 text-accent-400/70" />

@@ -12,7 +12,7 @@ interface Event {
     physical_address?: string;
     contact_email?: string;
     start_date: string;
-    end_date: string;
+    end_date?: string | null;
 }
 
 interface Invite {
@@ -105,7 +105,13 @@ export default function InviteResponse({ event, invite }: InviteResponseProps) {
                     <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                         <DetailItem icon="map-marker-alt" label="Location" value={event.mode === 'offline' ? event.physical_address : event.location} />
                         {event.contact_email && <DetailItem icon="envelope" label="Contact" value={event.contact_email} />}
-                        <DetailItem icon="clock" label="Date & Time" value={`${formatDate(event.start_date)} to ${formatDate(event.end_date)}`} />
+                        <DetailItem
+                            icon="clock"
+                            label="Date & Time"
+                            value={event.end_date
+                                ? `${formatDate(event.start_date)} to ${formatDate(event.end_date)}`
+                                : `Starts ${formatDate(event.start_date)}`}
+                        />
                     </div>
                 </section>
 

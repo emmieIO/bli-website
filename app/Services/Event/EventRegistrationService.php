@@ -120,6 +120,7 @@ class EventRegistrationService
         return $user->events()
             ->with([
                 'resources',
+                'days',
                 'speakers.user',
                 'transactions' => fn ($query) => $query->where('user_id', $user->id)->latest(),
             ])

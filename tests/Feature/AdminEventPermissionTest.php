@@ -67,7 +67,6 @@ class AdminEventPermissionTest extends TestCase
             'description',
             'mode',
             'start_date',
-            'end_date',
         ]);
     }
 
@@ -118,6 +117,93 @@ class AdminEventPermissionTest extends TestCase
         $this->assertSame(12, $event->metadata['cohort_duration_weeks']);
         $this->assertSame(420, $event->metadata['weekly_prayer_target_minutes']);
         $this->assertSame(3, $event->metadata['weekly_evangelism_target_min']);
+    }
+
+    public function test_create_event_accepts_an_optional_end_for_the_event_and_its_program_day(): void
+    {
+        $user = User::factory()->create();
+        $this->grantPermissions($user, [EventPermissionsEnum::CREATE->value]);
+        $start = now()->addDays(2)->startOfHour();
+
+        $response = $this->actingAs($user)->post(route('admin.events.store'), [
+            'title' => 'Open Ended Leadership Gathering',
+            'theme' => 'Leadership Formation',
+            'description' => '<p>A gathering whose finish time is not yet known.</p>',
+            'mode' => 'online',
+            'location' => 'https://meet.example.com/open-ended',
+            'start_date' => $start->format('Y-m-d H:i:s'),
+            'creator_id' => $user->id,
+            'entry_fee' => '0',
+            'days' => [
+                [
+                    'title' => 'Opening Session',
+                    'start_at' => $start->format('Y-m-d H:i:s'),
+                    'end_at' => null,
+                    'mode' => 'online',
+                    'meeting_link' => 'https://meet.example.com/open-ended',
+                ],
+            ],
+        ]);
+
+        $response
+            ->assertSessionHasNoErrors()
+            ->assertRedirect(route('admin.events.index'));
+
+        $event = Event::query()->where('title', 'Open Ended Leadership Gathering')->firstOrFail();
+
+        $this->assertNull($event->end_date);
+        $this->assertNull($event->days()->firstOrFail()->end_at);
+    }
+
+    public function test_create_event_persists_independent_program_days_and_derives_the_program_window(): void
+    {
+        $user = User::factory()->create();
+        $this->grantPermissions($user, [EventPermissionsEnum::CREATE->value]);
+        $firstStart = now()->addDays(3)->startOfHour();
+        $lastEnd = now()->addDays(9)->startOfHour()->addHours(3);
+
+        $response = $this->actingAs($user)->post(route('admin.events.store'), [
+            'title' => 'Seven Day Leadership Intensive',
+            'theme' => 'Leadership Formation',
+            'description' => '<p>A multi-day leadership intensive.</p>',
+            'mode' => 'hybrid',
+            'location' => 'https://meet.example.com/default',
+            'physical_address' => 'Beacon Centre, Lagos',
+            'start_date' => $firstStart->format('Y-m-d H:i:s'),
+            'end_date' => $lastEnd->format('Y-m-d H:i:s'),
+            'creator_id' => $user->id,
+            'entry_fee' => '0',
+            'days' => [
+                [
+                    'title' => 'Opening Forum',
+                    'theme' => 'Character',
+                    'start_at' => $firstStart->format('Y-m-d H:i:s'),
+                    'end_at' => $firstStart->copy()->addHours(2)->format('Y-m-d H:i:s'),
+                    'mode' => 'offline',
+                    'venue_name' => 'Beacon Hall',
+                    'physical_address' => '12 Leadership Road, Lagos',
+                    'meeting_link' => null,
+                ],
+                [
+                    'title' => 'Closing Lab',
+                    'theme' => 'Capacity',
+                    'start_at' => $lastEnd->copy()->subHours(3)->format('Y-m-d H:i:s'),
+                    'end_at' => $lastEnd->format('Y-m-d H:i:s'),
+                    'mode' => 'online',
+                    'meeting_link' => 'https://meet.example.com/closing-lab',
+                ],
+            ],
+        ]);
+
+        $response->assertSessionHasNoErrors()->assertRedirect(route('admin.events.index'));
+
+        $event = Event::query()->where('title', 'Seven Day Leadership Intensive')->firstOrFail();
+
+        $this->assertCount(2, $event->days);
+        $this->assertSame('Beacon Hall', $event->days->first()->venue_name);
+        $this->assertSame('Capacity', $event->days->last()->theme);
+        $this->assertSame($firstStart->toDateTimeString(), $event->start_date->toDateTimeString());
+        $this->assertSame($lastEnd->toDateTimeString(), $event->end_date->toDateTimeString());
     }
 
     public function test_create_event_stores_its_cover_on_the_public_disk(): void

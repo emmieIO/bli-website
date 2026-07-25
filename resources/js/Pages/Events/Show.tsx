@@ -1,6 +1,8 @@
 import { Head, Link, router, useForm } from '@inertiajs/react';
 import GuestLayout from '@/Layouts/GuestLayout';
 import { useState, useEffect, FormEvent } from 'react';
+import EventSchedule from '@/Components/Events/EventSchedule';
+import type { EventDayForm } from '@/types/events';
 
 interface User {
     id: number;
@@ -34,7 +36,7 @@ interface Event {
     description: string;
     program_cover: string | null;
     start_date: string;
-    end_date: string;
+    end_date?: string | null;
     mode?: 'online' | 'offline' | 'hybrid';
     physical_address?: string;
     location?: string;
@@ -48,6 +50,7 @@ interface Event {
     registration_status?: 'registered' | 'cancelled' | null;
     revoke_count?: number;
     attendee_workspace_url?: string | null;
+    days?: EventDayForm[];
     program_profile?: {
         program_type: 'general_event' | 'discipleship_track';
         program_code?: string | null;
@@ -96,10 +99,10 @@ export default function EventShow({ event, auth, primary_cta }: EventShowProps) 
 
     const now = new Date();
     const startDate = new Date(event.start_date);
-    const endDate = new Date(event.end_date);
-    const isLive = now >= startDate && now <= endDate;
+    const endDate = event.end_date ? new Date(event.end_date) : null;
+    const isLive = now >= startDate && (!endDate || now <= endDate);
     const isUpcoming = now < startDate;
-    const isPast = now > endDate;
+    const isPast = Boolean(endDate && now > endDate);
 
     // Countdown timer for upcoming events
     useEffect(() => {
@@ -316,7 +319,7 @@ export default function EventShow({ event, auth, primary_cta }: EventShowProps) 
                                                     </p>
                                                     <p className="mt-1 text-xs text-white/72 sm:text-sm">{formatTime(event.start_date)}</p>
                                                 </div>
-                                                <div>
+                                                {event.end_date && <div>
                                                     <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/54">Ends</p>
                                                     <p
                                                         className="mt-1 text-sm font-semibold leading-5 text-white/96 sm:mt-2 sm:text-base"
@@ -325,7 +328,7 @@ export default function EventShow({ event, auth, primary_cta }: EventShowProps) 
                                                         {formatDate(event.end_date)}
                                                     </p>
                                                     <p className="mt-1 text-xs text-white/72 sm:text-sm">{formatTime(event.end_date)}</p>
-                                                </div>
+                                                </div>}
                                                 <div className="hidden sm:block">
                                                     <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/54">Entry</p>
                                                     <p
@@ -371,6 +374,12 @@ export default function EventShow({ event, auth, primary_cta }: EventShowProps) 
                                     </div>
                                 </div>
                             </section>
+
+                            {event.days && event.days.length > 0 && (
+                                <div className="rounded-md border border-slate-200 bg-white p-4 shadow-sm sm:p-5 lg:p-7">
+                                    <EventSchedule days={event.days} />
+                                </div>
+                            )}
 
                             <div className="rounded-md border border-slate-200 bg-white p-4 shadow-sm sm:p-5 lg:p-7">
                                 <div className="mb-5 flex items-center gap-3">
@@ -647,7 +656,7 @@ export default function EventShow({ event, auth, primary_cta }: EventShowProps) 
                                             <p className="text-sm font-semibold text-slate-950">Schedule</p>
                                             <p className="mt-1 text-sm text-slate-600">{formatDate(event.start_date)}</p>
                                             <p className="text-sm text-slate-600">
-                                                {formatTime(event.start_date)} to {formatTime(event.end_date)}
+                                                {event.end_date ? `${formatTime(event.start_date)} to ${formatTime(event.end_date)}` : `Starts at ${formatTime(event.start_date)}`}
                                             </p>
                                         </div>
                                     </div>

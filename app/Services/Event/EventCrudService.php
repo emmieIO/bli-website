@@ -22,6 +22,8 @@ class EventCrudService
         try {
             DB::beginTransaction();
             $filepath = null;
+            $days = $validated['days'] ?? [];
+            unset($validated['days']);
 
             $validated['slug'] = (string) Str::uuid();
             unset($validated['program_cover']);
@@ -39,6 +41,7 @@ class EventCrudService
             $validated['status'] = $validated['status'] ?? EventStatus::DRAFT->value;
 
             $event = Event::create($validated);
+            $this->syncDays($event, $days);
             DB::commit();
             event(new EventCreated($event));
 
@@ -61,6 +64,8 @@ class EventCrudService
         DB::beginTransaction();
 
         try {
+            $days = $validated['days'] ?? null;
+            unset($validated['days']);
             $filePath = $event->program_cover;
             unset($validated['program_cover']);
 
@@ -82,9 +87,14 @@ class EventCrudService
 
             $event->fill($validated);
             $event->save();
+
+            if ($days !== null) {
+                $this->syncDays($event, $days);
+            }
+
             DB::commit();
 
-            return $event->fresh();
+            return $event->fresh()->load('days');
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Event update failed: '.$e->getMessage());
@@ -139,6 +149,28 @@ class EventCrudService
     {
         if (! empty($filePath) && Storage::disk($disk)->exists($filePath)) {
             Storage::disk($disk)->delete($filePath);
+        }
+    }
+
+    /** @param array<int, array<string, mixed>> $days */
+    private function syncDays(Event $event, array $days): void
+    {
+        $event->days()->delete();
+
+        foreach (array_values($days) as $position => $day) {
+            $event->days()->create([
+                ...$day,
+                'position' => $position + 1,
+            ]);
+        }
+
+        if ($days !== []) {
+            $knownEndDates = collect($days)->pluck('end_at')->filter();
+
+            $event->forceFill([
+                'start_date' => collect($days)->min('start_at'),
+                'end_date' => $knownEndDates->isEmpty() ? null : $knownEndDates->max(),
+            ])->save();
         }
     }
 }

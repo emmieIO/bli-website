@@ -2,12 +2,12 @@
 
 namespace App\Notifications;
 
+use App\Models\Event;
 use App\Services\Events\EventCalendarService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
-use App\Models\Event;
 use Illuminate\Support\Carbon;
 
 class EventRegisteredNotification extends Notification implements ShouldQueue
@@ -16,9 +16,7 @@ class EventRegisteredNotification extends Notification implements ShouldQueue
 
     public function __construct(
         public Event $event
-    )
-    {
-    }
+    ) {}
 
     public function via(object $notifiable): array
     {
@@ -31,24 +29,26 @@ class EventRegisteredNotification extends Notification implements ShouldQueue
         $ics = $calendarService->downloadEventCalendar($this->event);
 
         $startDate = Carbon::parse($this->event->start_date);
-        $endDate = Carbon::parse($this->event->end_date);
+        $endDate = $this->event->end_date ? Carbon::parse($this->event->end_date) : null;
 
         // Format dates
-        $dateRange = $startDate->isSameDay($endDate)
+        $dateRange = ! $endDate || $startDate->isSameDay($endDate)
             ? $startDate->format('l, F j, Y')
-            : $startDate->format('F j') . ' - ' . $endDate->format('F j, Y');
+            : $startDate->format('F j').' - '.$endDate->format('F j, Y');
 
-        $timeRange = $startDate->format('g:i A') . ' - ' . $endDate->format('g:i A');
+        $timeRange = $endDate
+            ? $startDate->format('g:i A').' - '.$endDate->format('g:i A')
+            : $startDate->format('g:i A');
 
         // Determine location display based on mode
-        $locationDisplay = match($this->event->mode) {
+        $locationDisplay = match ($this->event->mode) {
             'online' => 'Online Event (Link will be provided closer to the event)',
             'offline' => $this->event->physical_address ?? $this->event->location ?? 'Venue TBA',
             'hybrid' => 'Hybrid Event - Join online or in person',
             default => $this->event->location ?? 'Location TBA'
         };
 
-        $subject = 'Registration Confirmed - ' . $this->event->title;
+        $subject = 'Registration Confirmed - '.$this->event->title;
         $nextSteps = [
             'Your spot is secured',
             'A calendar invite is attached to this email',
@@ -68,7 +68,7 @@ class EventRegisteredNotification extends Notification implements ShouldQueue
                 'timeRange' => $timeRange,
                 'locationDisplay' => $locationDisplay,
                 'entryFeeDisplay' => $this->event->entry_fee > 0
-                    ? 'N' . number_format($this->event->entry_fee, 2)
+                    ? 'N'.number_format($this->event->entry_fee, 2)
                     : 'Free',
                 'workspaceUrl' => route('events.open', $this->event),
                 'nextSteps' => $nextSteps,
@@ -78,7 +78,7 @@ class EventRegisteredNotification extends Notification implements ShouldQueue
             ])
             ->attachData(
                 $ics,
-                str_replace(['/', '\\', ':', '*', '?', '"', '<', '>', '|'], '-', $this->event->title) . '.ics',
+                str_replace(['/', '\\', ':', '*', '?', '"', '<', '>', '|'], '-', $this->event->title).'.ics',
                 ['mime' => 'text/calendar; method=REQUEST; charset=utf-8;']
             );
 
@@ -108,13 +108,15 @@ class EventRegisteredNotification extends Notification implements ShouldQueue
     public function toArray(object $notifiable): array
     {
         $startDate = Carbon::parse($this->event->start_date);
-        $endDate = Carbon::parse($this->event->end_date);
+        $endDate = $this->event->end_date ? Carbon::parse($this->event->end_date) : null;
 
-        $dateRange = $startDate->isSameDay($endDate)
+        $dateRange = ! $endDate || $startDate->isSameDay($endDate)
             ? $startDate->format('l, F j, Y')
-            : $startDate->format('F j') . ' - ' . $endDate->format('F j, Y');
+            : $startDate->format('F j').' - '.$endDate->format('F j, Y');
 
-        $timeRange = $startDate->format('g:i A') . ' - ' . $endDate->format('g:i A');
+        $timeRange = $endDate
+            ? $startDate->format('g:i A').' - '.$endDate->format('g:i A')
+            : $startDate->format('g:i A');
 
         return [
             'event_id' => $this->event->id,

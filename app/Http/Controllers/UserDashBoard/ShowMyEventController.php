@@ -12,8 +12,7 @@ class ShowMyEventController extends Controller
     public function __construct(
         protected EventRegistrationService $eventRegistrationService,
         protected EventParticipantStateService $participantStateService
-    ) {
-    }
+    ) {}
 
     public function __invoke(string $slug)
     {
@@ -23,11 +22,13 @@ class ShowMyEventController extends Controller
 
         $event->journey_status = now()->isBefore($event->start_date)
             ? 'upcoming'
-            : (now()->isAfter($event->end_date) ? 'ended' : 'ongoing');
+            : ($event->end_date && now()->isAfter($event->end_date) ? 'ended' : 'ongoing');
 
         $event->registration_status = $event->pivot?->status;
         $event->slots_remaining = $this->participantStateService->normalizedSlotsRemaining($event);
-        $event->meeting_link = data_get($event->metadata, 'meeting_link');
+        $event->current_day = $event->currentOrNextDay();
+        $event->meeting_link = $event->current_day?->meeting_link
+            ?: data_get($event->metadata, 'meeting_link');
         $event->access_notes = data_get($event->metadata, 'access_notes');
         $event->latest_transaction = $event->transactions->first();
         $event->program_profile = [

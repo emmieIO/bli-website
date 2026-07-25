@@ -97,6 +97,24 @@ class Event extends Model
         return $this->hasMany(EventGuestAttendee::class);
     }
 
+    public function days(): HasMany
+    {
+        return $this->hasMany(EventDay::class)->orderBy('start_at')->orderBy('position');
+    }
+
+    public function currentOrNextDay(): ?EventDay
+    {
+        $now = now();
+
+        return $this->days()
+            ->where(fn (Builder $query) => $query
+                ->whereNull('end_at')
+                ->orWhere('end_at', '>=', $now))
+            ->orderByRaw('CASE WHEN start_at <= ? THEN 0 ELSE 1 END', [$now])
+            ->orderBy('start_at')
+            ->first();
+    }
+
     public function scopeFindBySlug(Builder $query, string $slug): Builder
     {
         return $query->where('slug', $slug);
@@ -111,7 +129,9 @@ class Event extends Model
     public function scopeOngoing(Builder $query): Builder
     {
         return $query->where('start_date', '<=', Carbon::now())
-            ->where('end_date', '>=', Carbon::now())
+            ->where(fn (Builder $query) => $query
+                ->whereNull('end_date')
+                ->orWhere('end_date', '>=', Carbon::now()))
             ->publiclyVisible();
 
     }

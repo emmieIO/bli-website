@@ -8,7 +8,7 @@ interface Event {
     title: string;
     slug: string;
     start_date: string;
-    end_date: string;
+    end_date?: string | null;
     location?: string | null;
     mode?: string | null;
     journey_status: 'upcoming' | 'ongoing' | 'ended';
@@ -163,7 +163,7 @@ export default function MyEvents({ events }: MyEventsProps) {
 
                                     <div className="mt-4 flex items-start gap-2 rounded-md bg-slate-50 px-3 py-2 text-[13px] leading-5 text-slate-600">
                                         <CalendarDays size={14} className="mt-0.5 shrink-0 text-slate-400" />
-                                        <span>{formatDate(event.start_date)} - {formatDate(event.end_date)}</span>
+                                        <span>{event.end_date ? `${formatDate(event.start_date)} - ${formatDate(event.end_date)}` : formatDate(event.start_date)}</span>
                                     </div>
 
                                     <Link href={route('user.events.show', event.slug)}
@@ -209,7 +209,7 @@ export default function MyEvents({ events }: MyEventsProps) {
                                             <td className="px-5 py-3.5 whitespace-nowrap">
                                                 <div className="flex items-center gap-1.5 text-[13px] text-slate-600">
                                                     <CalendarDays size={13} className="text-slate-400 shrink-0" />
-                                                    {formatDate(event.start_date)} - {formatDate(event.end_date)}
+                                                    {event.end_date ? `${formatDate(event.start_date)} - ${formatDate(event.end_date)}` : formatDate(event.start_date)}
                                                 </div>
                                             </td>
                                             <td className="px-5 py-3.5 whitespace-nowrap text-right">

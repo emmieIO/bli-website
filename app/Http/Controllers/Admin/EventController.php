@@ -73,6 +73,7 @@ class EventController extends Controller
         $event->load([
             'speakers.user',
             'resources',
+            'days',
             'attendees',
             'guestAttendees' => fn ($query) => $query->latest('created_at'),
             'speakerApplications.user',
@@ -137,6 +138,7 @@ class EventController extends Controller
     {
         $event = Event::findBySlug($slug)->firstOrFail();
         $this->authorize('update', $event);
+        $event->load('days');
 
         return Inertia::render('Admin/Events/Edit', compact('event'));
     }

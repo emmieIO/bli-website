@@ -7,6 +7,7 @@ import Modal from '@/Components/Modal';
 import Textarea from '@/Components/Textarea';
 import RichTextEditor from '@/Components/RichTextEditor';
 import { useEventForm } from '@/Components/Events/useEventForm';
+import EventDaysEditor from '@/Components/Events/EventDaysEditor';
 import type { EditEventProps } from '@/types/events';
 
 export default function EditEvent({ event }: EditEventProps) {
@@ -152,13 +153,12 @@ export default function EditEvent({ event }: EditEventProps) {
                 />
 
                 <Input
-                  label="End Date & Time"
+                  label="End Date & Time (Optional)"
                   name="end_date"
                   type="datetime-local"
                   value={formData.end_date}
                   onChange={handleInputChange}
                   error={formErrors.end_date}
-                  required
                 />
 
                 {shouldShowLocation && (
@@ -184,6 +184,19 @@ export default function EditEvent({ event }: EditEventProps) {
                 )}
               </div>
             </div>
+
+            <EventDaysEditor
+              days={formData.days}
+              errors={formErrors as Record<string, string | undefined>}
+              defaults={{
+                theme: formData.theme,
+                mode: formData.mode || 'offline',
+                venue_name: '',
+                physical_address: formData.physical_address,
+                meeting_link: programMetadata.meeting_link || formData.location,
+              }}
+              onChange={(days) => form.setData('days', days)}
+            />
 
             {/* Section: Contact & Pricing */}
             <div>

@@ -72,6 +72,27 @@ trait NormalizesEventPayload
                     'Paid events must require account sign-up so payment can be linked to an attendee.'
                 );
             }
+
+            foreach ((array) $this->input('days', []) as $index => $day) {
+                if (! is_array($day)) {
+                    continue;
+                }
+
+                $start = data_get($day, 'start_at');
+                $end = data_get($day, 'end_at');
+
+                if ($start && $end && strtotime((string) $end) <= strtotime((string) $start)) {
+                    $validator->errors()->add("days.{$index}.end_at", 'Each event day must end after it starts.');
+                }
+
+                if (in_array(data_get($day, 'mode'), ['offline', 'hybrid'], true)
+                    && blank(data_get($day, 'physical_address'))) {
+                    $validator->errors()->add(
+                        "days.{$index}.physical_address",
+                        'A physical address is required for an in-person or hybrid day.'
+                    );
+                }
+            }
         });
     }
 

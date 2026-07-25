@@ -10,7 +10,7 @@ interface Event {
   location?: string | null;
   mode: 'online' | 'offline' | 'hybrid';
   start_date: string;
-  end_date: string;
+  end_date?: string | null;
   status: 'draft' | 'review' | 'published' | 'registration_open' | 'registration_closed' | 'live' | 'completed' | 'cancelled' | 'archived';
   is_featured: boolean;
   speakers_count?: number;
@@ -141,7 +141,7 @@ export default function EventsIndex({ events, capabilities }: EventsProps) {
                       </td>
                       <td className="whitespace-nowrap px-5 py-3.5 text-sm text-slate-700">
                         <p>{formatDate(event.start_date)}</p>
-                        <p className="text-xs text-slate-400">Ends {formatDate(event.end_date)}</p>
+                        <p className="text-xs text-slate-400">{event.end_date ? `Ends ${formatDate(event.end_date)}` : 'End time not specified'}</p>
                       </td>
                       <td className="px-5 py-3.5">
                         <div className="space-y-1.5">

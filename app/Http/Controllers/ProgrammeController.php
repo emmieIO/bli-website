@@ -9,6 +9,7 @@ use App\Services\Event\EventParticipantStateService;
 use App\Services\Event\EventQueryService;
 use App\Services\Event\PublicEventCtaResolver;
 use Illuminate\Http\Request;
+use Inertia\Inertia;
 
 class ProgrammeController extends Controller
 {
@@ -17,7 +18,8 @@ class ProgrammeController extends Controller
         protected EventQueryService $eventQueryService,
         protected PublicEventCtaResolver $publicEventCtaResolver,
         protected EventParticipantStateService $participantStateService
-    ){}
+    ) {}
+
     /**
      * Display a listing of the resource.
      */
@@ -29,12 +31,12 @@ class ProgrammeController extends Controller
         $segmentCounts = $this->publicSegmentCounts($searchQuery);
 
         $statusMap = [
-            'live_now'             => 'live',
-            'open_registration'    => 'registration_open',
-            'event_full'           => 'registration_open',
-            'registration_closed'  => 'registration_closed',
-            'completed'            => 'completed',
-            'announced'            => 'published',
+            'live_now' => 'live',
+            'open_registration' => 'registration_open',
+            'event_full' => 'registration_open',
+            'registration_closed' => 'registration_closed',
+            'completed' => 'completed',
+            'announced' => 'published',
         ];
 
         $dbStatus = $statusFilter ? ($statusMap[$statusFilter] ?? null) : null;
@@ -55,7 +57,7 @@ class ProgrammeController extends Controller
             })
         );
 
-        return \Inertia\Inertia::render("Events/Index", [
+        return Inertia::render('Events/Index', [
             'searchQuery' => $searchQuery,
             'events' => $events,
             'segmentCounts' => $segmentCounts,
@@ -173,7 +175,8 @@ class ProgrammeController extends Controller
             $event = $this->programRepository->findProgramsBySlug($slug);
 
             // Load speakers relationship
-            $event->load('speakers.user');
+            $event->load(['speakers.user', 'days']);
+            $event->days->each->makeHidden('meeting_link');
 
             // Calculate slots remaining
             $slotsRemaining = $this->participantStateService->slotsRemaining($event);
@@ -218,16 +221,14 @@ class ProgrammeController extends Controller
                 'access_notes' => data_get($event->metadata, 'access_notes'),
             ];
 
-            return \Inertia\Inertia::render("Events/Show", [
+            return Inertia::render('Events/Show', [
                 'event' => $event,
                 'primary_cta' => $this->publicEventCtaResolver->resolve($event, auth()->user()),
             ]);
         } catch (\Exception $e) {
-            abort(404,"Event does not exist");
+            abort(404, 'Event does not exist');
         }
     }
-
-
 
     /**
      * Show the form for editing the specified resource.

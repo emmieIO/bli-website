@@ -7,21 +7,36 @@ use App\Models\Event;
 use App\Services\Event\EventReminderService;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 
 class SendEventReminderController extends Controller
 {
     use AuthorizesRequests;
 
-    public function __invoke(Event $event, EventReminderService $reminderService): RedirectResponse
+    public function __invoke(Request $request, Event $event, EventReminderService $reminderService): RedirectResponse
     {
         $this->authorize('sendUpdates', $event);
 
-        $result = $reminderService->sendToRegisteredAttendees($event);
+        $validated = $request->validate([
+            'account_ids' => ['sometimes', 'array'],
+            'account_ids.*' => ['integer', 'distinct'],
+            'guest_ids' => ['sometimes', 'array'],
+            'guest_ids.*' => ['integer', 'distinct'],
+        ]);
+        $selectionProvided = $request->has('account_ids') || $request->has('guest_ids');
+
+        $result = $reminderService->sendToRegisteredAttendees(
+            $event,
+            accountIds: $selectionProvided ? ($validated['account_ids'] ?? []) : null,
+            guestIds: $selectionProvided ? ($validated['guest_ids'] ?? []) : null
+        );
 
         if ($result['total'] === 0) {
             return back()->with([
                 'type' => 'warning',
-                'message' => 'No confirmed registrations were found for this event.',
+                'message' => $selectionProvided
+                    ? 'None of the selected recipients has a confirmed registration.'
+                    : 'No confirmed registrations were found for this event.',
             ]);
         }
 

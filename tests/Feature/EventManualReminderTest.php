@@ -118,4 +118,40 @@ class EventManualReminderTest extends TestCase
 
         Notification::assertNothingSent();
     }
+
+    public function test_manager_can_select_individual_confirmed_reminder_recipients(): void
+    {
+        Notification::fake();
+
+        $manager = User::factory()->create();
+        $manager->givePermissionTo(EventPermissionsEnum::SEND_UPDATES->value);
+        $event = Event::factory()->create([
+            'creator_id' => $manager->id,
+            'theme' => 'Beacon Summit',
+        ]);
+        $selectedUser = User::factory()->create();
+        $unselectedUser = User::factory()->create();
+        $selectedGuest = EventGuestAttendee::query()->create([
+            'event_id' => $event->id,
+            'name' => 'Selected Guest',
+            'email' => 'selected@example.com',
+            'status' => EventRegistrationStatus::REGISTERED->value,
+        ]);
+
+        foreach ([$selectedUser, $unselectedUser] as $attendee) {
+            $event->attendees()->attach($attendee->id, [
+                'status' => EventRegistrationStatus::REGISTERED->value,
+                'revoke_count' => 0,
+            ]);
+        }
+
+        $this->actingAs($manager)->post(route('admin.events.send-reminder', $event), [
+            'account_ids' => [$selectedUser->id],
+            'guest_ids' => [$selectedGuest->id],
+        ])->assertSessionHas('message', 'Reminder queued for 2 confirmed attendees.');
+
+        Notification::assertSentToTimes($selectedUser, UpcomingEventReminder::class, 1);
+        Notification::assertSentToTimes($selectedGuest, UpcomingEventReminder::class, 1);
+        Notification::assertNotSentTo($unselectedUser, UpcomingEventReminder::class);
+    }
 }

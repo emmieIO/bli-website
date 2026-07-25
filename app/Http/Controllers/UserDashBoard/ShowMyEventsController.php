@@ -20,7 +20,7 @@ class ShowMyEventsController extends Controller
         $events = $this->eventRegistrationService->getEventsImAttending()->map(function ($event) {
             $event->journey_status = now()->isBefore($event->start_date)
                 ? 'upcoming'
-                : (now()->isAfter($event->end_date) ? 'ended' : 'ongoing');
+                : ($event->end_date && now()->isAfter($event->end_date) ? 'ended' : 'ongoing');
             $event->registration_status = $event->pivot?->status;
             $event->latest_transaction = $event->transactions->first();
 

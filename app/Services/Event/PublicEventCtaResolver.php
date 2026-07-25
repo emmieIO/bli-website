@@ -94,7 +94,9 @@ class PublicEventCtaResolver
     private function isLive(Event $event): bool
     {
         return $event->lifecycleStatus() === EventStatus::LIVE
-            || ($event->start_date && $event->end_date && now()->between($event->start_date, $event->end_date));
+            || ($event->start_date
+                && now()->gte($event->start_date)
+                && (! $event->end_date || now()->lte($event->end_date)));
     }
 
     private function isFinished(Event $event): bool

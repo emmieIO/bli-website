@@ -17,6 +17,7 @@ import {
     X,
 } from 'lucide-react';
 import DashboardLayout from '@/Layouts/DashboardLayout';
+import EventSchedule from '@/Components/Events/EventSchedule';
 import type {
     AttendeeEventProgramProfile,
     AttendeeEventResource,
@@ -154,6 +155,12 @@ export default function ShowMyEvent({ event }: Props) {
                                 dangerouslySetInnerHTML={{ __html: event.description || '<p>No additional description has been published.</p>' }}
                             />
                         </WorkspaceSection>
+
+                        {event.days?.length > 0 && (
+                            <WorkspaceSection eyebrow="Program agenda" title={`${event.days.length}-day schedule`}>
+                                <EventSchedule days={event.days} showJoinLinks />
+                            </WorkspaceSection>
+                        )}
 
                         {event.program_profile?.program_type === 'discipleship_track' && (
                             <Commitments profile={event.program_profile} />
@@ -420,9 +427,11 @@ function formatDate(value: string): string {
     }).format(new Date(value));
 }
 
-function formatTimeRange(start: string, end: string): string {
+function formatTimeRange(start: string, end?: string | null): string {
     const formatter = new Intl.DateTimeFormat('en-NG', { hour: 'numeric', minute: '2-digit' });
-    return `${formatter.format(new Date(start))} – ${formatter.format(new Date(end))}`;
+    const startTime = formatter.format(new Date(start));
+
+    return end ? `${startTime} – ${formatter.format(new Date(end))}` : `Starts ${startTime}`;
 }
 
 function formatMinutes(minutes: number): string {

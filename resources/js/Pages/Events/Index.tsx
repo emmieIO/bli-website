@@ -10,7 +10,7 @@ interface Event {
     theme: string;
     program_cover: string | null;
     start_date: string;
-    end_date: string;
+    end_date?: string | null;
     mode?: 'online' | 'offline' | 'hybrid';
     physical_address?: string;
     entry_fee: number;

@@ -54,7 +54,7 @@ class UpdateEventRequest extends FormRequest
                     }
                 },
             ],
-            'end_date' => 'sometimes|required|date|after_or_equal:start_date',
+            'end_date' => 'nullable|date|after_or_equal:start_date',
             'physical_address' => 'nullable|string|max:255|required_if:mode,offline,hybrid',
             'creator_id' => 'sometimes|required|exists:users,id',
             'status' => 'nullable|string|in:'.implode(',', EventStatus::values()),
@@ -82,6 +82,16 @@ class UpdateEventRequest extends FormRequest
             'metadata.weekly_discipleship_target_max' => 'nullable|integer|min:0|max:1000|gte:metadata.weekly_discipleship_target_min',
             'metadata.meeting_link' => 'nullable|url|max:2048',
             'metadata.access_notes' => 'nullable|string|max:2000',
+            'days' => 'nullable|array|max:60',
+            'days.*.title' => 'nullable|string|max:255',
+            'days.*.theme' => 'nullable|string|max:255',
+            'days.*.start_at' => 'required_with:days|date',
+            'days.*.end_at' => 'nullable|date',
+            'days.*.mode' => 'required_with:days|string|in:'.implode(',', array_column(EventModeEnum::cases(), 'value')),
+            'days.*.venue_name' => 'nullable|string|max:255',
+            'days.*.physical_address' => 'nullable|string|max:500',
+            'days.*.meeting_link' => 'nullable|url:http,https|max:2048',
+            'days.*.notes' => 'nullable|string|max:2000',
         ];
     }
 

@@ -61,6 +61,17 @@ export function useEventForm(event?: EditableEvent, creatorId: number | null = n
             meeting_link: event?.metadata?.meeting_link ?? '',
             access_notes: event?.metadata?.access_notes ?? '',
         },
+        days: (event?.days ?? []).map((day) => ({
+            ...day,
+            title: day.title ?? '',
+            theme: day.theme ?? '',
+            start_at: toDateTimeInput(day.start_at),
+            end_at: toDateTimeInput(day.end_at),
+            venue_name: day.venue_name ?? '',
+            physical_address: day.physical_address ?? '',
+            meeting_link: day.meeting_link ?? '',
+            notes: day.notes ?? '',
+        })),
     });
 
     const handleInputChange = (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -128,6 +139,16 @@ function normalizeEventPayload(data: EventFormData): EventFormData {
             meeting_link: data.metadata.meeting_link.trim(),
             access_notes: data.metadata.access_notes.trim(),
         },
+        days: data.days.map((day) => ({
+            ...day,
+            title: day.title.trim(),
+            theme: day.theme.trim(),
+            venue_name: day.venue_name.trim(),
+            physical_address: day.mode === 'online' ? '' : day.physical_address.trim(),
+            meeting_link: day.meeting_link.trim(),
+            end_at: day.end_at?.trim() || null,
+            notes: day.notes.trim(),
+        })),
     };
 }
 

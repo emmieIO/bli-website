@@ -5,6 +5,7 @@ namespace App\Http\Controllers\UserDashBoard;
 use App\Http\Controllers\Controller;
 use App\Models\Event;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
@@ -21,7 +22,11 @@ class DashboardController extends Controller
 
         $stats = [
             'myEvents' => $user->events()->count(),
-            'upcomingEvents' => $user->events()->where('end_date', '>=', now())->count(),
+            'upcomingEvents' => $user->events()
+                ->where(fn ($query) => $query
+                    ->whereNull('end_date')
+                    ->orWhere('end_date', '>=', now()))
+                ->count(),
             'speakerInvitations' => DB::table('speaker_invites')->where('email', $user->email)->count(),
         ];
 
@@ -69,9 +74,14 @@ class DashboardController extends Controller
             : 0;
 
         // Events scheduled
-        $eventsScheduled = Event::where('end_date', '>=', $now)->count();
+        $eventsScheduled = Event::where(fn ($query) => $query
+            ->whereNull('end_date')
+            ->orWhere('end_date', '>=', $now))
+            ->count();
         $eventsToday = Event::whereDate('start_date', '<=', $now->toDateString())
-            ->whereDate('end_date', '>=', $now->toDateString())
+            ->where(fn ($query) => $query
+                ->whereNull('end_date')
+                ->orWhereDate('end_date', '>=', $now->toDateString()))
             ->count();
 
         // Total attendees (event participants)
@@ -138,7 +148,7 @@ class DashboardController extends Controller
         return [
             'upcomingSessions' => $upcomingSessions,
             'upcomingSessionsDescription' => $nextSession
-                ? 'Next session: ' . \Carbon\Carbon::parse($nextSession->start_date)->format('l ga')
+                ? 'Next session: '.Carbon::parse($nextSession->start_date)->format('l ga')
                 : 'No upcoming sessions',
             'feedbackReceived' => $feedbackCount,
             'feedbackReceivedDescription' => $feedbackThisMonth > 0

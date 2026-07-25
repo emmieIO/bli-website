@@ -119,6 +119,44 @@ class EventReminderCommandTest extends TestCase
         Notification::assertSentToTimes($confirmedGuest, UpcomingEventReminder::class, 1);
     }
 
+    public function test_reminder_command_schedules_each_detailed_program_day(): void
+    {
+        Notification::fake();
+        Carbon::setTestNow('2026-05-01 10:00:00');
+
+        $creator = User::factory()->create();
+        $attendee = User::factory()->create();
+        $event = Event::factory()->create([
+            'creator_id' => $creator->id,
+            'theme' => 'Seven Day Intensive',
+            'start_date' => now()->addHours(24),
+            'end_date' => now()->addDays(7),
+        ]);
+        $event->attendees()->attach($attendee->id, [
+            'status' => EventRegistrationStatus::REGISTERED->value,
+            'revoke_count' => 0,
+        ]);
+        $day = $event->days()->create([
+            'position' => 1,
+            'title' => 'Character Lab',
+            'theme' => 'Character',
+            'start_at' => now()->addHours(24),
+            'end_at' => now()->addHours(26),
+            'mode' => 'online',
+            'meeting_link' => 'https://meet.example.com/character-lab',
+        ]);
+
+        $this->artisan('app:send-event-reminders')->assertExitCode(0);
+
+        Notification::assertSentTo(
+            $attendee,
+            UpcomingEventReminder::class,
+            fn (UpcomingEventReminder $notification) => $notification->eventDay?->is($day)
+                && $notification->actionUrl() === 'https://meet.example.com/character-lab'
+        );
+        Notification::assertSentToTimes($attendee, UpcomingEventReminder::class, 1);
+    }
+
     public function test_reminder_notification_uses_human_readable_time_until_event(): void
     {
         Carbon::setTestNow('2026-05-01 10:00:00');
@@ -150,5 +188,33 @@ class EventReminderCommandTest extends TestCase
 
         $this->assertSame(route('events.show', $event->slug), $notification->actionUrl());
         $this->assertSame('View Event Details', $notification->toMail(User::factory()->create())->actionText);
+    }
+
+    public function test_reminder_uses_the_current_or_next_program_day_logistics(): void
+    {
+        Carbon::setTestNow('2026-05-01 10:00:00');
+
+        $event = Event::factory()->create([
+            'creator_id' => User::factory()->create()->id,
+            'theme' => 'Program Theme',
+            'start_date' => now()->addDay(),
+            'end_date' => now()->addDays(7),
+        ]);
+        $event->days()->create([
+            'position' => 1,
+            'title' => 'Day One',
+            'theme' => 'Clarity',
+            'start_at' => now()->addDay(),
+            'end_at' => now()->addDay()->addHours(2),
+            'mode' => 'online',
+            'meeting_link' => 'https://meet.example.com/day-one',
+        ]);
+
+        $notification = new UpcomingEventReminder($event);
+        $payload = $notification->toArray(User::factory()->create());
+
+        $this->assertSame('https://meet.example.com/day-one', $notification->actionUrl());
+        $this->assertSame($event->days()->first()->id, $payload['event_day_id']);
+        $this->assertSame('Online Event (Access link on event page)', $payload['location']);
     }
 }

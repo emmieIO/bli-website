@@ -3,6 +3,7 @@
 namespace App\Notifications;
 
 use App\Models\Event;
+use App\Models\EventDay;
 use App\Models\EventGuestAttendee;
 use Carbon\Carbon;
 use Illuminate\Bus\Queueable;
@@ -17,7 +18,7 @@ class UpcomingEventReminder extends Notification implements ShouldQueue
     /**
      * Create a new notification instance.
      */
-    public function __construct(public Event $event)
+    public function __construct(public Event $event, public ?EventDay $eventDay = null)
     {
         //
     }
@@ -41,16 +42,20 @@ class UpcomingEventReminder extends Notification implements ShouldQueue
      */
     public function toMail(object $notifiable): MailMessage
     {
-        $startDate = Carbon::parse($this->event->start_date);
-        $endDate = Carbon::parse($this->event->end_date);
+        $scheduleDay = $this->scheduleDay();
+        $startDate = Carbon::parse($scheduleDay?->start_at ?? $this->event->start_date);
+        $rawEndDate = $scheduleDay?->end_at ?? $this->event->end_date;
+        $endDate = $rawEndDate ? Carbon::parse($rawEndDate) : null;
         $timeUntil = $this->timeUntilStart($startDate);
 
         // Format dates
-        $dateRange = $startDate->isSameDay($endDate)
+        $dateRange = ! $endDate || $startDate->isSameDay($endDate)
             ? $startDate->format('l, F j, Y')
             : $startDate->format('F j').' - '.$endDate->format('F j, Y');
 
-        $timeRange = $startDate->format('g:i A').' - '.$endDate->format('g:i A');
+        $timeRange = $endDate
+            ? $startDate->format('g:i A').' - '.$endDate->format('g:i A')
+            : $startDate->format('g:i A');
         $recipientName = $notifiable->name ?: 'there';
 
         $mail = (new MailMessage)
@@ -63,13 +68,13 @@ class UpcomingEventReminder extends Notification implements ShouldQueue
             ->line('**Event:** '.$this->event->title);
 
         // Add theme if available
-        if ($this->event->theme) {
-            $mail->line('**Theme:** '.$this->event->theme);
+        if ($scheduleDay?->theme || $this->event->theme) {
+            $mail->line('**Theme:** '.($scheduleDay?->theme ?: $this->event->theme));
         }
 
         $mail->line('**Date:** '.$dateRange)
             ->line('**Time:** '.$timeRange)
-            ->line('**Mode:** '.ucfirst($this->event->mode ?? 'Hybrid'))
+            ->line('**Mode:** '.ucfirst($scheduleDay?->mode ?? $this->event->mode ?? 'Hybrid'))
             ->line('**Location:** '.$this->formatLocation());
 
         $mail->line('---')
@@ -114,14 +119,16 @@ The '.config('app.name').' Team');
      */
     public function toArray(object $notifiable): array
     {
-        $startDate = Carbon::parse($this->event->start_date);
+        $scheduleDay = $this->scheduleDay();
+        $startDate = Carbon::parse($scheduleDay?->start_at ?? $this->event->start_date);
         $timeUntil = $this->timeUntilStart($startDate);
 
         return [
             'event_id' => $this->event->id,
             'event_title' => $this->event->title,
             'event_slug' => $this->event->slug,
-            'start_date' => $this->event->start_date,
+            'start_date' => $startDate,
+            'event_day_id' => $scheduleDay?->id,
             'time_until' => $timeUntil,
             'mode' => $this->event->mode,
             'location' => $this->formatLocation(),
@@ -138,10 +145,15 @@ The '.config('app.name').' Team');
 
     public function formatLocation(): string
     {
-        return match ($this->event->mode) {
+        $scheduleDay = $this->scheduleDay();
+        $mode = $scheduleDay?->mode ?? $this->event->mode;
+        $physicalAddress = $scheduleDay?->physical_address ?? $this->event->physical_address;
+        $venue = $scheduleDay?->venue_name;
+
+        return match ($mode) {
             'online' => 'Online Event (Access link on event page)',
-            'offline' => $this->event->physical_address ?? 'Venue TBA',
-            'hybrid' => 'Hybrid Event - Online & '.($this->event->physical_address ?? 'Physical venue TBA'),
+            'offline' => collect([$venue, $physicalAddress])->filter()->implode(', ') ?: 'Venue TBA',
+            'hybrid' => 'Hybrid Event - Online & '.(collect([$venue, $physicalAddress])->filter()->implode(', ') ?: 'Physical venue TBA'),
             default => $this->event->location ?? 'Location TBA',
         };
     }
@@ -168,7 +180,8 @@ The '.config('app.name').' Team');
 
     private function meetingLink(): ?string
     {
-        $meetingLink = trim((string) data_get($this->event->metadata, 'meeting_link'));
+        $meetingLink = trim((string) ($this->scheduleDay()?->meeting_link
+            ?: data_get($this->event->metadata, 'meeting_link')));
 
         if ($meetingLink === '' || filter_var($meetingLink, FILTER_VALIDATE_URL) === false) {
             return null;
@@ -177,5 +190,10 @@ The '.config('app.name').' Team');
         return in_array(strtolower((string) parse_url($meetingLink, PHP_URL_SCHEME)), ['http', 'https'], true)
             ? $meetingLink
             : null;
+    }
+
+    private function scheduleDay(): ?EventDay
+    {
+        return $this->eventDay ?? $this->event->currentOrNextDay();
     }
 }

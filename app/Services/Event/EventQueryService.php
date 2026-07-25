@@ -68,7 +68,9 @@ class EventQueryService
             $query->where('end_date', '<', now(), 'and');
         } elseif ($filter === 'ongoing') {
             $query->where('start_date', '<=', now(), 'and')
-                ->where('end_date', '>=', now(), 'and');
+                ->where(fn (Builder $query) => $query
+                    ->whereNull('end_date')
+                    ->orWhere('end_date', '>=', now()));
         } elseif ($filter === 'future') {
             $query->where('start_date', '>', now(), 'and');
         } elseif ($filter === 'draft') {

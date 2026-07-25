@@ -3,6 +3,19 @@ import type { Event } from '@/types';
 export type EventStatus = Event['status'];
 export type EventMode = 'online' | 'offline' | 'hybrid';
 
+export interface EventDayForm {
+    id?: number;
+    title: string;
+    theme: string;
+    start_at: string;
+    end_at: string | null;
+    mode: EventMode;
+    venue_name: string;
+    physical_address: string;
+    meeting_link: string;
+    notes: string;
+}
+
 export interface EventProgramMetadataForm {
     program_type: 'general_event' | 'discipleship_track';
     program_code: string;
@@ -43,6 +56,7 @@ export interface EventFormData {
     creator_id: number | null;
     program_cover: File | null;
     metadata: EventProgramMetadataForm;
+    days: EventDayForm[];
     _method?: 'put';
 }
 
@@ -70,6 +84,10 @@ export interface EditableEvent extends Omit<Event, 'entry_fee' | 'attendee_slots
     attendee_slots: number;
     mode: EventMode;
     metadata?: EditableEventMetadata | null;
+    days?: Array<Omit<EventDayForm, 'start_at' | 'end_at'> & {
+        start_at: string;
+        end_at: string | null;
+    }>;
 }
 
 export interface EditEventProps {
@@ -122,6 +140,7 @@ export interface AdminEventGuestAttendee {
 export interface AdminEventRegistration {
     key: string;
     userId?: number;
+    guestId?: number;
     name: string;
     email: string;
     phone?: string | null;
@@ -157,7 +176,7 @@ export interface AttendeeWorkspaceEvent {
     description?: string | null;
     program_cover?: string | null;
     start_date: string;
-    end_date: string;
+    end_date?: string | null;
     location?: string | null;
     physical_address?: string | null;
     mode?: string | null;
@@ -172,6 +191,7 @@ export interface AttendeeWorkspaceEvent {
     resources: AttendeeEventResource[];
     speakers: AttendeeEventSpeaker[];
     program_profile?: AttendeeEventProgramProfile;
+    days: EventDayForm[];
     pivot?: { revoke_count?: number };
 }
 
