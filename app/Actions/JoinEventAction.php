@@ -139,17 +139,6 @@ class JoinEventAction
             'name' => ['required', 'string', 'max:255'],
         ]);
 
-        $existing = $event->guestAttendees()
-            ->where('email', mb_strtolower(trim($validated['email'])))
-            ->first();
-
-        if ($existing && $existing->status === EventRegistrationStatus::REGISTERED) {
-            return back()->with([
-                'type' => 'info',
-                'message' => 'This email is already confirmed for this event.',
-            ]);
-        }
-
         $result = $this->eventRegistrationService->registerGuestIfAvailable(
             $event,
             $validated['email'],
@@ -159,7 +148,7 @@ class JoinEventAction
         if ($result === EventRegistrationStatus::REGISTERED) {
             return back()->with([
                 'type' => 'success',
-                'message' => 'Your registration is confirmed. We will send event reminders to your email address.',
+                'message' => 'Your registration is confirmed. We sent a six-digit event access code to your email.',
             ]);
         }
 

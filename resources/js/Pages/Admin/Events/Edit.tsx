@@ -162,14 +162,20 @@ export default function EditEvent({ event }: EditEventProps) {
                 />
 
                 {shouldShowLocation && (
-                  <Input
-                    label="Location (Meeting Link)"
-                    name="location"
-                    value={formData.location}
-                    onChange={handleInputChange}
-                    error={formErrors.location}
-                    placeholder="Paste meeting link"
-                  />
+                  <div>
+                    <Input
+                      label="Default Meeting Link"
+                      name="location"
+                      type="url"
+                      value={formData.location}
+                      onChange={handleInputChange}
+                      error={formErrors.location}
+                      placeholder="https://meet.google.com/..."
+                    />
+                    <p className="mt-1 text-xs text-slate-500">
+                      Used for reminders and attendee access unless a program day has its own link.
+                    </p>
+                  </div>
                 )}
 
                 {shouldShowPhysicalAddress && (
@@ -193,7 +199,7 @@ export default function EditEvent({ event }: EditEventProps) {
                 mode: formData.mode || 'offline',
                 venue_name: '',
                 physical_address: formData.physical_address,
-                meeting_link: programMetadata.meeting_link || formData.location,
+                meeting_link: formData.location,
               }}
               onChange={(days) => form.setData('days', days)}
             />
@@ -416,15 +422,6 @@ export default function EditEvent({ event }: EditEventProps) {
                 )}
 
                 <div className="grid grid-cols-1 gap-6">
-                  <Input
-                    label="Attendee Meeting Link"
-                    name="meeting_link"
-                    value={programMetadata.meeting_link}
-                    onChange={handleMetadataChange}
-                    error={formErrors['metadata.meeting_link']}
-                    placeholder="https://..."
-                  />
-
                   <Textarea
                     label="Access Notes"
                     name="access_notes"

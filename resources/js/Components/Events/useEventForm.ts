@@ -30,7 +30,7 @@ export function useEventForm(event?: EditableEvent, creatorId: number | null = n
         theme: event?.theme ?? '',
         start_date: toDateTimeInput(event?.start_date),
         end_date: toDateTimeInput(event?.end_date),
-        location: event?.location ?? '',
+        location: event?.location ?? event?.metadata?.meeting_link ?? '',
         physical_address: event?.physical_address ?? '',
         contact_email: event?.contact_email ?? '',
         entry_fee: event?.entry_fee?.toString() ?? '0',
@@ -58,7 +58,7 @@ export function useEventForm(event?: EditableEvent, creatorId: number | null = n
             weekly_evangelism_target_max: event?.metadata?.weekly_evangelism_target_max?.toString() ?? '',
             weekly_discipleship_target_min: event?.metadata?.weekly_discipleship_target_min?.toString() ?? '',
             weekly_discipleship_target_max: event?.metadata?.weekly_discipleship_target_max?.toString() ?? '',
-            meeting_link: event?.metadata?.meeting_link ?? '',
+            meeting_link: event?.location ?? event?.metadata?.meeting_link ?? '',
             access_notes: event?.metadata?.access_notes ?? '',
         },
         days: (event?.days ?? []).map((day) => ({
@@ -136,7 +136,9 @@ function normalizeEventPayload(data: EventFormData): EventFormData {
             weekly_evangelism_target_max: isDiscipleshipTrack ? data.metadata.weekly_evangelism_target_max.trim() : '',
             weekly_discipleship_target_min: isDiscipleshipTrack ? data.metadata.weekly_discipleship_target_min.trim() : '',
             weekly_discipleship_target_max: isDiscipleshipTrack ? data.metadata.weekly_discipleship_target_max.trim() : '',
-            meeting_link: data.metadata.meeting_link.trim(),
+            // Keep the legacy metadata value synchronized while `location`
+            // remains the database column for the single default meeting link.
+            meeting_link: data.mode === 'offline' ? '' : data.location.trim(),
             access_notes: data.metadata.access_notes.trim(),
         },
         days: data.days.map((day) => ({

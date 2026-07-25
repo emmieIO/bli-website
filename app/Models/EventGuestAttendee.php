@@ -17,10 +17,13 @@ class EventGuestAttendee extends Model
         'email',
         'name',
         'status',
+        'access_code_hash',
+        'access_code_expires_at',
     ];
 
     protected $casts = [
         'status' => EventRegistrationStatus::class,
+        'access_code_expires_at' => 'datetime',
     ];
 
     public function event(): BelongsTo

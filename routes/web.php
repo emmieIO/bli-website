@@ -1,32 +1,38 @@
 <?php
 
-use App\Http\Controllers\HomeController;
-use App\Http\Controllers\ProgrammeController;
-use App\Http\Controllers\Events\OpenEventLinkController;
-use App\Http\Controllers\SpeakerUserController;
-use App\Http\Controllers\Instructors\InstructorsController;
+use App\Http\Controllers\BlogController;
 use App\Http\Controllers\ContactController;
+use App\Http\Controllers\Events\OpenEventLinkController;
+use App\Http\Controllers\Events\VerifyGuestEventAccessController;
+use App\Http\Controllers\HomeController;
+use App\Http\Controllers\InstructorRatingController;
+use App\Http\Controllers\Instructors\InstructorsController;
+use App\Http\Controllers\ProgrammeController;
 use App\Http\Controllers\PublicMentorshipController;
-use Illuminate\Foundation\Inspiring;
+use App\Http\Controllers\SpeakerUserController;
+use App\Http\Controllers\TransactionController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
 // Public pages
 Route::get('/', [HomeController::class, 'index'])->name('homepage');
-Route::get('/privacy', fn() => Inertia::render('Legal/Privacy'))->name('privacy-policy');
-Route::get('/agreement-terms', fn() => Inertia::render('Legal/Terms'))->name('terms-of-service');
-Route::get('/contact', fn() => Inertia::render('Contact'))->name('contact-us');
+Route::get('/privacy', fn () => Inertia::render('Legal/Privacy'))->name('privacy-policy');
+Route::get('/agreement-terms', fn () => Inertia::render('Legal/Terms'))->name('terms-of-service');
+Route::get('/contact', fn () => Inertia::render('Contact'))->name('contact-us');
 Route::post('/contact', [ContactController::class, 'submit'])->name('contact.submit');
 Route::get('/mentorship', [PublicMentorshipController::class, 'index'])->name('mentorship.index');
 
 // Public events browsing
 Route::get('/events', [ProgrammeController::class, 'index'])->name('events.index');
 Route::get('/events/{slug}/show', [ProgrammeController::class, 'show'])->name('events.show');
+Route::post('/events/{slug}/guest-access', VerifyGuestEventAccessController::class)
+    ->middleware('throttle:6,1')
+    ->name('events.guest-access.verify');
 Route::get('/events/{event}/open', OpenEventLinkController::class)->name('events.open');
 
 // Public blog
-Route::get('/blog', [\App\Http\Controllers\BlogController::class, 'index'])->name('blog.index');
-Route::get('/blog/{slug}', [\App\Http\Controllers\BlogController::class, 'show'])->name('blog.show');
+Route::get('/blog', [BlogController::class, 'index'])->name('blog.index');
+Route::get('/blog/{slug}', [BlogController::class, 'show'])->name('blog.show');
 
 // Public speaker/instructor application entry points
 Route::get('/become-a-speaker', [SpeakerUserController::class, 'index'])->name('become-a-speaker');
@@ -35,13 +41,13 @@ Route::get('/instructors/start-application', [InstructorsController::class, 'reg
 
 // Instructor ratings
 Route::middleware('auth')->group(function () {
-    Route::post('/instructors/{instructor}/rate', [\App\Http\Controllers\InstructorRatingController::class, 'store'])->name('instructors.rate');
+    Route::post('/instructors/{instructor}/rate', [InstructorRatingController::class, 'store'])->name('instructors.rate');
 });
-Route::get('/instructors/{instructor}/ratings', [\App\Http\Controllers\InstructorRatingController::class, 'index'])->name('instructors.ratings');
+Route::get('/instructors/{instructor}/ratings', [InstructorRatingController::class, 'index'])->name('instructors.ratings');
 
 // Transaction receipt route (User-specific)
 Route::middleware('auth')->group(function () {
-    Route::get('/transactions/{transaction}/receipt', [\App\Http\Controllers\TransactionController::class, 'showReceipt'])->name('transactions.show-receipt');
+    Route::get('/transactions/{transaction}/receipt', [TransactionController::class, 'showReceipt'])->name('transactions.show-receipt');
 });
 
 Route::get('process-queue', function () {
@@ -49,22 +55,24 @@ Route::get('process-queue', function () {
         '--stop-when-empty' => true,
         '--max-time' => 3600,
     ]);
+
     return 'Queue Processed.';
 })->middleware(['queue.token', 'throttle:5,1']);
 
 Route::get('send-event-reminders', function () {
     Artisan::call('app:send-event-reminders');
+
     return 'Event reminders queued successfully.';
 })->middleware(['queue.token', 'throttle:10,1']);
 
 // Load organized route files
 Route::middleware('web')->group(function () {
-    require __DIR__ . '/auth.php';
-    require __DIR__ . '/user.php';
-    require __DIR__ . '/admin.php';
-    require __DIR__ . '/instructor.php';
-    require __DIR__ . '/speakers.php';
-    require __DIR__ . '/payments.php';
-    require __DIR__ . '/mentorship.php';
-    require __DIR__ . '/tickets.php';
+    require __DIR__.'/auth.php';
+    require __DIR__.'/user.php';
+    require __DIR__.'/admin.php';
+    require __DIR__.'/instructor.php';
+    require __DIR__.'/speakers.php';
+    require __DIR__.'/payments.php';
+    require __DIR__.'/mentorship.php';
+    require __DIR__.'/tickets.php';
 });

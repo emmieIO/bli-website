@@ -27,8 +27,7 @@ class ShowMyEventController extends Controller
         $event->registration_status = $event->pivot?->status;
         $event->slots_remaining = $this->participantStateService->normalizedSlotsRemaining($event);
         $event->current_day = $event->currentOrNextDay();
-        $event->meeting_link = $event->current_day?->meeting_link
-            ?: data_get($event->metadata, 'meeting_link');
+        $event->meeting_link = $event->meetingLinkFor($event->current_day);
         $event->access_notes = data_get($event->metadata, 'access_notes');
         $event->latest_transaction = $event->transactions->first();
         $event->program_profile = [

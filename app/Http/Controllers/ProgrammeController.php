@@ -171,63 +171,66 @@ class ProgrammeController extends Controller
      */
     public function show(string $slug)
     {
-        try {
-            $event = $this->programRepository->findProgramsBySlug($slug);
+        $event = $this->programRepository->findProgramsBySlug($slug);
 
-            // Load speakers relationship
-            $event->load(['speakers.user', 'days']);
-            $event->days->each->makeHidden('meeting_link');
+        // Load speakers relationship
+        $event->load(['speakers.user', 'days']);
+        $event->days->each->makeHidden('meeting_link');
 
-            // Calculate slots remaining
-            $slotsRemaining = $this->participantStateService->slotsRemaining($event);
+        // Calculate slots remaining
+        $slotsRemaining = $this->participantStateService->slotsRemaining($event);
 
-            // Check if user is registered
-            $isRegistered = false;
-            $registrationStatus = null;
-            $revokeCount = 0;
-            if (auth()->check()) {
-                $userId = auth()->id();
-                $isRegistered = $this->participantStateService->isRegistered($event, $userId);
-                $registrationStatus = $this->participantStateService->registrationStatusForUser($event, $userId);
-                $revokeCount = $this->participantStateService->getRevokeCount($event, $userId);
-            }
-
-            // Append calculated values to event
-            // Transform 'Unlimited' to null for frontend to interpret as truly unlimited
-            // Transform 'Full' to 0 for frontend to interpret as no slots
-            $event->slots_remaining = $this->participantStateService->normalizedSlotsRemaining($event);
-            $event->is_registered = $isRegistered;
-            $event->registration_status = $registrationStatus;
-            $event->revoke_count = $revokeCount;
-            $event->attendee_workspace_url = auth()->check()
-                ? route('user.events.show', $event->slug)
-                : null;
-            $event->program_profile = [
-                'program_type' => data_get($event->metadata, 'program_type', 'general_event'),
-                'program_code' => data_get($event->metadata, 'program_code'),
-                'registration_mode' => data_get($event->metadata, 'registration_mode', 'open'),
-                'requires_screening' => (bool) data_get($event->metadata, 'requires_screening', false),
-                'screening_note' => data_get($event->metadata, 'screening_note'),
-                'cohort_duration_weeks' => data_get($event->metadata, 'cohort_duration_weeks'),
-                'group_model' => data_get($event->metadata, 'group_model'),
-                'central_teaching_schedule' => data_get($event->metadata, 'central_teaching_schedule'),
-                'group_meeting_schedule' => data_get($event->metadata, 'group_meeting_schedule'),
-                'weekly_prayer_target_minutes' => data_get($event->metadata, 'weekly_prayer_target_minutes'),
-                'weekly_evangelism_target_min' => data_get($event->metadata, 'weekly_evangelism_target_min'),
-                'weekly_evangelism_target_max' => data_get($event->metadata, 'weekly_evangelism_target_max'),
-                'weekly_discipleship_target_min' => data_get($event->metadata, 'weekly_discipleship_target_min'),
-                'weekly_discipleship_target_max' => data_get($event->metadata, 'weekly_discipleship_target_max'),
-                'meeting_link' => data_get($event->metadata, 'meeting_link'),
-                'access_notes' => data_get($event->metadata, 'access_notes'),
-            ];
-
-            return Inertia::render('Events/Show', [
-                'event' => $event,
-                'primary_cta' => $this->publicEventCtaResolver->resolve($event, auth()->user()),
-            ]);
-        } catch (\Exception $e) {
-            abort(404, 'Event does not exist');
+        // Check if user is registered
+        $isRegistered = false;
+        $registrationStatus = null;
+        $revokeCount = 0;
+        if (auth()->check()) {
+            $userId = auth()->id();
+            $isRegistered = $this->participantStateService->isRegistered($event, $userId);
+            $registrationStatus = $this->participantStateService->registrationStatusForUser($event, $userId);
+            $revokeCount = $this->participantStateService->getRevokeCount($event, $userId);
         }
+        $guestHasAccess = (bool) session()->get("event_guest_access.{$event->id}", false);
+        $canAccessMeeting = $isRegistered || $guestHasAccess;
+        $attendeeMeetingLink = $canAccessMeeting
+            ? $event->meetingLinkFor($event->currentOrNextDay())
+            : null;
+
+        // Append calculated values to event
+        // Transform 'Unlimited' to null for frontend to interpret as truly unlimited
+        // Transform 'Full' to 0 for frontend to interpret as no slots
+        $event->slots_remaining = $this->participantStateService->normalizedSlotsRemaining($event);
+        $event->is_registered = $isRegistered;
+        $event->registration_status = $registrationStatus;
+        $event->revoke_count = $revokeCount;
+        $event->attendee_workspace_url = auth()->check()
+            ? route('user.events.show', $event->slug)
+            : null;
+        $event->program_profile = [
+            'program_type' => data_get($event->metadata, 'program_type', 'general_event'),
+            'program_code' => data_get($event->metadata, 'program_code'),
+            'registration_mode' => data_get($event->metadata, 'registration_mode', 'open'),
+            'requires_screening' => (bool) data_get($event->metadata, 'requires_screening', false),
+            'screening_note' => data_get($event->metadata, 'screening_note'),
+            'cohort_duration_weeks' => data_get($event->metadata, 'cohort_duration_weeks'),
+            'group_model' => data_get($event->metadata, 'group_model'),
+            'central_teaching_schedule' => data_get($event->metadata, 'central_teaching_schedule'),
+            'group_meeting_schedule' => data_get($event->metadata, 'group_meeting_schedule'),
+            'weekly_prayer_target_minutes' => data_get($event->metadata, 'weekly_prayer_target_minutes'),
+            'weekly_evangelism_target_min' => data_get($event->metadata, 'weekly_evangelism_target_min'),
+            'weekly_evangelism_target_max' => data_get($event->metadata, 'weekly_evangelism_target_max'),
+            'weekly_discipleship_target_min' => data_get($event->metadata, 'weekly_discipleship_target_min'),
+            'weekly_discipleship_target_max' => data_get($event->metadata, 'weekly_discipleship_target_max'),
+            'has_meeting_link' => $event->meetingLinkFor($event->currentOrNextDay()) !== null,
+            'access_notes' => data_get($event->metadata, 'access_notes'),
+        ];
+        $event->makeHidden('location');
+
+        return Inertia::render('Events/Show', [
+            'event' => $event,
+            'attendeeMeetingLink' => $attendeeMeetingLink,
+            'primary_cta' => $this->publicEventCtaResolver->resolve($event, auth()->user()),
+        ]);
     }
 
     /**

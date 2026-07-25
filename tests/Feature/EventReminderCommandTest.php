@@ -181,6 +181,9 @@ class EventReminderCommandTest extends TestCase
         $event = Event::factory()->create([
             'creator_id' => User::factory()->create()->id,
             'theme' => 'Beacon Summit',
+            'mode' => 'online',
+            'location' => null,
+            'physical_address' => null,
             'metadata' => [],
         ]);
 
@@ -188,6 +191,39 @@ class EventReminderCommandTest extends TestCase
 
         $this->assertSame(route('events.show', $event->slug), $notification->actionUrl());
         $this->assertSame('View Event Details', $notification->toMail(User::factory()->create())->actionText);
+    }
+
+    public function test_reminder_uses_updated_default_link_before_stale_metadata_for_accounts_and_guests(): void
+    {
+        $event = Event::factory()->create([
+            'creator_id' => User::factory()->create()->id,
+            'theme' => 'Beacon Summit',
+            'mode' => 'online',
+            'location' => 'https://meet.example.com/updated-room',
+            'physical_address' => null,
+            'metadata' => [
+                'meeting_link' => 'https://meet.example.com/stale-room',
+            ],
+        ]);
+        $account = User::factory()->create();
+        $guest = EventGuestAttendee::query()->create([
+            'event_id' => $event->id,
+            'email' => 'guest@example.com',
+            'name' => 'Guest Attendee',
+            'status' => EventRegistrationStatus::REGISTERED->value,
+        ]);
+        $notification = new UpcomingEventReminder($event);
+
+        foreach ([$account, $guest] as $recipient) {
+            $mail = $notification->toMail($recipient);
+
+            $this->assertSame('https://meet.example.com/updated-room', $notification->actionUrl());
+            $this->assertSame('https://meet.example.com/updated-room', $mail->actionUrl);
+            $this->assertContains(
+                '**Meeting link:** https://meet.example.com/updated-room',
+                $mail->introLines
+            );
+        }
     }
 
     public function test_reminder_uses_the_current_or_next_program_day_logistics(): void

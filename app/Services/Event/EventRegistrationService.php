@@ -8,8 +8,10 @@ use App\Models\Event;
 use App\Models\EventGuestAttendee;
 use App\Models\EventTransitionAudit;
 use App\Models\User;
+use App\Notifications\EventRegisteredNotification;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Throwable;
 
@@ -67,6 +69,8 @@ class EventRegistrationService
             ->first();
 
         if ($existing && $existing->status === $targetStatus) {
+            $this->issueGuestAccessCode($event, $existing);
+
             return $targetStatus;
         }
 
@@ -81,18 +85,32 @@ class EventRegistrationService
                 'name' => $name,
                 'status' => $targetStatus->value,
             ]);
+            $this->issueGuestAccessCode($event, $existing);
 
             return $targetStatus;
         }
 
-        EventGuestAttendee::query()->create([
+        $guest = EventGuestAttendee::query()->create([
             'event_id' => $event->id,
             'email' => $email,
             'name' => $name,
             'status' => $targetStatus->value,
         ]);
+        $this->issueGuestAccessCode($event, $guest);
 
         return $targetStatus;
+    }
+
+    public function issueGuestAccessCode(Event $event, EventGuestAttendee $guest): void
+    {
+        $accessCode = (string) random_int(100000, 999999);
+
+        $guest->forceFill([
+            'access_code_hash' => Hash::make($accessCode),
+            'access_code_expires_at' => now()->addMinutes(15),
+        ])->save();
+
+        $guest->notify(new EventRegisteredNotification($event, $accessCode));
     }
 
     public function getEventsImAttending()

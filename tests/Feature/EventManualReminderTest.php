@@ -36,6 +36,9 @@ class EventManualReminderTest extends TestCase
         $event = Event::factory()->create([
             'creator_id' => $manager->id,
             'theme' => 'Beacon Summit',
+            'mode' => 'online',
+            'location' => null,
+            'physical_address' => null,
         ]);
         $event->update([
             'metadata' => [

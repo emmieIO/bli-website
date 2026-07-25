@@ -396,7 +396,7 @@ export default function ViewEvent({ event, capabilities, publicEventUrl }: ViewE
                     <MetaItem label="Entry fee" value={Number(event.entry_fee) > 0 ? `₦${Number(event.entry_fee).toLocaleString()}` : 'Free'} />
                     <MetaItem label="Starts" value={formatDate(event.start_date)} />
                     <MetaItem label="Ends" value={event.end_date ? formatDate(event.end_date) : 'Not specified'} />
-                    <MetaItem label="Meeting link" value={event.location || 'Not set'} />
+                    <MetaItem label="Default meeting link" value={event.location || programProfile?.meeting_link || 'Not set'} />
                     <MetaItem label="Physical address" value={event.physical_address || 'Not set'} />
                     <MetaItem label="Contact email" value={event.contact_email || 'Not set'} />
                     <MetaItem label="Capacity" value={event.attendee_slots ? event.attendee_slots.toString() : 'Unlimited'} />
@@ -422,7 +422,6 @@ export default function ViewEvent({ event, capabilities, publicEventUrl }: ViewE
                       <MetaItem label="Prayer target" value={prayerTargetLabel} />
                       <MetaItem label="Evangelism target" value={evangelismTargetLabel} />
                       <MetaItem label="Multiplication target" value={discipleshipTargetLabel} />
-                      <MetaItem label="Meeting link" value={programProfile.meeting_link ? 'Configured' : 'Not set'} />
                       <MetaItem label="Access notes" value={programProfile.access_notes ? 'Configured' : 'Not set'} />
                     </dl>
 

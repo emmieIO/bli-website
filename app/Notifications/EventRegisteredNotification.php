@@ -3,6 +3,7 @@
 namespace App\Notifications;
 
 use App\Models\Event;
+use App\Models\EventGuestAttendee;
 use App\Services\Events\EventCalendarService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -15,12 +16,13 @@ class EventRegisteredNotification extends Notification implements ShouldQueue
     use Queueable;
 
     public function __construct(
-        public Event $event
+        public Event $event,
+        public ?string $guestAccessCode = null
     ) {}
 
     public function via(object $notifiable): array
     {
-        return ['database', 'mail'];
+        return $notifiable instanceof EventGuestAttendee ? ['mail'] : ['database', 'mail'];
     }
 
     public function toMail(object $notifiable): MailMessage
@@ -30,6 +32,8 @@ class EventRegisteredNotification extends Notification implements ShouldQueue
 
         $startDate = Carbon::parse($this->event->start_date);
         $endDate = $this->event->end_date ? Carbon::parse($this->event->end_date) : null;
+        $isGuest = $notifiable instanceof EventGuestAttendee;
+        $meetingLink = $isGuest ? null : $this->event->meetingLinkFor($this->event->currentOrNextDay());
 
         // Format dates
         $dateRange = ! $endDate || $startDate->isSameDay($endDate)
@@ -42,10 +46,10 @@ class EventRegisteredNotification extends Notification implements ShouldQueue
 
         // Determine location display based on mode
         $locationDisplay = match ($this->event->mode) {
-            'online' => 'Online Event (Link will be provided closer to the event)',
-            'offline' => $this->event->physical_address ?? $this->event->location ?? 'Venue TBA',
-            'hybrid' => 'Hybrid Event - Join online or in person',
-            default => $this->event->location ?? 'Location TBA'
+            'online' => $meetingLink ? 'Online event - access link confirmed below' : 'Online event - access link pending',
+            'offline' => $this->event->physical_address ?? 'Venue TBA',
+            'hybrid' => $meetingLink ? 'Hybrid event - online access confirmed below' : 'Hybrid event - online access pending',
+            default => $this->event->physical_address ?? 'Location TBA'
         };
 
         $subject = 'Registration Confirmed - '.$this->event->title;
@@ -67,6 +71,8 @@ class EventRegisteredNotification extends Notification implements ShouldQueue
                 'dateRange' => $dateRange,
                 'timeRange' => $timeRange,
                 'locationDisplay' => $locationDisplay,
+                'meetingLink' => $meetingLink,
+                'guestAccessCode' => $this->guestAccessCode,
                 'entryFeeDisplay' => $this->event->entry_fee > 0
                     ? 'N'.number_format($this->event->entry_fee, 2)
                     : 'Free',
@@ -95,7 +101,9 @@ class EventRegisteredNotification extends Notification implements ShouldQueue
         $tips = [];
 
         if ($this->event->mode === 'online' || $this->event->mode === 'hybrid') {
-            $tips[] = 'Meeting access will be available from your event workspace before the session starts.';
+            $tips[] = $this->event->meetingLinkFor($this->event->currentOrNextDay())
+                ? 'Use the confirmed meeting link in this email when it is time to join.'
+                : 'The organizer will send the meeting link in a later reminder.';
         }
 
         if ($this->event->mode === 'offline' || $this->event->mode === 'hybrid') {

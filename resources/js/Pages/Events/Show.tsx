@@ -66,13 +66,14 @@ interface Event {
         weekly_evangelism_target_max?: number | null;
         weekly_discipleship_target_min?: number | null;
         weekly_discipleship_target_max?: number | null;
-        meeting_link?: string | null;
+        has_meeting_link?: boolean;
         access_notes?: string | null;
     };
 }
 
 interface EventShowProps {
     event: Event;
+    attendeeMeetingLink?: string | null;
     auth?: {
         user?: User;
     };
@@ -89,12 +90,17 @@ interface EventShowProps {
     };
 }
 
-export default function EventShow({ event, auth, primary_cta }: EventShowProps) {
+export default function EventShow({ event, auth, primary_cta, attendeeMeetingLink }: EventShowProps) {
     const [showModal, setShowModal] = useState(false);
+    const [guestRegistrationStep, setGuestRegistrationStep] = useState<'details' | 'review'>('details');
     const [countdown, setCountdown] = useState('');
     const guestRegistration = useForm({
         name: '',
         email: '',
+    });
+    const guestAccess = useForm({
+        guest_access_email: '',
+        guest_access_code: '',
     });
 
     const now = new Date();
@@ -157,12 +163,35 @@ export default function EventShow({ event, auth, primary_cta }: EventShowProps) 
     const handleRegistration = (e: FormEvent) => {
         e.preventDefault();
 
+        if (requiresGuestEmail && guestRegistrationStep === 'details') {
+            guestRegistration.setData('name', guestRegistration.data.name.trim());
+            guestRegistration.setData('email', guestRegistration.data.email.trim());
+            setGuestRegistrationStep('review');
+            return;
+        }
+
         guestRegistration.post(route('events.join', event.slug), {
             preserveScroll: true,
             onSuccess: () => {
+                guestAccess.setData('guest_access_email', guestRegistration.data.email);
                 guestRegistration.reset();
+                setGuestRegistrationStep('details');
                 setShowModal(false);
             },
+            onError: () => setGuestRegistrationStep('details'),
+        });
+    };
+
+    const closeRegistrationModal = () => {
+        setShowModal(false);
+        setGuestRegistrationStep('details');
+    };
+
+    const handleGuestAccess = (e: FormEvent) => {
+        e.preventDefault();
+        guestAccess.post(route('events.guest-access.verify', event.slug), {
+            preserveScroll: true,
+            onSuccess: () => guestAccess.reset('guest_access_code'),
         });
     };
 
@@ -202,6 +231,7 @@ export default function EventShow({ event, auth, primary_cta }: EventShowProps) 
         }
 
         if (primary_cta.requires_confirmation) {
+            setGuestRegistrationStep('details');
             setShowModal(true);
             return;
         }
@@ -414,7 +444,7 @@ export default function EventShow({ event, auth, primary_cta }: EventShowProps) 
                                         {programProfile.central_teaching_schedule && <ProgramFact label="Central teaching" value={programProfile.central_teaching_schedule} />}
                                         {programProfile.group_meeting_schedule && <ProgramFact label="Group meetings" value={programProfile.group_meeting_schedule} />}
                                         {programProfile.group_model && <ProgramFact label="Group model" value={programProfile.group_model} />}
-                                        {programProfile.meeting_link && <ProgramFact label="Meeting link" value="Shared after successful registration" />}
+                                        {programProfile.has_meeting_link && <ProgramFact label="Meeting link" value="Shared after successful registration" />}
                                     </div>
 
                                     {(programProfile.screening_note || prayerTargetLabel || evangelismTargetLabel || discipleshipTargetLabel || programProfile.access_notes) && (
@@ -680,23 +710,66 @@ export default function EventShow({ event, auth, primary_cta }: EventShowProps) 
                                             </div>
                                             <div>
                                                 <p className="text-sm font-semibold text-slate-950">Online access</p>
-                                                {auth?.user && isRegistered && event.location ? (
+                                                {attendeeMeetingLink ? (
                                                     isPast ? (
                                                         <p className="mt-1 text-sm text-slate-600">Meeting link has expired.</p>
-                                                    ) : startDate <= now ? (
+                                                    ) : (
                                                         <a
-                                                            href={event.location}
+                                                            href={attendeeMeetingLink}
                                                             className="mt-1 inline-flex items-center text-sm font-medium text-emerald-700 hover:underline"
                                                             target="_blank"
                                                             rel="noopener noreferrer"
                                                         >
                                                             Join meeting
                                                         </a>
-                                                    ) : (
-                                                        <p className="mt-1 text-sm text-slate-600">
-                                                            The meeting link will appear here at the event start time.
-                                                        </p>
                                                     )
+                                                ) : !auth?.user && !event.require_sign_up ? (
+                                                    <form onSubmit={handleGuestAccess} className="mt-3 max-w-md space-y-3">
+                                                        <p className="text-sm leading-6 text-slate-600">
+                                                            Registered as a guest? Enter the email and six-digit code sent to you to reveal joining details.
+                                                        </p>
+                                                        <div>
+                                                            <input
+                                                                type="email"
+                                                                required
+                                                                autoComplete="email"
+                                                                value={guestAccess.data.guest_access_email}
+                                                                onChange={(e) => guestAccess.setData('guest_access_email', e.target.value)}
+                                                                placeholder="Registration email"
+                                                                aria-label="Registration email"
+                                                                className="h-10 w-full rounded-md border border-slate-300 px-3 text-sm outline-none focus:border-primary"
+                                                            />
+                                                            {guestAccess.errors.guest_access_email && (
+                                                                <p className="mt-1 text-xs font-medium text-red-600">{guestAccess.errors.guest_access_email}</p>
+                                                            )}
+                                                        </div>
+                                                        <div className="flex gap-2">
+                                                            <div className="min-w-0 flex-1">
+                                                                <input
+                                                                    type="text"
+                                                                    required
+                                                                    inputMode="numeric"
+                                                                    pattern="[0-9]{6}"
+                                                                    maxLength={6}
+                                                                    value={guestAccess.data.guest_access_code}
+                                                                    onChange={(e) => guestAccess.setData('guest_access_code', e.target.value.replace(/\D/g, '').slice(0, 6))}
+                                                                    placeholder="6-digit code"
+                                                                    aria-label="Guest access code"
+                                                                    className="h-10 w-full rounded-md border border-slate-300 px-3 text-sm tracking-widest outline-none focus:border-primary"
+                                                                />
+                                                            </div>
+                                                            <button
+                                                                type="submit"
+                                                                disabled={guestAccess.processing}
+                                                                className="h-10 shrink-0 rounded-md bg-primary px-4 text-sm font-semibold text-white disabled:opacity-60"
+                                                            >
+                                                                {guestAccess.processing ? 'Checking...' : 'Reveal details'}
+                                                            </button>
+                                                        </div>
+                                                        {guestAccess.errors.guest_access_code && (
+                                                            <p className="text-xs font-medium text-red-600">{guestAccess.errors.guest_access_code}</p>
+                                                        )}
+                                                    </form>
                                                 ) : (
                                                     <p className="mt-1 text-sm text-slate-600">
                                                         Available to confirmed attendees.
@@ -753,7 +826,7 @@ export default function EventShow({ event, auth, primary_cta }: EventShowProps) 
                                 {/* Close Button */}
                                 <button
                                     type="button"
-                                    onClick={() => setShowModal(false)}
+                                    onClick={closeRegistrationModal}
                                     className="absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-md text-sm text-white/80 transition-all duration-300 hover:bg-white/20 hover:text-white"
                                 >
                                     <i className="fas fa-times w-4 h-4"></i>
@@ -765,9 +838,17 @@ export default function EventShow({ event, auth, primary_cta }: EventShowProps) 
                                 </div>
 
                                 {/* Modal Title */}
-                                <h3 className="mb-2 text-xl font-bold text-white">{requiresGuestEmail ? 'Register as a guest' : 'Confirm Free Registration'}</h3>
+                                <h3 className="mb-2 text-xl font-bold text-white">
+                                    {requiresGuestEmail
+                                        ? guestRegistrationStep === 'review' ? 'Review your details' : 'Register as a guest'
+                                        : 'Confirm Free Registration'}
+                                </h3>
                                 <p className="text-sm text-white/90">
-                                    {requiresGuestEmail ? 'No account needed. Enter your name and email to reserve your place.' : 'Reserve your seat and move directly into the attendee journey'}
+                                    {requiresGuestEmail
+                                        ? guestRegistrationStep === 'review'
+                                            ? 'Check everything carefully before confirming your place.'
+                                            : 'No account needed. Enter your name and email to reserve your place.'
+                                        : 'Reserve your seat and move directly into the attendee journey'}
                                 </p>
                             </div>
 
@@ -789,7 +870,7 @@ export default function EventShow({ event, auth, primary_cta }: EventShowProps) 
                                 </div>
 
                                 <form onSubmit={handleRegistration}>
-                                    {requiresGuestEmail && (
+                                    {requiresGuestEmail && guestRegistrationStep === 'details' && (
                                         <div className="mb-6 space-y-4 text-left">
                                             <div>
                                                 <label htmlFor="guest_name" className="mb-1 block text-sm font-medium text-slate-700">
@@ -802,7 +883,10 @@ export default function EventShow({ event, auth, primary_cta }: EventShowProps) 
                                                     required
                                                     autoComplete="name"
                                                     value={guestRegistration.data.name}
-                                                    onChange={(e) => guestRegistration.setData('name', e.target.value)}
+                                                    onChange={(e) => {
+                                                        guestRegistration.setData('name', e.target.value);
+                                                        guestRegistration.clearErrors('name');
+                                                    }}
                                                     aria-invalid={Boolean(guestRegistration.errors.name)}
                                                     aria-describedby={guestRegistration.errors.name ? 'guest_name_error' : undefined}
                                                     className="h-11 w-full rounded-lg border border-slate-300 px-3 text-sm text-slate-900 outline-none transition focus:border-primary-300 focus:ring-2 focus:ring-primary-500/10"
@@ -825,7 +909,10 @@ export default function EventShow({ event, auth, primary_cta }: EventShowProps) 
                                                     required
                                                     autoComplete="email"
                                                     value={guestRegistration.data.email}
-                                                    onChange={(e) => guestRegistration.setData('email', e.target.value)}
+                                                    onChange={(e) => {
+                                                        guestRegistration.setData('email', e.target.value);
+                                                        guestRegistration.clearErrors('email');
+                                                    }}
                                                     aria-invalid={Boolean(guestRegistration.errors.email)}
                                                     aria-describedby={guestRegistration.errors.email ? 'guest_email_error' : 'guest_email_help'}
                                                     className="h-11 w-full rounded-lg border border-slate-300 px-3 text-sm text-slate-900 outline-none transition focus:border-primary-300 focus:ring-2 focus:ring-primary-500/10"
@@ -838,6 +925,27 @@ export default function EventShow({ event, auth, primary_cta }: EventShowProps) 
                                                 ) : (
                                                     <p id="guest_email_help" className="mt-1 text-xs text-slate-500">We will use this only for this event registration and reminders.</p>
                                                 )}
+                                            </div>
+                                        </div>
+                                    )}
+                                    {requiresGuestEmail && guestRegistrationStep === 'review' && (
+                                        <div className="mb-6 space-y-4 text-left">
+                                            <div className="divide-y divide-slate-200 rounded-md border border-slate-200 bg-slate-50">
+                                                <div className="px-4 py-3">
+                                                    <p className="text-xs font-semibold uppercase text-slate-500">Event</p>
+                                                    <p className="mt-1 text-sm font-semibold text-slate-950">{event.title}</p>
+                                                </div>
+                                                <div className="px-4 py-3">
+                                                    <p className="text-xs font-semibold uppercase text-slate-500">Full name</p>
+                                                    <p className="mt-1 wrap-break-word text-sm font-semibold text-slate-950">{guestRegistration.data.name}</p>
+                                                </div>
+                                                <div className="px-4 py-3">
+                                                    <p className="text-xs font-semibold uppercase text-slate-500">Email address</p>
+                                                    <p className="mt-1 wrap-break-word text-sm font-semibold text-slate-950">{guestRegistration.data.email}</p>
+                                                </div>
+                                            </div>
+                                            <div className="border-l-4 border-amber-500 bg-amber-50 px-4 py-3 text-sm leading-6 text-amber-950">
+                                                <span className="font-bold">NB:</span> Double-check your name and email address. Your access code, joining details, and event reminders will be sent to this email.
                                             </div>
                                         </div>
                                     )}
@@ -865,17 +973,21 @@ export default function EventShow({ event, auth, primary_cta }: EventShowProps) 
                                             ) : (
                                                 <>
                                                     <i className="fas fa-check"></i>
-                                                    {requiresGuestEmail ? 'Complete registration' : 'Yes, Confirm Registration'}
+                                                    {requiresGuestEmail
+                                                        ? guestRegistrationStep === 'review' ? 'Confirm guest registration' : 'Review details'
+                                                        : 'Yes, Confirm Registration'}
                                                 </>
                                             )}
                                         </button>
                                         <button
                                             type="button"
-                                            onClick={() => setShowModal(false)}
+                                            onClick={requiresGuestEmail && guestRegistrationStep === 'review'
+                                                ? () => setGuestRegistrationStep('details')
+                                                : closeRegistrationModal}
                                             className="inline-flex items-center justify-center rounded-xl border border-slate-200 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
                                         >
-                                            <i className="fas fa-times mr-2"></i>
-                                            Cancel
+                                            <i className={`fas fa-${requiresGuestEmail && guestRegistrationStep === 'review' ? 'arrow-left' : 'times'} mr-2`}></i>
+                                            {requiresGuestEmail && guestRegistrationStep === 'review' ? 'Edit details' : 'Cancel'}
                                         </button>
                                     </div>
                                 </form>

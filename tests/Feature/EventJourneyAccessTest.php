@@ -6,12 +6,17 @@ use App\Enums\EventRegistrationStatus;
 use App\Enums\EventStatus;
 use App\Enums\UserRoles;
 use App\Models\Event;
+use App\Models\EventGuestAttendee;
 use App\Models\Speaker;
 use App\Models\SpeakerInvite;
 use App\Models\User;
+use App\Notifications\EventRegisteredNotification;
+use App\Services\Event\EventParticipantStateService;
 use Illuminate\Foundation\Http\Middleware\ValidateCsrfToken;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Notification;
 use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
@@ -176,6 +181,8 @@ class EventJourneyAccessTest extends TestCase
 
     public function test_guest_can_join_free_event_with_email_when_signup_is_not_required(): void
     {
+        Notification::fake();
+
         $event = $this->makeEvent([
             'entry_fee' => 0,
             'attendee_slots' => 5,
@@ -191,7 +198,7 @@ class EventJourneyAccessTest extends TestCase
 
         $response
             ->assertRedirect(route('events.show', $event->slug))
-            ->assertSessionHas('message', 'Your registration is confirmed. We will send event reminders to your email address.');
+            ->assertSessionHas('message', 'Your registration is confirmed. We sent a six-digit event access code to your email.');
 
         $this->assertDatabaseHas('event_guest_attendees', [
             'event_id' => $event->id,
@@ -199,6 +206,86 @@ class EventJourneyAccessTest extends TestCase
             'name' => 'Guest Attendee',
             'status' => EventRegistrationStatus::REGISTERED->value,
         ]);
+
+        $guest = EventGuestAttendee::query()
+            ->where('event_id', $event->id)
+            ->where('email', 'guest@example.com')
+            ->firstOrFail();
+        $accessCode = null;
+
+        Notification::assertSentTo(
+            $guest,
+            EventRegisteredNotification::class,
+            function (EventRegisteredNotification $notification) use (&$accessCode): bool {
+                $accessCode = $notification->guestAccessCode;
+
+                return is_string($accessCode) && preg_match('/^\d{6}$/', $accessCode) === 1;
+            }
+        );
+
+        $this->assertNotNull($guest->access_code_hash);
+        $this->assertTrue(Hash::check($accessCode, $guest->access_code_hash));
+        $this->assertTrue($guest->access_code_expires_at->isFuture());
+    }
+
+    public function test_guest_access_code_reveals_private_meeting_details_for_the_session(): void
+    {
+        $event = $this->makeEvent([
+            'entry_fee' => 0,
+            'require_sign_up' => false,
+            'mode' => 'online',
+            'location' => 'https://meet.example.com/private-room',
+            'physical_address' => null,
+        ]);
+        $guest = EventGuestAttendee::query()->create([
+            'event_id' => $event->id,
+            'email' => 'guest@example.com',
+            'name' => 'Guest Attendee',
+            'status' => EventRegistrationStatus::REGISTERED->value,
+            'access_code_hash' => Hash::make('482913'),
+            'access_code_expires_at' => now()->addMinutes(15),
+        ]);
+
+        $this->get(route('events.show', $event->slug))
+            ->assertInertia(fn ($page) => $page
+                ->where('attendeeMeetingLink', null));
+
+        $this->post(route('events.guest-access.verify', $event->slug), [
+            'guest_access_email' => 'Guest@Example.com',
+            'guest_access_code' => '482913',
+        ])->assertSessionHas('message', 'Guest access verified. Private event joining details are now available.');
+
+        $this->assertTrue(session()->get("event_guest_access.{$event->id}"));
+        $this->assertNull($guest->fresh()->access_code_hash);
+
+        $this->get(route('events.show', $event->slug))
+            ->assertInertia(fn ($page) => $page
+                ->where('attendeeMeetingLink', 'https://meet.example.com/private-room'));
+    }
+
+    public function test_invalid_guest_access_code_does_not_reveal_meeting_details(): void
+    {
+        $event = $this->makeEvent([
+            'require_sign_up' => false,
+            'mode' => 'online',
+            'location' => 'https://meet.example.com/private-room',
+            'physical_address' => null,
+        ]);
+        EventGuestAttendee::query()->create([
+            'event_id' => $event->id,
+            'email' => 'guest@example.com',
+            'name' => 'Guest Attendee',
+            'status' => EventRegistrationStatus::REGISTERED->value,
+            'access_code_hash' => Hash::make('482913'),
+            'access_code_expires_at' => now()->addMinutes(15),
+        ]);
+
+        $this->post(route('events.guest-access.verify', $event->slug), [
+            'guest_access_email' => 'guest@example.com',
+            'guest_access_code' => '000000',
+        ])->assertSessionHasErrors('guest_access_code');
+
+        $this->assertFalse(session()->has("event_guest_access.{$event->id}"));
     }
 
     public function test_guest_registration_requires_name_and_email(): void
@@ -424,7 +511,7 @@ class EventJourneyAccessTest extends TestCase
             'status' => EventRegistrationStatus::CANCELLED->value,
         ]);
 
-        $this->assertSame(1, app(\App\Services\Event\EventParticipantStateService::class)->slotsRemaining($event));
+        $this->assertSame(1, app(EventParticipantStateService::class)->slotsRemaining($event));
     }
 
     public function test_public_event_page_exposes_discipleship_program_profile(): void

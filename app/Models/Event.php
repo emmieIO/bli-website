@@ -115,6 +115,31 @@ class Event extends Model
             ->first();
     }
 
+    public function meetingLinkFor(?EventDay $eventDay = null): ?string
+    {
+        $mode = $eventDay?->mode ?? $this->mode;
+
+        if (! in_array($mode, ['online', 'hybrid'], true)) {
+            return null;
+        }
+
+        foreach ([
+            $eventDay?->meeting_link,
+            $this->location,
+            data_get($this->metadata, 'meeting_link'),
+        ] as $candidate) {
+            $meetingLink = trim((string) $candidate);
+
+            if ($meetingLink !== ''
+                && filter_var($meetingLink, FILTER_VALIDATE_URL)
+                && in_array(strtolower((string) parse_url($meetingLink, PHP_URL_SCHEME)), ['http', 'https'], true)) {
+                return $meetingLink;
+            }
+        }
+
+        return null;
+    }
+
     public function scopeFindBySlug(Builder $query, string $slug): Builder
     {
         return $query->where('slug', $slug);

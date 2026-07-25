@@ -112,6 +112,20 @@
                                                 <td class="email-detail-border email-detail-label" style="padding:14px 0;width:34%;font-size:13px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;">Location</td>
                                                 <td class="email-detail-border email-detail-value" style="padding:14px 0;font-size:15px;">{{ $locationDisplay }}</td>
                                             </tr>
+                                            @if($meetingLink)
+                                                <tr>
+                                                    <td class="email-detail-border email-detail-label" style="padding:14px 0;width:34%;font-size:13px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;">Meeting Link</td>
+                                                    <td class="email-detail-border email-detail-value" style="padding:14px 0;font-size:15px;">
+                                                        <a href="{{ $meetingLink }}">{{ $meetingLink }}</a>
+                                                    </td>
+                                                </tr>
+                                            @endif
+                                            @if($guestAccessCode)
+                                                <tr>
+                                                    <td class="email-detail-border email-detail-label" style="padding:14px 0;width:34%;font-size:13px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;">Access Code</td>
+                                                    <td class="email-detail-border email-detail-value" style="padding:14px 0;font-size:22px;font-weight:700;letter-spacing:0.18em;">{{ $guestAccessCode }}</td>
+                                                </tr>
+                                            @endif
                                             <tr>
                                                 <td class="email-detail-border email-detail-label" style="padding:14px 0;width:34%;font-size:13px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;">Entry Fee</td>
                                                 <td class="email-detail-border email-detail-value" style="padding:14px 0;font-size:15px;">{{ $entryFeeDisplay }}</td>
@@ -132,6 +146,9 @@
                                             What Happens Next
                                         </div>
                                         <ul class="email-next-text" style="margin:14px 0 0 0;padding-left:20px;">
+                                            @if($guestAccessCode)
+                                                <li style="margin:0 0 10px 0;font-size:15px;line-height:1.7;">Enter your registration email and access code on the event page within 15 minutes to reveal private joining details.</li>
+                                            @endif
                                             @foreach($nextSteps as $nextStep)
                                                 <li style="margin:0 0 10px 0;font-size:15px;line-height:1.7;">{{ $nextStep }}</li>
                                             @endforeach
@@ -147,8 +164,14 @@
 
                     <tr>
                         <td style="padding:24px 40px 10px 40px;" align="center">
+                            @if($meetingLink)
+                                <a href="{{ $meetingLink }}" class="email-button" style="display:inline-block;text-decoration:none;font-size:15px;font-weight:700;padding:15px 28px;border-radius:10px;margin-bottom:12px;">
+                                    Join Online Session
+                                </a>
+                                <br>
+                            @endif
                             <a href="{{ $workspaceUrl }}" class="email-button" style="display:inline-block;text-decoration:none;font-size:15px;font-weight:700;padding:15px 28px;border-radius:10px;">
-                                Open Event Workspace
+                                View Event Details
                             </a>
                             <p class="email-muted" style="margin:14px 0 0 0;font-size:13px;line-height:1.6;">
                                 A calendar invite is attached to this email for quick saving.

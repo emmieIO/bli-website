@@ -12,6 +12,11 @@ EVENT DETAILS
 - Time: {{ $timeRange }}
 - Format: {{ ucfirst($event->mode ?? 'Hybrid') }}
 - Location: {{ $locationDisplay }}
+@if($meetingLink)- Meeting Link: {{ $meetingLink }}
+@endif
+@if($guestAccessCode)- Guest Access Code: {{ $guestAccessCode }}
+- This code expires in 15 minutes. Enter it with your registration email on the event page.
+@endif
 - Entry Fee: {{ $entryFeeDisplay }}
 
 WHAT HAPPENS NEXT

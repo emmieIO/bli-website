@@ -77,16 +77,22 @@ class UpcomingEventReminder extends Notification implements ShouldQueue
             ->line('**Mode:** '.ucfirst($scheduleDay?->mode ?? $this->event->mode ?? 'Hybrid'))
             ->line('**Location:** '.$this->formatLocation());
 
+        if ($meetingLink = $this->meetingLink()) {
+            $mail->line('**Meeting link:** '.$meetingLink);
+        }
+
         $mail->line('---')
             ->action(
-                $this->meetingLink() ? 'Join Event Now' : 'View Event Details',
+                $meetingLink ? 'Join Event Now' : 'View Event Details',
                 $this->actionUrl()
             );
 
         // Add mode-specific reminders
         if ($this->event->mode === 'online' || $this->event->mode === 'hybrid') {
             $mail->line('### Online Access')
-                ->line('🔗 Click the button above to access the meeting link')
+                ->line($meetingLink
+                    ? 'Click the button above to join the online session.'
+                    : 'The organizer has not published an online meeting link yet.')
                 ->line('💻 Test your audio and video before joining')
                 ->line('📱 Keep your device charged');
         }
@@ -180,16 +186,7 @@ The '.config('app.name').' Team');
 
     private function meetingLink(): ?string
     {
-        $meetingLink = trim((string) ($this->scheduleDay()?->meeting_link
-            ?: data_get($this->event->metadata, 'meeting_link')));
-
-        if ($meetingLink === '' || filter_var($meetingLink, FILTER_VALIDATE_URL) === false) {
-            return null;
-        }
-
-        return in_array(strtolower((string) parse_url($meetingLink, PHP_URL_SCHEME)), ['http', 'https'], true)
-            ? $meetingLink
-            : null;
+        return $this->event->meetingLinkFor($this->scheduleDay());
     }
 
     private function scheduleDay(): ?EventDay
