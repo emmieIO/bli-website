@@ -35,7 +35,7 @@ export default function EventDaysEditor({ days, errors, defaults, onChange }: Ev
             <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                 <div>
                     <h3 id="event-days-title" className="text-lg font-semibold text-slate-900">Day-by-day schedule</h3>
-                    <p className="mt-1 text-sm text-slate-500">Add days when the program changes theme, time, venue, or joining link.</p>
+                    <p className="mt-1 text-sm text-slate-500">Add days when the program changes theme, time, venue, or joining link. Enter times in West Africa Time (WAT).</p>
                 </div>
                 <button type="button" onClick={addDay} className="inline-flex items-center justify-center gap-2 rounded-md bg-primary px-3.5 py-2 text-sm font-semibold text-white hover:bg-primary-600">
                     <CalendarPlus size={17} />

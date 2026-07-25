@@ -137,7 +137,8 @@ export default function Checkout({ event }: CheckoutProps) {
                                                 weekday: 'long',
                                                 year: 'numeric',
                                                 month: 'long',
-                                                day: 'numeric'
+                                                day: 'numeric',
+                                                timeZone: 'Africa/Lagos',
                                             })}
                                         </p>
                                     </div>

@@ -43,6 +43,7 @@ class EventRegisteredNotification extends Notification implements ShouldQueue
         $timeRange = $endDate
             ? $startDate->format('g:i A').' - '.$endDate->format('g:i A')
             : $startDate->format('g:i A');
+        $timeRange .= ' West Africa Time (WAT)';
 
         // Determine location display based on mode
         $locationDisplay = match ($this->event->mode) {

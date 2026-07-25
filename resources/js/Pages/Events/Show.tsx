@@ -4,6 +4,8 @@ import { useState, useEffect, FormEvent } from 'react';
 import EventSchedule from '@/Components/Events/EventSchedule';
 import type { EventDayForm } from '@/types/events';
 
+const EVENT_TIMEZONE = 'Africa/Lagos';
+
 interface User {
     id: number;
     name: string;
@@ -143,12 +145,25 @@ export default function EventShow({ event, auth, primary_cta, attendeeMeetingLin
 
     const formatDate = (dateString: string) => {
         const date = new Date(dateString);
-        return date.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
+        return date.toLocaleDateString('en-US', {
+            weekday: 'long',
+            month: 'long',
+            day: 'numeric',
+            year: 'numeric',
+            timeZone: EVENT_TIMEZONE,
+        });
     };
 
     const formatTime = (dateString: string) => {
         const date = new Date(dateString);
-        return date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+        const time = date.toLocaleTimeString('en-US', {
+            hour: 'numeric',
+            minute: '2-digit',
+            hour12: true,
+            timeZone: EVENT_TIMEZONE,
+        });
+
+        return `${time} WAT`;
     };
 
     const getModeIcon = (mode?: string) => {

@@ -12,6 +12,7 @@ import {
 import type { EventDayForm } from '@/types/events';
 
 type DayState = 'completed' | 'live' | 'next' | 'scheduled';
+const EVENT_TIMEZONE = 'Africa/Lagos';
 
 export default function EventSchedule({ days, showJoinLinks = false }: {
     days?: EventDayForm[];
@@ -56,8 +57,6 @@ export default function EventSchedule({ days, showJoinLinks = false }: {
             .filter(Boolean),
     ).size;
     const modes = Array.from(new Set(schedule.map((day) => day.mode)));
-    const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-
     return (
         <section aria-labelledby="event-schedule-heading">
             <div className="flex flex-col gap-4 border-b border-slate-200 pb-5 sm:flex-row sm:items-end sm:justify-between">
@@ -66,7 +65,7 @@ export default function EventSchedule({ days, showJoinLinks = false }: {
                     <h2 id="event-schedule-heading" className="mt-1 text-xl font-semibold text-slate-950 sm:text-2xl">
                         Day-by-day schedule
                     </h2>
-                    <p className="mt-1 text-sm text-slate-500">Times shown in {timezone}</p>
+                    <p className="mt-1 text-sm text-slate-500">Times shown in West Africa Time (WAT)</p>
                 </div>
                 <div className="flex flex-wrap gap-x-4 gap-y-2 text-sm font-medium text-slate-600">
                     <span>{schedule.length} program {schedule.length === 1 ? 'day' : 'days'}</span>
@@ -182,9 +181,19 @@ function ScheduleFact({ icon, value }: { icon: React.ReactNode; value: string })
 }
 
 function formatDate(value: string): string {
-    return new Date(value).toLocaleDateString('en-NG', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
+    return new Date(value).toLocaleDateString('en-NG', {
+        weekday: 'short',
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric',
+        timeZone: EVENT_TIMEZONE,
+    });
 }
 
 function formatTime(value: string): string {
-    return new Date(value).toLocaleTimeString('en-NG', { hour: 'numeric', minute: '2-digit' });
+    return new Date(value).toLocaleTimeString('en-NG', {
+        hour: 'numeric',
+        minute: '2-digit',
+        timeZone: EVENT_TIMEZONE,
+    });
 }

@@ -73,7 +73,7 @@ class UpcomingEventReminder extends Notification implements ShouldQueue
         }
 
         $mail->line('**Date:** '.$dateRange)
-            ->line('**Time:** '.$timeRange)
+            ->line('**Time:** '.$timeRange.' West Africa Time (WAT)')
             ->line('**Mode:** '.ucfirst($scheduleDay?->mode ?? $this->event->mode ?? 'Hybrid'))
             ->line('**Location:** '.$this->formatLocation());
 

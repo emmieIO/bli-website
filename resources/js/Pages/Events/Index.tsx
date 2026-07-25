@@ -3,6 +3,8 @@ import GuestLayout from '@/Layouts/GuestLayout';
 import { useState, FormEvent } from 'react';
 import { CalendarDays, Globe, MapPin, Search } from 'lucide-react';
 
+const EVENT_TIMEZONE = 'Africa/Lagos';
+
 interface Event {
     id: number;
     slug: string;
@@ -57,7 +59,12 @@ export default function EventsIndex({ events, searchQuery: initialSearchQuery = 
     };
 
     const formatDate = (dateString: string) => {
-        return new Date(dateString).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+        return new Date(dateString).toLocaleDateString('en-US', {
+            month: 'short',
+            day: 'numeric',
+            year: 'numeric',
+            timeZone: EVENT_TIMEZONE,
+        });
     };
 
     const getModeIcon = (mode?: string) => {

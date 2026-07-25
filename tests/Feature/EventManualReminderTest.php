@@ -7,8 +7,10 @@ use App\Enums\Permissions\EventPermissionsEnum;
 use App\Models\Event;
 use App\Models\EventGuestAttendee;
 use App\Models\User;
+use App\Notifications\EventLiveNotification;
 use App\Notifications\UpcomingEventReminder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Notification;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\PermissionRegistrar;
@@ -156,5 +158,97 @@ class EventManualReminderTest extends TestCase
         Notification::assertSentToTimes($selectedUser, UpcomingEventReminder::class, 1);
         Notification::assertSentToTimes($selectedGuest, UpcomingEventReminder::class, 1);
         Notification::assertNotSentTo($unselectedUser, UpcomingEventReminder::class);
+    }
+
+    public function test_manager_can_send_live_alert_with_direct_and_guest_safe_access(): void
+    {
+        Notification::fake();
+
+        $manager = User::factory()->create();
+        $manager->givePermissionTo(EventPermissionsEnum::SEND_UPDATES->value);
+        $event = Event::factory()->create([
+            'creator_id' => $manager->id,
+            'theme' => 'Beacon Summit',
+            'status' => 'live',
+            'mode' => 'online',
+            'location' => 'https://meet.google.com/beacon-live-room',
+        ]);
+        $confirmedUser = User::factory()->create();
+        $cancelledUser = User::factory()->create();
+        $event->attendees()->attach($confirmedUser->id, [
+            'status' => EventRegistrationStatus::REGISTERED->value,
+            'revoke_count' => 0,
+        ]);
+        $event->attendees()->attach($cancelledUser->id, [
+            'status' => EventRegistrationStatus::CANCELLED->value,
+            'revoke_count' => 1,
+        ]);
+        $confirmedGuest = EventGuestAttendee::query()->create([
+            'event_id' => $event->id,
+            'name' => 'Confirmed Guest',
+            'email' => 'confirmed-guest@example.com',
+            'status' => EventRegistrationStatus::REGISTERED->value,
+        ]);
+        $guestCode = null;
+
+        $this->actingAs($manager)
+            ->post(route('admin.events.send-live-alert', $event))
+            ->assertSessionHas('message', 'Live alert queued for 2 confirmed attendees.');
+
+        Notification::assertSentTo(
+            $confirmedUser,
+            EventLiveNotification::class,
+            function (EventLiveNotification $notification) use ($confirmedUser): bool {
+                $mail = $notification->toMail($confirmedUser);
+
+                return $mail->actionUrl === 'https://meet.google.com/beacon-live-room'
+                    && collect($mail->introLines)->contains(
+                        fn ($line) => str_contains((string) $line, 'West Africa Time (WAT)')
+                    );
+            }
+        );
+        Notification::assertSentTo(
+            $confirmedGuest,
+            EventLiveNotification::class,
+            function (EventLiveNotification $notification) use ($confirmedGuest, $event, &$guestCode): bool {
+                $guestCode = $notification->guestAccessCode;
+
+                return preg_match('/^\d{6}$/', $guestCode) === 1
+                    && $notification->toMail($confirmedGuest)->actionUrl === route('events.show', $event->slug);
+            }
+        );
+        Notification::assertNotSentTo($cancelledUser, EventLiveNotification::class);
+
+        $confirmedGuest->refresh();
+        $this->assertTrue(Hash::check($guestCode, $confirmedGuest->access_code_hash));
+        $this->assertTrue($confirmedGuest->access_code_expires_at->isFuture());
+        $this->assertSame('Africa/Lagos', config('app.timezone'));
+    }
+
+    public function test_live_alert_requires_live_status_and_a_meeting_link(): void
+    {
+        Notification::fake();
+
+        $manager = User::factory()->create();
+        $manager->givePermissionTo(EventPermissionsEnum::SEND_UPDATES->value);
+        $event = Event::factory()->create([
+            'creator_id' => $manager->id,
+            'theme' => 'Beacon Summit',
+            'status' => 'registration_open',
+            'mode' => 'online',
+            'location' => null,
+        ]);
+
+        $this->actingAs($manager)
+            ->post(route('admin.events.send-live-alert', $event))
+            ->assertSessionHas('message', 'Set the event status to Live before sending a live alert.');
+
+        $event->update(['status' => 'live']);
+
+        $this->actingAs($manager)
+            ->post(route('admin.events.send-live-alert', $event))
+            ->assertSessionHas('message', 'Add a meeting link before sending a live alert.');
+
+        Notification::assertNothingSent();
     }
 }

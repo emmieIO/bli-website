@@ -203,6 +203,7 @@ export default function CreateEvent() {
               <h3 className="text-lg font-semibold text-slate-900 mb-4 pb-2 border-b border-slate-200">
                 Date & Location
               </h3>
+              <p className="mb-4 text-sm text-slate-500">Enter all event times in West Africa Time (WAT).</p>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 <Input
                   label="Start Date & Time"

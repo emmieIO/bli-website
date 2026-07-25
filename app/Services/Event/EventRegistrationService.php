@@ -104,7 +104,7 @@ class EventRegistrationService
 
     public function issueGuestAccessCode(Event $event, EventGuestAttendee $guest): void
     {
-        $accessCode = $this->replaceGuestAccessCode($guest);
+        $accessCode = $this->createGuestAccessCode($guest);
 
         $guest->notify(new EventRegisteredNotification($event, $accessCode));
     }
@@ -115,13 +115,13 @@ class EventRegistrationService
             return false;
         }
 
-        $accessCode = $this->replaceGuestAccessCode($guest);
+        $accessCode = $this->createGuestAccessCode($guest);
         $guest->notify(new EventGuestAccessCodeNotification($event, $accessCode));
 
         return true;
     }
 
-    private function replaceGuestAccessCode(EventGuestAttendee $guest): string
+    public function createGuestAccessCode(EventGuestAttendee $guest): string
     {
         $accessCode = (string) random_int(100000, 999999);
 

@@ -1,5 +1,5 @@
 import { Head, Link, router, usePage } from '@inertiajs/react';
-import { BadgeCheck, BellRing, CalendarDays, Eye, KeyRound, Mail, Phone, QrCode, UserRound, X } from 'lucide-react';
+import { BadgeCheck, BellRing, CalendarDays, Eye, KeyRound, Mail, Phone, QrCode, RadioTower, UserRound, X } from 'lucide-react';
 import DashboardLayout from '@/Layouts/DashboardLayout';
 import EventQrCodeModal from '@/Components/Events/EventQrCodeModal';
 import EventSchedule from '@/Components/Events/EventSchedule';
@@ -165,6 +165,7 @@ export default function ViewEvent({ event, capabilities, publicEventUrl }: ViewE
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showQrCode, setShowQrCode] = useState(false);
   const [showReminderModal, setShowReminderModal] = useState(false);
+  const [notificationKind, setNotificationKind] = useState<'reminder' | 'live'>('reminder');
   const [isDeleting, setIsDeleting] = useState(false);
   const [isSendingReminder, setIsSendingReminder] = useState(false);
   const [selectedReminderKeys, setSelectedReminderKeys] = useState<string[]>([]);
@@ -218,6 +219,11 @@ export default function ViewEvent({ event, capabilities, publicEventUrl }: ViewE
     ...(capabilities.canViewPayments ? [['payments', 'Payments']] : []),
   ] as const;
   const programProfile = event.program_profile;
+  const hasLiveMeetingLink = Boolean(
+    event.location
+    || programProfile?.meeting_link
+    || event.days.some((day) => Boolean(day.meeting_link)),
+  );
   const prayerTargetLabel = programProfile?.weekly_prayer_target_minutes
     ? `${Math.floor(programProfile.weekly_prayer_target_minutes / 60)}h ${programProfile.weekly_prayer_target_minutes % 60}m weekly`
     : 'Not set';
@@ -243,7 +249,11 @@ export default function ViewEvent({ event, capabilities, publicEventUrl }: ViewE
     const selectedRecipients = confirmedRegistrations.filter((registration) => selectedKeys.has(registration.key));
 
     setIsSendingReminder(true);
-    router.post(route('admin.events.send-reminder', event.slug), {
+    const notificationRoute = notificationKind === 'live'
+      ? 'admin.events.send-live-alert'
+      : 'admin.events.send-reminder';
+
+    router.post(route(notificationRoute, event.slug), {
       account_ids: selectedRecipients.flatMap((registration) => registration.userId ? [registration.userId] : []),
       guest_ids: selectedRecipients.flatMap((registration) => registration.guestId ? [registration.guestId] : []),
     }, {
@@ -253,7 +263,8 @@ export default function ViewEvent({ event, capabilities, publicEventUrl }: ViewE
     });
   };
 
-  const openReminderModal = () => {
+  const openReminderModal = (kind: 'reminder' | 'live' = 'reminder') => {
+    setNotificationKind(kind);
     setSelectedReminderKeys(confirmedRegistrations.map((registration) => registration.key));
     setShowReminderModal(true);
   };
@@ -310,13 +321,29 @@ export default function ViewEvent({ event, capabilities, publicEventUrl }: ViewE
             {capabilities.canSendUpdates && (
               <button
                 type="button"
-                onClick={openReminderModal}
+                onClick={() => openReminderModal('reminder')}
                 disabled={registrationStats.registered === 0}
                 title={registrationStats.registered === 0 ? 'No confirmed registrations to remind' : 'Send event reminder'}
                 className="inline-flex min-w-0 items-center justify-center gap-2 rounded-md border border-slate-300 bg-white px-3 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50 sm:px-4"
               >
                 <BellRing size={17} />
                 Send reminder
+              </button>
+            )}
+            {capabilities.canSendUpdates && event.status === 'live' && (
+              <button
+                type="button"
+                onClick={() => openReminderModal('live')}
+                disabled={registrationStats.registered === 0 || !hasLiveMeetingLink}
+                title={!hasLiveMeetingLink
+                  ? 'Add a meeting link before sending a live alert'
+                  : registrationStats.registered === 0
+                    ? 'No confirmed registrations to notify'
+                    : 'Tell confirmed attendees the event is live'}
+                className="inline-flex min-w-0 items-center justify-center gap-2 rounded-md border border-emerald-300 bg-emerald-50 px-3 py-2.5 text-sm font-semibold text-emerald-800 transition hover:bg-emerald-100 disabled:cursor-not-allowed disabled:opacity-50 sm:px-4"
+              >
+                <RadioTower size={17} />
+                Send live alert
               </button>
             )}
             {capabilities.canUpdate && (
@@ -735,14 +762,18 @@ export default function ViewEvent({ event, capabilities, publicEventUrl }: ViewE
             aria-labelledby="send-reminder-title"
             className="max-h-full w-full max-w-lg overflow-y-auto rounded-lg border border-slate-200 bg-white p-6 shadow-xl"
           >
-            <div className="flex h-11 w-11 items-center justify-center rounded-md bg-primary/10 text-primary">
-              <BellRing size={21} />
+            <div className={`flex h-11 w-11 items-center justify-center rounded-md ${
+              notificationKind === 'live' ? 'bg-emerald-100 text-emerald-700' : 'bg-primary/10 text-primary'
+            }`}>
+              {notificationKind === 'live' ? <RadioTower size={21} /> : <BellRing size={21} />}
             </div>
             <h2 id="send-reminder-title" className="mt-4 text-lg font-semibold text-slate-900">
-              Send event reminder
+              {notificationKind === 'live' ? 'Send live alert' : 'Send event reminder'}
             </h2>
             <p className="mt-2 text-sm leading-6 text-slate-600">
-              Choose which confirmed attendees should receive the reminder for <strong>{event.title}</strong>. Cancelled, attended, and no-show registrations are excluded.
+              {notificationKind === 'live'
+                ? <>Tell selected attendees that <strong>{event.title}</strong> is live now. Account attendees receive the join link; email guests receive a fresh 15-minute access code. Times are shown in West Africa Time (WAT).</>
+                : <>Choose which confirmed attendees should receive the reminder for <strong>{event.title}</strong>. Cancelled, attended, and no-show registrations are excluded.</>}
             </p>
             <div className="mt-5 overflow-hidden rounded-md border border-slate-200">
               <div className="flex items-center justify-between gap-3 border-b border-slate-200 bg-slate-50 px-3 py-2.5">
@@ -789,10 +820,16 @@ export default function ViewEvent({ event, capabilities, publicEventUrl }: ViewE
                 type="button"
                 onClick={handleSendReminder}
                 disabled={isSendingReminder || selectedReminderKeys.length === 0}
-                className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-semibold text-white hover:bg-primary/90 disabled:opacity-60"
+                className={`inline-flex items-center gap-2 rounded-md px-4 py-2 text-sm font-semibold text-white disabled:opacity-60 ${
+                  notificationKind === 'live' ? 'bg-emerald-600 hover:bg-emerald-700' : 'bg-primary hover:bg-primary/90'
+                }`}
               >
-                <BellRing size={16} />
-                {isSendingReminder ? 'Queuing...' : `Send to ${selectedReminderKeys.length}`}
+                {notificationKind === 'live' ? <RadioTower size={16} /> : <BellRing size={16} />}
+                {isSendingReminder
+                  ? 'Queuing...'
+                  : notificationKind === 'live'
+                    ? `Alert ${selectedReminderKeys.length}`
+                    : `Send to ${selectedReminderKeys.length}`}
               </button>
             </div>
           </div>
@@ -1047,13 +1084,16 @@ function QuickLink({ href, icon, label }: { href: string; icon: string; label: s
 }
 
 function formatDate(dateString: string) {
-  return new Date(dateString).toLocaleString('en-US', {
+  const value = new Date(dateString).toLocaleString('en-US', {
     year: 'numeric',
     month: 'short',
     day: 'numeric',
     hour: 'numeric',
     minute: '2-digit',
+    timeZone: 'Africa/Lagos',
   });
+
+  return `${value} WAT`;
 }
 
 function formatShortDate(dateString: string) {
@@ -1061,6 +1101,7 @@ function formatShortDate(dateString: string) {
     year: 'numeric',
     month: 'short',
     day: 'numeric',
+    timeZone: 'Africa/Lagos',
   });
 }
 

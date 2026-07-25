@@ -227,5 +227,14 @@ function HeaderCell({ children, align = 'left' }: { children: ReactNode; align?:
 }
 
 function formatDate(dateString: string) {
-  return new Date(dateString).toLocaleString('en-US', { year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+  const value = new Date(dateString).toLocaleString('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+    timeZone: 'Africa/Lagos',
+  });
+
+  return `${value} WAT`;
 }
