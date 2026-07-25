@@ -67,6 +67,7 @@ class EventController extends Controller
             'canManageAttendees' => auth()->user()?->can('manageAttendees', $event) ?? false,
             'canManageResources' => auth()->user()?->can('manageResources', $event) ?? false,
             'canViewPayments' => auth()->user()?->can('viewPayments', $event) ?? false,
+            'canSendUpdates' => auth()->user()?->can('sendUpdates', $event) ?? false,
         ];
 
         $event->load([

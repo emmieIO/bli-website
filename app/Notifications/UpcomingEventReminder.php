@@ -73,7 +73,10 @@ class UpcomingEventReminder extends Notification implements ShouldQueue
             ->line('**Location:** '.$this->formatLocation());
 
         $mail->line('---')
-            ->action('Join Event Now', route('events.show', $this->event->slug));
+            ->action(
+                $this->meetingLink() ? 'Join Event Now' : 'View Event Details',
+                $this->actionUrl()
+            );
 
         // Add mode-specific reminders
         if ($this->event->mode === 'online' || $this->event->mode === 'hybrid') {
@@ -123,9 +126,14 @@ The '.config('app.name').' Team');
             'mode' => $this->event->mode,
             'location' => $this->formatLocation(),
             'message' => "Reminder: {$this->event->title} is starting {$timeUntil}!",
-            'action_url' => route('events.show', $this->event->slug),
+            'action_url' => $this->actionUrl(),
             'type' => 'event_reminder',
         ];
+    }
+
+    public function actionUrl(): string
+    {
+        return $this->meetingLink() ?? route('events.show', $this->event->slug);
     }
 
     public function formatLocation(): string
@@ -156,5 +164,18 @@ The '.config('app.name').' Team');
         $daysUntil = (int) round($minutesUntil / 1440);
 
         return $daysUntil === 1 ? 'tomorrow' : 'in '.$daysUntil.' days';
+    }
+
+    private function meetingLink(): ?string
+    {
+        $meetingLink = trim((string) data_get($this->event->metadata, 'meeting_link'));
+
+        if ($meetingLink === '' || filter_var($meetingLink, FILTER_VALIDATE_URL) === false) {
+            return null;
+        }
+
+        return in_array(strtolower((string) parse_url($meetingLink, PHP_URL_SCHEME)), ['http', 'https'], true)
+            ? $meetingLink
+            : null;
     }
 }

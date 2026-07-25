@@ -178,7 +178,11 @@ class User extends Authenticatable implements MustVerifyEmail
             ? $event->speakers()->where('speakers.id', $speakerId)->exists()
             : false;
 
-        return $this->canAccessSpeakerArea() && ($hasApplication || $hasInvite || $isAssignedSpeaker);
+        // An application or invitation is enough to enter that event's workspace.
+        // The global Speaker role remains reserved for approved/assigned speakers.
+        return $hasApplication
+            || $hasInvite
+            || ($this->canAccessSpeakerArea() && $isAssignedSpeaker);
     }
 
     /**

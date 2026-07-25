@@ -1,5 +1,5 @@
 import { Head, Link, router, usePage } from '@inertiajs/react';
-import { BadgeCheck, CalendarDays, Eye, Mail, Phone, QrCode, UserRound, X } from 'lucide-react';
+import { BadgeCheck, BellRing, CalendarDays, Eye, Mail, Phone, QrCode, UserRound, X } from 'lucide-react';
 import DashboardLayout from '@/Layouts/DashboardLayout';
 import EventQrCodeModal from '@/Components/Events/EventQrCodeModal';
 import { useMemo, useState } from 'react';
@@ -129,6 +129,7 @@ interface ViewEventProps {
     canManageAttendees: boolean;
     canManageResources: boolean;
     canViewPayments: boolean;
+    canSendUpdates: boolean;
   };
 }
 
@@ -160,7 +161,9 @@ export default function ViewEvent({ event, capabilities, publicEventUrl }: ViewE
   const { sideLinks } = usePage().props as any;
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showQrCode, setShowQrCode] = useState(false);
+  const [showReminderModal, setShowReminderModal] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isSendingReminder, setIsSendingReminder] = useState(false);
   const [selectedRegistration, setSelectedRegistration] = useState<AdminEventRegistration | null>(null);
   const [activeTab, setActiveTab] = useState<'overview' | 'speakers' | 'registrations' | 'resources' | 'payments'>('overview');
 
@@ -226,6 +229,15 @@ export default function ViewEvent({ event, capabilities, publicEventUrl }: ViewE
     });
   };
 
+  const handleSendReminder = () => {
+    setIsSendingReminder(true);
+    router.post(route('admin.events.send-reminder', event.slug), {}, {
+      preserveScroll: true,
+      onSuccess: () => setShowReminderModal(false),
+      onFinish: () => setIsSendingReminder(false),
+    });
+  };
+
   return (
     <DashboardLayout sideLinks={sideLinks}>
       <Head title={`${event.title} - Event Workspace`} />
@@ -269,6 +281,18 @@ export default function ViewEvent({ event, capabilities, publicEventUrl }: ViewE
               <QrCode size={17} />
               QR code
             </button>
+            {capabilities.canSendUpdates && (
+              <button
+                type="button"
+                onClick={() => setShowReminderModal(true)}
+                disabled={registrationStats.registered === 0}
+                title={registrationStats.registered === 0 ? 'No confirmed registrations to remind' : 'Send event reminder'}
+                className="inline-flex min-w-0 items-center justify-center gap-2 rounded-md border border-slate-300 bg-white px-3 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50 sm:px-4"
+              >
+                <BellRing size={17} />
+                Send reminder
+              </button>
+            )}
             {capabilities.canUpdate && (
               <Link
                 href={route('admin.events.edit', event.slug)}
@@ -672,6 +696,46 @@ export default function ViewEvent({ event, capabilities, publicEventUrl }: ViewE
         </div>
       )}
 
+      {showReminderModal && capabilities.canSendUpdates && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/50 px-4 py-6">
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="send-reminder-title"
+            className="w-full max-w-md rounded-lg border border-slate-200 bg-white p-6 shadow-xl"
+          >
+            <div className="flex h-11 w-11 items-center justify-center rounded-md bg-primary/10 text-primary">
+              <BellRing size={21} />
+            </div>
+            <h2 id="send-reminder-title" className="mt-4 text-lg font-semibold text-slate-900">
+              Send event reminder
+            </h2>
+            <p className="mt-2 text-sm leading-6 text-slate-600">
+              Queue a reminder for <strong>{registrationStats.registered}</strong> confirmed {registrationStats.registered === 1 ? 'attendee' : 'attendees'} of <strong>{event.title}</strong>. Cancelled, attended, and no-show registrations will not receive it.
+            </p>
+            <div className="mt-6 flex justify-end gap-3">
+              <button
+                type="button"
+                onClick={() => setShowReminderModal(false)}
+                disabled={isSendingReminder}
+                className="rounded-md border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-60"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleSendReminder}
+                disabled={isSendingReminder || registrationStats.registered === 0}
+                className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-semibold text-white hover:bg-primary/90 disabled:opacity-60"
+              >
+                <BellRing size={16} />
+                {isSendingReminder ? 'Queuing...' : 'Send reminder'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {selectedRegistration && (
         <RegistrationDetailsModal
           registration={selectedRegistration}
@@ -742,7 +806,7 @@ function RegistrationDetailsModal({
                 ? 'bg-green-100 text-green-700'
                 : 'bg-rose-100 text-rose-700'
             }`}>
-              {registration.status === 'registered' ? 'Confirmed' : registration.status.replaceAll('_', ' ')}
+              {registration.status === 'registered' ? 'Confirmed' : registration.status.replace(/_/g, ' ')}
             </span>
             {registration.source === 'Account' && registration.emailVerified && (
               <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700">
@@ -800,7 +864,7 @@ function RegistrationDetail({ icon, label, value, href }: { icon: ReactNode; lab
         {href ? (
           <a href={href} className="mt-1 block break-all text-sm font-medium text-primary hover:underline">{value}</a>
         ) : (
-          <p className="mt-1 break-words text-sm font-medium text-slate-800">{value}</p>
+          <p className="mt-1 wrap-break-word text-sm font-medium text-slate-800">{value}</p>
         )}
       </div>
     </div>

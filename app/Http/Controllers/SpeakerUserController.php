@@ -4,15 +4,15 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\CreateSpeakerRequest;
 use App\Services\Event\SpeakerService;
-use Illuminate\Http\Request;
-use Illuminate\Log\Logger;
+use Inertia\Inertia;
 
 class SpeakerUserController extends Controller
 {
-    public function __construct(protected SpeakerService $speakerService){}
+    public function __construct(protected SpeakerService $speakerService) {}
+
     public function index()
     {
-        return \Inertia\Inertia::render('Speakers/BecomeASpeaker');
+        return Inertia::render('Speakers/BecomeASpeaker');
     }
 
     public function store(CreateSpeakerRequest $request)
@@ -22,15 +22,15 @@ class SpeakerUserController extends Controller
         $speaker = $this->speakerService->createSpeaker($validated, $photo);
 
         if ($speaker) {
-            return back()->with([
+            return to_route('login')->with([
                 'type' => 'success',
-                'message' => 'Thank you for registering as a speaker! Your application has been submitted successfully.'
+                'message' => 'Your speaker application has been submitted for review.',
             ]);
         }
 
-        return back()->with([
+        return back()->withInput($request->except(['password', 'password_confirmation', 'photo']))->with([
             'type' => 'error',
-            'message' => 'An error occurred. Please try again later.'
+            'message' => 'We could not submit your speaker application. Please check the photo and try again.',
         ]);
     }
 }

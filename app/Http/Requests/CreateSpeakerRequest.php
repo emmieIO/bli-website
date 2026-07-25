@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
 class CreateSpeakerRequest extends FormRequest
@@ -17,21 +18,24 @@ class CreateSpeakerRequest extends FormRequest
     /**
      * Get the validation rules that apply to the request.
      *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
+     * @return array<string, ValidationRule|array<mixed>|string>
      */
     public function rules(): array
     {
         return [
-            "name" => ['required', "string"],
-            "headline" => ['nullable', 'string'],
-            "organization" => ["sometimes"],
-            "email" => ["required", 'email', "unique:users,email"],
-            "photo" => "required|image|mimes:jpeg,png,jpg,gif,svg|max:2048",
-            "phone" => ["sometimes", 'phone:NG', 'unique:users,phone'],
+            'name' => ['required', 'string', 'max:255'],
+            'headline' => ['required', 'string', 'max:255'],
+            'organization' => ['nullable', 'string', 'max:255'],
+            'email' => ['required', 'email', 'max:255', 'unique:users,email'],
+            'photo' => ['required', 'image', 'mimes:jpeg,png,jpg,gif,svg', 'max:2048'],
+            'phone' => ['required', 'phone:NG', 'unique:users,phone'],
             'linkedin' => ['nullable', 'regex:/^https?:\/\/(www\.)?linkedin\.com\/in\/[a-zA-Z0-9_-]+\/?$/'],
             'website' => ['nullable', 'url'],
-            "password" => ["required", "string", 'confirmed', "min:6"],
-            "bio" => ['sometimes'],
+            'password' => ['required', 'string', 'confirmed', 'min:8'],
+            'bio' => ['required', 'string', 'max:2000'],
+            'agree_terms' => $this->routeIs('become-a-speaker.store')
+                ? ['accepted']
+                : ['sometimes', 'accepted'],
         ];
     }
 
@@ -54,7 +58,8 @@ class CreateSpeakerRequest extends FormRequest
             'password.required' => 'Password is required.',
             'password.string' => 'Password must be a string.',
             'password.confirmed' => 'Password confirmation does not match.',
-            'password.min' => 'Password must be at least 6 characters.',
+            'password.min' => 'Password must be at least 8 characters.',
+            'agree_terms.accepted' => 'You must accept the terms and privacy policy.',
         ];
     }
 
@@ -71,12 +76,15 @@ class CreateSpeakerRequest extends FormRequest
                 'email' => $data['email'],
                 'phone' => $data['phone'],
                 'photo' => $data['photo'],
-                'password' => $data['password']
+                'password' => $data['password'],
             ],
             'speakerInfo' => [
+                'title' => $data['headline'],
                 'bio' => $data['bio'],
-                'organization' => $data['organization'],
-            ]
+                'organization' => $data['organization'] ?? null,
+                'linkedin' => $data['linkedin'] ?? null,
+                'website' => $data['website'] ?? null,
+            ],
         ];
     }
 }

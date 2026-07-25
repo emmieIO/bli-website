@@ -2,6 +2,7 @@ import { FormEvent, ReactNode, useMemo, useState } from 'react';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import { ArrowLeft, CheckCircle2, Clock3, Mail, Mic2, Send, UserRoundCheck, XCircle } from 'lucide-react';
 import DashboardLayout from '@/Layouts/DashboardLayout';
+import type { SideLink } from '@/types';
 
 interface User {
   id: number;
@@ -86,7 +87,7 @@ function PersonRow({ speaker, detail, trailing }: { speaker: Speaker; detail?: s
 }
 
 export default function SpeakerPipeline({ event, speakers }: Props) {
-  const { sideLinks } = usePage().props as { sideLinks?: unknown };
+  const { sideLinks } = usePage().props as { sideLinks?: SideLink[] };
   const [showInviteForm, setShowInviteForm] = useState(false);
   const form = useForm({
     speaker_id: '',

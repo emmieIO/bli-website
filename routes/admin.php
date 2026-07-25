@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin\EventController;
 use App\Http\Controllers\Admin\EventResourceController;
 use App\Http\Controllers\Admin\InstructorApplicationController;
 use App\Http\Controllers\Admin\InstructorsManagementController;
+use App\Http\Controllers\Admin\SendEventReminderController;
 use App\Http\Controllers\Admin\SpeakersController;
 use App\Http\Controllers\SpeakerApplicationController;
 use Illuminate\Support\Facades\Route;
@@ -37,6 +38,10 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
         Route::post('/events/{event}/assign-speaker', AssignSpeakerToEvent::class)->name('events.assign-speaker');
         Route::get('/events/{event}/assign-speakers', [SpeakersController::class, 'showAssignSpeakersPage'])->name('events.assign-speakers');
     });
+
+    Route::post('/events/{event}/send-reminder', SendEventReminderController::class)
+        ->middleware('permission:event-send-updates')
+        ->name('events.send-reminder');
 
     // Event Resources (simple operations)
     Route::middleware(['permission:event-manage-resources'])->group(function () {

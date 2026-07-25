@@ -1,4 +1,5 @@
 import { Head, Link, usePage } from '@inertiajs/react';
+import { Eye, Pencil } from 'lucide-react';
 import DashboardLayout from '@/Layouts/DashboardLayout';
 import type { ReactNode } from 'react';
 
@@ -167,9 +168,21 @@ export default function EventsIndex({ events, capabilities }: EventsProps) {
                       )}
                       <td className="px-5 py-3.5">
                         <div className="flex items-center justify-end gap-2 whitespace-nowrap text-sm">
-                          <Link href={route('admin.events.show', event.slug)} className="font-medium text-primary hover:text-primary-600">Open</Link>
+                          <Link
+                            href={route('admin.events.show', event.slug)}
+                            className="inline-flex h-8 items-center justify-center gap-1.5 rounded-md bg-primary px-3 text-xs font-semibold text-white transition hover:bg-primary-600"
+                          >
+                            <Eye size={14} />
+                            Open
+                          </Link>
                           {capabilities.canUpdateAny && (
-                            <Link href={route('admin.events.edit', event.slug)} className="font-medium text-slate-600 hover:text-slate-900">Edit</Link>
+                            <Link
+                              href={route('admin.events.edit', event.slug)}
+                              className="inline-flex h-8 items-center justify-center gap-1.5 rounded-md border border-amber-200 bg-amber-50 px-3 text-xs font-semibold text-amber-800 transition hover:bg-amber-100"
+                            >
+                              <Pencil size={14} />
+                              Edit
+                            </Link>
                           )}
                         </div>
                       </td>

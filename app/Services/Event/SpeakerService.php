@@ -2,7 +2,6 @@
 
 namespace App\Services\Event;
 
-
 use App\Enums\SpeakerStatus;
 use App\Enums\UserRoles;
 use App\Models\Event;
@@ -15,14 +14,13 @@ use App\Notifications\SpeakerAccountCreatedNotification;
 use App\Services\MiscService;
 use App\Traits\HasFileUpload;
 use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Password;
 
 class SpeakerService
 {
     use HasFileUpload;
+
     /**
      * Create a new class instance.
      */
@@ -31,7 +29,7 @@ class SpeakerService
         //
     }
 
-    public function fetchSpeakers(string $status = "active")
+    public function fetchSpeakers(string $status = 'active')
     {
         $speakers = Speaker::latest()
             ->where('status', $status)
@@ -40,67 +38,63 @@ class SpeakerService
         return $speakers;
     }
 
-
-
     public function findOneSpeaker($id)
     {
         return Speaker::findOrFail($id);
     }
 
-    public function createSpeaker(array $validated, UploadedFile $photo)
+    public function createSpeaker(array $validated, UploadedFile $photo): ?Speaker
     {
-        $photoPath = null;
-        try {
-            $speaker = DB::transaction(function () use ($validated, $photo) {
-                // we  save the speaker info
-                $photoPath = $this->uploadFile($photo, "speakers_dp");
-                if (!$photoPath) {
-                    throw new \Exception('Photo upload failed.');
-                }
+        $photoPath = $this->uploadFile($photo, 'speakers_dp');
 
-                // we register the user :which definitely would need to be verified
-                $user = User::updateOrCreate(array_merge($validated['userInfo'], [
+        if (! $photoPath) {
+            return null;
+        }
+
+        try {
+            return DB::transaction(function () use ($validated, $photoPath) {
+                // Identity belongs to User; speaking credentials belong to Speaker.
+                $user = User::create(array_merge($validated['userInfo'], [
                     'photo' => $photoPath,
                 ]));
 
-                if ($this->miscService->isAdmin()) {
+                $createdByAdmin = $this->miscService->isAdmin();
+
+                if ($createdByAdmin) {
                     $user->forceFill(['email_verified_at' => now()])->save();
                 }
 
-                $speakerData = array_merge($validated['speakerInfo'], [
-
+                $speaker = Speaker::create(array_merge($validated['speakerInfo'], [
                     'user_id' => $user->id,
-                    'status' => $this->miscService->isAdmin() ? 'active' : 'pending',
-                ]);
-                $speaker = Speaker::create($speakerData);
+                    'created_by' => auth()->id() ?? $user->id,
+                    'photo' => $photoPath,
+                    'status' => $createdByAdmin
+                        ? SpeakerStatus::ACTIVE->value
+                        : SpeakerStatus::PENDING->value,
+                ]));
 
-                if ($this->miscService->isAdmin() && ! $user->hasRole(UserRoles::SPEAKER->value)) {
+                // Public applicants receive speaker access only after an admin approves them.
+                if ($createdByAdmin && ! $user->hasRole(UserRoles::SPEAKER->value)) {
                     $user->assignRole(UserRoles::SPEAKER->value);
                 }
 
-
-                DB::afterCommit(function () use ($user) {
-                    if ($this->miscService->isAdmin()) {
-                        // $user->sendEmailVerificationNotification();
-                        $user->notify(new SpeakerAccountCreatedNotification());
-                    }
-                    else {
-                        $user->notify(new SpeakerAccountCreatedNotification(false));
-                    }
+                DB::afterCommit(function () use ($user, $createdByAdmin) {
+                    $user->notify(new SpeakerAccountCreatedNotification($createdByAdmin));
                 });
+
                 return $speaker;
             });
+        } catch (\Throwable $e) {
+            $this->deleteFile($photoPath);
+            Log::error('Speaker creation failed', [
+                'email' => data_get($validated, 'userInfo.email'),
+                'error' => $e->getMessage(),
+            ]);
 
-            return $speaker;
-        } catch (\Exception $e) {
-            if ($photoPath) {
-                $this->deleteFile($photoPath);
-            }
-            Log::error('Speaker creation failed: ' . $e->getMessage());
-            throw $e;
+            return null;
         }
-
     }
+
     public function updateSpeaker(array $validated, Speaker $speaker, ?UploadedFile $photo)
     {
         try {
@@ -124,7 +118,8 @@ class SpeakerService
 
             return $speaker->fresh();
         } catch (\Exception $e) {
-            Log::error('Speaker update failed: ' . $e->getMessage());
+            Log::error('Speaker update failed: '.$e->getMessage());
+
             return null;
         }
     }
@@ -141,12 +136,14 @@ class SpeakerService
                 }
                 $speaker->Fill(['status' => SpeakerStatus::ACTIVE->value])->save();
                 DB::afterCommit(function () use ($user) {
-                    $user->notifyNow(new SpeakerAccountApprovedNotification());
+                    $user->notifyNow(new SpeakerAccountApprovedNotification);
                 });
+
                 return true;
             });
         } catch (\Exception $e) {
             Log::error('Speaker Activation Failed', ['error' => $e->getMessage()]);
+
             return false;
         }
     }
@@ -161,8 +158,10 @@ class SpeakerService
                 $user->removeRole(UserRoles::SPEAKER->value);
             }
             $this->deleteFile($photo_path);
+
             return true;
         }
+
         return false;
     }
 
@@ -172,8 +171,10 @@ class SpeakerService
         if ($speaker_id) {
             $invites = SpeakerInvite::where('speaker_id', $speaker_id)
                 ->paginate($perPage);
+
             return $invites;
         }
+
         return collect([]);
     }
 
@@ -200,5 +201,4 @@ class SpeakerService
 
         return $application->firstOrFail();
     }
-
 }

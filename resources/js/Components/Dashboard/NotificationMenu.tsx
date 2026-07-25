@@ -59,7 +59,15 @@ export default function NotificationMenu() {
 
     const select = (notification: DashboardNotification) => {
         if (!notification.read_at) void markAsRead(notification.id);
-        if (notification.action_url) router.visit(notification.action_url);
+        if (notification.action_url) {
+            const destination = new URL(notification.action_url, window.location.origin);
+
+            if (destination.origin === window.location.origin) {
+                router.visit(destination.href);
+            } else {
+                window.location.assign(destination.href);
+            }
+        }
         setOpen(false);
     };
 

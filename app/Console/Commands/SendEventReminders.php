@@ -2,14 +2,12 @@
 
 namespace App\Console\Commands;
 
-use App\Enums\EventRegistrationStatus;
 use App\Models\Event;
-use App\Notifications\UpcomingEventReminder;
+use App\Services\Event\EventReminderService;
 use Illuminate\Console\Command;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Notification;
-use Log;
+use Illuminate\Support\Facades\Log;
 
 class SendEventReminders extends Command
 {
@@ -30,18 +28,14 @@ class SendEventReminders extends Command
     /**
      * Execute the console command.
      */
-    public function handle()
+    public function handle(EventReminderService $reminderService): int
     {
         $now = Carbon::now();
         $reminderCount = 0;
 
         // Send reminders for events starting in approximately 24 hours (23h 55m to 24h 5m window)
         // This 10-minute window accommodates two 5-minute cron runs
-        $events24h = Event::with(['attendees' => function ($query) {
-            $query->whereIn('status', EventRegistrationStatus::reminderEligibleValues());
-        }, 'guestAttendees' => function ($query) {
-            $query->whereIn('status', EventRegistrationStatus::reminderEligibleValues());
-        }])
+        $events24h = Event::query()
             ->where('start_date', '>', $now->copy()->addHours(23)->addMinutes(55))
             ->where('start_date', '<=', $now->copy()->addHours(24)->addMinutes(5))
             ->get();
@@ -54,13 +48,10 @@ class SendEventReminders extends Command
                 continue;
             }
 
-            $recipientCount = $event->attendees->count() + $event->guestAttendees->count();
+            $result = $reminderService->sendToRegisteredAttendees($event);
 
-            if ($recipientCount > 0) {
-                // Queue notification for all registered attendees
-                Notification::send($event->attendees, new UpcomingEventReminder($event));
-                Notification::send($event->guestAttendees, new UpcomingEventReminder($event));
-                $reminderCount += $recipientCount;
+            if ($result['total'] > 0) {
+                $reminderCount += $result['total'];
 
                 // Cache for 23 hours to prevent duplicate reminders
                 Cache::put($cacheKey, true, now()->addHours(23));
@@ -68,19 +59,15 @@ class SendEventReminders extends Command
                 Log::info('24-hour event reminders queued', [
                     'event_id' => $event->id,
                     'event_title' => $event->title,
-                    'attendee_count' => $event->attendees->count(),
-                    'guest_attendee_count' => $event->guestAttendees->count(),
+                    'attendee_count' => $result['accounts'],
+                    'guest_attendee_count' => $result['guests'],
                 ]);
             }
         }
 
         // Send reminders for events starting in approximately 2 hours (1h 55m to 2h 5m window)
         // This 10-minute window accommodates two 5-minute cron runs
-        $events2h = Event::with(['attendees' => function ($query) {
-            $query->whereIn('status', EventRegistrationStatus::reminderEligibleValues());
-        }, 'guestAttendees' => function ($query) {
-            $query->whereIn('status', EventRegistrationStatus::reminderEligibleValues());
-        }])
+        $events2h = Event::query()
             ->where('start_date', '>', $now->copy()->addHours(1)->addMinutes(55))
             ->where('start_date', '<=', $now->copy()->addHours(2)->addMinutes(5))
             ->get();
@@ -93,13 +80,10 @@ class SendEventReminders extends Command
                 continue;
             }
 
-            $recipientCount = $event->attendees->count() + $event->guestAttendees->count();
+            $result = $reminderService->sendToRegisteredAttendees($event);
 
-            if ($recipientCount > 0) {
-                // Queue notification for all registered attendees
-                Notification::send($event->attendees, new UpcomingEventReminder($event));
-                Notification::send($event->guestAttendees, new UpcomingEventReminder($event));
-                $reminderCount += $recipientCount;
+            if ($result['total'] > 0) {
+                $reminderCount += $result['total'];
 
                 // Cache for 2 hours to prevent duplicate reminders
                 Cache::put($cacheKey, true, now()->addHours(2));
@@ -107,8 +91,8 @@ class SendEventReminders extends Command
                 Log::info('2-hour event reminders queued', [
                     'event_id' => $event->id,
                     'event_title' => $event->title,
-                    'attendee_count' => $event->attendees->count(),
-                    'guest_attendee_count' => $event->guestAttendees->count(),
+                    'attendee_count' => $result['accounts'],
+                    'guest_attendee_count' => $result['guests'],
                 ]);
             }
         }

@@ -137,4 +137,18 @@ class EventReminderCommandTest extends TestCase
         $this->assertSame('in 2 hours', $payload['time_until']);
         $this->assertSame("Reminder: {$event->title} is starting in 2 hours!", $payload['message']);
     }
+
+    public function test_reminder_falls_back_to_event_page_without_a_meeting_link(): void
+    {
+        $event = Event::factory()->create([
+            'creator_id' => User::factory()->create()->id,
+            'theme' => 'Beacon Summit',
+            'metadata' => [],
+        ]);
+
+        $notification = new UpcomingEventReminder($event);
+
+        $this->assertSame(route('events.show', $event->slug), $notification->actionUrl());
+        $this->assertSame('View Event Details', $notification->toMail(User::factory()->create())->actionText);
+    }
 }

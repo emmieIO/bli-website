@@ -22,9 +22,6 @@ export default function BecomeASpeaker() {
         e.preventDefault();
         form.post(route('become-a-speaker.store'), {
             forceFormData: true,
-            onSuccess: () => {
-                form.reset();
-            },
         });
     };
 
@@ -372,6 +369,9 @@ export default function BecomeASpeaker() {
                                                 directory.
                                             </label>
                                         </div>
+                                        {form.errors.agree_terms && (
+                                            <p className="text-sm text-red-600">{form.errors.agree_terms}</p>
+                                        )}
 
                                         <button
                                             type="submit"
